@@ -1,0 +1,20 @@
+{
+  "name": "raport",
+  "version": "0.0.1",
+  "description": "Simple reports. No ragrets.",
+  "main": "lib/raport.umd.js",
+  "module": "lib/index.js",
+  "devDependencies": {
+    "ractive": "^1.3",
+    "rollup": "^1.21",
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "typescript": "^3.6"
+  },
+  "scripts": {
+    "build": "tsc; rollup -c; rm -r lib; cp -r build/lib lib",
+    "clean": "rm -r build; rm -r lib"
+  },
+  "files": [
+    "lib", "src", "README.md"
+  ]
+}
