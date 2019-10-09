@@ -9,7 +9,7 @@ function simple(names: string[], types: Type[][], result: Type, apply: (name: st
 
 // basic ops
 registerOperator(
-  simple(['is', 'is not'], [['any'], ['any']], 'boolean',
+  simple(['is', 'is-not'], [['any'], ['any']], 'boolean',
   (name: string, values: any[]): boolean => {
     const [l, r] = values;
     const res = l == r; // eslint-disable-line eqeqeq
@@ -43,7 +43,7 @@ registerOperator(
               false;
     }
   ),
-  simple(['like', 'not like', 'ilike', 'not ilike'], [['string'], ['string']], 'boolean',
+  simple(['like', 'not-like', 'ilike', 'not-ilike'], [['string'], ['string']], 'boolean',
     (name: string, values: any[]): boolean => {
       const [l, r] = values;
       if (typeof r !== 'string') return false;
@@ -51,7 +51,7 @@ registerOperator(
       return name === 'like' || name === 'ilike' ? res : !res;
     }
   ),
-  simple(['in', 'not in'], [['any'], ['array']], 'boolean',
+  simple(['in', 'not-in'], [['any'], ['array']], 'boolean',
     (name: string, values: any[]): boolean => {
       const [l, r] = values;
       if (!Array.isArray(r)) return false;
@@ -59,7 +59,7 @@ registerOperator(
       return name === 'in' ? res : !res;
     }
   ), 
-  simple(['contains', 'does not contain'], [['array'], ['any']], 'boolean',
+  simple(['contains', 'does-not-contain'], [['array'], ['any']], 'boolean',
     (name: string, values: any[]): boolean => {
       const [l, r] = values;
       if (!Array.isArray(l)) return false;
