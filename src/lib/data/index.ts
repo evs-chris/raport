@@ -297,6 +297,14 @@ export type Reference = { r: string };
 export type ValueOrExpr = string|Value;
 export type Value = Reference | Literal | Operation;
 
+export function isValueOrExpr(o: any): o is ValueOrExpr {
+  return typeof o === 'string' || (typeof o === 'object' && o && (
+    ('r' in o && typeof o.r === 'string') ||
+    ('op' in o && typeof o.op === 'string') ||
+    ('v' in o)
+  ) );
+}
+
 export interface Literal {
   v: any;
 }

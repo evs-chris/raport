@@ -160,7 +160,7 @@ export interface Label extends Widget {
 }
 
 export interface Repeater extends Widget {
-  source: PartSource;
+  source: PartSource|ValueOrExpr;
   header?: Container;
   group?: Container[];
   groupEnds?: boolean[];

@@ -1,5 +1,5 @@
 import { Container, Label, Repeater, Image, MeasuredLabel } from '../report';
-import { evaluate, filter, Group } from '../data/index';
+import { evaluate, filter, Group, isValueOrExpr } from '../data/index';
 
 import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, getHeightWithMargin, expandMargin } from './index';
 import { style, styleFont } from './style';
@@ -43,7 +43,11 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   let groupNo: number|boolean = false;
 
   let src: Group|any[] = state && state.state && state.state.src;
-  if (!src) src = filter(ctx.context.root.sources[w.source.name], w.source.filter, w.source.sort, w.source.group).value;
+  if (!src) src = isValueOrExpr(w.source) ?
+    evaluate(ctx, w.source) :
+    filter(ctx.context.root.sources[w.source.name], w.source.filter, w.source.sort, w.source.group).value;
+    
+  
   let arr: any[];
 
   if (!Array.isArray(src)) {
