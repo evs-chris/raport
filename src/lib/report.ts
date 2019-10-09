@@ -4,7 +4,7 @@ import { renderWidget, RenderContext, RenderResult, RenderState } from './render
 
 export type ReportType = 'delimited'|'flow'|'page';
 
-export type Report = Delimited | Flow | Page;
+export type Report<T = {}> = Delimited<T> | Flow<T> | Page<T>;
 
 export interface PartSource {
   filter?: Operation;
@@ -20,13 +20,13 @@ export interface ReportSource extends PartSource {
 
 // TODO: sources should be a named datasource and a label for the report so that one source can be used multiple times
 
-interface BaseReport {
+interface BaseReport<T = {}> {
   type: ReportType;
-  parameters?: Parameter[];
+  parameters?: Parameter<T>[];
 }
 
 // delimited
-export interface Delimited extends BaseReport {
+export interface Delimited<T = {}> extends BaseReport<T> {
   type: 'delimited';
   source: ReportSource;
   fields: ValueOrExpr[];
@@ -36,13 +36,12 @@ export interface Delimited extends BaseReport {
   quote?: string;
 }
 
-export interface Displayed extends BaseReport {
+export interface Displayed<T = {}> extends BaseReport<T> {
   widgets: Widget[];
-  sources?: ReportSource[];
 }
 
 // flow
-export interface Flow extends Displayed {
+export interface Flow<T = {}> extends Displayed<T> {
   type: 'flow';
   width?: number;
   margin?: [number, number];
@@ -51,7 +50,7 @@ export interface Flow extends Displayed {
 }
 
 // page
-export interface Page extends Displayed {
+export interface Page<T = {}> extends Displayed<T> {
   type: 'page';
   header?: Container;
   footer?: Container;

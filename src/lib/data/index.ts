@@ -309,7 +309,8 @@ export interface Literal {
   v: any;
 }
 
-export interface Parameter {
+export type Parameter<T = {}> = ParameterBase<T> & T;
+export interface ParameterBase<T = {}> {
   name: string;
   type: Type;
   required?: boolean;
