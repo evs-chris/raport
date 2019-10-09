@@ -289,7 +289,7 @@ function runPage(report: Page, context: Context): string {
     pages[i] = n;
   });
 
-  return `<html style="font-size:100%;margin:0;padding:0;"><head><style>${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}</style></head><body style="font-size:0.83rem;margin:0;padding:0;${size ? `width:${size.width}rem;` : ''}">\n${pages.reduce((a, c) => a + c, '')}</body></html>`;
+  return `<html style="font-size:100%;margin:0;padding:0;"><head><style>@page { size: ${size.width}em ${size.height}em; }${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}</style></head><body style="font-size:0.83rem;margin:0;padding:0;${size ? `width:${size.width}rem;` : ''}">\n${pages.reduce((a, c) => a + c, '')}</body></html>`;
 }
 
 function runFlow(report: Flow, context: Context): string {
