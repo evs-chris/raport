@@ -1,4 +1,4 @@
-import { Operation, Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, DataSet, Root, Context, extend, evaluate, filter, Type } from './data/index';
+import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, DataSet, Root, Context, extend, evaluate, filter, Type } from './data/index';
 
 import { renderWidget, RenderContext, RenderResult, RenderState } from './render/index';
 
@@ -7,8 +7,8 @@ export type ReportType = 'delimited'|'flow'|'page';
 export type Report<T = {}> = Delimited<T> | Flow<T> | Page<T>;
 
 export interface PartSource {
-  filter?: Operation;
-  sort?: Sort[];
+  filter?: ValueOrExpr;
+  sort?: Sort[]|ValueOrExpr;
   group?: Array<ValueOrExpr>;
   name: string;
 }
@@ -23,12 +23,14 @@ export interface ReportSource extends PartSource {
 interface BaseReport<T = {}> {
   type: ReportType;
   parameters?: Parameter<T>[];
+  sources?: ReportSource[];
+  context?: ParameterMap;
 }
 
 // delimited
 export interface Delimited<T = {}> extends BaseReport<T> {
   type: 'delimited';
-  source: ReportSource;
+  source?: string;
   fields: ValueOrExpr[];
   header?: ValueOrExpr[];
   record?: string;
@@ -183,29 +185,26 @@ export interface MeasuredLabel extends Widget {
 }
 
 // execution
-export function run(report: Report, sources: SourceMap, parameters?: ParameterMap): string {
-  const ctx = new Root({});
-  if (parameters) ctx.parameters = parameters;
+export function run(report: Report, sources: SourceMap, parameters?: ParameterMap|Root): string {
+  const ctx = parameters && 'root' in parameters && parameters.root === parameters ? parameters as Root : new Root(Object.assign({}, report.context), { parameters });
 
-  if (report.type === 'delimited') {
-    if (report.source.filter || report.source.sort) ctx.sources[report.source.name] = filter(sources[report.source.name], report.source.filter, report.source.sort, report.source.group, ctx);
-    else ctx.sources[report.source.name] = sources[report.source.name];
-  } else if (report.sources) {
+  if (report.sources) {
     for (const src of report.sources) {
-      if (src.filter || src.sort) ctx.sources[src.name] = filter(sources[src.name], src.filter, src.sort, src.group, ctx);
-      else ctx.sources[src.name] = sources[src.name];
+      if (src.filter || src.sort || src.group) ctx.sources[src.name] = filter(sources[src.name] || { value: [] }, src.filter, src.sort, src.group, ctx);
+      else ctx.sources[src.name] = sources[src.name] || { value: [] };
     }
     for (const k in ctx.sources) { // set sources in root of context
       ctx.value[k] = ctx.sources[k].value;
     }
   }
 
-  if (report.type === 'delimited') return runDelimited(report, ctx.sources[report.source.name], ctx);
+  if (report.type === 'delimited') return runDelimited(report, ctx);
   else if (report.type === 'flow') return runFlow(report, ctx);
   else return runPage(report, ctx);
 }
 
-function runDelimited(report: Delimited, source: DataSet, context: Context): string {
+function runDelimited(report: Delimited, context: Context): string {
+  const source = context.root.sources[report.source ? report.source : report.sources[0].name];
   let res = '';
   if (report.header) res += report.header.map(h => `${report.quote || ''}${h}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
   const values = Array.isArray(source.value) ? source.value : [source.value];

@@ -150,7 +150,8 @@ const people: DataSet = {
 const csv: Delimited = {
   type: 'delimited',
   header: ['Name', 'Age', 'Money', "Things", "Sum Things", "Average Things"],
-  source: { name: 'people', source: 'people', sort: [] },
+  sources: [{ name: 'people', source: 'people', sort: [] }],
+  source: 'people',
   quote: '"',
   fields: [
     'name', 'age', `(+ '$ ' (format wallet))`, `(count +things)`, `(sum +things)`, `(format (avg +things) 'integer')`

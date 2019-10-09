@@ -183,19 +183,30 @@ export function registerOperator<T = any>(...ops: Operator<T>[]) {
   }
 }
 
-export function filter(ds: DataSet, filter?: Operation, sorts?: Sort[], groups?: Array<ValueOrExpr>, context?: Context): DataSet {
-  if (!Array.isArray(ds.value)) return ds;
+// TODO: allow sorting groups
+export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>, context?: Context): DataSet {
+  if (!ds || !Array.isArray(ds.value)) return ds;
   if (!context) context = new Root(ds.value);
   const values = filter ? [] : ds.value.slice();
 
   if (filter) {
     ds.value.forEach(row => {
-      if (!!applyOperator(extend(context, { value: row }), filter)) values.push(row);
+      if (!!evaluate(extend(context, { value: row }), filter)) values.push(row);
     });
   }
 
-  if (sorts && sorts.length) {
-    const dirs: boolean[] = sorts.map(s => {
+  let sortArr: Sort[];
+
+  if (Array.isArray(sorts)) {
+    sortArr = sorts;
+  } else {
+    const s = evaluate(context, sorts);
+    if (Array.isArray(s)) sortArr = s;
+    else if (typeof s === 'string') sortArr = [{ v: s }];
+  }
+
+  if (sortArr && sortArr.length) {
+    const dirs: boolean[] = sortArr.map(s => {
       if (typeof s === 'object') {
         if ('by' in s) {
           if (typeof s.desc === 'boolean') return s.desc;
@@ -206,8 +217,8 @@ export function filter(ds: DataSet, filter?: Operation, sorts?: Sort[], groups?:
     });
 
     values.sort((a, b) => {
-      for (let i = 0; i < sorts.length; i++) {
-        const s = sorts[i];
+      for (let i = 0; i < sortArr.length; i++) {
+        const s = sortArr[i];
         const desc = dirs[i];
         const by: ValueOrExpr = typeof s === 'string' ? s : 'by' in s ? s.by : s;
         const l = evaluate(extend(context, { value: a }), by);
@@ -345,8 +356,12 @@ export class Root implements RootContext {
   exprs = {};
   path: '';
 
-  constructor(root: any) {
+  constructor(root: any = {}, opts?: ExtendOptions & { parameters?: ParameterMap }) {
     this.value = root;
+    if (opts) {
+      Object.assign(this.parameters, opts.parameters);
+      Object.assign(this.special, opts.special);
+    }
   }
 }
 

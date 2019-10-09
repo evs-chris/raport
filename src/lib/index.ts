@@ -9,9 +9,9 @@ import './render/builtins';
 import './data/builtins';
 
 export {
-  evaluate, extend, filter, join, safeGet, registerFormat, registerOperator,
+  evaluate, extend, filter, isValueOrExpr, join, safeGet, registerFormat, registerOperator,
   Context, Root, Parameter,
-  DataSet, DataSource, Field, Group, Schema, Sort,
+  DataSet, DataSource, Field, Group, Schema, Sort, SourceMap,
   Operation, AggregateOperation, FunctionOperation,
   Type, ArrayType, ValueType,
 } from './data/index';
