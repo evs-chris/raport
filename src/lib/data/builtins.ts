@@ -1,7 +1,7 @@
 import { filter, safeGet, registerOperator, CheckResult, Type, ValueOperator, OperatorCategory, Context, Root, evaluate, extend, formats, registerFormat } from './index';
 import { date, dollar, number, phone } from './format';
 
-function simple(names: string[], types: Type[][], result: Type, apply: (name: string, values: any[]) => any, args: number|'any' = 2, category?: OperatorCategory[]): ValueOperator {
+function simple(names: string[], types: Type[][], result: Type, apply: (name: string, values: any[], ctx: Context) => any, args: number|'any' = 2, category?: OperatorCategory[]): ValueOperator {
   return {
     type: 'value', names, args, types, result, apply, category: ['binary']
   };
@@ -68,9 +68,9 @@ registerOperator(
     }
   ),
   simple(['get'], [['any'], ['string']], 'any',
-    (name: string, values: any[]): any => {
+    (name: string, values: any[], ctx): any => {
       const [l, r] = values;
-      return safeGet(l, `${r}`);
+      return safeGet(extend(ctx, { value: l }), `${r}`);
     },
     2,
     ['function']
