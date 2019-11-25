@@ -2,6 +2,8 @@
 
 Raport is a text/html reporting tool that takes one or more json data sources and uses a template to generate delimited text (csv, tsv, etc) or html that can be paginated for printing. When printing paged reports from chromium-based browsers, turn off the margins, as they're built into the report, and be sure to match the paper size and orientation.
 
+While reports are it's main goal, raport templates happen to be pretty decent at rendering other sorts of printable media, like form letters, menus, and brochures.
+
 ## Reports
 
 There are three ways to run reports: as delimited text using a single datasource, as a flowed html report using as many datasources as you like, and as a paged html report using as many datasources as you like. Any report datasource can be filtered and sorted, as can be seen in the data section below.
@@ -34,7 +36,7 @@ In addition to containers, the basic widgets supplied in this library are the `C
 * `Container`: This is simply a widget that holds other widgets and acts as a local reference for coordinates. Containers have pluggable layouts that default to something like a flex row. The other built-in option is a static list of `x, y` coordinates that are applied to the child widgets in the same order that they are specified.
 * `Label`: This is pretty much what you'd expect. It renders a piece of text that can be composed of multiple parts. The parts may be literal values, references, operators, or spans, which are sort of a sub-label that is composed of a part and optional styling.
 * `Image`: This is also what you'd expect. You can supply a `url` as a literal, reference, or operator that is used to render the image into the output HTML.
-* `Repeater`: This is the most useful widget for reporting purposes. It is composed of an optional header, and optional footer, optional group headers, and rows. The row source must be wither an array or a grouping that eventually results in an array. A repeater will render each of its pieces in a page-aware way, so if there's not room left in the report for a header, footer, or row, it will suspend rendering and resume at the appropriate place when called again. Repeaters automatically handle grouped datasources and support footers for each nested group automatically if required. Footers get access to a special `@source` reference that allows aggregate operators to automatically apply to all of the rows in the repeater. 
+* `Repeater`: This is the most useful widget for reporting purposes. It is composed of an optional header, an optional footer, optional group headers, and rows. The row source must be either an array or a grouping that eventually results in an array. A repeater will render each of its pieces in a page-aware way, so if there's not room left in the report for a header, footer, or row, it will suspend rendering and resume at the appropriate place when called again. Repeaters automatically handle grouped datasources and support footers for each nested group automatically if required. Footers get access to a special `@source` reference that allows aggregate operators to automatically apply to all of the rows in the repeater. 
 
 #### Flowed
 
@@ -42,23 +44,23 @@ A flowed report may optionally have a width, but it never has a height. As such,
 
 #### Paged
 
-A paged report requires a page size in order to render, and an orientation can optionally be supplied to, where the runner will handle flipping the dimensions and margins around to handle the orientation.
+A paged report requires a page size in order to render, and an orientation can optionally be supplied too, where the runner will handle flipping the dimensions and margins around to handle the orientation.
 
-Since a paged report has height constraints on any given piece of the report, rendering of widgets can be optionally interrupted and resumed on a new page. Whether or not a widget supports interruption is up to the individual widget, but by default most containers require that there entire content fit in the available space in order to render.
+Since a paged report has height constraints on any given piece of the report, rendering of widgets can be optionally interrupted and resumed on a new page. Whether or not a widget supports interruption is up to the individual widget, but by default most containers require that their entire content fit in the available space in order to render.
 
-Paged reports can optionally include page headers and footers that are rendered at the top and bottom of each page if supplied. The context for headers and footers contain additional special variables `@page` and `@pages` the contain the current page number and total number of pages, respectively.
+Paged reports can optionally include page headers and footers that are rendered at the top and bottom of each page if supplied. The context for headers and footers contain additional special variables `@page` and `@pages` the contain the current page number and total number of pages, respectively. Page headers and footers are always expected to be the same size.
 
 ## Data
 
 Most data is in a tree or graph format encapsulated in a datasource. Without a datasource, a report isn't going to do much good. Datasources are handled by the root context, which is simply a wrapper around an object that contains a `value`, a few special storage points, a reference to itself as root, and no parent reference. Further contexts can be extended from the root context that encapsulate a different value, but they will have pointers to the root context and the context from which they were extended, which may also be the root context.
 
-Contexts are used to give a report access to data in a particular widget. The report base context is the root context, and widgets have the opportunity to modify their context or add additional contexts as they are rendered. They can also evaluate values from their context to retrieve data or manipulate data.
+Contexts are used to give a report access to data in a particular widget. The report base context is the root context, and widgets have the opportunity to modify their context or add additional contexts as they are rendered. They can also evaluate values from their context to retrieve or manipulate data.
 
 ### Values
 
 Values are one of a reference, a literal, or an operation, which are composed of operators, references, and literals. There is a built-in expression syntax that simplifies building operations a bit using strings. The direct definition form uses a tree of nested objects and arrays.
 
-Literal expressions can be `true`, `false`, `null`, `undefined`, numbers without scientific notation but with as many `_` as you want for separators, and strings with any of `'`, `"`, and `` as quotes and `\` to escape quotes or other backslashes. Literals in definition form are an object with a `v` property containing the literal value, and when in this form, the value can be any valid js value.
+Literal expressions can be `true`, `false`, `null`, `undefined`, numbers without scientific notation but with as many `_`s as you want for separators, and strings with any of `'`, `"`, and `` as quotes and `\` to escape quotes or other backslashes. Literals in definition form are an object with a `v` property containing the literal value, and when in this form, the value can be any valid js value. Examples in definition form: `{ v: true }`, `{ v: 'some string' }`, `{ v: ['an', 'array'] }`, `{ v: someVariable }`.
 
 References are in dotted path notation that start at the current context and include arrays as a simple number in the path. `.`s and `\` can be escaped with `\`. There are also a number of prefixes to aid in referencing data that exists in the context but not specifically part of the piece of data at the core of the current context. Things like report parameters, access to the parent context, special data like the current iteration index, and report data sources are accessible using reference prefixes.
 
@@ -68,7 +70,7 @@ References are in dotted path notation that start at the current context and inc
 * `@`: Refers to the nearest context with special references. These are managed by the report widgets that build context e.g. a repeater or container.
 * `^`: Starts the reference from the current context's parent. These can be stacked e.g. `^^` refers to the grandparent context.
 
-In defintion form, references are an object with the path as a string at an `r` key.
+In defintion form, references are an object with the path as a string at an `r` key. Examples in definition form: `{ r: 'name.length' }`, `{ r: '#info.address.line1' }`, `{ r: '@index' }`.
 
 Operations in expression form can be one of two types: a function call or an aggregate. There are other types of operator, but they share the form of a function call syntactically. Any operation consists of an operator and optional arguments. An aggregate operator can also optionally specify a source, an application, and local arguments. In expression form, an operator is wrapped with `()` with the name first, followed by source, application, local arguments, and finally regular arguments `(op-name [+source] [=>application] [&(...local args)] [...args])`. Commas are optional between arguments, and any arguments are evaluated in the current context before being passed to the operator.
 
@@ -90,7 +92,7 @@ All of these operations are supported on any dataset in a report, and some widge
 
 ## Development environment
 
-Raport is writting in typescript and bundled with rollup using npm scripts.
+Raport is written in typescript and bundled with rollup using npm scripts.
 
 To build raport, you'll need a posix-ish environment. There is a sort of a playground page in the `play` directory, and the script that runs in it is located at `src/play/index.ts`.
 
@@ -99,6 +101,8 @@ Running `npm run build` will compile the typescript to `build`, roll the play sc
 ```sh
 # clone the repo to wherever
 git clone https://github.com/evs-chris/raport raport
+
+cd raport
 
 # install the deps
 npm i
