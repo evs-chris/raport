@@ -25,6 +25,7 @@ interface BaseReport<T = {}> {
   parameters?: Parameter<T>[];
   sources?: ReportSource[];
   context?: ParameterMap;
+  classifyStyles?: boolean;
 }
 
 // delimited
@@ -222,7 +223,7 @@ function runDelimited(report: Delimited, context: Context): string {
 
 function runPage(report: Page, context: Context): string {
   let size: PageSize = report.orientation === 'landscape' ? { width: report.size.height, height: report.size.width, margin: [report.size.margin[1], report.size.margin[0]] } : report.size;
-  const ctx: RenderContext = { context, report, styles: {} };
+  const ctx: RenderContext = { context, report, styles: {}, styleMap: { id: 0, styles: {} } };
   context.special = context.special || {};
   context.special.page = 0;
   context.special.pages = 0;
@@ -287,11 +288,11 @@ function runPage(report: Page, context: Context): string {
     pages[i] = n;
   });
 
-  return `<html style="font-size:100%;margin:0;padding:0;"><head><style>@page { size: ${size.width}em ${size.height}em; }${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}</style></head><body style="font-size:0.83rem;margin:0;padding:0;${size ? `width:${size.width}rem;` : ''}">\n${pages.reduce((a, c) => a + c, '')}</body></html>`;
+  return `<html style="font-size:100%;margin:0;padding:0;"><head><style>@page { size: ${size.width}em ${size.height}em; }${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}</style></head><body style="font-size:0.83rem;margin:0;padding:0;${size ? `width:${size.width}rem;` : ''}">\n${pages.reduce((a, c) => a + c, '')}</body></html>`;
 }
 
 function runFlow(report: Flow, context: Context): string {
-  const ctx: RenderContext = { context, report, styles: {} };
+  const ctx: RenderContext = { context, report, styles: {}, styleMap: { id: 0, styles: {} } };
   let html = '';
   let y = 0;
   let state: RenderState<any> = null;
@@ -322,5 +323,5 @@ function runFlow(report: Flow, context: Context): string {
     html += `</div>\n`;
   }
 
-  return `<html style="font-size:100%;margin:0;padding:0;"><head><style>${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}</style></head><body style="font-size:0.83rem;padding:0;margin:0;">\n${html}</body></html>`;
+  return `<html style="font-size:100%;margin:0;padding:0;"><head><style>${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}</style></head><body style="font-size:0.83rem;padding:0;margin:0;">\n${html}</body></html>`;
 }

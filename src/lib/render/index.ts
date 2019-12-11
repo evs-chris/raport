@@ -1,14 +1,20 @@
-import { Dimension, Displayed, Layout, Placement, Widget, MeasureFont } from '../report';
+import { Displayed, Layout, Placement, Widget, MeasureFont } from '../report';
 import { extend as extendContext, Context, ExtendOptions as ContextExtendOptions, evaluate } from '../data/index';
 
 export interface RenderContext {
   report: Displayed;
   styles: StyleRegistry;
+  styleMap: StyleMap;
   context: Context;
 }
 
 export interface StyleRegistry {
   [id: string]: string;
+}
+
+interface StyleMap {
+  id: number;
+  styles: StyleRegistry;
 }
 
 export function addStyle(context: RenderContext, id: string, style: string) {
@@ -18,7 +24,7 @@ export function addStyle(context: RenderContext, id: string, style: string) {
 export interface ExtendOptions extends ContextExtendOptions {}
 
 export function extend(context: RenderContext, opts: ExtendOptions): RenderContext {
-  return { report: context.report, context: extendContext(context.context, opts), styles: context.styles };
+  return { report: context.report, context: extendContext(context.context, opts), styles: context.styles, styleMap: context.styleMap };
 }
 
 const htmlChars = /\>\<\&/g;

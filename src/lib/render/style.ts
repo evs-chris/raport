@@ -8,6 +8,21 @@ export interface StyleOptions {
   font?: Font;
 }
 
+export function mapStyle(ctx: RenderContext, style: string): string {
+  if (!style) return '';
+  return ctx.styleMap.styles[style] || ((ctx.styleMap.styles[style] = `s${++ctx.styleMap.id}`) && `s${ctx.styleMap.id}`);
+}
+
+export function styleClass(ctx: RenderContext, cls: string[], style: string, inlineStyle?: string): string {
+  if (ctx.report.classifyStyles) {
+    return ` class="${cls.concat([mapStyle(ctx, style)]).join(' ')}"${inlineStyle ? ` style="${inlineStyle}"` : ''}`;
+  } else {
+    const s = `${style}${inlineStyle || ''}`;
+    const c = `${cls.length ? ` class="${cls.join(' ')}"` : ''}`;
+    return `${c}${s ? ` style="${s}"` : ''}`;
+  }
+}
+
 export function style(w: Widget, placement: Placement, context: RenderContext, opts?: StyleOptions): string {
   let s = `left:${placement.x || 0}rem;top:${(placement.y || 0)}rem;`;
   if (!w.width) s += `right:${(w.margin || {})[1] || 0}rem;`;
