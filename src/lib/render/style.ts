@@ -45,6 +45,12 @@ export function styleBorder(b: number|Borders|ValueOrExpr, context: RenderContex
   if (typeof b === 'string' || (typeof b === 'object' && ('v' in b || 'r' in b || 'op' in b))) b = evaluate(context, b);
   if (typeof b === 'number') return `border-bottom:${b * 0.0625}rem solid;`;
   else if (isBorder(b)) return `border-style:solid;border-width:${(b.top || 0) * 0.0625}rem ${(b.right || 0) * 0.0625}rem ${(b.bottom || 0) * 0.0625}rem ${(b.left || 0) * 0.0625}rem;`;
+  else if (Array.isArray(b)) {
+    if (b.length === 1) return `border:${(+b[0] || 0) * 0.0625}rem solid;`;
+    else if (b.length === 2) return `border-style:solid;border-width:${(+b[0] || 0) * 0.0625}rem ${(+b[1] || 0) * 0.0625}rem ${(+b[0] || 0) * 0.0625}rem ${(+b[1] || 0) * 0.0625}rem;`;
+    else if (b.length === 3) return `border-style:solid;border-width:${(+b[0] || 0) * 0.0625}rem ${(+b[1] || 0) * 0.0625}rem ${(+b[2] || 0) * 0.0625}rem ${(+b[1] || 0) * 0.0625}rem;`;
+    else if (b.length === 4) return `border-style:solid;border-width:${(+b[0] || 0) * 0.0625}rem ${(+b[1] || 0) * 0.0625}rem ${(+b[2] || 0) * 0.0625}rem ${(+b[3] || 0) * 0.0625}rem;`;
+  }
 }
 
 function isBorder(b: any): b is Borders {
