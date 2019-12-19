@@ -1,6 +1,7 @@
 import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, DataSet, Root, Context, extend, evaluate, filter, Type } from './data/index';
 
 import { renderWidget, RenderContext, RenderResult, RenderState } from './render/index';
+import { styleClass } from './render/style';
 
 export type ReportType = 'delimited'|'flow'|'page';
 
@@ -231,7 +232,7 @@ function runDelimited(report: Delimited, context: Context): string {
 
 function runPage(report: Page, context: Context): string {
   let size: PageSize = report.orientation === 'landscape' ? { width: report.size.height, height: report.size.width, margin: [report.size.margin[1], report.size.margin[0]] } : report.size;
-  const ctx: RenderContext = { context, report, styles: {}, styleMap: { id: 0, styles: {} } };
+  const ctx: RenderContext = { context, report, styles: {}, styleMap: { ids: {}, styles: {} } };
   context.special = context.special || {};
   context.special.page = 0;
   context.special.pages = 0;
@@ -281,7 +282,7 @@ function runPage(report: Page, context: Context): string {
   const footTop = size.height - 2 * size.margin[0] - footSize;
 
   pages.forEach((p, i) => {
-    let n = `<div class="page" style="position:absolute;top:${i * size.height + size.margin[0]}rem;height:${size.height - 2 * size.margin[0]}rem;width:${size.width - 2 * size.margin[1]}rem;left:${size.margin[1]}rem;overflow:hidden;">\n`;
+    let n = `<div${styleClass(ctx, ['page'], [`position:absolute;height:${size.height - 2 * size.margin[0]}rem;width:${size.width - 2 * size.margin[1]}rem;left:${size.margin[1]}rem;overflow:hidden;`, ''], `top:${i * size.height + size.margin[0]}rem;`, 'p')}>\n`;
     context.special.page = i + 1;
     if (report.header) {
       const r = renderWidget(report.header, ctx, { x: 0, y: 0 });
@@ -300,7 +301,7 @@ function runPage(report: Page, context: Context): string {
 }
 
 function runFlow(report: Flow, context: Context): string {
-  const ctx: RenderContext = { context, report, styles: {}, styleMap: { id: 0, styles: {} } };
+  const ctx: RenderContext = { context, report, styles: {}, styleMap: { ids: {}, styles: {} } };
   let html = '';
   let y = 0;
   let state: RenderState<any> = null;
@@ -311,7 +312,7 @@ function runFlow(report: Flow, context: Context): string {
   else if (report.size) width = report.orientation === 'landscape' ? report.size.height : report.size.width;
 
   for (const w of report.widgets) {
-    html += `<div style="position:absolute;top:${y}rem;right:0rem;left:0rem;${width ? `width:${width}rem;` : ''}">\n`;
+    html += `<div${styleClass(ctx, [], [`position:absolute;right:0rem;left:0rem;${width ? `width:${width}rem;` : ''}`, ''], `top:${y}rem;`, 'p')}>\n`;
     let r: RenderResult;
     let yy = 0;
     do {

@@ -8,28 +8,43 @@ export interface StyleOptions {
   font?: Font;
 }
 
-export function mapStyle(ctx: RenderContext, style: string): string {
-  if (!style) return '';
-  return ctx.styleMap.styles[style] || ((ctx.styleMap.styles[style] = `s${++ctx.styleMap.id}`) && `s${ctx.styleMap.id}`);
+export function nextStyleId(ctx: RenderContext, prefix: string): number {
+  if (!ctx.styleMap.ids[prefix]) ctx.styleMap.ids[prefix] = 0;
+  return ctx.styleMap.ids[prefix]++;
 }
 
-export function styleClass(ctx: RenderContext, cls: string[], style: string, inlineStyle?: string): string {
+export function mapStyle(ctx: RenderContext, style: string, prefix: string): string {
+  if (!style) return '';
+  const mapped = ctx.styleMap.styles[style];
+  if (mapped) return mapped;
+  const id = `${prefix}${nextStyleId(ctx, prefix)}`;
+  return ctx.styleMap.styles[style] = id;
+}
+
+export function styleClass(ctx: RenderContext, cls: string[], [style, inline]: [string, string], inlineStyle?: string, classPrefix?: string): string {
   if (ctx.report.classifyStyles) {
-    return ` class="${cls.concat([mapStyle(ctx, style)]).join(' ')}"${inlineStyle ? ` style="${inlineStyle}"` : ''}`;
+    const cs = [];
+    if (inline) cs.push(mapStyle(ctx, inline, 'h'));
+    cs.push(mapStyle(ctx, style, classPrefix || 's'));
+    return ` class="${cls.concat(cs).join(' ')}"${inlineStyle ? ` style="${inlineStyle}"` : ''}`;
   } else {
-    const s = `${style}${inlineStyle || ''}`;
+    const s = `${style}${inlineStyle || ''}${inline || ''}`;
     const c = `${cls.length ? ` class="${cls.join(' ')}"` : ''}`;
     return `${c}${s ? ` style="${s}"` : ''}`;
   }
 }
 
-export function style(w: Widget, placement: Placement, context: RenderContext, opts?: StyleOptions): string {
+export function style(w: Widget, placement: Placement, context: RenderContext, opts?: StyleOptions): [string, string] {
   let s = `left:${placement.x || 0}rem;top:${(placement.y || 0)}rem;`;
+  let i = ``;
   if (!w.width) s += `right:${(w.margin || {})[1] || 0}rem;`;
   else if (typeof w.width !== 'number' && 'percent' in w.width) s += `width:${w.width.percent}%;`;
   else s += `width:${getWidthWithMargin(w, placement)}rem;`
+
   const h = getHeightWithMargin(w, placement, opts && opts.computedHeight) || 1;
-  s += `height:${h}rem;${!opts || !opts.container || (w.font && w.font.line) ? `line-height:${(w.font && w.font.line) || getHeight(w, placement, opts && opts.computedHeight)}rem;` : ''}`;
+  if (opts && opts.container && opts.computedHeight) i = `height:${h}rem;`;
+  else s += `height:${h}rem;`;
+  s += `${!opts || !opts.container || (w.font && w.font.line) ? `line-height:${(w.font && w.font.line) || getHeight(w, placement, opts && opts.computedHeight)}rem;` : ''}`;
 
   if (w.margin) {
     const m = expandMargin(w);
@@ -41,7 +56,7 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   if ((opts && opts.font) || w.font) s += styleFont((opts && opts.font) || w.font);
   if (w.border) s += styleBorder(w.border, context);
 
-  return s;
+  return [s, i];
 }
 
 export function styleFont(f: Font): string {

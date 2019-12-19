@@ -13,7 +13,7 @@ export interface StyleRegistry {
 }
 
 interface StyleMap {
-  id: number;
+  ids: { [id: string]: number };
   styles: StyleRegistry;
 }
 

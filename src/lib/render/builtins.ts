@@ -10,7 +10,7 @@ import { styleClass, style, styleFont } from './style';
 registerRenderer<Label>('label', (w, ctx, placement, state) => {
   addStyle(ctx, 'label', `.label { position: absolute; box-sizing: border-box; }`);
   const str = (Array.isArray(w.text) ? w.text : [w.text]).map(v => {
-    if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], styleFont(v.font))}>${evaluate(ctx, v.text)}</span>`;
+    if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font), ''])}>${evaluate(ctx, v.text)}</span>`;
     else return evaluate(ctx, v);
   }).join('');
   return `<span${styleClass(ctx, ['label'], style(w, placement, ctx))}>${escapeHTML(str)}</span>`
@@ -44,13 +44,12 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   let src: Group|any[] = state && state.state && state.state.src;
   if (!src) src = isValueOrExpr(w.source) ?
     evaluate(ctx, w.source) :
-    filter(ctx.context.root.sources[w.source.name], w.source.filter, w.source.sort, w.source.group).value;
+    filter(ctx.context.root.sources[w.source.name], w.source.filter, w.source.sort, w.source.group, ctx.context).value;
     
-  
   let arr: any[];
 
   if (!Array.isArray(src)) {
-    if (!Array.isArray(src.value)) return { output: '', height: 0 };
+    if (!src || !Array.isArray(src.value)) return { output: '', height: 0 };
     group = src;
     arr = group.value;
     if (w.group) {
@@ -72,7 +71,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
     }
   }
 
-  if ((state && state.state.part === 'body' && w.headerPerPage !== false && (!group || !group.grouped)) || (!group || !group.grouped) && w.header && (!state || !state.state || state.state.part === 'header' || state.state.part === 'group')) {
+  if (w.header && ((state && state.state.part === 'body' && w.headerPerPage !== false && (!group || !group.grouped)) || (!group || !group.grouped) && (!state || !state.state || state.state.part === 'header' || state.state.part === 'group'))) {
     r = renderWidget(w.header, ctx, { x: 0, y, availableX: placement.availableX });
 
     if (r.height > available) return { output: '', height: 0, continue: { offset: 0, state: { part: 'header', src, current: 0 } } }
@@ -132,8 +131,10 @@ registerRenderer<MeasuredLabel>('measured', (w, ctx, placement, state) => {
   if (!state && height > placement.availableY) {
     return { output: '', height: 0, continue: { state: {}, offset: 0 } };
   } else {
+    let s = style(w, placement, ctx, { computedHeight: height, container: true });
+    s[0] = `display:inline-block;white-space:pre-wrap;line-height:${(w.font && w.font.line) || (w.font && w.font.size) || 1}rem;` + s[0];
     return {
-      height, output: `<span${styleClass(ctx, ['label'], `display:inline-block;white-space:pre-wrap;line-height:${(w.font && w.font.line) || (w.font && w.font.size) || 1}rem;${style(w, placement, ctx, { computedHeight: height, container: true })}`)}>${escapeHTML(text)}</span>`
+      height, output: `<span${styleClass(ctx, ['label'], s)}>${escapeHTML(text)}</span>`
     };
   }
 });
