@@ -125,6 +125,16 @@ export function safeGet(root: Context, path: string): any {
   } else if (path[0] === '+') {
     path = path.substr(1);
     o = root.root.sources;
+
+    // grab the data source
+    if (o && (match = splitPattern.exec(path))) {
+      idx = match.index + match[1].length;
+      o = o[path.substr(0, idx).replace(escapePattern, '$1$2')];
+      path = path.substr(idx + 1);
+
+      // if it's a subpath request, drill into the datasource
+      if (o && path.length && o.value) o = o.value;
+    }
   }
 
   if (path[0] === '@') { // special ref, which can follow pops
@@ -184,7 +194,7 @@ export function registerOperator<T = any>(...ops: Operator<T>[]) {
 }
 
 // TODO: allow sorting groups
-export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>, context?: Context): DataSet {
+export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context): DataSet {
   if (!ds || !Array.isArray(ds.value)) return ds;
   if (!context) context = new Root(ds.value);
   const values = filter ? [] : ds.value.slice();
@@ -230,7 +240,9 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
     });
   }
 
-  if (groups && groups.length) {
+  if (!Array.isArray(groups)) groups = evaluate(context, groups);
+
+  if (Array.isArray(groups) && groups.length) {
     return { value: { schema: ds.schema, grouped: groups.length, value: group(values, groups, context), all: values } };
   }
 
