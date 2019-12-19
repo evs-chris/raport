@@ -1,11 +1,12 @@
 {
   "name": "raport",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Simple reports. No ragrets.",
   "main": "./lib/raport.umd.js",
   "types": "./lib/index.d.ts",
   "module": "./lib/index.js",
   "license": "MIT",
+  "keywords": ["report", "pdf", "html", "delimited"],
   "devDependencies": {
     "ractive": "^1.3",
     "rollup": "^1.21",
@@ -17,6 +18,6 @@
     "clean": "rm -r build; rm -r lib"
   },
   "files": [
-    "lib", "src", "README.md"
+    "lib", "README.md", "CHANGELOG.md"
   ]
 }

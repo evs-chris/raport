@@ -1,3 +1,21 @@
+## 0.1.0
+
+2019-12-19
+
+#### Report
+
+* Borders can now be specified as an array.
+* Reports can have their individual inline styles packaged into generated classes. Depending on the report, this can save quite a bit of size on the generated HTML.
+* Report source groupings may now be an expression.
+* Report sources may now have a `base` application before filtering, sorting, and groupings are applied.
+* Report sources properly use the `name` and `source` attributes i.e. `name` is what the data is called in the context and `source` is where the data is retrieved from the source map passed to run.
+
+#### Data
+
+* Added `group`, `sort`, and `source` operators.
+* `+some.child.prop.on.source` will now properly unwrap the `some` source to get `child.prop.on.source` as you would expect.
+
+
 ## 0.0.2
 
 2019-10-09
