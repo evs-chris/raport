@@ -7,9 +7,15 @@ export type ReportType = 'delimited'|'flow'|'page';
 export type Report<T = {}> = Delimited<T> | Flow<T> | Page<T>;
 
 export interface PartSource {
+  /** Filters to apply to the base value of the data source */
   filter?: ValueOrExpr;
+  /** Sorts to apply to the base value of the data source */
   sort?: Sort[]|ValueOrExpr;
-  group?: Array<ValueOrExpr>;
+  /** Groupings to apply to the base data source */
+  group?: Array<ValueOrExpr>|ValueOrExpr;
+  /** An expression to apply to the base data source before filtering, sorting, or grouping */
+  base?: ValueOrExpr;
+  /** The name of the data source to be pulled from the root context */
   name: string;
 }
 
@@ -191,8 +197,10 @@ export function run(report: Report, sources: SourceMap, parameters?: ParameterMa
 
   if (report.sources) {
     for (const src of report.sources) {
-      if (src.filter || src.sort || src.group) ctx.sources[src.name] = filter(sources[src.name] || { value: [] }, src.filter, src.sort, src.group, ctx);
-      else ctx.sources[src.name] = sources[src.name] || { value: [] };
+      let base = sources[src.source || src.name] || { value: [] };
+      if (src.base) base = { value: evaluate(extend(ctx, { value: base.value }), src.base) };
+      if (src.filter || src.sort || src.group) ctx.sources[src.name] = filter(base, src.filter, src.sort, src.group, ctx);
+      else ctx.sources[src.name] = base;
     }
     for (const k in ctx.sources) { // set sources in root of context
       ctx.value[k] = ctx.sources[k].value;
