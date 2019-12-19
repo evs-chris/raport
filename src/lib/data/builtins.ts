@@ -51,10 +51,10 @@ registerOperator(
       return name === 'like' || name === 'ilike' ? res : !res;
     }
   ),
-  simple(['in', 'not-in'], [['any'], ['array']], 'boolean',
+  simple(['in', 'not-in'], [['any'], ['array', 'string']], 'boolean',
     (name: string, values: any[]): boolean => {
       const [l, r] = values;
-      if (!Array.isArray(r)) return false;
+      if (!Array.isArray(r) && typeof r !== 'string') return false;
       const res = !!~r.indexOf(l);
       return name === 'in' ? res : !res;
     }
@@ -62,7 +62,7 @@ registerOperator(
   simple(['contains', 'does-not-contain'], [['array'], ['any']], 'boolean',
     (name: string, values: any[]): boolean => {
       const [l, r] = values;
-      if (!Array.isArray(l)) return false;
+      if (!Array.isArray(l) && typeof l !== 'string') return false;
       const res = !!~l.indexOf(r);
       return name === 'contains' ? res : !res;
     }
@@ -93,8 +93,11 @@ registerOperator(
   ),
   simple(['filter'], [['array'], ['object'], ['array'], ['array']], 'array',
     (name: string, values: any[], ctx?: Context): any => {
-      const [arr, flt, sorts, groups] = values;
-      if (!Array.isArray(arr)) return [];
+      let [arr, flt, sorts, groups] = values;
+      if (!Array.isArray(arr)) {
+        if (arr && Array.isArray(arr.value)) arr = arr.value;
+        else return [];
+      }
       return filter({ value: arr }, flt, sorts, groups, ctx).value;
     },
     4
@@ -105,6 +108,40 @@ registerOperator(
       const [arr, flt] = values;
       if (!Array.isArray(arr)) return;
       return arr.find(e => evaluate(extend(ctx, { value: e }), flt));
+    },
+    2,
+    ['function']
+  ),
+  simple(['source'], [['any']], 'any',
+    (name: string, values: any[]): any => {
+      const [val] = values;
+      return { value: val };
+    },
+    1,
+    ['function']
+  ),
+  simple(['group'], [['array'], ['array']], 'any',
+    (name: string, values: any[], ctx?: Context): any => {
+      ctx = ctx || new Root({});
+      let [arr, groups] = values;
+      if (!Array.isArray(arr)) {
+        if (arr && Array.isArray(arr.value)) arr =arr.value;
+        else return {};
+      }
+      return filter({ value: arr }, null, null, groups, ctx);
+    },
+    2,
+    ['function']
+  ),
+  simple(['sort'], [['array'], ['array']], 'array',
+    (name: string, values: any[], ctx?: Context): any => {
+      ctx = ctx || new Root({});
+      let [arr, sort] = values;
+      if (!Array.isArray(arr)) {
+        if (arr && Array.isArray(arr.value)) arr =arr.value;
+        else return {};
+      }
+      return filter({ value: arr }, null, sort, null, ctx);
     },
     2,
     ['function']
@@ -143,14 +180,14 @@ registerOperator(
     (name: string, values: any[]): number => {
       const first = values.shift();
       if (isNaN(first)) return 0;
-      return values.reduce((a, c) => a / (isNaN(c) ? 0 : +c), +first);
+      return values.reduce((a, c) => a / (isNaN(c) ? 1 : +c), +first);
     },
     'any'
   ),
   simple(['%'], [['number']], 'number',
     (name: string, values: any[]): number => {
       const first = values.shift();
-      return values.reduce((a, c) => a / (isNaN(c) ? 0 : +c), isNaN(first) ? 0 : +first);
+      return values.reduce((a, c) => a % (isNaN(c) ? 1 : +c), isNaN(first) ? 0 : +first);
     },
     'any'
   )
@@ -231,7 +268,7 @@ registerOperator(
     },
     1, ['function', 'format']
   ),
-  simple(['format', 'fmt'], [['string'], ['string'], ['any']], 'string',
+  simple(['format', 'fmt'], [['any'], ['string'], ['any']], 'string',
     (name: string, args: any[]): string => {
       let [n, v, ...s] = args;
       const fmt = formats[v];
@@ -409,7 +446,7 @@ registerFormat('date', (n, [fmt]) => {
   return date(n, fmt);
 });
 
-registerFormat('integer', (n, [dec]) => {
+registerFormat('integer', (n, []) => {
   return number(n, 0);
 });
 
