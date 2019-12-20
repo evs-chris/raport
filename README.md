@@ -31,12 +31,53 @@ A context is simply a wrapper around a piece of data that includes the ability t
 
 **Widgets**
 
-In addition to containers, the basic widgets supplied in this library are the `Container`, `Label`, `Repeater`, and `Image`.
+In addition to containers, the basic widgets supplied in this library are the `Label`, `Repeater`, `Image`, and `Measured`.
 
 * `Container`: This is simply a widget that holds other widgets and acts as a local reference for coordinates. Containers have pluggable layouts that default to something like a flex row. The other built-in option is a static list of `x, y` coordinates that are applied to the child widgets in the same order that they are specified.
 * `Label`: This is pretty much what you'd expect. It renders a piece of text that can be composed of multiple parts. The parts may be literal values, references, operators, or spans, which are sort of a sub-label that is composed of a part and optional styling.
+* `Measured Label`: This is a label that estimates its height based on its content and applied styles. The estimation is not exact and is based on average character width for a few standard font metrics.
 * `Image`: This is also what you'd expect. You can supply a `url` as a literal, reference, or operator that is used to render the image into the output HTML.
-* `Repeater`: This is the most useful widget for reporting purposes. It is composed of an optional header, an optional footer, optional group headers, and rows. The row source must be either an array or a grouping that eventually results in an array. A repeater will render each of its pieces in a page-aware way, so if there's not room left in the report for a header, footer, or row, it will suspend rendering and resume at the appropriate place when called again. Repeaters automatically handle grouped datasources and support footers for each nested group automatically if required. Footers get access to a special `@source` reference that allows aggregate operators to automatically apply to all of the rows in the repeater. 
+* `Repeater`: This is the most useful widget for reporting purposes. It is composed of an optional `header`, an optional `footer`, optional `group` headers, and `row`s. The row `source` must be either an array or a grouping that eventually results in an array. A repeater will render each of its pieces in a page-aware way, so if there's not room left in the report for a header, footer, or row, it will suspend rendering and resume at the appropriate place when called again. Repeaters automatically handle grouped datasources and support footers for each nested group automatically if required. Footers get access to a special `@source` reference that allows aggregate operators to automatically apply to all of the rows in the repeater. 
+
+  The grouping of the data source for a repeater will determine how many nested sections show up on the report with actual rows only being rendered for the innermost (rightmost in the array) grouping. The `group` key on the repeater widget is an array that can specify a header for each grouping in the source. The `groupEnds` key on the repeater widget specifies whether footers should be rendered for each group in reverse order with an additional entry at the end for the whole repeater, meaning that the first entry is for the innermost group, proceeding outward to the extra entry for all data before groupings are applied.
+
+**Widget Properties**
+
+| Property | Type | Applies To | Description |
+| -------- | ---- | ---------- | ----------- |
+| `type` | `string` | *all* | Specifies what registered widget this should be. The built-ins are `container`, `label`, `measured`, `image`, and `repeater`. |
+| `hide` | `boolean \| value` | *all* | If the property is or evaluates to `true` the widget will be skipped during render. |
+| `font` | `font-object` | *all* | Specifies text properties for a widget and its children (CSS cascade). See below for supported properties. |
+| `border` | `number \| number[] \| object \| value` | *all* | Specifies borders for a widget as widths in 16ths of a `rem`. If a `number`, specifies bottom border width. If an `object`, it may have `top`, `bottom`, `left`, and `right` properties with number values that correspond to those border widths. If a `number[]`, the arrity determines behavior: `1` sets all widths to the first element; `2` sets `top` and `bottom` to the first element and `left` and `right` to the second element; `3` sets `top` to the first element, `right` and `left` to the second element, and `bottom` to the third element; and `4` sets `top`, `bottom`, `left`, and `right` to the elements in that order. If a value, the evaluate can be a `number`, `number[]`, or `object` corresponding to the design-time constructs enumerated here. |
+| `margin` | `number \| number[]` | *all* | Specifies the padding inside the widget in `rem`, as CSS margins don't play well with positioning inside containers. A `number` is shorthand for a `4` element array with the number as each element. The arity of the `number[]` determines which paddings get set: `2` sets the `top` and `bottom` to the first element, and `left` and `right` to the second element; and `4` sets the `top`, `right`, `bottom`, and `left` to the elements in that order. |
+| `width` | `number \| object` | *all* | If a `number`, sets the width of the widget in `rem`. If an `object` with a `percent` property, sets the width of the widget in percent. If not set, the widget with fill the remaining width of the parent. |
+| `layout` | `string \| {x,y}[]` | containers | If a `string`, uses the named registered layout. If an array of objects with `x` and `y` properties, child widgets are placed at the coordinates specified at the index in the `layout` array that corresponds to their index in the `widgets` array. |
+| `widgets` | `object[]` | containers | Child widgets to render within this widget. |
+| `height` | `'auto' \| number \| object` | *all* | If a `number`, specifies the height of the widget in `rem`. If an `object` with a `percent` property, specifies the height of the widget in percent of the available space. If `'auto'` or not set, sets the height to whatever contains its children or `1rem` if there are no children. |
+| `text` | `value \| object[]` | `label` | The text content for the `label`. If this is an array of `object`s, each object may specify a `text` property and a `font` property, where the `text` will be wrapped in a `<span>` with the `font` properties applied. |
+| `text` | `value` | `measured` | The text content for the `measured` label. |
+| `url` | `value` | `image` | The url of the image to display. |
+| `context` | `value` | `container` | A new context to add to the context stack for the widgets within the container. This can be used to introduce values that will need to be referenced from child widgets. |
+| `source` | `value \| object` | `repeater` | The source of data for the repeater. If an `object`, this can be a report source with a `name` and optional `filter`, `sort`, and `group` properties. Otherwise, the evaluated value should be a source or an array. |
+| `header` | `widget` | `repeater` | An optional header to be rendered before any data. |
+| `row` | `widget` | `repeater` | A widget to be rendered for each element in the source. |
+| `footer` | `widget` | `repeater` | A widget to be rendered after any data. If there are multiple groups in the source, rendering of the footer is controlled by the `groupEnd` property. |
+| `group` | `widget[]` | `repeater` | An array of widgets to be rendered before any data at the beginning of each group. The widgets in the array correspond to the groups in the source, so the first widget will be rendered for each item in the first group source, and the second widget will be rendered for each item in the second group nested within the first, etc. |
+| `groupEnds` | `boolean[]` | `repeater` | An array of `boolean`s that specify whether of not the `footer` should be rendered at the end of each group. The first element applies to the innermost group, the second to the next containing group, and so on. If there is one more element in the array than the number of groups in the source, it will control a final render of the footer for all of the data in the `repeater`. |
+
+**Font Properties**
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `family` | `string` | Sets the CSS `font-family`. |
+| `color` | `string` | Sets the CSS `color`. |
+| `align` | `string` | Sets the CSS `text-align`. |
+| `size` | `number` | Set the CSS `font-size` in `rem`. |
+| `weight` | `number \| string` | Sets the CSS `font-weight`. |
+| `pre` | `boolean` | If `true`, sets CSS `white-space` to `pre-wrap`. |
+| `clamp` | `boolean` | If `true`, set CSS `white-space` to `nowrap` and `overflow` to `hidden`. |
+| `right` | `number` | If not `margin` is set on the widget, this will set a right margin in `rem`. This is useful for right-aligned text next to left-aligned text to keep them from running together. |
+
 
 #### Flowed
 
@@ -102,19 +143,19 @@ There are a few operations built-in to the library to handle common expressions:
 | `ilike` | `string, string` | `boolean` | `like`, but case insensitive. |
 | `not-like` | `string, string` | `boolean` | `like`, but negated. |
 | `not-ilike` | `string, string` | `boolean` | `not-like`, but case insensitive. |
-| `in` | `any, array|string` | `boolean` | Returns true if the given `array|string` contains the given value using `indexOf` |
-| `not-in` | `any, array|string` | `boolean` | `in`, but negated. |
-| `contains` | `array|string, any` | `boolean` | Returns true if the given `array|string` contains the given value using `indexOf` |
-| `does-not-contain` | `array|string, any` | `boolean` | `contains`, but negated. |
+| `in` | `any, array\|string` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf` |
+| `not-in` | `any, array\|string` | `boolean` | `in`, but negated. |
+| `contains` | `array\|string, any` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf` |
+| `does-not-contain` | `array\|string, any` | `boolean` | `contains`, but negated. |
 | `get` | `any, string` | `any` | Safely retrieves the value at the path given by the `string` from the given value. |
 | `array` | `...any` | `array` | Returns the given values in an array. |
 | `object` | `...(key: string, value: any)` | `any` | Creates an object from the given values where the odd-numbered args are keys and their subsequent event-numbered args are values e.g. `(object 'foo' true 'bar' 3.14159)` is `{ foo: true, bar: 3.14159 }`. |
-| `filter` | `array, filter?, sort?, group?` | `array|any` | Applies any supplied filter, sort, and group to the given array. This operator is an interface the function that powers report sources. |
+| `filter` | `array, filter?, sort?, group?` | `array\|any` | Applies any supplied filter, sort, and group to the given array. This operator is an interface the function that powers report sources. |
 | `find` | `array, value` | `any` | Finds the first element in the given array that matches the second argument, where the second argument is a data value e.g. an operation, reference, or literal that evaluates to true when the element matches. |
 | `source` | `any` | `DataSet` | Takes the given value and turns it into a `DataSet` |
 | `group` | `array, group` | `any` | Like `filter`, but can only apply groupings. |
 | `sort` | `array, sort` | `array` | Like `filter`, but can only apply sorts. |
-| `+` | `...any` | `string|number` | Adds the given values if they all pass `isNaN` or concatenates them as a string otherwise. |
+| `+` | `...any` | `string\|number` | Adds the given values if they all pass `isNaN` or concatenates them as a string otherwise. |
 | `-` | `...any` | `number` | Subtracts the given values starting with the first. |
 | `*` | `...any` | `number` | Multiplies the given values starting with the first. |
 | `/` | `...any` | `number` | Divides the given values starting with the first. |
@@ -124,11 +165,11 @@ There are a few operations built-in to the library to handle common expressions:
 | `triml` | `string` | `string` | Trims whitespace from the left side of the given string. |
 | `trimr` | `string` | `string` | Trims whitespace from the right side of the given string. |
 | `trim` | `string` | `string` | Trims whitespace from both sides of the given string. |
-| `slice` | `string|array, number?, number?` | `string|array` | Slices the given string or array from the first number argument index to the second number argument index. This is a proxy for the `slice` method on the first argument. |
-| `substr` | `string|array, number?, number?` | `string|array` | This is an alias for `slice`. |
+| `slice` | `string\|array, number?, number?` | `string\|array` | Slices the given string or array from the first number argument index to the second number argument index. This is a proxy for the `slice` method on the first argument. |
+| `substr` | `string\|array, number?, number?` | `string\|array` | This is an alias for `slice`. |
 | `replace` | `string, string, string, string?` | `string` | Calling the arguments `haystack`, `needle`, `replacement`, `flags`, this replaces `needle` in the `haystack` with `replacement`. If `flags` is provided, and it may be empty, `needle` is a regex with the given `flags`. |
 | `replace-all` | `string, string, string, string?` | `string` | Calling the arguments `haystack`, `needle`, `replacement`, `flags`, this replaces all instances of `needle` in the `haystack` with `replacement`. If `flags` is provided, and it may be empty, `needle` is a regex with the given `flags`. |
-| `reverse` | `string|array` | `string|array` | Reverses the given string or array. |
+| `reverse` | `string\|array` | `string\|array` | Reverses the given string or array. |
 | `date` | `string` | `date` | Creates a new `Date` with the given value. |
 | `upper` | `string` | `string` | Uppercases the given string. |
 | `lower` | `string` | `string` | Lowercases the given string. |
