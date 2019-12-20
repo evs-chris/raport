@@ -71,7 +71,7 @@ export function styleFont(f: Font): string {
   return s;
 }
 
-export function styleBorder(b: number|Borders|ValueOrExpr, context: RenderContext): string {
+export function styleBorder(b: number|number[]|Borders|ValueOrExpr, context: RenderContext): string {
   if (typeof b === 'string' || (typeof b === 'object' && ('v' in b || 'r' in b || 'op' in b))) b = evaluate(context, b);
   if (typeof b === 'number') return `border-bottom:${b * 0.0625}rem solid;`;
   else if (isBorder(b)) return `border-style:solid;border-width:${(b.top || 0) * 0.0625}rem ${(b.right || 0) * 0.0625}rem ${(b.bottom || 0) * 0.0625}rem ${(b.left || 0) * 0.0625}rem;`;
