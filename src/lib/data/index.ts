@@ -193,7 +193,30 @@ export function registerOperator<T = any>(...ops: Operator<T>[]) {
   }
 }
 
-// TODO: allow sorting groups
+function mungeSort(context: Context, sorts: Sort[]|ValueOrExpr): Sort[] {
+  let sortArr: Sort[];
+  
+  if (Array.isArray(sorts)) {
+    sortArr = sorts;
+  } else {
+    const s = evaluate(context, sorts);
+    if (Array.isArray(s)) sortArr = s;
+    else if (typeof s === 'string') sortArr = [{ v: s }];
+  }
+
+  if (sortArr) {
+    for (let i = 0; i < sortArr.length; i++) {
+      const by = sortArr[i];
+      if (typeof by === 'string') {
+        if (by[0] === '-') sortArr[i] = { by: by.substr(1), desc: true };
+        else sortArr[i] = { by };
+      }
+    }
+  }
+
+  return sortArr;
+}
+
 export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context): DataSet {
   if (!ds || !Array.isArray(ds.value)) return ds;
   if (!context) context = new Root(ds.value);
@@ -205,15 +228,7 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
     });
   }
 
-  let sortArr: Sort[];
-
-  if (Array.isArray(sorts)) {
-    sortArr = sorts;
-  } else {
-    const s = evaluate(context, sorts);
-    if (Array.isArray(s)) sortArr = s;
-    else if (typeof s === 'string') sortArr = [{ v: s }];
-  }
+  const sortArr = mungeSort(context, sorts);  
 
   if (sortArr && sortArr.length) {
     const dirs: boolean[] = sortArr.map(s => {
