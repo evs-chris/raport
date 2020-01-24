@@ -275,16 +275,20 @@ interface GroupCache {
   [group: string]: any[];
 }
 
-function group(arr: any[], groups: Array<ValueOrExpr>, ctx: Context): Group[] {
+function group(arr: any[], groups: Array<ValueOrExpr>, ctx: Context, level: number = 0): Group[] {
   const cache: GroupCache = {};
   const res: Group[] = [];
+  const order: string[] = [];
   for (const e of arr) {
     const g = `${evaluate(extend(ctx, { value: e }), groups[0])}`;
-    const a = cache[g] || (cache[g] = []);
-    a.push(e);
+    if (!cache[g]) {
+      order.push(g);
+      cache[g] = [];
+    }
+    cache[g].push(e);
   }
 
-  for (const k in cache) {
+  for (const k of order) {
     res.push({ group: k, grouped: groups.length - 1, value: groups.length > 1 ? group(cache[k], groups.slice(1), ctx, level + 1) : cache[k], all: cache[k], level });
   }
 
