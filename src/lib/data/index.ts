@@ -176,12 +176,18 @@ export function safeGet(root: Context, path: string): any {
   return o;
 }
 
-export function evaluate(root: Context|{ context: Context }, value: ValueOrExpr): any {
-  if (!('value' in root)) root = root.context;
-  if (typeof value === 'string') value = root.root.exprs[value] || (root.root.exprs[value] = parse(value));
-  if (value && 'r' in value) return safeGet(root, value.r);
+export function evaluate(value: ValueOrExpr): any;
+export function evaluate(root: Context|{ context: Context }, value: ValueOrExpr): any;
+export function evaluate(root: ValueOrExpr|Context|{ context: Context }, value?: ValueOrExpr): any {
+  if (arguments.length === 1) {
+    value = root as ValueOrExpr;
+    root = new Root();
+  }
+  if (typeof root === 'object' && !('value' in root)) root = (root as { context: Context }).context;
+  if (typeof value === 'string') value = (root as Context).root.exprs[value] || ((root as Context).root.exprs[value] = parse(value));
+  if (value && 'r' in value) return safeGet(root as Context, value.r);
   else if (value && 'v' in value) return value.v;
-  else if (value && 'op' in value) return applyOperator(root, value);
+  else if (value && 'op' in value) return applyOperator(root as Context, value);
 }
 
 const operators: Operator[] = [];

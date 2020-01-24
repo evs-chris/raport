@@ -4,6 +4,7 @@
 
 * Added support for prefixing sort expressions with a `'-'` to specify that the sort should be descending rather than the default ascending e.g. `-some.path` and `-(some expr)` are equivalent to `{ by: 'some.path', desc: true }` and `{ by: '(some expr)', desc: true }`, respectively.
 * Added built-in aggregate ops for `min`/`max` and `first`/`nth`/`last`.
+* Allow `evaluate` to create a context if one is not provided.
 
 
 ## 0.1.0
