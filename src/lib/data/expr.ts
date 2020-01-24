@@ -1,12 +1,11 @@
-import { Value, Operation, AggregateOperation, FunctionOperation } from "./index";
+import { Value, Operation } from "./index";
 
 type Result<T> = Ok<T>|Fail<T>;
 type Ok<T> = [T];
 type Fail<T> = [];
 const Fail: Fail<never> = [];
 
-function seekUntil(input: string, offset: number, target: string, end): Result<number> {
-  let j: number;
+function seekUntil(input: string, offset: number, target: string, end: boolean): Result<number> {
   for (let i = offset; i < input.length; i++) {
     if (~target.indexOf(input[i])) return [i - offset];
   }
@@ -198,14 +197,15 @@ function readOperation(input: string, offset: number): ParseResult<Operation> {
   let locals: ParseResult<Value[]>;
 
   if (input[c] === '+') {
-    source = readValue(input, ++c);
+    c += seekWhile(input, c + 1, space)[0] + 1;
+    source = readValue(input, c);
     if (source === Fail) return Fail;
     c += source[1];
     c += seekWhile(input, c, space)[0];
   }
 
   if (input[c] === '=' && input[c + 1] === '>') {
-    c += 2;
+    c += seekWhile(input, c + 2, space)[0] + 2;
     apply = readValue(input, c);
     if (apply === Fail) return Fail;
     c += apply[1];
@@ -213,8 +213,7 @@ function readOperation(input: string, offset: number): ParseResult<Operation> {
   }
 
   if ((source || apply) && input[c] === '&' && input[c + 1] === '(') {
-    c += 2;
-    c += seekWhile(input, c, space)[0];
+    c += seekWhile(input, c + 2, space)[0] + 2;
     locals = readList(input, c, readValue);
     if (locals === Fail) return Fail;
     c += locals[1];
