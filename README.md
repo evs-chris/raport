@@ -184,6 +184,11 @@ There are a few operations built-in to the library to handle common expressions:
 | `avg` | aggregate | `number` | This will compute the average of the given application of source. |
 | `sum` | aggregate | `number` | This will compute the sum of the given application of source. |
 | `count` | aggregate | `number` | This will count the values in the given source. |
+| `min` | aggregate | `number` | This will return the smallest application in the given source. |
+| `max` | aggregate | `number` | This will return the largets application in the given source. |
+| `first` | aggregate | `any` | This will return the first application in the given source. |
+| `nth` | aggregate `number` | This will return the nth application in the given source, using the 1-based index specified by the parameter. |
+| `last` | aggregate | This will return the last application in the given source. |
 | `map` | aggregate | `array` | This will map the given source into a new array composed of the application for each value. |
 | `unique` | aggregate | `array` | This will create a new array from the given source ensuring that the same value does not appear more than once using `indexOf` |
 | `join` | aggregate `string` | `string` | This will join the values in the given source using the first non-local argument. |

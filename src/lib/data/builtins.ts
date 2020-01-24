@@ -376,8 +376,8 @@ registerOperator<SUM>({
 }, {
   type: 'aggregate',
   names: ['count'],
-  args: 1,
-  types: [['boolean']],
+  args: 0,
+  types: [],
   result: 'number',
   category: ['aggregate', 'function'],
   init() { return { value: 0 } },
@@ -387,6 +387,51 @@ registerOperator<SUM>({
   final({ value }: SUM): number {
     return value;
   }
+});
+
+type MaybeNum = { value?: number };
+registerOperator<MaybeNum>({
+  type: 'aggregate',
+  names: ['min', 'max'],
+  args: 0,
+  types: [],
+  result: 'number',
+  category: ['aggregate', 'function'],
+  init() { return {}; },
+  apply(name: string, state: MaybeNum, value: any) {
+    if (!isNaN(value) && (state.value == null || (name === 'min' ? value < state.value : value > state.value))) state.value = value;
+  },
+  final({ value }: MaybeNum): number {
+    return value;
+  }
+});
+
+type Nth = { value?: any, nth?: number, iter?: number; };
+registerOperator<Nth>({
+  type: 'aggregate',
+  names: ['first', 'nth', 'last'],
+  args: 1,
+  types: [['number']],
+  result: 'any',
+  category: ['aggregate', 'function'],
+  init(args: any[]) { return { nth: args[0] }; },
+  apply(name: string, state: Nth, value: any) {
+    if (name === 'first') {
+      if (!state.iter) {
+        state.iter = 1;
+        state.value = value;
+      }
+    } else if (name === 'last') {
+      state.value = value;
+    } else if (name === 'nth') {
+      if (!state.iter) state.iter = 1;
+      if (state.iter === state.nth) state.value = value;
+      state.iter++;
+    }
+  },
+  final({ value }: Nth): any {
+    return value;
+   }
 });
 
 type MAP = { value: any[] };
