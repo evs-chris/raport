@@ -103,7 +103,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   }
 
   if (w.footer) {
-    const c = extend(ctx, { special: { source: group && group.grouped ? group.all : arr } });
+    const c = extend(ctx, { special: { source: group && group.grouped ? group.all : arr, level: group.level, grouped: group.grouped } });
 
     if (group) {
       if (w.groupEnds && w.groupEnds[group.grouped]) r = renderWidget(w.footer, c, { x: 0, y, availableX: placement.availableX });

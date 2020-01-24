@@ -97,6 +97,7 @@ export interface Group<R = any> {
   group: string;
   value: R;
   all: R[];
+  level: number;
 }
 
 // eval
@@ -264,7 +265,7 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
   if (!Array.isArray(groups)) groups = evaluate(context, groups);
 
   if (Array.isArray(groups) && groups.length) {
-    return { value: { schema: ds.schema, grouped: groups.length, value: group(values, groups, context), all: values } };
+    return { value: { schema: ds.schema, grouped: groups.length, level: 0, value: group(values, groups, context, 1), all: values } };
   }
 
   return { schema: ds.schema, value: values };
@@ -284,7 +285,7 @@ function group(arr: any[], groups: Array<ValueOrExpr>, ctx: Context): Group[] {
   }
 
   for (const k in cache) {
-    res.push({ group: k, grouped: groups.length - 1, value: groups.length > 1 ? group(cache[k], groups.slice(1), ctx) : cache[k], all: cache[k] });
+    res.push({ group: k, grouped: groups.length - 1, value: groups.length > 1 ? group(cache[k], groups.slice(1), ctx, level + 1) : cache[k], all: cache[k], level });
   }
 
   return res;
