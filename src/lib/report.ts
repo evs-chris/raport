@@ -1,4 +1,4 @@
-import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, DataSet, Root, Context, extend, evaluate, filter, Type } from './data/index';
+import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, Root, Context, extend, evaluate, filter } from './data/index';
 
 import { renderWidget, RenderContext, RenderResult, RenderState } from './render/index';
 import { styleClass } from './render/style';
@@ -282,7 +282,7 @@ function runPage(report: Page, context: Context): string {
   const footTop = size.height - 2 * size.margin[0] - footSize;
 
   pages.forEach((p, i) => {
-    let n = `<div${styleClass(ctx, ['page'], [`position:absolute;height:${size.height - 2 * size.margin[0]}rem;width:${size.width - 2 * size.margin[1]}rem;left:${size.margin[1]}rem;overflow:hidden;`, ''], `top:${i * size.height + size.margin[0]}rem;`, 'p')}>\n`;
+    let n = `<div class="page-back pb${i}"><div${styleClass(ctx, ['page', `ps${i}`], ['', ''], '', 'p')}>\n`;
     context.special.page = i + 1;
     if (report.header) {
       const r = renderWidget(report.header, ctx, { x: 0, y: 0 });
@@ -293,11 +293,26 @@ function runPage(report: Page, context: Context): string {
       const r = renderWidget(report.footer, ctx, { x: 0, y: footTop });
       n += r.output + '\n';
     }
-    n += '\n</div>';
+    n += '\n</div></div>';
     pages[i] = n;
   });
 
-  return `<html style="font-size:100%;margin:0;padding:0;"><head><style>@page { size: ${size.width}em ${size.height}em; }${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}</style></head><body style="font-size:0.83rem;margin:0;padding:0;${size ? `width:${size.width}rem;` : ''}">\n${pages.reduce((a, c) => a + c, '')}</body></html>`;
+  return `<html style="font-size:100%;margin:0;padding:0;"><head><style>
+    .page { width: ${size.width - 2 * size.margin[1]}rem; height: ${size.height - 2 * size.margin[0]}rem; position: absolute; overflow: hidden; left: ${size.margin[1]}rem; top: ${size.margin[0]}rem; }
+    .page-back { width: ${size.width}rem; height: ${size.height}rem; }
+    @media screen {
+      body { background-color: #999; display: flex; flex-direction: column; align-items: center; }
+      .page-back { background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); position: relative; overflow: hidden; box-sizing: border-box; margin: 0.5em; }
+    }
+    @media print {
+      body { font-size: 0.83rem; margin: 0; padding: 0; ${size ? `width:${size.width}rem;` : ''}background-color: none; display: block; height: ${pages.length * size.height}rem }
+      .page-back { position: absolute; box-shadow: none; background-color: none; margin: 0; padding: 0; left: 0rem; }
+      ${pages.map((p, i) => `.pb${i} { top: ${i * size.height}rem; }`).join('')}
+    }
+    @page {
+      size: ${size.width}em ${size.height}em;
+    }${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}
+  </style></head><body>\n${pages.reduce((a, c) => a + c, '')}</body></html>`;
 }
 
 function runFlow(report: Flow, context: Context): string {
