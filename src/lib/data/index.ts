@@ -340,7 +340,7 @@ function applyOperator(root: Context, filter: Operation): any {
 export type Reference = { r: string };
 
 export type ValueOrExpr = string|Value;
-export type Value = Reference | Literal | Operation;
+export type Value = Reference | Literal | Operation | ParseError;
 
 export function isValueOrExpr(o: any): o is ValueOrExpr {
   return typeof o === 'string' || (typeof o === 'object' && o && (
@@ -352,6 +352,12 @@ export function isValueOrExpr(o: any): o is ValueOrExpr {
 
 export interface Literal {
   v: any;
+}
+
+export interface ParseError extends Literal {
+  v: '';
+  l: number;
+  m: string;
 }
 
 export type Parameter<T = any> = ParameterBase & T;
