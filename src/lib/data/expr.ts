@@ -37,7 +37,7 @@ function readLiteral(input: string, offset: number): ParseResult<Literal> {
   if (input.substr(offset, 4) === 'true') return [{ v: true }, 4];
   if (input.substr(offset, 4) === 'null') return [{ v: null }, 4];
   if (input.substr(offset, 5) === 'false') return [{ v: false }, 5];
-  if (input.substr(offset, 4) === 'null') return [{ v: undefined }, 4];
+  if (input.substr(offset, 9) === 'undefined') return [{ v: undefined }, 9];
   
   let p: ParseResult<Literal>;
   const fns = [readNumber, readString];
@@ -77,7 +77,9 @@ function readNumber(input: string, offset: number): ParseResult<{ v: number }> {
   return [{ v: parseFloat(num) }, c - offset];
 }
 
+const escapes = { b: '\b', f: '\f', n: '\n', r: '\r', t: '\t', v: '\v', 0: '\0' };
 const space = ' \r\n\t';
+const hex = '0123456789abcdefABCDEF';
 function readString(input: string, offset: number): ParseResult<{ v: string }> {
   const q = input[offset];
   let p: Result<string>;
@@ -101,7 +103,20 @@ function readString(input: string, offset: number): ParseResult<{ v: string }> {
       if (input[c] === q) return [{ v: str }, ++c - offset];
       if (input[c] === '\\') {
         c++
-        str += input[c++];
+        const n = input[c++];
+        if (n in escapes) str += escapes[n];
+        else if (n === 'x') {
+          const x = input[c] + input[c + 1];
+          if (~hex.indexOf(x[0]) && ~hex.indexOf[1]) {
+            str += String.fromCharCode(parseInt(x, 16));
+            c += 2;
+          } else return Fail;
+        } else if (n === 'u') {
+          const u = input.substr(c, 4);
+          for (let i = 0; i < 4; i++) if (!~hex.indexOf(u[i])) return Fail;
+          str += String.fromCharCode(parseInt(u, 16));
+          c += 4;
+        } else str += n;
       }
     }
   }
@@ -212,7 +227,7 @@ function readOperation(input: string, offset: number): ParseResult<Operation> {
     c += seekWhile(input, c, space)[0];
   }
 
-  if ((source || apply) && input[c] === '&' && input[c + 1] === '(') {
+  if (input[c] === '&' && input[c + 1] === '(') {
     c += seekWhile(input, c + 2, space)[0] + 2;
     locals = readList(input, c, readValue);
     if (locals === Fail) return Fail;

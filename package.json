@@ -6,18 +6,30 @@
   "types": "./lib/index.d.ts",
   "module": "./lib/index.js",
   "license": "MIT",
-  "keywords": ["report", "pdf", "html", "delimited"],
+  "keywords": [
+    "report",
+    "pdf",
+    "html",
+    "delimited"
+  ],
   "devDependencies": {
     "ractive": "^1.3",
     "rollup": "^1.21",
     "rollup-plugin-sourcemaps": "^0.4.2",
-    "typescript": "^3.6"
+    "typescript": "^3.6",
+    "eslint": "^6",
+    "qunit": "^2.9",
+    "@types/qunit": "^2.9"
   },
   "scripts": {
-    "build": "tsc; rollup -c; rm -r lib; cp -r build/lib lib",
-    "clean": "rm -r build; rm -r lib"
+    "build": "tsc -p config/lib.tsconfig.json; rollup -c config/lib.rollup.config.js; rm -r lib; cp -r build/lib lib",
+    "dev": "bash -c \"tsc\ntsc -w &\nrollup -w -c config/dev.rollup.config.js\"",
+    "clean": "rm -r build; rm -r lib",
+    "test": "tsc -p config/test.tsconfig.json; rollup -c config/test.rollup.config.js; qunit build/test.js"
   },
   "files": [
-    "lib", "README.md", "CHANGELOG.md"
+    "lib",
+    "README.md",
+    "CHANGELOG.md"
   ]
 }

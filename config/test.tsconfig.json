@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "declaration": true,
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "suppressImplicitAnyIndexErrors": false,
+    "strictNullChecks": false,
+    "outDir": "../build/test",
+    "lib": [
+      "dom",
+      "es2017"
+    ],
+    "preserveWatchOutput": true,
+    "skipLibCheck": true
+  },
+  "compileOnSave": false,
+  "include": [
+    "../test", "../src"
+  ],
+  "exclude": [
+    "../src/play"
+  ]
+}
+
