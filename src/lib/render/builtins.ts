@@ -7,7 +7,7 @@ import { styleClass, style, styleFont } from './style';
 // TODO: add designer stuff to widgets and register entire widgets in one go rather than split up
 // TODO: propsheet descriptors as part of widget def
 
-registerRenderer<Label>('label', (w, ctx, placement, state) => {
+registerRenderer<Label>('label', (w, ctx, placement) => {
   addStyle(ctx, 'label', `.label { position: absolute; box-sizing: border-box; }`);
   const str = (Array.isArray(w.text) ? w.text : [w.text]).map(v => {
     if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font), ''])}>${evaluate(ctx, v.text)}</span>`;
@@ -83,7 +83,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 
   if (!state || !state.state || state.state.part !== 'footer') {
     for (let i = (state && state.state && state.state.current) || 0; i < arr.length; i++) {
-      const c = extend(ctx, { value: arr[i] });
+      const c = extend(ctx, { value: arr[i], special: { index: i, value: arr[i] } });
 
       if (group && group.grouped) {
         const s: RenderState<RepeatState> = (state && state.child) || { offset: 0, state: { current: 0, src: arr[i], part: 'group' } };
@@ -119,7 +119,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y };
 }, { container: true });
 
-registerRenderer<Image>('image', (w, ctx, placement, state) => {
+registerRenderer<Image>('image', (w, ctx, placement) => {
   addStyle(ctx, 'image', `.image { position: absolute; }`);
   return `<img src="${evaluate(ctx, w.url)}"${styleClass(ctx, ['image'], style(w, placement, ctx))} />`;
 });
