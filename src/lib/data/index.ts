@@ -20,8 +20,9 @@ export class CachedDataSource<R = any> implements DataSource<any, R> {
   _schema: Schema;
   _value: R;
 
-  constructor(value: R, schama?: Schema) {
+  constructor(value: R, schema?: Schema) {
     this._value = value;
+    this._schema = schema;
   }
 
   values(): Promise<DataSet<R>> { return Promise.resolve({ schema: this._schema, value: this._value }); }
@@ -63,14 +64,9 @@ export interface SortBy {
 }
 
 type Operator<T = any> = AggregateOperator<T> | ValueOperator | CheckedOperator;
-export type OperatorCategory = 'format'|'binary'|'aggregate'|'function'|'unary'|'ternary';
 
 export interface BaseOperator {
   names: string[];
-  args: number|'any';
-  types: Type[][];
-  result: Type;
-  category?: OperatorCategory[];
 }
 export interface ValueOperator extends BaseOperator {
   type: 'value';
@@ -297,7 +293,7 @@ function group(arr: any[], groups: Array<ValueOrExpr>, ctx: Context, level: numb
 
 function applyOperator(root: Context, filter: Operation): any {
   const op = opMap[filter.op];
-  let state;
+  let state: any;
   // if the operator doesn't exist, skip
   if (!op) return true;
 
@@ -358,10 +354,10 @@ export interface Literal {
   v: any;
 }
 
-export type Parameter<T = {}> = ParameterBase<T> & T;
-export interface ParameterBase<T = {}> {
+export type Parameter<T = any> = ParameterBase & T;
+export interface ParameterBase {
   name: string;
-  type: Type;
+  type?: Type;
   required?: boolean;
 }
 
