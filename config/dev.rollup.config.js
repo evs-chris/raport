@@ -5,7 +5,8 @@ export default [{
   output: {
     file: 'play/index.js',
     format: 'iife'
-  }
+  },
+  watch: { clearScreen: false }
 }, {
   input: 'build/lib/index.js',
   output: {
@@ -16,5 +17,6 @@ export default [{
   },
   plugins: [
     sourcemaps()
-  ]
+  ],
+  watch: { clearScreen: false }
 }];
