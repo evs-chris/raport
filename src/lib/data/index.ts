@@ -326,10 +326,10 @@ function applyOperator(root: Context, filter: Operation): any {
     args = (agg.args || []).map(a => evaluate(root, a));
     state = op.init(args);
 
-    arr.forEach(e => {
-      const ctx = apply || agg.locals ? extend(root, { value: e }) : root;
+    arr.forEach((e, i) => {
+      const ctx = apply || agg.locals ? extend(root, { value: e, special: { index: i, value: e } }) : root;
       const locals: any[] = agg.locals ? agg.locals.map(e => evaluate(ctx, e)) : [];
-      op.apply(agg.op, state, apply ? evaluate(extend(root, { value: e }), apply) : e, locals, root);
+      op.apply(agg.op, state, apply ? evaluate(ctx, apply) : e, locals, root);
     });
   }
 
