@@ -242,7 +242,7 @@ registerOperator<AVG>({
   type: 'aggregate',
   names: ['avg'],
   init() { return { count: 0, total: 0 }; },
-  apply(_name: string, state: AVG, value: any) {
+  apply(_name: string, state: AVG, _base: any, value: any) {
     state.count++;
     if (!isNaN(value)) state.total += +value;
   },
@@ -256,7 +256,7 @@ registerOperator<SUM>({
   type: 'aggregate',
   names: ['sum'],
   init() { return { value: 0 } },
-  apply(_name: string, state: SUM, value: any) {
+  apply(_name: string, state: SUM, _base: any, value: any) {
     if (!isNaN(value)) state.value += +value;
   },
   final({ value }: SUM) {
@@ -266,7 +266,7 @@ registerOperator<SUM>({
   type: 'aggregate',
   names: ['count'],
   init() { return { value: 0 } },
-  apply(_name: string, state: SUM, value: any) {
+  apply(_name: string, state: SUM, _base: any, value: any) {
     if (value !== false) state.value++;
   },
   final({ value }: SUM): number {
@@ -279,7 +279,7 @@ registerOperator<MaybeNum>({
   type: 'aggregate',
   names: ['min', 'max'],
   init() { return {}; },
-  apply(name: string, state: MaybeNum, value: any) {
+  apply(name: string, state: MaybeNum, _base: any, value: any) {
     if (!isNaN(value) && (state.value == null || (name === 'min' ? value < state.value : value > state.value))) state.value = value;
   },
   final({ value }: MaybeNum): number {
@@ -292,7 +292,7 @@ registerOperator<Nth>({
   type: 'aggregate',
   names: ['first', 'nth', 'last'],
   init(args: any[]) { return { nth: args[0] }; },
-  apply(name: string, state: Nth, value: any) {
+  apply(name: string, state: Nth, _base: any, value: any) {
     if (name === 'first') {
       if (!state.iter) {
         state.iter = 1;
@@ -316,7 +316,7 @@ registerOperator<MAP>({
   type: 'aggregate',
   names: ['map'],
   init() { return { value: [] }; },
-  apply(_name: string, state: MAP, value: any) {
+  apply(_name: string, state: MAP, _base: any, value: any) {
     state.value.push(value);
   },
   final({ value }: MAP): any[] {
@@ -326,7 +326,7 @@ registerOperator<MAP>({
   type: 'aggregate',
   names: ['unique'],
   init() { return { value: [] }; },
-  apply(_name: string, state: MAP, value: any) {
+  apply(_name: string, state: MAP, _base: any, value: any) {
     if (!~state.value.indexOf(value)) state.value.push(value);
   },
   final({ value }: MAP): any[] {
@@ -339,7 +339,7 @@ registerOperator<JOIN>({
   type: 'aggregate',
   names: ['join'],
   init(args?: any[]) { return { value: [], join: (args || [])[0] }; },
-  apply(_name: string, state: JOIN, value: any) {
+  apply(_name: string, state: JOIN, _base: any, value: any) {
     state.value.push(value);
   },
   final({ value, join }: JOIN): string {
