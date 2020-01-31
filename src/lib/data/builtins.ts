@@ -334,6 +334,25 @@ registerOperator<MAP>({
   }
 });
 
+type MapBy = { bys: any[], values: any[] };
+registerOperator<MapBy>({
+  type: 'aggregate',
+  names: ['unique-by'],
+  init() { return { bys: [], values: [] }; },
+  apply(_name: string, state: MapBy, base: any, value: any) {
+    if (!~state.bys.indexOf(value)) {
+      state.bys.push(value);
+      state.values.push(base);
+    }
+  },
+  final({ values }: MapBy): any[] {
+    return values;
+  },
+  check(final: any[], base: any) {
+    return !!~final.indexOf(base);
+  }
+});
+
 type JOIN = { value: any[], join: string };
 registerOperator<JOIN>({
   type: 'aggregate',

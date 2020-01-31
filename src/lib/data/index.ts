@@ -84,6 +84,7 @@ export interface AggregateOperator<T = any> extends BaseOperator {
   init(args?: any[]): T;
   apply(name: string, state: T, base: any, value: any, locals?: any[], context?: Context): any;
   final(state: T): any;
+  check?: (final: any, base: any, value: any, locals?: any[], context?: Context) => any;
 }
 
 export type CheckResult = 'continue'|{ result: any }|{ skip: number };
@@ -220,14 +221,22 @@ function mungeSort(context: Context, sorts: Sort[]|ValueOrExpr): Sort[] {
   return sortArr;
 }
 
+interface OpAggregateMap {
+  map: Array<[Operation, any]>;
+}
+
 export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context): DataSet {
   if (!ds || !Array.isArray(ds.value)) return ds;
-  if (!context) context = new Root(ds.value);
+  if (!context) context = new Root(ds.value, { special: { source: ds } });
+  else context = extend(context, { special: { source: ds.value } });
+  const cache = { ops: { map: [] } };
   const values = filter ? [] : ds.value.slice();
 
   if (filter) {
-    ds.value.forEach(row => {
-      if (!!evaluate(extend(context, { value: row }), filter)) values.push(row);
+    let flt: Value = typeof filter === 'string' ? parse(filter) : filter;
+    if ('m' in flt) flt = { v: true };
+    ds.value.forEach((row, index) => {
+      if (!!evaluate(extend(context, { value: row, special: { value: row, index }, cache }), flt)) values.push(row);
     });
   }
 
@@ -291,50 +300,67 @@ function group(arr: any[], groups: Array<ValueOrExpr>, ctx: Context, level: numb
   return res;
 }
 
-function applyOperator(root: Context, filter: Operation): any {
-  const op = opMap[filter.op];
-  let state: any;
+function applyOperator(root: Context, operation: Operation): any {
+  const op = opMap[operation.op];
   // if the operator doesn't exist, skip
   if (!op) return true;
 
   let args: any[];
   if (op.type === 'checked') {
     args = [];
-    const flts = filter.args || [];
+    const flts = operation.args || [];
     for (let i = 0; i < flts.length; i++) {
       const a = flts[i];
       const arg = evaluate(root, a);
-      const res = op.checkArg(filter.op, i, flts.length - 1, arg, root);
+      const res = op.checkArg(operation.op, i, flts.length - 1, arg, root);
       if (res === 'continue') args.push(arg);
       else if ('skip' in res) {
         i += res.skip;
         for (let c = 0; c < res.skip; c++) args.push(undefined);
       } else if ('result' in res) return res.result;
     }
+
+    return op.apply(operation.op, args, root);
   } else if (op.type === 'value') {
-    args = (filter.args || []).map(a => evaluate(root, a));
+    args = (operation.args || []).map(a => evaluate(root, a));
+    return op.apply(operation.op, args, root);
   } else {
-    const agg = filter as AggregateOperation;
-    let arr: any[] = evaluate(root, agg.source);
-    let apply = agg.apply;
+    const agg = operation as AggregateOperation;
+    if (!agg.source && root.cache) {
+      let fin = root.cache.ops.map.find(e => e[0] === agg);
+      if (fin) {
+        fin = fin[1];
+      } else {
+        fin = applyAggregate(root, agg, op);
+        root.cache.ops.map.push([agg, fin]);
+      }
+      if (op.check) return op.check(fin, root.value, agg.apply && evaluate(root, agg.apply), agg.locals && agg.locals.map(e => evaluate(root, e)), root);
+      else return fin;
+    } else return applyAggregate(root, agg, op);
+  }
+}
 
-    if (!Array.isArray(arr)) {
-      arr = evaluate(root, { r: '@source' });
-      if (!Array.isArray(arr)) arr = [];
-    }
+function applyAggregate(root: Context, agg: AggregateOperation, op: AggregateOperator): any {
+  let arr: any[] = evaluate(root, agg.source);
+  let apply = agg.apply;
 
-    args = (agg.args || []).map(a => evaluate(root, a));
-    state = op.init(args);
-
-    arr.forEach((e, i) => {
-      const ctx = apply || agg.locals ? extend(root, { value: e, special: { index: i, value: e } }) : root;
-      const locals: any[] = agg.locals ? agg.locals.map(e => evaluate(ctx, e)) : [];
-      op.apply(agg.op, state, e, apply ? evaluate(ctx, apply) : e, locals, root);
-    });
+  if (arr && typeof arr === 'object' && 'value' in arr) arr = (arr as any).value;
+  if (!Array.isArray(arr)) {
+    arr = evaluate(root, { r: '@source' });
+    if (arr && typeof arr === 'object' && 'value' in arr) arr = (arr as any).value;
+    if (!Array.isArray(arr)) arr = [];
   }
 
-  if (op.type === 'checked' || op.type === 'value') return op.apply(filter.op, args, root);
-  else return op.final(state);
+  const args = (agg.args || []).map(a => evaluate(root, a));
+  const state = op.init(args);
+
+  arr.forEach((e, i) => {
+    const ctx = apply || agg.locals ? extend(root, { value: e, special: { index: i, value: e } }) : root;
+    const locals: any[] = agg.locals ? agg.locals.map(e => evaluate(ctx, e)) : [];
+    op.apply(agg.op, state, e, apply ? evaluate(ctx, apply) : e, locals, root);
+  });
+
+  return op.final(state);
 }
 
 export type Reference = { r: string };
@@ -371,12 +397,16 @@ export interface ParameterMap {
   [name: string]: any;
 }
 
+export type ContextCache = {
+  ops: OpAggregateMap;
+} & any;
 export interface Context {
   path: string;
   root: RootContext;
   parent?: Context;
   special?: ParameterMap;
   value: any;
+  cache?: ContextCache;
 }
 
 export interface RootContext extends Context {
@@ -395,12 +425,14 @@ export class Root implements RootContext {
   parent: undefined;
   exprs = {};
   path: '';
+  cache?: ContextCache;
 
   constructor(root: any = {}, opts?: ExtendOptions & { parameters?: ParameterMap }) {
     this.value = root;
     if (opts) {
       Object.assign(this.parameters, opts.parameters);
       Object.assign(this.special, opts.special);
+      this.cache = opts.cache;
     }
   }
 }
@@ -417,6 +449,7 @@ export function join(context: Context, path: string): Context {
 export interface ExtendOptions {
   value?: any;
   special?: any;
+  cache?:  ContextCache;
 }
 
 export function extend(context: Context, opts: ExtendOptions): Context {
@@ -425,7 +458,8 @@ export function extend(context: Context, opts: ExtendOptions): Context {
     root: context.root,
     path: '',
     value: 'value' in opts ? opts.value : context.value,
-    special: opts.special || {}
+    special: opts.special || {},
+    cache: opts.cache
   };
 }
 
