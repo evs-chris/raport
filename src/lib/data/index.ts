@@ -175,13 +175,16 @@ export function safeGet(root: Context, path: string): any {
 }
 
 export function evaluate(value: ValueOrExpr): any;
-export function evaluate(root: Context|{ context: Context }, value: ValueOrExpr): any;
-export function evaluate(root: ValueOrExpr|Context|{ context: Context }, value?: ValueOrExpr): any {
+export function evaluate(root: Context|{ context: Context }|any, value: ValueOrExpr): any;
+export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, value?: ValueOrExpr): any {
   if (arguments.length === 1) {
     value = root as ValueOrExpr;
     root = new Root();
   }
-  if (typeof root === 'object' && !('value' in root)) root = (root as { context: Context }).context;
+  if (!isContext(root)) {
+    if (root && 'context' in root && isContext(root.context)) root = root.context;
+    else root = new Root(root);
+  }
   if (typeof value === 'string') value = (root as Context).root.exprs[value] || ((root as Context).root.exprs[value] = parse(value));
   if (value && 'r' in value) return safeGet(root as Context, value.r);
   else if (value && 'v' in value) return value.v;
@@ -400,6 +403,9 @@ export interface ParameterMap {
   [name: string]: any;
 }
 
+export function isContext(v: any): v is Context {
+  return typeof v === 'object' && typeof v.path === 'string' && typeof v.root == 'object' && 'value' in v && (typeof v.parent === 'object' || v.root === v);
+}
 export type ContextCache = {
   ops: OpAggregateMap;
 } & any;
@@ -427,7 +433,7 @@ export class Root implements RootContext {
   special: ParameterMap = {};
   parent: undefined;
   exprs = {};
-  path: '';
+  path: '' = '';
   cache?: ContextCache;
 
   constructor(root: any = {}, opts?: ExtendOptions & { parameters?: ParameterMap }) {
