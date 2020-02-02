@@ -63,7 +63,7 @@ export interface SortBy {
   desc?: ValueOrExpr|boolean;
 }
 
-type Operator<T = any> = AggregateOperator<T> | ValueOperator | CheckedOperator;
+export type Operator<T = any> = AggregateOperator<T> | ValueOperator | CheckedOperator;
 
 export interface BaseOperator {
   names: string[];
@@ -188,12 +188,15 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }, value?:
   else if (value && 'op' in value) return applyOperator(root as Context, value);
 }
 
-const operators: Operator[] = [];
 const opMap: { [key: string]: Operator } = {};
 export function registerOperator<T = any>(...ops: Operator<T>[]) {
   for (const op of ops) {
-    operators.push(op);
     for (const name of op.names) opMap[name] = op;
+  }
+}
+export function unregisterOperator<T = any>(...ops: Operator<T>[]) {
+  for (const op of ops) {
+    for (const name of op.names) delete opMap[name];
   }
 }
 
@@ -466,4 +469,7 @@ export function extend(context: Context, opts: ExtendOptions): Context {
 export const formats: { [name: string]: (value: any, args?: any[]) => string } = {};
 export function registerFormat<T = any>(name: string, format: (value: T, args?: any[]) => string) {
   formats[name] = format;
+}
+export function unregisterFormat(name: string) {
+  delete formats[name];
 }
