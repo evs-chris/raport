@@ -87,7 +87,7 @@ export interface AggregateOperator<T = any> extends BaseOperator {
   check?: (final: any, base: any, value: any, locals?: any[], context?: Context) => any;
 }
 
-export type CheckResult = 'continue'|{ result: any }|{ skip: number };
+export type CheckResult = 'continue'|{ result: any }|{ skip: number, value?: any };
 
 export interface Group<R = any> {
   grouped: number;
@@ -322,7 +322,7 @@ function applyOperator(root: Context, operation: Operation): any {
       if (res === 'continue') args.push(arg);
       else if ('skip' in res) {
         i += res.skip;
-        for (let c = 0; c < res.skip; c++) args.push(undefined);
+        if ('value' in res) args.push(res.value);
       } else if ('result' in res) return res.result;
     }
 
