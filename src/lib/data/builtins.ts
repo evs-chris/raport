@@ -291,7 +291,7 @@ type Nth = { value?: any, nth?: number, iter?: number; };
 registerOperator<Nth>({
   type: 'aggregate',
   names: ['first', 'nth', 'last'],
-  init(args: any[]) { return { nth: args[0] }; },
+  init(_name, args: any[]) { return { nth: args[0] }; },
   apply(name: string, state: Nth, _base: any, value: any) {
     if (name === 'first') {
       if (!state.iter) {
@@ -357,7 +357,7 @@ type JOIN = { value: any[], join: string };
 registerOperator<JOIN>({
   type: 'aggregate',
   names: ['join'],
-  init(args?: any[]) { return { value: [], join: (args || [])[0] }; },
+  init(_name, args?: any[]) { return { value: [], join: (args || [])[0] }; },
   apply(_name: string, state: JOIN, _base: any, value: any) {
     state.value.push(value);
   },

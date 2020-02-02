@@ -81,7 +81,7 @@ export interface CheckedOperator extends BaseOperator {
 
 export interface AggregateOperator<T = any> extends BaseOperator {
   type: 'aggregate';
-  init(args?: any[]): T;
+  init(name: string, args?: any[]): T;
   apply(name: string, state: T, base: any, value: any, locals?: any[], context?: Context): any;
   final(state: T): any;
   check?: (final: any, base: any, value: any, locals?: any[], context?: Context) => any;
@@ -358,7 +358,7 @@ function applyAggregate(root: Context, agg: AggregateOperation, op: AggregateOpe
   }
 
   const args = (agg.args || []).map(a => evaluate(root, a));
-  const state = op.init(args);
+  const state = op.init(agg.op, args);
 
   arr.forEach((e, i) => {
     const ctx = apply || agg.locals ? extend(root, { value: e, special: { index: i, value: e } }) : root;
