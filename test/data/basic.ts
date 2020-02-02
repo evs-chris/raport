@@ -1,18 +1,23 @@
 import { Root, evaluate, extend } from '../../src/lib/index';
+import { isContext } from '../../src/lib/data/index';
 
 const q = QUnit;
 
 q.module('data/basic');
 
+q.test(`contexts are safely detected`, t => {
+  t.ok(isContext(new Root()), 'Root is detected as context');
+  t.notOk(isContext({}), 'empty object is not context');
+  t.notOk(isContext({ context: {} }), 'context containing object is not context');
+  t.notOk(isContext({ value: {}, path: '' }), 'similar object is not context');
+});
+
 q.test('simple data access', t => {
-  const data = new Root();
-  data.value.foo = 'hello';
-  t.equal(evaluate(data, 'foo'), 'hello');
+  t.equal(evaluate({ foo: 'hello' }, 'foo'), 'hello');
 });
 
 q.test('safe data access', t => {
-  const data = new Root();
-  t.equal(evaluate(data, 'foo.bar.baz.bat'), undefined);
+  t.equal(evaluate('foo.bar.baz.bat'), undefined);
 });
 
 q.test('parameter access', t => {
