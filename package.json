@@ -19,13 +19,14 @@
     "typescript": "^3.6",
     "eslint": "^6",
     "qunit": "^2.9",
-    "@types/qunit": "^2.9"
+    "@types/qunit": "^2.9",
+    "source-map-support": "^0.5"
   },
   "scripts": {
     "build": "tsc -p config/lib.tsconfig.json; rollup -c config/lib.rollup.config.js; rm -r lib; cp -r build/lib lib",
     "dev": "bash -c \"tsc\ntsc -w &\nrollup -w -c config/dev.rollup.config.js\"",
     "clean": "rm -r build; rm -r lib",
-    "test": "tsc -p config/test.tsconfig.json; rollup -c config/test.rollup.config.js; qunit build/test.js"
+    "test": "tsc -p config/test.tsconfig.json; rollup -c config/test.rollup.config.js; qunit --require 'source-map-support/register' build/test.js"
   },
   "files": [
     "lib",
