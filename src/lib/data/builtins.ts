@@ -237,39 +237,40 @@ registerOperator({
 });
 
 // aggregates
-type AVG = { count: number; total: number };
-registerOperator<AVG>({
+registerOperator<[number, number]>({
   type: 'aggregate',
   names: ['avg'],
-  init() { return { count: 0, total: 0 }; },
-  apply(_name: string, state: AVG, _base: any, value: any) {
-    state.count++;
-    if (!isNaN(value)) state.total += +value;
+  init() { return [0, 0]; },
+  apply(_name: string, state: [number, number], _base: any, value: any) {
+    state[0]++;
+    if (!isNaN(value)) state[1] += +value;
+    return state;
   },
-  final({ total, count }: AVG): number {
+  final(_name: string, [count, total]: [number, number]): number {
     return count < 1 ? 0 : total / count;
   }
 });
 
-type SUM = { value: number };
-registerOperator<SUM>({
+registerOperator<number>({
   type: 'aggregate',
   names: ['sum'],
-  init() { return { value: 0 } },
-  apply(_name: string, state: SUM, _base: any, value: any) {
-    if (!isNaN(value)) state.value += +value;
+  init() { return 0; },
+  apply(_name: string, state: number, _base: any, value: any) {
+    if (!isNaN(value)) return state + +value;
+    else return state;
   },
-  final({ value }: SUM) {
+  final(_name: string, value: number) {
     return value;
   }
 }, {
   type: 'aggregate',
   names: ['count'],
-  init() { return { value: 0 } },
-  apply(_name: string, state: SUM, _base: any, value: any) {
-    if (value !== false) state.value++;
+  init() { return 0; },
+  apply(_name: string, state: number, _base: any, value: any) {
+    if (value !== false) return state + 1;
+    else return state;
   },
-  final({ value }: SUM): number {
+  final(_name: string, value: number): number {
     return value;
   }
 });
@@ -281,8 +282,9 @@ registerOperator<MaybeNum>({
   init() { return {}; },
   apply(name: string, state: MaybeNum, _base: any, value: any) {
     if (!isNaN(value) && (state.value == null || (name === 'min' ? value < state.value : value > state.value))) state.value = value;
+    return state;
   },
-  final({ value }: MaybeNum): number {
+  final(_name: string, { value }: MaybeNum): number {
     return value;
   }
 });
@@ -305,63 +307,65 @@ registerOperator<Nth>({
       if (state.iter === state.nth) state.value = value;
       state.iter++;
     }
+    return state;
   },
-  final({ value }: Nth): any {
+  final(_name: string, { value }: Nth): any {
     return value;
    }
 });
 
-type MAP = { value: any[] };
-registerOperator<MAP>({
+registerOperator<any[]>({
   type: 'aggregate',
   names: ['map'],
-  init() { return { value: [] }; },
-  apply(_name: string, state: MAP, _base: any, value: any) {
-    state.value.push(value);
+  init() { return []; },
+  apply(_name: string, state: any[], _base: any, value: any) {
+    state.push(value);
+    return state;
   },
-  final({ value }: MAP): any[] {
+  final(_name: string, value: any[]): any[] {
     return value;
   }
 }, {
   type: 'aggregate',
   names: ['unique'],
-  init() { return { value: [] }; },
-  apply(_name: string, state: MAP, _base: any, value: any) {
-    if (!~state.value.indexOf(value)) state.value.push(value);
+  init() { return []; },
+  apply(_name: string, state: any[], _base: any, value: any) {
+    if (!~state.indexOf(value)) state.push(value);
+    return state;
   },
-  final({ value }: MAP): any[] {
+  final(_name: string, value: any[]): any[] {
     return value;
   }
 });
 
-type MapBy = { bys: any[], values: any[] };
-registerOperator<MapBy>({
+registerOperator<[any[], any[]]>({
   type: 'aggregate',
   names: ['unique-by'],
-  init() { return { bys: [], values: [] }; },
-  apply(_name: string, state: MapBy, base: any, value: any) {
-    if (!~state.bys.indexOf(value)) {
-      state.bys.push(value);
-      state.values.push(base);
+  init() { return [[], []]; },
+  apply(_name: string, state: [any[], any[]], base: any, value: any) {
+    if (!~state[0].indexOf(value)) {
+      state[0].push(value);
+      state[1].push(base);
     }
+    return state;
   },
-  final({ values }: MapBy): any[] {
+  final(_name: string, [, values]: [any[], any[]]): any[] {
     return values;
   },
-  check(final: any[], base: any) {
+  check(_name: string, final: any[], base: any) {
     return !!~final.indexOf(base);
   }
 });
 
-type JOIN = { value: any[], join: string };
-registerOperator<JOIN>({
+registerOperator<any[]>({
   type: 'aggregate',
   names: ['join'],
-  init(_name, args?: any[]) { return { value: [], join: (args || [])[0] }; },
-  apply(_name: string, state: JOIN, _base: any, value: any) {
-    state.value.push(value);
+  init() { return []; },
+  apply(_name: string, state: any[], _base: any, value: any) {
+    state.push(value);
+    return state;
   },
-  final({ value, join }: JOIN): string {
+  final(_name: string, value: any[], [join]: [string]): string {
     return value.join(join);
   }
 });

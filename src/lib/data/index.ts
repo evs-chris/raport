@@ -82,9 +82,9 @@ export interface CheckedOperator extends BaseOperator {
 export interface AggregateOperator<T = any> extends BaseOperator {
   type: 'aggregate';
   init(name: string, args?: any[]): T;
-  apply(name: string, state: T, base: any, value: any, locals?: any[], context?: Context): any;
-  final(state: T): any;
-  check?: (final: any, base: any, value: any, locals?: any[], context?: Context) => any;
+  apply(name: string, state: T, base: any, value: any, locals?: any[], args?: any[], context?: Context): T;
+  final(name: string, state: T, args?: any[]): any;
+  check?: (name: string, final: any, base: any, value: any, locals?: any[], args?: any[], context?: Context) => any;
 }
 
 export type CheckResult = 'continue'|{ result: any }|{ skip: number, value?: any };
@@ -334,19 +334,20 @@ function applyOperator(root: Context, operation: Operation): any {
     const agg = operation as AggregateOperation;
     if (!agg.source && root.cache) {
       let fin = root.cache.ops.map.find(e => e[0] === agg);
+      let args: any[];
       if (fin) {
-        fin = fin[1];
+        ([, fin, args] = fin);
       } else {
-        fin = applyAggregate(root, agg, op);
-        root.cache.ops.map.push([agg, fin]);
+        ([fin, args] = applyAggregate(root, agg, op));
+        root.cache.ops.map.push([agg, fin[0], fin[1]]);
       }
-      if (op.check) return op.check(fin, root.value, agg.apply && evaluate(root, agg.apply), agg.locals && agg.locals.map(e => evaluate(root, e)), root);
+      if (op.check) return op.check(agg.op, fin, root.value, agg.apply && evaluate(root, agg.apply), agg.locals && agg.locals.map(e => evaluate(root, e)), args, root);
       else return fin;
-    } else return applyAggregate(root, agg, op);
+    } else return applyAggregate(root, agg, op)[0];
   }
 }
 
-function applyAggregate(root: Context, agg: AggregateOperation, op: AggregateOperator): any {
+function applyAggregate(root: Context, agg: AggregateOperation, op: AggregateOperator): [any, any[]] {
   let arr: any[] = evaluate(root, agg.source);
   let apply = agg.apply;
 
@@ -358,15 +359,15 @@ function applyAggregate(root: Context, agg: AggregateOperation, op: AggregateOpe
   }
 
   const args = (agg.args || []).map(a => evaluate(root, a));
-  const state = op.init(agg.op, args);
+  let state = op.init(agg.op, args);
 
   arr.forEach((e, i) => {
     const ctx = apply || agg.locals ? extend(root, { value: e, special: { index: i, value: e } }) : root;
     const locals: any[] = agg.locals ? agg.locals.map(e => evaluate(ctx, e)) : [];
-    op.apply(agg.op, state, e, apply ? evaluate(ctx, apply) : e, locals, root);
+    state = op.apply(agg.op, state, e, apply ? evaluate(ctx, apply) : e, locals, args, root);
   });
 
-  return op.final(state);
+  return [op.final(agg.op, state, args), args];
 }
 
 export type Reference = { r: string };

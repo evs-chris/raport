@@ -159,8 +159,9 @@ q.test('aggregate op', t => {
       t.equal(name, 'tmp');
       t.equal(args[state.count], val);
       state.count++;
+      return state;
     },
-    final(state) { return state.count; }
+    final(_name, state) { return state.count; }
   };
 
   registerOperator(op);
@@ -185,8 +186,9 @@ q.test('aggregate op application', t => {
       t.deepEqual(args[state.count], val);
       t.equal(state.count + 1, app);
       state.count++;
+      return state;
     },
-    final(state) { return state.count; }
+    final(_name, state) { return state.count; }
   };
 
   registerOperator(op);
@@ -208,8 +210,9 @@ q.test('aggregate op implicit source', t => {
       t.deepEqual(args[state.count], val);
       t.equal(state.count + 1, app);
       state.count++;
+      return state;
     },
-    final(state) { return state.count; }
+    final(_name, state) { return state.count; }
   };
 
   registerOperator(op);
@@ -236,8 +239,9 @@ q.test('aggregate op local args', t => {
       t.equal(locals[0], 1);
       t.equal(locals[1], args[state.count].e);
       state.count++;
+      return state;
     },
-    final(state) { return state.count; }
+    final(_name, state) { return state.count; }
   };
 
   registerOperator(op);
@@ -259,12 +263,13 @@ q.test('aggregate op checked cache', t => {
     },
     apply(_name, state) {
       state.count++;
+      return state;
     },
-    final(state) {
+    final(_name, state) {
       t.equal(state.count, 3);
       return state.count;
     },
-    check(count) {
+    check(_name, count) {
       checks++;
       return count;
     }
