@@ -133,65 +133,67 @@ There are a few operations built-in to the library to handle common expressions:
 
 | Operator | Arguments | Result | Description |
 | -------- | --------- | ------ | ----------- |
-| `is` | `any, any` | `boolean` | Returns true if the given values are equal (not strict). |
-| `is-not` | `any, any` | `boolean` | Returns true if the given values are not equal (not strict). |
+| `%` | `...any` | `number` | Returns the modulus of the given values starting with the first. |
+| `*` | `...any` | `number` | Multiplies the given values starting with the first. |
+| `+` | `...any` | `string\|number` | Adds the given values if they all pass `isNaN` or concatenates them as a string otherwise. |
+| `-` | `...any` | `number` | Subtracts the given values starting with the first. |
+| `/` | `...any` | `number` | Divides the given values starting with the first. |
 | `<` | `any, any` | `boolean` | Returns true if the first value is less than the second value. |
 | `<=` | `any, any` | `boolean` | Returns true if the first value is less than or equal to the second value. |
 | `>` | `any, any` | `boolean` | Returns true if the first value is greater than the second value. |
 | `>=` | `any, any` | `boolean` | Returns true if the first value is greater than or equal to the second value. |
-| `like` | `string, string` | `boolean` | Returns true if the first string matches a regex created from the second string by replacing spaces, percent signs, and asterisks with `.*`, replacing question marks with `.`, and anchoring the pattern at the beginning and end. |
-| `ilike` | `string, string` | `boolean` | `like`, but case insensitive. |
-| `not-like` | `string, string` | `boolean` | `like`, but negated. |
-| `not-ilike` | `string, string` | `boolean` | `not-like`, but case insensitive. |
-| `in` | `any, array\|string` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf` |
-| `not-in` | `any, array\|string` | `boolean` | `in`, but negated. |
-| `contains` | `array\|string, any` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf` |
-| `does-not-contain` | `array\|string, any` | `boolean` | `contains`, but negated. |
-| `get` | `any, string` | `any` | Safely retrieves the value at the path given by the `string` from the given value. |
+| `and` | `...any` | `boolean` | This will lazily evaluate its arguments and return false if any are not truthy. |
 | `array` | `...any` | `array` | Returns the given values in an array. |
-| `object` | `...(key: string, value: any)` | `any` | Creates an object from the given values where the odd-numbered args are keys and their subsequent event-numbered args are values e.g. `(object 'foo' true 'bar' 3.14159)` is `{ foo: true, bar: 3.14159 }`. |
+| `avg` | aggregate | `number` | This will compute the average of the given application of source. |
+| `call` | `object, string, ...args` or `function, ...args` | `any` | This will call the given method or function with the remaining args returning the result. |
+| `coalesce` | `...any` | `any` | This will lazily return its first non-nullish argument. |
+| `coalesce-truth` | `...any` | `any` | This will lazily return its first truthy argument. |
+| `contains` | `array\|string, any` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf` |
+| `count` | aggregate | `number` | This will count the values in the given source. |
+| `date` | `string` | `date` | Creates a new `Date` with the given value. |
+| `does-not-contain` | `array\|string, any` | `boolean` | `contains`, but negated. |
 | `filter` | `array, filter?, sort?, group?` | `array\|any` | Applies any supplied filter, sort, and group to the given array. This operator is an interface the function that powers report sources. |
 | `find` | `array, value` | `any` | Finds the first element in the given array that matches the second argument, where the second argument is a data value e.g. an operation, reference, or literal that evaluates to true when the element matches. |
-| `source` | `any` | `DataSet` | Takes the given value and turns it into a `DataSet` |
+| `first` | aggregate | `any` | This will return the first application in the given source. |
+| `fmt` | `any, string, ...any` | `string` | This is an alias for `format`. |
+| `format` | `any, string, ...any` | `string` | Formats the first argument as a string using the formatter named by the second argument, passing any further arguments the formatter. |
+| `get` | `any, string` | `any` | Safely retrieves the value at the path given by the `string` from the given value. |
 | `group` | `array, group` | `any` | Like `filter`, but can only apply groupings. |
-| `sort` | `array, sort` | `array` | Like `filter`, but can only apply sorts. |
-| `+` | `...any` | `string\|number` | Adds the given values if they all pass `isNaN` or concatenates them as a string otherwise. |
-| `-` | `...any` | `number` | Subtracts the given values starting with the first. |
-| `*` | `...any` | `number` | Multiplies the given values starting with the first. |
-| `/` | `...any` | `number` | Divides the given values starting with the first. |
-| `%` | `...any` | `number` | Returns the modulus of the given values starting with the first. |
+| `if` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is truthy, the second argument in the pair will be the final value of the operation. If none of pairs has a truthy condition and there is an odd last argument, the odd last argument will be returned. This roughly mirrors `icase` functions from some languages. |
+| `ilike` | `string, string` | `boolean` | `like`, but case insensitive. |
+| `in` | `any, array\|string` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf` |
+| `is` | `any, any` | `boolean` | Returns true if the given values are equal (not strict). |
+| `is-not` | `any, any` | `boolean` | Returns true if the given values are not equal (not strict). |
+| `join` | aggregate `string` | `string` | This will join the values in the given source using the first non-local argument. |
+| `last` | aggregate | This will return the last application in the given source. |
+| `like` | `string, string` | `boolean` | Returns true if the first string matches a regex created from the second string by replacing spaces, percent signs, and asterisks with `.*`, replacing question marks with `.`, and anchoring the pattern at the beginning and end. |
+| `lower` | `string` | `string` | Lowercases the given string. |
+| `map` | aggregate | `array` | This will map the given source into a new array composed of the application for each value. |
+| `max` | aggregate | `number` | This will return the largets application in the given source. |
+| `min` | aggregate | `number` | This will return the smallest application in the given source. |
+| `not-ilike` | `string, string` | `boolean` | `not-like`, but case insensitive. |
+| `not-in` | `any, array\|string` | `boolean` | `in`, but negated. |
+| `not-like` | `string, string` | `boolean` | `like`, but negated. |
+| `nth` | aggregate `number` | This will return the nth application in the given source, using the 1-based index specified by the parameter. |
+| `object` | `...(key: string, value: any)` | `any` | Creates an object from the given values where the odd-numbered args are keys and their subsequent event-numbered args are values e.g. `(object 'foo' true 'bar' 3.14159)` is `{ foo: true, bar: 3.14159 }`. |
+| `or` | `...any` | `boolean` | This will lazily evaluate its arguments and return true if any are truthy. |
 | `padl` | `string, number, string?` | `string` | Pads the given string to the given number of characters by adding the last argument or a space to the left side if necessary. |
 | `padr` | `string, number, string?` | `string` | Pads the given string to the given number of characters by adding the last argument or a space to the right side if necessary. |
+| `replace-all` | `string, string, string, string?` | `string` | Calling the arguments `haystack`, `needle`, `replacement`, `flags`, this replaces all instances of `needle` in the `haystack` with `replacement`. If `flags` is provided, and it may be empty, `needle` is a regex with the given `flags`. |
+| `replace` | `string, string, string, string?` | `string` | Calling the arguments `haystack`, `needle`, `replacement`, `flags`, this replaces `needle` in the `haystack` with `replacement`. If `flags` is provided, and it may be empty, `needle` is a regex with the given `flags`. |
+| `reverse` | `string\|array` | `string\|array` | Reverses the given string or array. |
+| `slice` | `string\|array, number?, number?` | `string\|array` | Slices the given string or array from the first number argument index to the second number argument index. This is a proxy for the `slice` method on the first argument. |
+| `sort` | `array, sort` | `array` | Like `filter`, but can only apply sorts. |
+| `source` | `any` | `DataSet` | Takes the given value and turns it into a `DataSet` |
+| `substr` | `string\|array, number?, number?` | `string\|array` | This is an alias for `slice`. |
+| `sum` | aggregate | `number` | This will compute the sum of the given application of source. |
 | `triml` | `string` | `string` | Trims whitespace from the left side of the given string. |
 | `trimr` | `string` | `string` | Trims whitespace from the right side of the given string. |
 | `trim` | `string` | `string` | Trims whitespace from both sides of the given string. |
-| `slice` | `string\|array, number?, number?` | `string\|array` | Slices the given string or array from the first number argument index to the second number argument index. This is a proxy for the `slice` method on the first argument. |
-| `substr` | `string\|array, number?, number?` | `string\|array` | This is an alias for `slice`. |
-| `replace` | `string, string, string, string?` | `string` | Calling the arguments `haystack`, `needle`, `replacement`, `flags`, this replaces `needle` in the `haystack` with `replacement`. If `flags` is provided, and it may be empty, `needle` is a regex with the given `flags`. |
-| `replace-all` | `string, string, string, string?` | `string` | Calling the arguments `haystack`, `needle`, `replacement`, `flags`, this replaces all instances of `needle` in the `haystack` with `replacement`. If `flags` is provided, and it may be empty, `needle` is a regex with the given `flags`. |
-| `reverse` | `string\|array` | `string\|array` | Reverses the given string or array. |
-| `date` | `string` | `date` | Creates a new `Date` with the given value. |
-| `upper` | `string` | `string` | Uppercases the given string. |
-| `lower` | `string` | `string` | Lowercases the given string. |
-| `format` | `any, string, ...any` | `string` | Formats the first argument as a string using the formatter named by the second argument, passing any further arguments the formatter. |
-| `fmt` | `any, string, ...any` | `string` | This is an alias for `format`. |
-| `and` | `...any` | `boolean` | This will lazily evaluate its arguments and return false if any are not truthy. |
-| `or` | `...any` | `boolean` | This will lazily evaluate its arguments and return true if any are truthy. |
-| `if` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is truthy, the second argument in the pair will be the final value of the operation. If none of pairs has a truthy condition and there is an odd last argument, the odd last argument will be returned. This roughly mirrors `icase` functions from some languages. |
-| `unless` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is not truthy, the second argument in the pair will be the final value of the operation. If all of pairs have a truthy condition and there is an odd last argument, the odd last argument will be returned. This is the negated version of `if`. |
-| `coalesce` | `...any` | `any` | This will lazily return its first non-nullish argument. |
-| `coalesce-truth` | `...any` | `any` | This will lazily return its first truthy argument. |
-| `avg` | aggregate | `number` | This will compute the average of the given application of source. |
-| `sum` | aggregate | `number` | This will compute the sum of the given application of source. |
-| `count` | aggregate | `number` | This will count the values in the given source. |
-| `min` | aggregate | `number` | This will return the smallest application in the given source. |
-| `max` | aggregate | `number` | This will return the largets application in the given source. |
-| `first` | aggregate | `any` | This will return the first application in the given source. |
-| `nth` | aggregate `number` | This will return the nth application in the given source, using the 1-based index specified by the parameter. |
-| `last` | aggregate | This will return the last application in the given source. |
-| `map` | aggregate | `array` | This will map the given source into a new array composed of the application for each value. |
 | `unique` | aggregate | `array` | This will create a new array from the given source ensuring that the same value does not appear more than once using `indexOf` |
-| `join` | aggregate `string` | `string` | This will join the values in the given source using the first non-local argument. |
+| `unique-by` | aggregate | `array` | This will create a new array from the given source using the specified application to determine whether a value is unique. |
+| `unless` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is not truthy, the second argument in the pair will be the final value of the operation. If all of pairs have a truthy condition and there is an odd last argument, the odd last argument will be returned. This is the negated version of `if`. |
+| `upper` | `string` | `string` | Uppercases the given string. |
 
 #### Built-in formats
 
