@@ -162,3 +162,11 @@ q.test('operator requires a closing )', t => {
 q.test('operator requires a name', t => {
   t.equal(parseErr('()'), 'expected op name');
 });
+
+q.test(`expression literals`, t => {
+  t.deepEqual(parse('%a'), { v: { r: 'a' } });
+  t.deepEqual(parse('%10'), { v: { v: 10 } });
+  t.deepEqual(parse('%:10'), { v: { v: '10' } });
+  t.deepEqual(parse('%(+ 10 2)'), { v: { op: '+', args: [{ v: 10 }, { v: 2 }] } });
+  t.deepEqual(parse('(foo %(+ 10 2))'), { op: 'foo', args: [{ v: { op: '+', args: [{ v: 10 }, { v: 2 }] } }] });
+});
