@@ -170,6 +170,9 @@ export function parse(input: string): Value {
 function readValue(input: string, offset: number, require: boolean = true): ParseResult<Value> {
   let p: ParseResult<any>;
 
+  p = readExpr(input, offset, false);
+  if (p !== Fail || p.m) return p;
+
   p = readOperation(input, offset);
   if (p !== Fail || p.m) return p;
   
@@ -181,6 +184,28 @@ function readValue(input: string, offset: number, require: boolean = true): Pars
   else if (p.m) return p;
 
   return require ? fail(offset, 'expected an op, literal, or reference') : fail();
+}
+
+function readExpr(input: string, offset: number, require: boolean = true): ParseResult<Literal> {
+  let c = offset;
+  if (input[c++] !== '%') return fail();
+  c += seekWhile(input, c, space)[0];
+
+  let p: ParseResult<any>;
+
+  p = readOperation(input, c);
+  if (p !== Fail) return [{ v: p[0] }, p[1] + (c - offset)];
+  else if (p.m) return p;
+  
+  p = readLiteral(input, c);
+  if (p !== Fail) return [{ v: p[0] }, p[1] + (c - offset)];
+  else if (p.m) return p;
+
+  p = readReference(input, c);
+  if (p !== Fail) return [{ v: { r: p[0].join('.') } }, p[1] + (c - offset)];
+  else if (p.m) return p;
+
+  return require ? fail(c, 'expected an op, literal, or reference expression') : fail();
 }
 
 const listSep = ',' + space;

@@ -186,6 +186,7 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, val
     else root = new Root(root);
   }
   if (typeof value === 'string') value = (root as Context).root.exprs[value] || ((root as Context).root.exprs[value] = parse(value));
+  if (typeof value !== 'object') value = { v: value };
   if (value && 'r' in value) return safeGet(root as Context, value.r);
   else if (value && 'v' in value) return value.v;
   else if (value && 'op' in value) return applyOperator(root as Context, value);
