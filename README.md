@@ -117,6 +117,8 @@ Operations in expression form can be one of two types: a function call or an agg
 
 Aggregate operators evaluate their regular arguments in the context of the call and their local arguments within the context of each iteration. Local arguments are not particularly common. The source will default to the nearest `@source` special reference within the context stack or an empty array if none is found. The application is applied to each iteration of the aggregate before the iteration is passed to the operator, so for something like a `map` operator, `(map =>(upper name))` will result in an array of strings that are the uppercased name property of each element in the local source. In that example, `upper` is also an operator that simply uppercases its first argument.
 
+There is a final literal form that returns the expression form in definition form. This can be useful for some operators that want to apply an expression as part of the operation rather than having it applied before the operator is called. Expression literals start with a `%`, so `%foo` is equivalent to `(object :r :foo)` or `{ r: 'foo' }` in definition form. The same applies to literals and operations e.g. `%10` and `%(+ 20 foo)` are both valid and result in literals that match their definition form. As a final example, consider the `find` operator, where you want to find the first element that matches a predicate `(find arr %(ilike name '*joe*'))` where any elements of `arr` that have a property `name` that matches `/.*joe.*/i` will be the result. The `%(ilike name '*joe*')` is not evaluated along with the `arr` argument to `find`, which allows the `find` operator to apply the predicate to each of `arr`s members more easily than, for instance, requiring it to be passed as another string and parsed on the fly.
+
 ### Filtering, sorting, and grouping
 
 Filters are simply expressions that are applied to each value in a dataset, where values that evaluate to a truthy value are included in the filtered set. Similarly, sorts are expressions that are applied to each value in the dataset and they used to sort the dataset (currently using `array.sort()`). Groupings are also expressions that are applied to each value in the dataset, and the result from the evaluation is used to group the values into a map of results with the group evaluations as keys.
@@ -187,9 +189,9 @@ There are a few operations built-in to the library to handle common expressions:
 | `source` | `any` | `DataSet` | Takes the given value and turns it into a `DataSet` |
 | `substr` | `string\|array, number?, number?` | `string\|array` | This is an alias for `slice`. |
 | `sum` | aggregate | `number` | This will compute the sum of the given application of source. |
+| `trim` | `string` | `string` | Trims whitespace from both sides of the given string. |
 | `triml` | `string` | `string` | Trims whitespace from the left side of the given string. |
 | `trimr` | `string` | `string` | Trims whitespace from the right side of the given string. |
-| `trim` | `string` | `string` | Trims whitespace from both sides of the given string. |
 | `unique` | aggregate | `array` | This will create a new array from the given source ensuring that the same value does not appear more than once using `indexOf` |
 | `unique-by` | aggregate | `array` | This will create a new array from the given source using the specified application to determine whether a value is unique. |
 | `unless` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is not truthy, the second argument in the pair will be the final value of the operation. If all of pairs have a truthy condition and there is an odd last argument, the odd last argument will be returned. This is the negated version of `if`. |
@@ -232,7 +234,7 @@ There are a few operations built-in to the library to handle common expressions:
 
 ## TODO
 
-* [ ] Tests!
+* [ ] Moar tests!
 * [x] (slightly) Better docs
 * [ ] Designer and schema generator
 * [ ] Some sort of simple built-in graph widget
