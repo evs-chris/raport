@@ -1,4 +1,5 @@
 import { filter, safeGet, registerOperator, CheckResult, ValueOperator, Context, Root, evaluate, extend, formats, registerFormat } from './index';
+import { parse } from './expr';
 import { date, dollar, number, phone } from './format';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
@@ -72,9 +73,13 @@ registerOperator(
   }),
   simple(['find'], (_name: string, values: any[], ctx?: Context): any => {
     ctx = ctx || new Root({});
-    const [arr, flt] = values;
+    let [arr, flt] = values;
     if (!Array.isArray(arr)) return;
-    return arr.find(e => evaluate(extend(ctx, { value: e }), flt));
+    if (typeof flt === 'string') flt = parse(flt);
+    if (typeof flt !== 'object') flt = { v: flt };
+    if (flt.v) return arr.find(e => e == flt.v);
+    else if (flt.r) return arr.find(e => e == evaluate(ctx, flt));
+    else return arr.find(e => evaluate(extend(ctx, { value: e }), flt));
   }),
   simple(['source'], (_name: string, values: any[]): any => {
     const [val] = values;
@@ -98,6 +103,18 @@ registerOperator(
     }
     return filter({ value: arr }, null, sort, null, ctx);
   }),
+  simple(['call'], (_name: string, args: any[]): any => {
+    if (args[0] != null && typeof args[1] === 'string' && typeof args[0][args[1]] === 'function') {
+      const obj = args.shift();
+      const name = args.shift();
+      return obj[name].apply(obj, args);
+    }
+
+    if (typeof args[0] === 'function') {
+      const fn = args.shift();
+      return fn.apply(null, args);
+    }
+  })
 );
 
 // math
@@ -179,7 +196,8 @@ registerOperator(
     }
   }),
   simple(['date'], (_name: string, [v]: any[]): Date => {
-    return new Date(v);
+    if (v !== undefined) return new Date(v);
+    else return new Date();
   }),
   simple(['upper', 'lower'], (name: string, [v]: any[]): string => {
     return name === 'upper' ? `${v}`.toUpperCase() : `${v}`.toLowerCase();
