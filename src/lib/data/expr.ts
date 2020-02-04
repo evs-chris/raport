@@ -88,13 +88,16 @@ function readNumber(input: string, offset: number): ParseResult<{ v: number }> {
 const escapes = { b: '\b', f: '\f', n: '\n', r: '\r', t: '\t', v: '\v', 0: '\0' };
 const space = ' \r\n\t';
 const hex = '0123456789abcdefABCDEF';
+const sigils = '!@#+^';
+const endSym = space + '()';
+const endRef = endSym + '.,{}[]"\'<>\\%:=&' + sigils;
 function readString(input: string, offset: number): ParseResult<{ v: string }> {
   const q = input[offset];
   let p: Result<string>;
   let c = offset + 1;
   if (q !== '\'' && q !== '"' && q !== '`' && q !== ':') return fail();
   if (q === ':') {
-    p = readUntil(input, c, space, true);
+    p = readUntil(input, c, endSym, true);
     if (p === Fail) {
       if (space.indexOf(input[c])) return [{ v: '' }, 1];
       return Fail;
@@ -130,8 +133,6 @@ function readString(input: string, offset: number): ParseResult<{ v: string }> {
   }
 }
 
-const sigils = '!@#+^';
-const endRef = space + ',.(){}[]"\':=&<>\\' + sigils;
 function readReference(input: string, offset: number): ParseResult<string[]> {
   let c = offset;
   let s = '';
