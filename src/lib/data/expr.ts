@@ -234,6 +234,7 @@ function readList<T>(input: string, offset: number, parser: (input: string, offs
     t = seekWhile(input, c, listSep)[0];
     if (t < 1) cont = false;
     c += t;
+    if (input[c] === ')') cont = false;
   }
 
   return [res, c - offset];

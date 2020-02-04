@@ -170,3 +170,7 @@ q.test(`expression literals`, t => {
   t.deepEqual(parse('%(+ 10 2)'), { v: { op: '+', args: [{ v: 10 }, { v: 2 }] } });
   t.deepEqual(parse('(foo %(+ 10 2))'), { op: 'foo', args: [{ v: { op: '+', args: [{ v: 10 }, { v: 2 }] } }] });
 });
+
+q.test(`a list may have whitespace just before its closing paren`, t => {
+  t.deepEqual(parse('(a b c )'), { op: 'a', args: [{ r: 'b' }, { r: 'c' }] });
+});
