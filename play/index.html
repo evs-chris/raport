@@ -11,15 +11,48 @@
         margin: 0;
         padding: 1em;
       }
+      body > * {
+        margin: 0.5em;
+      }
 
       iframe {
         flex-grow: 2;
+      }
+
+      div.run {
+        display: flex;
+        align-items: center;
+      }
+
+      div.parse {
+        display: flex;
+        height: 20vh;
+        overflow: auto;
+      }
+
+      div#parsed {
+        white-space: pre-wrap;
+        font-family: monospace;
       }
     </style>
   </head>
   <body>
     <iframe srcdoc="raporting..."></iframe>
-    <button onclick="document.querySelector('iframe').contentWindow.print()">Print</button>
+    <div class="run">
+      Generated&nbsp;<span id="length"></span>&nbsp;bytes and took&nbsp;<span id="time"></span>&nbsp;ms.
+      <button onclick="report()">Run Report</button>
+      <button onclick="document.querySelector('iframe').contentWindow.print()">Print</button>
+    </div>
+    <div class="parse">
+      <div style="display: flex; flex-direction: column; position: sticky; top: 0; min-width: 20em; margin-right: 1em;">
+        <textarea id="expr" style="display: block; flex-grow: 2;"></textarea>
+        <div>
+          <button onclick="parse()">Parse</button>
+          <button onclick="run()">run</button>
+        </div>
+      </div>
+      <div id="parsed" style="white-space: pre-wrap;"></div>
+    </div>
     <script src="./index.js"></script>
   </body>
 </html>

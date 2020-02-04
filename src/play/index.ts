@@ -1,4 +1,4 @@
-import { run, Delimited, Page, DataSet, PageSizes, Repeater } from '../lib/index';
+import { filter, parse, run, evaluate, Root, Delimited, Page, DataSet, PageSizes } from '../lib/index';
 
 const people: DataSet = {
   value: [
@@ -146,6 +146,41 @@ const people: DataSet = {
   ]
 }
 
+globalThis.raport = {
+  evaluate, Root, parse
+};
+
+globalThis.parse = function() {
+  const expr = document.getElementById('expr');
+  const output = document.getElementById('parsed');
+  try {
+    const start = new Date();
+    const str = (expr as any).value;
+    const res = parse(str);
+    if ((res as any).m) output.innerHTML = `${(res as any).m}\n${str}\n${' '.repeat((res as any).l)}^`;
+    else output.innerHTML = JSON.stringify(parse((expr as any).value), null, '  ');
+    document.getElementById('time').innerHTML = `${+(new Date()) - +start}`;
+    document.getElementById('length').innerHTML = `${output.innerHTML.length}`;
+  } catch {
+    output.innerHTML = 'Error parsing expression'
+  }
+}
+
+globalThis.run = function() {
+  const expr = document.getElementById('expr');
+  const output = document.getElementById('parsed');
+  try {
+    const start = new Date();
+    const str = (expr as any).value;
+    const res = evaluate(new Root({ people }), str);
+    output.innerHTML = JSON.stringify(res);
+    document.getElementById('time').innerHTML = `${+(new Date()) - +start}`;
+    document.getElementById('length').innerHTML = `${output.innerHTML.length}`;
+  } catch {
+    output.innerHTML = 'Error evaluating expression'
+  }
+}
+
 // delimtied example
 const csv: Delimited = {
   type: 'delimited',
@@ -161,6 +196,7 @@ const csv: Delimited = {
 // Page displayed example - try a Flow report
 const displayed: Page = {
   type: 'page',
+  classifyStyles: true,
   footer: { type: 'container', widgets: [
     { type: 'label', width: { percent: 100 }, font: { align: 'right' }, text: `(+ 'Page ' @page ' of ' @pages)` }
   ] },
@@ -215,7 +251,13 @@ const displayed: Page = {
   ]
 };
 
-// swap out the report here
-const html = run(displayed, { people }, { 'desc': true });
+globalThis.report = function() {
+  const start = new Date();
 
-document.querySelector('iframe').srcdoc = html;
+  // swap out the report here
+  const html = run(displayed, { people }, { 'desc': true });
+  document.getElementById('time').innerHTML = `${+(new Date()) - +start}`;
+  document.getElementById('length').innerHTML = `${html.length}`;
+
+  document.querySelector('iframe').srcdoc = html;
+}
