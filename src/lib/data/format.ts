@@ -42,7 +42,7 @@ export function date(d: string|Date, fmt: string): string {
   const v = d as Date;
 
   if (!fmt) fmt = dateDefault;
-  if (!fmt) return d.toISOString().substr(0, 10);
+  if (!fmt) return new Date(+d - (d.getTimezoneOffset() * 60000)).toISOString().substr(0, 10);
 
   return fmt.replace(dateRE, m => {
     if (m[0] === 'y') {
