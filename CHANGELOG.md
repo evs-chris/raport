@@ -1,3 +1,12 @@
+## 0.2.1
+
+2020-02-04
+
+#### Data
+
+* __BUG__: Allow whitespace at the end of argument lists before the closing parenthesis.
+
+
 ## 0.2.0
 
 2020-02-04
@@ -29,7 +38,6 @@
 * Aggregate operators should now return their state while being applied, as the evaluator no longer assumes that the initial state will be mutated.
 * Added a `unique-by` operator that returns an array of unique items based on an application. This operator can also be used in filtering as it is also checked.
 * Operators no longer supply typing information, as it is not used in the runtime, and should tus be part of the designer.
-
 
 
 ## 0.1.0
