@@ -34,7 +34,10 @@ registerOperator(
   simple(['like', 'not-like', 'ilike', 'not-ilike'], (name: string, values: any[]): boolean => {
     const [l, r] = values;
     if (typeof r !== 'string') return false;
-    const res = new RegExp(`^${r.replace(/[\s\%\*]+/g, '.*').replace(/\?/g, '.')}$`, ~name.indexOf('ilike') ? 'i' : '').test(l);
+    let res: boolean;
+    const re = new RegExp(`^${r.replace(/[\s\%\*]+/g, '.*').replace(/\?/g, '.')}$`, ~name.indexOf('ilike') ? 'i' : '');
+    if (Array.isArray(l)) res = !!l.find(v => re.test(v));
+    else res = re.test(l);
     return name === 'like' || name === 'ilike' ? res : !res;
   }),
   simple(['in', 'not-in'], (name: string, values: any[]): boolean => {

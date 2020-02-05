@@ -154,9 +154,36 @@ q.test('get', t => {
 });
 
 // TODO: group
-// TODO: if
-// TODO: ilike
-// TODO: in
+
+q.test('if', t => {
+  const op: Operator = { type: 'value', names: ['nope'], apply() { t.notOk('nope'); } };
+  registerOperator(op);
+
+  t.equal(evaluate('(if true :yep)'), 'yep');
+  t.equal(evaluate('(if true :yep :else)'), 'yep');
+  t.equal(evaluate('(if true :yep (nope))'), 'yep');
+  t.equal(evaluate('(if false :yep)'), undefined);
+  t.equal(evaluate('(if false (nope))'), undefined);
+  t.equal(evaluate('(if false :yep :else)'), 'else');
+  t.equal(evaluate('(if false :yep true :elseif)'), 'elseif');
+  t.equal(evaluate('(if false :yep true :elseif :else)'), 'elseif');
+  t.equal(evaluate('(if false :yep true :elseif (nope))'), 'elseif');
+  t.equal(evaluate('(if false :yep false :elseif :else)'), 'else');
+
+  unregisterOperator(op);
+});
+
+q.test(`ilike`, t => {
+  t.equal(evaluate('(ilike :SomeThing :*et*)'), true);
+  t.equal(evaluate('(ilike :SomeThing :*fr*)'), false);
+  t.equal(evaluate('(ilike (array :Or :SomeThing :Other) :*et*)'), true);
+  t.equal(evaluate('(ilike (array :Or :SomeThing :Other) :*fr*)'), false);
+});
+
+q.test('in', t => {
+  t.ok(evaluate('(in :a (array 1 2 :a 3))'));
+  t.notOk(evaluate('(in :a (array 1 2 3))'));
+});
 
 q.test(`is`, t => {
   t.ok(evaluate(`(is :joe 'joe')`));
@@ -170,17 +197,58 @@ q.test(`is-not`, t => {
 
 // TODO: join
 // TODO: last
-// TODO: like
+
+q.test(`like`, t => {
+  t.equal(evaluate('(like :SomeThing :*et*)'), false);
+  t.equal(evaluate('(like :SomeThing :*eT*)'), true);
+  t.equal(evaluate('(like :SomeThing :*fr*)'), false);
+  t.equal(evaluate('(like (array :Or :SomeThing :Other) :*et*)'), false);
+  t.equal(evaluate('(like (array :Or :SomeThing :Other) :*eT*)'), true);
+  t.equal(evaluate('(like (array :Or :SomeThing :Other) :*fr*)'), false);
+});
+
 // TODO: lower
 // TODO: map
 // TODO: max
 // TODO: min
-// TODO: not-ilike
-// TODO: not-in
-// TODO: not-like
+//
+q.test(`not-ilike`, t => {
+  t.equal(evaluate('(not-ilike :SomeThing :*et*)'), false);
+  t.equal(evaluate('(not-ilike :SomeThing :*fr*)'), true);
+  t.equal(evaluate('(not-ilike (array :Or :SomeThing :Other) :*et*)'), false);
+  t.equal(evaluate('(not-ilike (array :Or :SomeThing :Other) :*fr*)'), true);
+});
+
+q.test('not-in', t => {
+  t.ok(evaluate('(not-in :b (array 1 2 3))'));
+  t.notOk(evaluate('(not-in :b (array 1 2 :b 3))'));
+});
+
+q.test(`not-like`, t => {
+  t.equal(evaluate('(not-like :SomeThing :*et*)'), true);
+  t.equal(evaluate('(not-like :SomeThing :*eT*)'), false);
+  t.equal(evaluate('(not-like :SomeThing :*fr*)'), true);
+  t.equal(evaluate('(not-like (array :Or :SomeThing :Other) :*et*)'), true);
+  t.equal(evaluate('(not-like (array :Or :SomeThing :Other) :*eT*)'), false);
+  t.equal(evaluate('(not-like (array :Or :SomeThing :Other) :*fr*)'), true);
+});
+
 // TODO: nth
 // TODO: object
-// TODO: or
+
+q.test('or', t => {
+  const op: Operator = { type: 'value', names: ['nope'], apply() { t.notOk('nope'); } };
+  registerOperator(op);
+
+  t.ok(evaluate('(or true)'));
+  t.notOk(evaluate('(or false)'));
+  t.ok(evaluate('(or true false)'));
+  t.ok(evaluate('(or false true)'));
+  t.ok(evaluate('(or true (nope))'));
+
+  unregisterOperator(op);
+});
+
 // TODO: padl
 // TODO: padr
 // TODO: replace-all
