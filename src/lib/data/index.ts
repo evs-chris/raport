@@ -267,8 +267,13 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
         const by: ValueOrExpr = typeof s === 'string' ? s : 'by' in s ? s.by : s;
         const l = evaluate(extend(context, { value: a }), by);
         const r = evaluate(extend(context, { value: b }), by);
-        const cmp = l < r ? -1 : l > r ? 1 : 0;
-        if (cmp !== 0) return (desc ? -1 : 1) * cmp;
+        const cmp = l == null && r != null ? -1 
+          : l != null && r == null ? 1
+          : (l < r) === (r < l) ? 0
+          : l < r ? -1
+          : l > r ? 1
+          : 0;
+        if (cmp) return (desc ? -1 : 1) * cmp;
       }
       return 0;
     });
