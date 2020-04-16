@@ -203,6 +203,7 @@ registerOperator(
     else return new Date();
   }),
   simple(['upper', 'lower'], (name: string, [v]: any[]): string => {
+    v = v == null ? '' : v;
     return name === 'upper' ? `${v}`.toUpperCase() : `${v}`.toLowerCase();
   }),
   simple(['format', 'fmt'], (_name: string, args: any[]): string => {
