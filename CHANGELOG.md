@@ -1,3 +1,12 @@
+## 0.2.2
+
+### Data
+
+* __BUG__: Sorting with un-comparable values should now be stable, as null-ish values are always less, and values that are both less than each other are equal.
+* __BUG__: `upper` and `lower` will treat null-ish values as empty strings.
+* `like` will now check elements within an array against the pattern.
+
+
 ## 0.2.1
 
 2020-02-04
