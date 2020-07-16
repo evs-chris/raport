@@ -167,6 +167,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `is` | `any, any` | `boolean` | Returns true if the given values are equal (not strict). |
 | `is-not` | `any, any` | `boolean` | Returns true if the given values are not equal (not strict). |
 | `join` | aggregate `string` | `string` | This will join the values in the given source using the first non-local argument. |
+| `keys` | `object, boolean` | `array` | This returns the keys of the given object. If the second argument is `true`, then prototype keys will also be included. |
 | `last` | aggregate | This will return the last application in the given source. |
 | `like` | `string\|array, string, 'free'` | `boolean` | Returns true if the first string matches a regex created from the second string by replacing spaces, percent signs, and asterisks with `.*`, replacing question marks with `.`, and anchoring the pattern at the beginning and end. If the first argument is an array, this will check each element and return true if any match the pattern. If 'free' is passed as the last argument, the regular expression will not be anchored. |
 | `lower` | `string` | `string` | Lowercases the given string. |
@@ -196,6 +197,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `unique-by` | aggregate | `array` | This will create a new array from the given source using the specified application to determine whether a value is unique. |
 | `unless` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is not truthy, the second argument in the pair will be the final value of the operation. If all of pairs have a truthy condition and there is an odd last argument, the odd last argument will be returned. This is the negated version of `if`. |
 | `upper` | `string` | `string` | Uppercases the given string. |
+| `values` | `object` | `array` | This will return an array of values from the given object, equivalent to `Object.values(arg)` |
 
 #### Built-in formats
 

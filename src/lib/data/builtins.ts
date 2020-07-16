@@ -198,6 +198,20 @@ registerOperator(
       return src.reverse();
     }
   }),
+  simple(['keys'], (_name: string, [src, proto]): string[] => {
+    if (!src) return [];
+    if (proto) {
+      const res: string[] = [];
+      for (const k in src) res.push(k);
+      return res;
+    } else {
+      return Object.keys(src);
+    }
+  }),
+  simple(['values'], (_name: string, [src]): any[] => {
+    if (!src) return [];
+    return Object.values(src);
+  }),
   simple(['date'], (_name: string, [v]: any[]): Date => {
     if (v !== undefined) return new Date(v);
     else return new Date();
