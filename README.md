@@ -162,20 +162,20 @@ There are a few operations built-in to the library to handle common expressions:
 | `get` | `any, string` | `any` | Safely retrieves the value at the path given by the `string` from the given value. |
 | `group` | `array, group` | `any` | Like `filter`, but can only apply groupings. |
 | `if` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is truthy, the second argument in the pair will be the final value of the operation. If none of pairs has a truthy condition and there is an odd last argument, the odd last argument will be returned. This roughly mirrors `icase` functions from some languages. |
-| `ilike` | `string, string` | `boolean` | `like`, but case insensitive. |
+| `ilike` | `string\|array, string, 'free'` | `boolean` | `like`, but case insensitive. |
 | `in` | `any, array\|string` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf` |
 | `is` | `any, any` | `boolean` | Returns true if the given values are equal (not strict). |
 | `is-not` | `any, any` | `boolean` | Returns true if the given values are not equal (not strict). |
 | `join` | aggregate `string` | `string` | This will join the values in the given source using the first non-local argument. |
 | `last` | aggregate | This will return the last application in the given source. |
-| `like` | `string, string` | `boolean` | Returns true if the first string matches a regex created from the second string by replacing spaces, percent signs, and asterisks with `.*`, replacing question marks with `.`, and anchoring the pattern at the beginning and end. |
+| `like` | `string\|array, string, 'free'` | `boolean` | Returns true if the first string matches a regex created from the second string by replacing spaces, percent signs, and asterisks with `.*`, replacing question marks with `.`, and anchoring the pattern at the beginning and end. If the first argument is an array, this will check each element and return true if any match the pattern. If 'free' is passed as the last argument, the regular expression will not be anchored. |
 | `lower` | `string` | `string` | Lowercases the given string. |
 | `map` | aggregate | `array` | This will map the given source into a new array composed of the application for each value. |
 | `max` | aggregate | `number` | This will return the largets application in the given source. |
 | `min` | aggregate | `number` | This will return the smallest application in the given source. |
-| `not-ilike` | `string, string` | `boolean` | `not-like`, but case insensitive. |
+| `not-ilike` | `string\|array, string, 'free'` | `boolean` | `not-like`, but case insensitive. |
 | `not-in` | `any, array\|string` | `boolean` | `in`, but negated. |
-| `not-like` | `string, string` | `boolean` | `like`, but negated. |
+| `not-like` | `string\|array, string, 'free'` | `boolean` | `like`, but negated. |
 | `nth` | aggregate `number` | This will return the nth application in the given source, using the 1-based index specified by the parameter. |
 | `object` | `...(key: string, value: any)` | `any` | Creates an object from the given values where the odd-numbered args are keys and their subsequent event-numbered args are values e.g. `(object 'foo' true 'bar' 3.14159)` is `{ foo: true, bar: 3.14159 }`. |
 | `or` | `...any` | `boolean` | This will lazily evaluate its arguments and return true if any are truthy. |

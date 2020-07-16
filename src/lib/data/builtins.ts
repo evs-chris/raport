@@ -32,10 +32,10 @@ registerOperator(
             false;
   }),
   simple(['like', 'not-like', 'ilike', 'not-ilike'], (name: string, values: any[]): boolean => {
-    const [l, r] = values;
+    const [l, r, arg] = values;
     if (typeof r !== 'string') return false;
     let res: boolean;
-    const re = new RegExp(`^${r.replace(/[\s\%\*]+/g, '.*').replace(/\?/g, '.')}$`, ~name.indexOf('ilike') ? 'i' : '');
+    const re = new RegExp(`${arg === 'free' ? '' : '^'}${r.replace(/[\s\%\*]+/g, '.*').replace(/\?/g, '.')}${arg === 'free' ? '' : '$'}`, ~name.indexOf('ilike') ? 'i' : '');
     if (Array.isArray(l)) res = !!l.find(v => re.test(v));
     else res = re.test(l);
     return name === 'like' || name === 'ilike' ? res : !res;
