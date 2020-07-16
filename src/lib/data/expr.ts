@@ -243,6 +243,16 @@ function readExpr(input: string, offset: number, require: boolean = true): Parse
 
   let p: ParseResult<any>;
 
+  if (input[c] === '[') {
+    p = readArray(input, c);
+    if (p !== Fail) return [{ v: p[0] }, p[1] + (c - offset)];
+    else if (p.m) return p;
+  } else if (input[c] === '{') {
+    p = readObject(input, c);
+    if (p !== Fail) return [{ v: p[0] }, p[1] + (c - offset)];
+    else if (p.m) return p;
+  }
+
   p = readOperation(input, c);
   if (p !== Fail) return [{ v: p[0] }, p[1] + (c - offset)];
   else if (p.m) return p;
