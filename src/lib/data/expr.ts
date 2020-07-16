@@ -89,8 +89,8 @@ const escapes = { b: '\b', f: '\f', n: '\n', r: '\r', t: '\t', v: '\v', 0: '\0' 
 const space = ' \r\n\t';
 const hex = '0123456789abcdefABCDEF';
 const sigils = '!@#+^';
-const endSym = space + '()';
-const endRef = endSym + '.,{}[]"\'<>\\%:=&' + sigils;
+const endSym = space + '():{}[]';
+const endRef = endSym + '.,"\'<>\\%=&' + sigils;
 function readString(input: string, offset: number): ParseResult<{ v: string }> {
   const q = input[offset];
   let p: Result<string>;
@@ -133,6 +133,48 @@ function readString(input: string, offset: number): ParseResult<{ v: string }> {
   }
 }
 
+function readArray(input: string, offset: number): ParseResult<Operation> {
+  if (input[offset] !== '[') return fail();
+  let c = offset + 1;
+  c += seekWhile(input, c, space)[0];
+  const res = readList(input, c, readValue);
+  if (res === Fail) return res;
+  c += res[1];
+  c += seekWhile(input, c, space)[0];
+  if (input[c] !== ']') return fail(c, `expected closing ]`);
+  return [{ op: 'array', args: res[0] }, c - offset + 1];
+}
+
+function readObjectPair(input: string, offset: number): ParseResult<[Value, Value]> {
+  let c = offset + seekWhile(input, offset, space)[0];
+  let key = readString(input, c);
+  if (key === Fail) {
+    const str = readUntil(input, c, endRef, true);
+    if (str[0].length < 1) return fail();
+    key = [{ v: str[0] }, str[0].length];
+  }
+  c += key[1];
+  c += seekWhile(input, c, space)[0];
+  if (input[c] !== ':') return fail();
+  c += 1 + seekWhile(input, c + 1, space)[0];
+  const val = readValue(input, c);
+  if (val === Fail) return val;
+  c += val[1];
+  return [[key[0], val[0]], c - offset];
+}
+
+function readObject(input: string, offset: number): ParseResult<Operation> {
+  if (input[offset] !== '{') return fail();
+  let c = offset + 1;
+  c += seekWhile(input, c, space)[0];
+  const pairs = readList(input, c, readObjectPair);
+  if (pairs === Fail) return pairs;
+  c += pairs[1];
+  c += seekWhile(input, c, space)[0];
+  if (input[c] !== '}') return fail(c, `expected closing }`);
+  return [{ op: 'object', args: pairs[0].reduce((a, c) => (a.push(c[0], c[1]), a), [] as Value[]) }, c + 1 - offset];
+}
+
 function readReference(input: string, offset: number): ParseResult<string[]> {
   let c = offset;
   let s = '';
@@ -169,6 +211,14 @@ export function parse(input: string): Value {
 
 function readValue(input: string, offset: number, require: boolean = true): ParseResult<Value> {
   let p: ParseResult<any>;
+
+  if (input[offset] === '[') {
+    p = readArray(input, offset);
+    if (p !== Fail || p.m) return p;
+  } else if (input[offset] === '{') {
+    p = readObject(input, offset);
+    if (p !== Fail || p.m) return p;
+  }
 
   p = readExpr(input, offset, false);
   if (p !== Fail || p.m) return p;
@@ -227,14 +277,13 @@ function readList<T>(input: string, offset: number, parser: (input: string, offs
 
   while (cont) {
     p = parser(input, c, require);
-    if (p === Fail) return p;
+    if (p === Fail) return [res, c - offset - t];
     res.push(p[0]);
     c += p[1];
 
     t = seekWhile(input, c, listSep)[0];
     if (t < 1) cont = false;
     c += t;
-    if (input[c] === ')') cont = false;
   }
 
   return [res, c - offset];

@@ -174,3 +174,11 @@ q.test(`expression literals`, t => {
 q.test(`a list may have whitespace just before its closing paren`, t => {
   t.deepEqual(parse('(a b c )'), { op: 'a', args: [{ r: 'b' }, { r: 'c' }] });
 });
+
+q.test(`array literal`, t => {
+  t.deepEqual(parse('[1 2 3]'), { op: 'array', args: [{ v: 1 }, { v: 2 }, { v: 3 }] });
+});
+
+q.test(`object literal`, t => {
+  t.deepEqual(parse('{ foo:12 :bar:21 baz::asdf }'), { op: 'object', args: [{ v: 'foo' }, { v: 12 }, { v: 'bar' }, { v: 21 }, { v: 'baz' }, { v: 'asdf' }] });
+});
