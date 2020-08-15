@@ -204,8 +204,8 @@ export function parse(input: string): Value {
   input = input.trim();
   const p = readValue(input, 0);
 
-  if (p === Fail) return { v: '', l: Fail.l, m: Fail.m };
-  else if (p[1] !== input.length) return { v: '', l: p[1], m: 'unconsumed input' };
+  if (p === Fail) return { position: Fail.l, message: Fail.m };
+  else if (p[1] !== input.length) return { position: p[1], message: 'unconsumed input' };
   return p[0];
 }
 

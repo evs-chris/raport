@@ -1,4 +1,4 @@
-import { filter, parse, run, evaluate, Root, Delimited, Page, DataSet, PageSizes } from '../lib/index';
+import { parse, run, evaluate, Root, Delimited, Page, DataSet, PageSizes } from '../lib/index';
 
 const people: DataSet = {
   value: [
@@ -147,7 +147,7 @@ const people: DataSet = {
 }
 
 globalThis.raport = {
-  evaluate, Root, parse
+  evaluate, Root, parse,
 };
 
 globalThis.parse = function() {
@@ -156,9 +156,9 @@ globalThis.parse = function() {
   try {
     const start = new Date();
     const str = (expr as any).value;
-    const res = parse(str);
-    if ((res as any).m) output.innerHTML = `${(res as any).m}\n${str}\n${' '.repeat((res as any).l)}^`;
-    else output.innerHTML = JSON.stringify(parse((expr as any).value), null, '  ');
+    const res = parse(str, { detailed: true });
+    if ('message' in res) output.innerHTML = `${res.message}\n${res.marked}${res.latest ? `\nbecause: ${res.latest.message}\n${res.latest.marked}` : ''}`;
+    else output.innerHTML = JSON.stringify(res, null, '  ');
     document.getElementById('time').innerHTML = `${+(new Date()) - +start}`;
     document.getElementById('length').innerHTML = `${output.innerHTML.length}`;
   } catch {
@@ -198,7 +198,7 @@ const displayed: Page = {
   type: 'page',
   classifyStyles: true,
   footer: { type: 'container', widgets: [
-    { type: 'label', width: { percent: 100 }, font: { align: 'right' }, text: `(+ 'Page ' @page ' of ' @pages)` }
+    { type: 'label', width: { percent: 100 }, font: { align: 'right' }, text: "'Page ${@page} of ${@pages}'" }
   ] },
   size: PageSizes.letter, // try changing paper size and orientation
   orientation: 'landscape',
@@ -229,23 +229,23 @@ const displayed: Page = {
       row: { type: 'container', border: 1, margin: 0.25, widgets: [
         { type: 'label', width: 10, text: 'name' },
         { type: 'label', width: 10, font: { align: 'right' }, text: 'age' },
-        { type: 'label', width: 10, font: { align: 'right' }, text: `(+ '$ ' (format wallet 'number'))` },
+        { type: 'label', width: 10, font: { align: 'right' }, text: "'$ ${(format wallet :number)}'" },
         { type: 'label', width: 10, font: { align: 'right' }, text: `(count +things)` },
         { type: 'label', width: 10, font: { align: 'right' }, text: `(sum +things)` },
-        { type: 'label', width: 10, font: { align: 'right' }, text: `(format (avg +things) 'integer')` },
+        { type: 'label', width: 10, font: { align: 'right' }, text: `(format (avg +things) :integer)` },
       ] },
-      footer: { type: 'container', border: `(if group (object 'top' 1) 0)`, margin: 0.25, widgets: [
+      footer: { type: 'container', border: `(if group {:top: 1} 0)`, margin: 0.25, widgets: [
         { type: 'container', width: { percent: 100 }, hide: 'group', margin: [4, 0, 0, 0], border: 1, widgets: [
           { type: 'label', width: 10, height: 1.5, font: { size: 1.5, weight: 700 }, text: `'Totals:'` }
         ], layout: [
           [ 5, 0 ]
         ] },
         { type: 'label', width: 10 },
-        { type: 'label', width: 10, font: { align: 'right' }, text: `(format (avg =>age) 'integer')` },
-        { type: 'label', width: 10, font: { align: 'right' }, text: `(+ '$ ' (format (sum =>wallet) 'number'))` },
+        { type: 'label', width: 10, font: { align: 'right' }, text: `(format (avg =>age) :integer)` },
+        { type: 'label', width: 10, font: { align: 'right' }, text: `(+ '$ ' (format (sum =>wallet) :number))` },
         { type: 'label', width: 10, font: { align: 'right' }, text: `(sum =>(count +things))` },
         { type: 'label', width: 10, font: { align: 'right' }, text: `(sum =>(sum +things))` },
-        { type: 'label', width: 10, font: { align: 'right' }, text: `(format (avg =>(avg +things)) 'integer')` },
+        { type: 'label', width: 10, font: { align: 'right' }, text: `(format (avg =>(avg +things)) :integer)` },
       ] }
     }
   ]

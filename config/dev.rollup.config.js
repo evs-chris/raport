@@ -1,4 +1,5 @@
 import sourcemaps from 'rollup-plugin-sourcemaps';
+import node from '@rollup/plugin-node-resolve';
 
 export default [{
   input: 'build/play/index.js',
@@ -6,7 +7,10 @@ export default [{
     file: 'play/index.js',
     format: 'iife'
   },
-  watch: { clearScreen: false }
+  watch: { clearScreen: false },
+  plugins: [
+    node(),
+  ],
 }, {
   input: 'build/lib/index.js',
   output: {
@@ -16,7 +20,8 @@ export default [{
     sourcemap: true
   },
   plugins: [
-    sourcemaps()
+    sourcemaps(),
+    node(),
   ],
   watch: { clearScreen: false }
 }];

@@ -3,7 +3,7 @@ import { parse } from '../../src/lib/index';
 const q = QUnit;
 
 function parseErr(str: string): string {
-  const res = parse(str);
+  const res = parse(str, { detailed: true });
   if ('v' in res && 'l' in res) return res.m;
   else return '<no error>';
 }
@@ -104,23 +104,19 @@ q.test('complex ops', t => {
   t.deepEqual(parse('(a +d =>foo &(b) e (- f 10))'), { op: 'a', source: { r: 'd' }, apply: { r: 'foo' }, locals: [{ r: 'b' }], args: [{ r: 'e' }, { op: '-', args: [{ r: 'f' }, { v: 10 }] }] });
 });
 
-q.test('numbers with decimal points require decimals', t => {
-  t.equal(parseErr('10.'), 'expected decimal');
-});
-
 q.test('references with a path separator must have path after the separator', t => {
-  t.equal(parseErr('foo.'), 'expected reference path');
+  t.matches(parseErr('foo.'), 'expected');
 });
 
 q.test('strings must have an endquote', t => {
-  t.equal(parseErr('"foo'), 'expected "');
-  t.equal(parseErr('"foo`'), 'expected "');
-  t.equal(parseErr('"foo\\"'), 'expected "');
-  t.equal(parseErr(`'foo`), 'expected \'');
+  t.matches(parseErr('"foo'), 'expected');
+  t.matches(parseErr('"foo`'), 'expected');
+  t.matches(parseErr('"foo\\"'), 'expected');
+  t.matches(parseErr(`'foo`), 'expected');
 });
 
 q.test('parser must consume all input', t => {
-  t.equal(parseErr('a b'), 'unconsumed input');
+  t.matches(parseErr('a b'), 'consume all');
 });
 
 q.test(`whitespace alone doesn't count as more input`, t => {
@@ -128,39 +124,39 @@ q.test(`whitespace alone doesn't count as more input`, t => {
 });
 
 q.test('string char escapes must be valid', t => {
-  t.equal(parseErr('"\\xa"'), 'expected two hex chars');
-  t.equal(parseErr('"\\xap"'), 'expected two hex chars');
-  t.equal(parseErr('"\\ua"'), 'expected four hex chars');
-  t.equal(parseErr('"\\uap"'), 'expected four hex chars');
-  t.equal(parseErr('"\\uaa"'), 'expected four hex chars');
-  t.equal(parseErr('"\\uaa0"'), 'expected four hex chars');
-  t.equal(parseErr('"\\uaa0v"'), 'expected four hex chars');
+  t.matches(parseErr('"\\xa"'), 'expected');
+  t.matches(parseErr('"\\xap"'), 'expected');
+  t.matches(parseErr('"\\ua"'), 'expected');
+  t.matches(parseErr('"\\uap"'), 'expected');
+  t.matches(parseErr('"\\uaa"'), 'expected');
+  t.matches(parseErr('"\\uaa0"'), 'expected');
+  t.matches(parseErr('"\\uaa0v"'), 'expected');
 });
 
 q.test('there must be something to parse', t => {
-  t.equal(parseErr(''), 'expected an op, literal, or reference');
+  t.matches(parseErr(''), 'expected');
 });
 
 q.test('source sigil requires source', t => {
-  t.equal(parseErr('(foo +)'), 'expected source');
+  t.matches(parseErr('(foo +)'), 'expected');
 });
 
 q.test('application sigil requires application', t => {
-  t.equal(parseErr('(foo =>)'), 'expected application');
+  t.matches(parseErr('(foo =>)'), 'expected');
 });
 
 q.test('local args require correct surround', t => {
-  t.equal(parseErr('(foo &()'), 'expected local args');
-  t.equal(parseErr('(foo &(a'), 'expected )');
-  t.equal(parseErr('(foo &())'), 'expected local args');
+  t.matches(parseErr('(foo &()'), 'expected');
+  t.matches(parseErr('(foo &(a'), 'expected');
+  t.matches(parseErr('(foo &())'), 'expected');
 });
 
 q.test('operator requires a closing )', t => {
-  t.equal(parseErr('(a b'), 'expected )');
+  t.matches(parseErr('(a b'), 'expected');
 });
 
 q.test('operator requires a name', t => {
-  t.equal(parseErr('()'), 'expected op name');
+  t.matches(parseErr('()'), 'expected');
 });
 
 q.test(`expression literals`, t => {
@@ -176,9 +172,11 @@ q.test(`a list may have whitespace just before its closing paren`, t => {
 });
 
 q.test(`array literal`, t => {
-  t.deepEqual(parse('[1 2 3]'), { op: 'array', args: [{ v: 1 }, { v: 2 }, { v: 3 }] });
+  t.deepEqual(parse('[1 2 asdf]'), { op: 'array', args: [{ v: 1 }, { v: 2 }, { r: 'asdf' }] });
+  t.deepEqual(parse('[1 2 :asdf]'), { v: [1, 2, 'asdf'] });
 });
 
 q.test(`object literal`, t => {
-  t.deepEqual(parse('{ foo:12 :bar:21 baz::asdf }'), { op: 'object', args: [{ v: 'foo' }, { v: 12 }, { v: 'bar' }, { v: 21 }, { v: 'baz' }, { v: 'asdf' }] });
+  t.deepEqual(parse('{ foo:12 :bar:21 baz:asdf }'), { op: 'object', args: [{ v: 'foo' }, { v: 12 }, { v: 'bar' }, { v: 21 }, { v: 'baz' }, { r: 'asdf' }] });
+  t.deepEqual(parse('{ foo:12 :bar:21 baz::asdf }'), { v: { foo: 12, bar: 21, baz: 'asdf' } });
 });

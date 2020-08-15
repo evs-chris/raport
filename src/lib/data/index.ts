@@ -1,4 +1,5 @@
-import { parse } from './expr';
+import { parse } from './parse';
+import { ParseError } from 'sprunge/lib';
 
 // Data
 export interface Schema {
@@ -391,12 +392,6 @@ export function isValueOrExpr(o: any): o is ValueOrExpr {
 
 export interface Literal {
   v: any;
-}
-
-export interface ParseError extends Literal {
-  v: '';
-  l: number;
-  m: string;
 }
 
 export type Parameter<T = any> = ParameterBase & T;

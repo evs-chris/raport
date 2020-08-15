@@ -1,4 +1,5 @@
 import sourcemaps from 'rollup-plugin-sourcemaps';
+import node from '@rollup/plugin-node-resolve';
 
 export default [{
   input: 'build/lib/index.js',
@@ -9,7 +10,8 @@ export default [{
     sourcemap: true
   },
   plugins: [
-    sourcemaps()
-  ]
+    sourcemaps(),
+    node(),
+  ],
 }];
 
