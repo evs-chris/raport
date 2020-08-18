@@ -1,4 +1,4 @@
-import { parse, run, evaluate, Root, Delimited, Page, DataSet, PageSizes } from '../lib/index';
+import { parse, stringify, run, evaluate, Root, Delimited, Page, DataSet, PageSizes } from '../lib/index';
 
 const people: DataSet = {
   value: [
@@ -158,7 +158,7 @@ globalThis.parse = function() {
     const str = (expr as any).value;
     const res = parse(str, { detailed: true });
     if ('message' in res) output.innerHTML = `${res.message}\n${res.marked}${res.latest ? `\nbecause: ${res.latest.message}\n${res.latest.marked}` : ''}`;
-    else output.innerHTML = JSON.stringify(res, null, '  ');
+    else output.innerHTML = JSON.stringify(res, null, '  ') + '\n\n' + stringify(res, { noSymbols: (document.getElementById('nosym') as HTMLInputElement).checked });
     document.getElementById('time').innerHTML = `${+(new Date()) - +start}`;
     document.getElementById('length').innerHTML = `${output.innerHTML.length}`;
   } catch {
@@ -228,7 +228,7 @@ const displayed: Page = {
       ] },
       row: { type: 'container', border: 1, margin: 0.25, widgets: [
         { type: 'label', width: 10, text: 'name' },
-        { type: 'label', width: 10, font: { align: 'right' }, text: 'age' },
+        { type: 'label', width: 10, font: { align: 'right' }, text: '(format age :integer)' },
         { type: 'label', width: 10, font: { align: 'right' }, text: "'$ ${(format wallet :number)}'" },
         { type: 'label', width: 10, font: { align: 'right' }, text: `(count +things)` },
         { type: 'label', width: 10, font: { align: 'right' }, text: `(sum +things)` },

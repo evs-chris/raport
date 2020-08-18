@@ -16,7 +16,7 @@ export {
   Operation, AggregateOperation, FunctionOperation,
   Type, ArrayType, ValueType,
 } from './data/index';
-export { parse } from './data/parse';
+export { parse, stringify } from './data/parse';
 
 export {
   registerLayout, registerRenderer,

@@ -109,3 +109,65 @@ const _parse = makeParser(value);
 export function parse(input: string, opts?: ErrorOptions): Value {
   return _parse(input.trim(), Object.assign({ detailed: false, consumeAll: true }, opts));
 }
+
+const checkIdent = new RegExp(endRef);
+const opKeys = ['op', 'source', 'apply', 'locals', 'args'];
+export interface StringifyOpts {
+  noSymbols?: boolean;
+}
+
+let _noSym: boolean = false;
+let _key: boolean = false;
+
+export function stringify(value: Value, opts?: StringifyOpts): string {
+  opts = opts || {};
+  _noSym = opts.noSymbols;
+  _key = false;
+  return _stringify(value);
+}
+
+function _stringify(value: Value): string {
+  if ('r' in value) {
+    return value.r;
+  } else if ('op' in value) {
+    if (value.op === 'array') {
+      return `[${value.args ? value.args.map(a => _stringify(a)).join(' ') : ''}]`;
+    } else if (value.op === 'object' && value.args && !value.args.find((a, i) => i % 2 === 0 && (!('v' in a) || typeof a.v !== 'string'))) {
+      let res = '{';
+      if (value.args) {
+        for (let i = 0; i < value.args.length; i += 2) {
+          res += `${i > 0 ? ' ' : ''}${_key = true, _stringify(value.args[i])}:${_key = false, _stringify(value.args[i + 1])}`;
+        }
+      }
+      res += '}';
+      return res;
+    } else if (value.op === '+' && value.args && value.args.length > 0 && typeof value.args[0] === 'object' && typeof (value.args[0] as any).v === 'string') {
+      return `'${value.args.map(a => 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `\$\{${_stringify(a)}}`).join('')}'`
+    } else {
+      return `(${value.op}${'source' in value ? ` +${_stringify(value.source)}` : ''}${'apply' in value ? ` =>${_stringify(value.apply)}` : ''}${'locals' in value ? ` &(${value.locals.map(v => _stringify(v)).join(' ')})` : ''}${value.args && value.args.length ? ` ${value.args.map(v => _stringify(v)).join(' ')}`: ''})`;
+    }
+  } else if ('v' in value) {
+    if (typeof value.v === 'string') {
+      if ((_key || !_noSym) && !checkIdent.test(value.v)) return `${_key ? '' : ':'}${value.v}`;
+      else if (!~value.v.indexOf("'")) return `'${value.v.replace(/[\$']/g, v => `\\${v}`)}'`;
+      else if (!~value.v.indexOf('`')) return `\`${value.v.replace(/[\$`]/g, v => `\\${v}`)}\``;
+      else if (!~value.v.indexOf('"')) return `"${value.v}"`;
+      else return `'${value.v.replace(/['\$]/g, s => `\\${s}`)}'`;
+    } else if (typeof value.v === 'number' || typeof value.v === 'boolean') {
+      return `${value.v}`;
+    } else if (value.v === 'undefined') {
+      return 'undefined';
+    } else if (value.v === 'null') {
+      return 'null';
+    } else if (Array.isArray(value.v)) {
+      return `[${value.v.map(v => _stringify({ v })).join(' ')}]`;
+    } else if (typeof value.v === 'object') {
+      const keys = Object.keys(value.v);
+      if ((keys.length === 1 && (keys[0] === 'r' || keys[0] === 'v')) || !keys.find(k => !opKeys.includes(k))) {
+        return `%${_stringify(value.v)}`;
+      } else {
+        return `{${keys.map(k => `${_key = true, _stringify({ v: k })}:${_key = false, _stringify({ v: value.v[k] })}`).join(' ')}}`;
+      }
+    }
+  }
+}
