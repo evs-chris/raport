@@ -1,5 +1,7 @@
 ## 0.2.2
 
+2020-04-17
+
 ### Data
 
 * __BUG__: Sorting with un-comparable values should now be stable, as null-ish values are always less, and values that are both less than each other are equal.

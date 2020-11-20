@@ -1,0 +1,108 @@
+{{#if report.type === 'delimited'}}
+  <div class-scrolled-wrapper style-flex-grow=1><div as-scrolled>
+    <div class="delimited paper">
+      <div class-widget>
+        <div class-bar>
+          Report
+          {{#if !report.headers}}
+            <span class-btn on-click="@.addHeader()">Add Header</span>
+          {{else}}
+            <span class-btn on-click="@.set('report.headers', undefined)">Remove Header</span>
+          {{/if}}
+        </div>
+        <div class-children>
+          {{#if !!~/report.headers}}
+            <div class-widget>
+              <div class-bar>
+                Header
+                <button class-ico class-large on-click="@.push('report.headers', ''), @.push('report.fields', '')">+</button>
+              </div>
+              <div class-children class-fields>
+                {{#each report.headers}}
+                  <div class="field" on-click="@.editExpr(@context)" class-active-expr="~/temp.expr.path === @keypath" as-expr><span>{{.}}</span><button class-ico class-large on-click="@context.splice('../', @index, 1), @.splice('~/report.fields', @index, 1), @.checkExpr(), false">&times;</button></div>
+                {{/each}}
+              </div>
+            </div>
+          {{/if}}
+          <div class-widget>
+            <div class-bar>
+              Row
+              <button class-ico class-large on-click="@.push('report.fields', ''), ~/report.headers && @.push('report.headers', '')">+</button>
+            </div>
+            <div class-children class-fields>
+              {{#each report.fields}}
+                <div class="field" on-click="@.editExpr(@context)" class-active-expr="~/temp.expr.path === @keypath" as-expr><span>{{.}}</span><button class-ico class-large on-click="@context.splice('../', @index, 1), ~/report.header && @.splice('~/report.headers', @index, 1), @.checkExpr(), false">&times;</button></div>
+              {{/each}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+{{else}}
+  <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
+    <div class="paper" style="{{@.paperSize()}}" on-click="@.selectWidget('report')">
+      <div class=bar style-cursor=pointer on-click="@.unlink('widget'), @.unlink('expr'), @.set('temp', { name: 'report ', widget: 'report' })" class-active="temp.widget === 'report'" class-hover="temp.hover === 'report'" on-mouseover="@.set('temp.hover', 'report'), false" on-mouseout="@.set('temp.hover', ''), false">
+        <span>report</span>
+        {{#if report.type === 'page'}}
+          {{#if report.header}}
+            <span class-btn on-click="@.set('report.header', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove page header</span>
+          {{else}}
+            <span class-btn on-click="@.set('report.header', { type: 'container' })">Add page header</span>
+          {{/if}}
+
+          {{#if report.footer}}
+            <span class-btn on-click="@.set('report.footer', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove page footer</span>
+          {{else}}
+            <span class-btn on-click="@.set('report.footer', { type: 'container' })">Add page footer</span>
+          {{/if}}
+        {{/if}}
+      </div>
+      {{#if ~/report.type === 'page' && ~/report.header}}{{>widget ~/report.header, 'page header' as label}}{{/if}}
+      {{#each ~/report.widgets}}
+        {{>widget}}
+      {{/each}}
+      {{#if ~/report.type === 'page' && ~/report.footer}}{{>widget ~/report.footer, 'page footer' as label}}{{/if}}
+    </div>
+  </div></div>
+{{/if}}
+
+<style>
+  .paper {
+    background-color: #fff;
+  }
+
+  .delimited.paper {
+    margin: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .delimited .children.fields {
+    display: flex;
+  }
+
+  .field {
+    display: flex;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    margin: 0.25rem;
+    padding: 0.25rem;
+  }
+  .field span {
+    display: inline-block;
+    width: 15em;
+    min-height: 1em;
+    max-height: 6em;
+    word-break: break-all;
+    white-space: pre-wrap;
+    overflow: hidden;
+  }
+  .field.active-expr {
+    background-color: #4596ff20;
+    border-color: #4596ff;
+  }
+  .field.hover-expr {
+    background-color: #26bf1017;
+    border-color: #26bf10;
+  }
+
+</style>

@@ -1,0 +1,511 @@
+<div class-top class-actions>
+  {{#if ~/report.parameters.length}}<span class-tab class-active="~/temp.bottom.tab === 'params'" on-click="@.set('temp.bottom.tab', 'params'), @.set('temp.bottom.pop', true)">Parameters</span>{{/if}}
+  <span class-tab class-active="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'" on-click="@.set('temp.bottom.tab', 'expr'), @.set('temp.bottom.pop', true)">{{#if ~/temp.expr.path}}Expression{{else}}Evaluate{{/if}}</span>
+  {{#if ~/temp.bottom.param}}<span class-tab class-active="~/temp.bottom.tab === 'param'" on-click="@.set('temp.bottom.tab', 'param'), @.set('temp.bottom.pop', true)">Parameter</span>{{/if}}
+  {{#if ~/temp.bottom.source}}<span class-tab class-active="~/temp.bottom.tab === 'source'" on-click="@.set('temp.bottom.tab', 'source'), @.set('temp.bottom.pop', true)">Source</span>{{/if}}
+  <span style-flex-grow="1">
+    {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button class-ico on-click="@.unlink('expr'), @.set('temp.expr.path', undefined), @.set('temp.expr.str', '')">&times;</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
+    {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button class-ico on-click="@.unlink('param'), @.set('temp.bottom.param', undefined), @.set('temp.bottom.tab', 'expr')">&times;</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
+    {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button class-ico on-click="@.unlink('source'), @.set('temp.bottom.source', undefined), @.set('temp.bottom.tab', 'source')">&times;</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
+  </span>
+  <button on-click="@.toggle('temp.bottom.pop')" class-ico style-height="2.5rem">{{#if ~/temp.bottom.pop}}&#9660;{{else}}&#9650;{{/if}}</button>
+</div>
+<div class-bottom>
+  <div class-tab class-active-tab="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'">
+    <div class-editor>
+      <div class-actions>
+        <button disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-ico class-large>&#9655;</button>
+        <button class-tab class-active="!~/temp.expr.tab || ~/temp.expr.tab === 'ast'" class-error="~/temp.expr.error" on-click="@.set('temp.expr.tab', 'ast')">AST</button>
+        <button class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">Text</button>
+        <button class-tab style-display="{{~/temp.expr.html ? '' : 'none'}}" class-active="~/temp.expr.tab === 'html'" on-click="@.set('temp.expr.tab', 'html')">HTML</button>
+        <div style-flex-grow=2 />
+        <button class-tab class-active="~/temp.expr.tab === 'result'" on-click="@.set('temp.expr.tab', 'result')">Result</button>
+        {{#if ~/temp.expr.parsed}}
+          <button class-tab class-active="~/temp.expr.tab === 'parsed'" on-click="@.set('temp.expr.tab', 'parsed')">Parsed</button>
+        {{/if}}
+      </div>
+      <div class-tab class-ast class-active-tab="!~/temp.expr.tab || ~/temp.expr.tab === 'ast'" class-error="~/temp.expr.error">
+        <div class-scrolled-wrapper style-flex-grow=1>
+          <div as-scrolled on-click="@node === @event.target && @.set('temp.expr.partpath', '')">
+            {{#if ~/temp.expr.ast}}
+              {{>ast-node ~/temp.expr.ast}}
+            {{else}}
+              <button class-ico on-click="@.set('temp.expr.ast', { v: '' })">+</button>
+            {{/if}}
+          </div>
+        </div>
+      </div>
+      <div class-tab class-text class-active-tab="~/temp.expr.tab === 'text'">
+        <div class-scrolled-wrapper style-flex-grow=1>
+          <div as-scrolled>
+            <textarea lazy="500" on-input="@.autosize(@node)" class-expr-text>{{~/temp.expr.str}}</textarea>
+          </div>
+        </div>
+      </div>
+      <div class-tab class-html class-active-tab="~/temp.expr.tab === 'html'">
+        <div class-editor-buttons>
+          <button on-click="@.command('bold')" title="Bold"><strong>B</strong></button>
+          <button on-click="@.command('italic')" title="Italic"><em>I</em></button>
+          <button on-click="@.command('underline')" title="Underline"><span style="text-decoration: underline;">U</span></button>
+          <button on-click="@.command('strikeThrough')" title="Strike Through"><span style="text-decoration: line-through;">S</span></button>
+          <select value="{{~/temp.fontSize}}" on-change="@.setHTMLFontSize()" title="Change Font Size">
+            <option value=''>(font size)</option>
+            <option value="{{1}}">smallest</option>
+            <option value="{{2}}">smaller</option>
+            <option value="{{3}}">small</option>
+            <option value="{{4}}">regular</option>
+            <option value="{{5}}">large</option>
+            <option value="{{6}}">larger</option>
+            <option value="{{7}}">largest</option>
+          </select>
+        </div>
+        <div class-scrolled-wrapper><div as-scrolled>
+          <div contenteditable=true class-html-editor value="{{~/temp.expr.htmlstr}}" />
+        </div></div>
+      </div>
+      <div class-tab class-result class-active-tab="~/temp.expr.tab === 'result'">
+        <div class-editor-buttons>
+          <div class=toggles>{{#with ~/temp.expr.resulttype as t}}
+            <span class-toggle class-active="!t || t === 'plain'" {{#if t && t !== 'plain'}}on-click="@.set('temp.expr.resulttype', 'plain')"{{/if}} title="Show result as a plain string">Plain</span>
+            <span class-toggle class-active="t === 'json'" {{#if t !== 'json'}}on-click="@.set('temp.expr.resulttype', 'json')"{{/if}} title="Show result as JSON">JSON</span>
+            <span class-toggle class-active="t === 'html'" {{#if t !== 'html'}}on-click="@.set('temp.expr.resulttype', 'html')"{{/if}} title="Show result as HTML">HTML</span>
+          {{/with}}</div>
+        </div>
+        <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
+          {{#if ~/temp.expr.result === undefined}}
+            <span style="color: blue;">undefined</span>
+          {{else}}
+            {{#if ~/temp.expr.resulttype === 'html'}}
+              {{{~/temp.expr.result}}}
+            {{elseif ~/temp.expr.resulttype === 'json'}}
+              <code><pre>{{JSON.stringify(~/temp.expr.result, null, '  ')}}</pre></code>
+            {{else}}
+              <code><pre>{{~/temp.expr.result}}</pre></code>
+            {{/if}}
+          {{/if}}
+        </div></div>
+      </div>
+      <div class-tab class-parsed class-active-tab="~/temp.expr.tab === 'parsed'">
+        <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
+          <code><pre>{{~/temp.expr.parsed}}</pre></code>
+        </div></div>
+      </div>
+    </div>
+    <div class-context style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' ? '' : 'none'}}">
+      <div class-header>Context</div>
+      <div class-panel class-scrolled-wrapper><div as-scrolled>
+        {{#if ~/temp.expr.ctx}}
+          {{>expr-context ~/temp.expr.ctx}}
+        {{/if}}
+      </div></div>
+    </div>
+    <div class-ops style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' ? '' : 'none'}}">
+      <div class-header>Operators</div>
+      <div class-panel class-scrolled-wrapper><div as-scrolled>
+        {{~/temp.expr.tab === 'ast' && @context.decorators.scrolled && @context.decorators.scrolled.invalidate() || '' && ''}}
+        {{#each ~/operators}}
+          <div class-entry-details>
+            <div class-expr-operator on-click="@.insertOp(@key)">{{@key}}</div>
+            <div class-entry-type>{{.type}}</div>
+          </div>
+        {{/each}}
+      </div></div>
+    </div>
+  </div>
+  <div class-tab class-active-tab="~/temp.bottom.tab === 'param'" class-properties>
+    {{#with ~/param}}
+      <label><span>Name</span><input value="{{.name}}" /></label>
+      <label><span>Type</span><select value="{{.type}}">{{>types}}</select></label>
+      <label><input type=checkbox checked="{{.required}}" /> Require?</label>
+      <label><span>Label</span><input value="{{.label}}" /></label>
+      <label><input type=checkbox twoway=false checked="{{!!.options}}" on-change="@context.set('.options', !!.options ? undefined : [])" /> Options?</label>
+      {{#if !!.options}}
+        <div class-options style="height: 100%; width: 30rem;">
+          <div>
+            {{#with @local as ctx}}
+              <label><span>Label</span><br/><input value="{{ctx.label}}" /></label>
+              <label><span>Value</span><br/><input value="{{ctx.value}}" /></label>
+              <button disabled="{{ctx.label || !ctx.value}}" class-ico class-large on-click="@context.push('.options', !ctx.label ? ctx.value : { label: ctx.label, value: ctx.value }), @context.set({ 'ctx.label': '', 'ctx.value': '' })">+</button>
+            {{/with}}
+          </div>
+          {{#if .options}}
+            <h3>Options</h3>
+            <div class-scrolled-wrapper><div as-scrolled>
+              {{#each .options}}
+                <div>
+                  {{#if typeof . === 'string'}}<input value="{{.}}" />
+                  {{else}}<input value="{{.label}}" /> <input value="{{.value}}" />{{/if}}
+                  <button class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button>
+                </div>
+              {{/each}}
+            </div></div>
+          {{/if}}
+        </div>
+      {{/if}}
+    {{/with}}
+  </div>
+  <div class-tab class-active-tab="~/temp.bottom.tab === 'params'" class-properties>
+    {{>bottom-parameters}}
+  </div>
+  <div class-tab class-active-tab="~/temp.bottom.tab === 'source'" class-properties>
+    {{#with ~/source}}
+      <label><span>Name</span><input value="{{.name}}" /></label>
+      <label><span>Source</span><select value="{{.source}}">{{#each ~/sources}}<option>{{.name}}</option>{{/each}}</select></label>
+      <label><span>Base <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.base')">&#9998;</button></span><textarea rows=1>{{.base}}</textarea></label>
+      <label><span>Filter <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.filter')">&#9998;</button></span><textarea rows=1>{{.filter}}</textarea></label>
+      <label><span>Sort <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.sort')">&#9998;</button></span><textarea rows=1>{{.sort}}</textarea></label>
+      {{#if Array.isArray(.group)}}
+        <div class-options style="height: 100%; width: 20rem;">
+          <h3>
+            <button class-ico style-float=right on-click="@context.push('.group', '')">+</button>
+            <label><input type="checkbox" checked on-change="@context.set('.groups', undefined)" /> Groups</label>
+          </h3>
+          <div class-scrolled-wrapper><div as-scrolled>
+            {{#each .group}}
+              <div class-group-edit>
+                <span>{{@index + 1}}</span>
+                <textarea rows=1>{{.}}</textarea>
+                <button class-ico class-large on-click="@.editExpr('~/' + @keypath)">&#9998;</button>
+                <button class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button>
+              </div>
+            {{/each}}
+          </div></div>
+        </div>
+      {{else}}
+        <label><input type=checkbox on-change="@context.set('.group', [''])" /> Group?</label>
+      {{/if}}
+    {{/with}}
+  </div>
+</div>
+
+<datalist id="operators">
+  {{#each ~/operators}}<option value="{{@key}}" />{{/each}}
+</datalist>
+
+<template id="ast-node">
+  <div on-click="~/temp.expr.partpath !== @keypath && [@.link(@keypath, 'temp.expr.part'), @.set('temp.expr.partpath', @keypath)], false" class="ast-node ast-{{(. && ('op' in . ? 'op' : 'v' in . ? 'value' : 'r' in . ? 'ref' : 'wat')) || 'wat'}}" class-ast-active-node="~/temp.expr.partpath === @keypath">
+    {{#if ~/temp.expr.partpath === @keypath}}
+      <div class-ast-content>
+        {{#if . && 'op' in .}}
+          <div class-ast-op-name><div>{{prefix}}(<input value={{.op}} list=operators /></div>{{>ast-actions}}</div>
+          {{#if .source}}{{>ast-node .source, '+ ' as prefix}}{{/if}}
+          {{#if .apply}}{{>ast-node .apply, '=>' as prefix}}{{/if}}
+          {{#each .args}}{{>ast-node}}{{/each}}
+          <div>) <button class-ico on-click="@context.push('.args', { v: '' })">+</button></div>
+          {{elseif . && 'v' in .}}{{!TODO: array, object, date?}}
+            <div class-ast-content-value>
+              <div>
+                {{prefix}}
+                {{#if typeof .v === 'string'}}<textarea rows=1 cols=30>{{.v}}</textarea>
+                {{elseif typeof .v === 'number'}}<input value={{.v}} type=number />
+                {{/if}}
+              </div>
+              {{>ast-actions}}
+            </div>
+        {{elseif . && 'r' in .}}
+          <div class-ast-content-ref>
+            <div>{{prefix}}<input value={{.r}} /></div>
+            {{>ast-actions}}
+          </div>
+        {{/if}}
+      </div>
+    {{else}}
+      <div class-ast-content>
+        {{#if . && 'op' in .}}
+          <div class-ast-op-name><div>{{prefix}}({{.op}}</div>{{>ast-dim-actions}}</div>
+          {{#if ~/operators[.op] && ~/operators[.op].type === 'aggregate'}}
+            {{#if .source}}{{>ast-node .source, '+ ' as prefix}}{{/if}}
+            {{#if .apply}}{{>ast-node .apply, '=> ' as prefix}}{{/if}}
+          {{/if}}
+          {{#each .args}}{{>ast-node}}{{/each}}
+          )
+        {{elseif . && 'v' in .}}{{!TODO: array, object, date?}}
+          <div class-ast-content-value><div class-ast-string="typeof .v === 'string'" class-ast-number="typeof .v === 'number'">{{prefix}}{{.v}}</div>{{>ast-dim-actions}}</div>
+        {{elseif . && 'r' in .}}
+          <div class-ast-content-ref><div>{{prefix}}{{.r}} (ref)</div>{{>ast-dim-actions}}</div>
+        {{/if}}
+      </div>
+    {{/if}}
+  </div>
+</template>
+
+<template id="ast-actions">
+  <div class-ast-actions>
+    {{#if ~/operators[.op] && ~/operators[.op].type === 'aggregate'}}
+      {{#unless .source}}<button class-ico on-click="@context.set('.source', { r: '' })">+ Source</button>{{/unless}}
+      {{#unless .apply}}<button class-ico on-click="@context.set('.apply', { r: '' })">+ Application</button>{{/unless}}
+    {{/if}}
+    <select twoway=false on-change="@.retypeASTNode(@keypath, @node.value)" value="{{. && 'op' in . ? 'operator' : . && 'v' in . ? (typeof .v === 'string' ? 'string' : typeof .v === 'number' ? 'number' : 'object') : . && 'r' in . ? 'reference' : 'undefined'}}">
+      <option>operator</option>
+      <option>string</option>
+      <option>number</option>
+      <option>reference</option>
+      <option>undefined</option>
+    </select>
+    <button class-ico on-click="Array.isArray(../) ? @context.splice('../', @index, 1) : @context.set('.', undefined)">&times;</button>
+  </div>
+</template>
+
+<template id="ast-dim-actions">
+  <div class-ast-actions>
+    <button class-ico on-click="Array.isArray(../) ? @context.splice('../', @index, 1) : @context.set('.', undefined)">&times;</button>
+  </div>
+</template>
+
+<template id="expr-context">
+  {{#each .fields}}
+    <div class-context-entry>
+      <div class-entry-details>
+        <div class-entry-name on-click="@.insertRef(@keypath)">{{.name}}</div>
+        <div class-entry-type>{{.type}}</div>
+      </div>
+      {{#if .fields}}{{>expr-context}}{{/if}}
+    </div>
+  {{/each}}
+</template>
+
+<template id="bottom-parameters" src="./params.ractive.html" />
+
+<style>
+  .bottom-pane pre {
+    margin: 0;
+  }
+
+  .bottom-pane .top {
+    display: flex;
+    flex-shrink: 0;
+    flex-grow: 0;
+    box-sizing: border-box;
+    height: 2.5rem;
+    align-items: end;
+  }
+
+  .bottom-pane .bottom {
+    display: flex;
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    border: 1px solid #ddd;
+  }
+
+  .bottom-pane .bottom > .tab {
+    display: flex;
+    padding: 0.5rem;
+    flex-grow: 0;
+    border: none;
+    display: none;
+  }
+  .bottom-pane .bottom > .active-tab {
+    flex-grow: 1;
+    display: flex;
+  }
+
+  .bottom-pane .context, .bottom-pane .ops {
+    margin: 0.2em;
+    width: 25%;
+    max-width: 20em;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bottom-pane .context .panel, .bottom-pane .ops .panel {
+    border: 1px solid #ddd;
+    flex-grow: 1;
+  }
+
+  .bottom-pane .context .header, .bottom-pane .ops .header {
+    height: 2.2em;
+    font-weight: bold;
+    text-align: center;
+    line-height: 2.2em;
+  }
+
+  .bottom-pane .editor {
+    flex-grow: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 0.25rem;
+    box-sizing: border-box;
+  }
+  
+  .bottom-pane textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5em;
+  }
+  .bottom-pane .text.tab textarea {
+    min-height: 99%;
+    border: none;
+    outline: none;
+  }
+
+  .bottom-pane .active-tab {
+    border: 1px solid #ddd;
+  }
+
+  .bottom-pane .editor .tab {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bottom-pane .ast.tab {
+    word-wrap: anywhere;
+    word-break: break-all;
+  }
+  .bottom-pane .ast.tab.error {
+    border-color: red;
+  }
+
+  .bottom-pane .tab.html .scrolled {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bottom-pane .tab.result .scrolled {
+    padding: 0.5rem;
+  }
+
+  .bottom-pane .tab.html, .bottom-pane .tab.result {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bottom-pane .tab .editor-buttons {
+    display: flex;
+    flex-shrink: 0;
+    padding: 0.2rem;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .bottom-pane .tab.html button {
+    border: none;
+    background-color: transparent;
+    padding: 0.25rem;
+    cursor: pointer;
+    outline: none;
+  }
+  .bottom-pane .tab.html button:hover {
+    color: #4596ff;
+  }
+  .bottom-pane .tab.html button.skip {
+    margin-left: 1rem;
+  }
+
+  .bottom-pane .html-editor {
+    padding: 0.5rem;
+    flex-grow: 1;
+    flex-shrink: 1;
+    white-space: pre-wrap;
+    word-wrap: anywhere;
+    word-break: break-all;
+  }
+
+  .bottom-pane pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .bottom-pane .properties {
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: flex-start;
+  }
+  .bottom-pane .properties > label {
+    width: 20em;
+    margin: 0.5rem;
+  }
+  .bottom-pane .options label {
+    display: inline-block;
+  }
+  .bottom-pane .options label > span:first-of-type {
+    font-size: 0.8rem;
+  }
+  .bottom-pane .properties > label > span:first-of-type {
+    font-size: 0.8rem;
+    display: block;
+  }
+  .bottom-pane .properties input, .bottom-pane .properties select {
+    border: none;
+    background-color: transparent;
+    border: 1px solid #ddd;
+  }
+  .bottom-pane .options {
+    box-sizing: border-box;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bottom-pane .group-edit {
+    display: flex;
+    align-items: center;
+  }
+
+  .ast-node {
+    margin-left: 0.5em;
+    display: flex;
+    cursor: pointer;
+    min-height: 2em;
+    border: 1px solid transparent;
+  }
+
+  .ast-node input, .ast-node select {
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    background-color: transparent;
+    padding: 0.2em;
+  }
+
+  .ast-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .ast-active-node {
+    background-color: #4596ff20;
+    border: 1px solid #4596ff;
+    cursor: default;
+  }
+
+  .ast-string:before, .ast-string:after {
+    content: '"';
+  }
+
+  .ast-number {
+    font-family: mono;
+  }
+
+  .ast-op-name, .ast-content-value, .ast-content-ref {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .entry-details {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .entry-type {
+    opacity: 0.5;
+    padding: 0 0.5em;
+  }
+
+  .context-entry {
+    padding-left: 0.5em;
+  }
+  .context-entry .context-entry {
+    margin-left: 0.5em;
+    border-left: 1px dotted rgba(0, 0, 0, 0.2);
+  }
+
+  .expr-operator, .context-entry {
+    cursor: pointer;
+  }
+
+  .expr-operator {
+    padding: 0 0.5em;
+  }
+</style>

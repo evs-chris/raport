@@ -11,9 +11,6 @@
         margin: 0;
         padding: 1em;
       }
-      body > * {
-        margin: 0.5em;
-      }
 
       iframe {
         flex-grow: 2;
@@ -37,23 +34,12 @@
     </style>
   </head>
   <body>
-    <iframe srcdoc="raporting..."></iframe>
-    <div class="run">
-      Generated&nbsp;<span id="length"></span>&nbsp;bytes and took&nbsp;<span id="time"></span>&nbsp;ms.
-      <button onclick="report()">Run Report</button>
-      <button onclick="document.querySelector('iframe').contentWindow.print()">Print</button>
-    </div>
-    <div class="parse">
-      <div style="display: flex; flex-direction: column; position: sticky; top: 0; min-width: 20em; margin-right: 1em;">
-        <textarea id="expr" style="display: block; flex-grow: 2;"></textarea>
-        <div>
-          <button onclick="parse()">Parse</button>
-          <button onclick="run()">run</button>
-          <label><input type=checkbox id=nosym /> nosym</label>
-        </div>
-      </div>
-      <div id="parsed" style="white-space: pre-wrap;"></div>
-    </div>
+    <script type="ractive" id="template">
+      <report bind-sources on-init="@.set('@.report', $1)" />
+    </script>
+    <script src="../node_modules/ractive/ractive.js"></script>
+    <script src="../build/lib/raport.umd.js"></script>
+    <script src="../build/lib/raport.design.umd.js"></script>
     <script src="./index.js"></script>
   </body>
 </html>

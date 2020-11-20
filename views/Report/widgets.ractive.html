@@ -1,0 +1,139 @@
+<div class=children>
+  {{#if .type === 'repeater' && .group}}
+    {{#each .group}}
+      <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.selectWidget(@keypath), false">
+        <span class-line on-mouseover="@.set('temp.hover', @keypath), false"><span>group {{@index + 1}}</span>
+          <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context), @.moveUp(@context, '^^/groupEnds'), false">&#9650;</button>
+          <button class-ico disabled="{{@index === @last}}" on-click="@.moveDown(@context), @.moveDown(@context, '^^/groupEnds'), false">&#9660;</button>
+          <button class-ico class-large on-click="@context.splice('../', @index, 1), @context.splice('^^/groupsEnds', @index, 1), false">&times;</button>
+        </span>
+        {{>widget-tree}}
+      </div>
+    {{/each}}
+  {{/if}}
+  {{#each .}}
+    {{#if .type === 'container'}}
+      <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
+        <span class-line>
+          <span>{{@key}}</span>
+          {{#if @key !== 'row' || ../type !== 'repeater'}}<button class-ico class-large on-click="@context.set('^^/' + @key, undefined), false">&times;</button>{{/if}}
+        </span>
+        {{>widget-tree}}
+      </div>
+    {{/if}}
+  {{/each}}
+  {{#each .widgets}}
+    <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
+      <span class-line><span>{{.type}}</span>
+        <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context), Array.isArray(^^/layout) ? @.moveUp(@context, '^^/layout') : false, false">&#9650;</button>
+        <button class-ico disabled="{{@index === @last}}" on-click="@.moveDown(@context), Array.isArray(^^/layout) ? @.moveDown(@context, '^^/groupEnds') : false, false">&#9660;</button>
+        <button class-ico class-large on-click="@context.splice('../', @index, 1), Array.isArray(^^/layout) ? @context.splice('^^/layout', @index, 1) : false, false">&times;</button>
+        </span>
+        {{>widget-tree}}
+    </div>
+  {{/each}}
+</div>
+
+<template id="widget">
+  {{#with @.calcWidthWithMargin(., @keypath) as widthMargin, @.calcHeightWithMargin(.) as heightMargin}}
+  <div as-widget=.type style="width: {{widthMargin}}; {{#if .type !== 'container'}}height: {{heightMargin}}{{/if}}"
+    {{#if Array.isArray(^^/layout)}}
+      style="margin-left: {{(^^/layout[@index] || [])[0] || 0}}rem; margin-top: {{(^^/layout[@index] || [])[1] || 0}}rem; margin-right: calc(-{{(^^/layout[@index] || [])[0] || 0}}rem - {{widthMargin}})"
+      {{#if ~/temp.widget === @keypath}}as-moveable{{/if}}
+    {{else}}
+      style="{{#if .br}}break-after: always;{{/if}}"
+    {{/if}}
+    {{#if .margin}}style="{{@.calcMargin(.)}}"{{/if}}
+    {{#if .border}}style="{{@.calcBorder(.)}}"{{/if}}
+    {{#if .font}}style="{{@.calcFont(.)}}"{{/if}}
+  >
+    {{#if Array.isArray(../)}}<span class="remove btn" title="Remove {{.type}}" on-click="@context.splice('../', @index, 1), @.unlink('widget'), @.set('temp.widget', undefined), false">&times;</span>{{/if}}
+    {{>.type}}
+  </div>
+  {{/with}}
+</template>
+
+<template id="container">
+  {{#with @local as ctx}}
+  <div class=bar on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false">
+    <span>{{label || 'container'}}</span>
+    {{#if ctx.layout}}{{@context.set('ctx.layout', .layout === 'row' || !.layout ? 'auto' : 'manual') && ''}}{{/if}}
+    <select value="{{ctx.layout}}" on-change="@node.value === 'auto' ? @context.set('.layout', undefined) : @context.set('.layout', [])">
+      <option value="auto">Auto Layout</option>
+      <option value="manual">Manual Layout</option>
+    </select>
+  </div>
+  {{/with}}
+  <div class-widgets class-manual="Array.isArray(.layout)" style="height: {{heightMargin}};">
+    {{#each .widgets}}
+      {{>widget false as label}}
+    {{/each}}
+  </div>
+</template>
+
+<template id="label">
+  <span class-content on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false" on-click="@.editExpr(@context.resolve('.text')), @.selectWidget(@keypath)" title="{{.text}}">{{.text}}</span>
+</template>
+
+<template id="measured">
+  <span class-content on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false" on-click="@.editExpr(@context.resolve('.text')), @.selectWidget(@keypath)" title="{{.text}}">{{.text}}</span>
+</template>
+
+<template id="image">
+  {{#with @local as ctx}}
+    <span class="preview btn" title="Toggle Preview" on-click="@context.toggle('ctx.preview')">&#9678;</span>
+    {{#if ctx.preview}}
+      <img src="{{@.readHtml(.url)}}" style="width: 100%; height: 100%;" />
+    {{/if}}
+  {{/with}}
+</template>
+
+<template id="html">
+  {{#with @local as ctx}}
+    <span class="preview btn" title="Toggle Preview" on-click="@context.toggle('ctx.preview')">&#9678;</span>
+    <span class="autosize btn" title="Autosize Block" on-click="@.autosizeHtml(@context)">&#8597;</span>
+    <span class-content on-click="@.editExpr(@context.resolve('.html'), { html: true })" class-preview="ctx.preview" {{#if ctx.preview}}style-font-size="{{.font.size || 1}}rem" style-line-height="{{.font.line === 0 ? 'initial' : (.font.line || .font.size || 1) + 'rem'}}"{{/if}} {{#if ctx.autosize}}style="height: auto;"{{/if}} title="{{.html}}">{{#if ctx.preview}}{{{@.readHtml(.html)}}}{{else}}{{.html}}{{/if}}</span>
+  {{/with}}
+</template>
+
+<template id="repeater">
+  <div class=bar on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false">
+    <span>Repeater</span>
+
+    {{#if .group}}
+      <span class-btn on-click="@context.set('.group', undefined), @context.set('.groupEnds', [true]), @.unlink('widget'), @.set('temp.widget', undefined)">Remove Group</span>
+      <span class-btn on-click="@context.push('.group', { type: 'container' }), @context.splice('.groupEnds', -1, 0, true)">Add Group Level</span>
+    {{else}}
+      <span class-btn on-click="@context.set('.group', [{ type: 'container' }]), @context.set('.groupEnds', [true, true])">Add Group</span>
+    {{/if}}
+
+    {{#if .header}}
+      <span class-btn on-click="@context.set('.header', undefined), @.unlink('widget'), @.set('temp.widget', undefined)">Remove Header</span>
+    {{else}}
+      <span class-btn on-click="@context.set('.header', { type: 'container' })">Add Header</span>
+    {{/if}}
+
+    {{#if .footer}}
+      <span class-btn on-click="@context.set('.footer', undefined), @.unlink('widget'), @.set('temp.widget', undefined)">Remove Footer</span>
+    {{else}}
+      <span class-btn on-click="@context.set('.footer', { type: 'container' })">Add Footer</span>
+    {{/if}}
+  </div>
+
+  <div class-widgets>
+    {{#if .group}}
+      {{#each .group}}{{>widget `Group Header ${@index + 1}` as label}}{{/each}}
+    {{/if}}
+
+    {{#if .header}}
+      {{#with .header}}{{>widget 'Header' as label}}{{/with}}
+    {{/if}}
+
+    {{#if !.row}}{{@context.set('.row', { type: 'container' }) && ''}}{{/if}}
+    {{#with .row}}{{>widget 'Row' as label}}{{/with}}
+
+    {{#if .footer}}
+      {{#with .footer}}{{>widget 'Footer' as label}}{{/with}}
+    {{/if}}
+  </div>
+</template>

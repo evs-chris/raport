@@ -1,0 +1,432 @@
+<div class-raport-report>
+  {{>left}}
+  <div class=layout>
+    <div class-actions>
+      <button disabled="{{report.type === 'delimited' && report.sources.length !== 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>&#9655;</button>
+      <button on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'definition'">Designer</button>
+      <button on-click="@.set('tab', 'definition')" class-tab class-active="tab === 'definition'">Definition</button>
+      {{#if result}}
+        <button on-click="@.set('tab', 'result')" class-tab class-active="tab === 'result'">Output</button>
+        {{#if tab === 'result'}}<button class-ico on-click="@.download((~/report.name || 'report') + (~/report.type === 'delimited' ? '.csv' : '.html'), ~/result, ~/report.type === 'delimited' ? 'text/csv' : 'text/html')" title="Save output to a file">Save Output</button>{{/if}}
+      {{/if}}
+    </div>
+    <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'definition'">
+      {{>design}}
+    </div>
+    <div class-tab class-report-definition class-active-tab="tab === 'definition'">
+      {{>definition}}
+    </div>
+    <div class-result class-tab class-active-tab="tab === 'result'">
+      <iframe srcdoc="{{~/report.type === 'delimited' ? '<style>pre { margin: 1rem; background-color: #fff; padding: 0.5rem; }</style><code><pre>' + result + '</pre></code>' : result}}"></iframe>
+    </div>
+    <div class-bottom-pane class-active="~/temp.bottom.pop">
+      {{>bottom}}
+    </div>
+  </div>
+</div>
+
+<template id="left" src="./Report/left.ractive.html" />
+<template id="design" src="./Report/design.ractive.html" />
+<template id="definition" src="./Report/definition.ractive.html" />
+<template id="bottom" src="./Report/bottom.ractive.html" />
+
+<template id="types">
+  <option>any</option>
+  <option>string</option>
+  <option>number</option>
+  <option>boolean</option>
+  <option>date</option>
+  <option>array</option>
+  <option>object</option>
+  <option>string[]</option>
+  <option>number[]</option>
+  <option>boolean[]</option>
+  <option>date[]</option>
+  <option>object[]</option>
+</template>
+
+<template id="widget-props" src="./Report/widget-props.ractive.html" />
+
+<style>
+  h3 {
+    padding: 0.5rem;
+    margin: 0;
+  }
+
+  button.ico {
+    border: none;
+    background-color: transparent;
+    padding: 0.25rem;
+    cursor: pointer;
+    outline: none;
+  }
+
+  button.ico:hover {
+    color: #4596ff;
+  }
+
+  button.ico.large {
+    font-size: 1.5rem;
+    padding: 0 0.5rem;
+    line-height: 1.5rem;
+  }
+
+  button.ico:disabled {
+    color: #ccc;
+    cursor: default;
+  }
+
+  .raport-report {
+    display: flex;
+    flex-grow: 1;
+    flex-shrink: 1;
+    font-family: sans-serif;
+    height: 100%;
+    width: 100%;
+    color: #222;
+  }
+
+  button.add {
+    width: 2rem;
+    height: 2rem;
+    line-height: 1em;
+    text-align: center;
+    border-radius: 2rem;
+    background-color: #4596ff;
+    color: #fff;
+    margin: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5em;
+  }
+
+  select {
+    padding: 0.2rem;
+    border-style: solid;
+    border-width: 0 0 1px 0;
+    background: none;
+  }
+
+  .layout {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 2;
+    flex-shrink: 1;
+    margin: 0 0.5em;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .layout > .tab {
+    background-color: #999;
+  }
+
+  .editor > .tab, .layout > .tab {
+    flex-grow: 10;
+    flex-shrink: 1;
+    overflow: hidden;
+    max-height: 0;
+  }
+
+  .editor > .active-tab, .layout > .active-tab {
+    max-height: none;
+  }
+
+  .designer {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .layout .actions {
+    display: flex;
+    z-index: 2;
+  }
+
+  .layout .actions .tab {
+    box-sizing: border-box;
+    padding: 0.5em;
+    margin: 0 0.5em;
+    background-color: #eee;
+    color: #777;
+    border-style: solid;
+    border-width: 1px 1px 0 1px;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+    border-color: #ddd;
+  }
+  .layout .actions .tab:first-of-type {
+    margin-left: 0;
+  }
+
+  .layout .actions .tab.active {
+    background-color: #999;
+    color: #fff;
+    border: none;
+  }
+
+  .layout .bottom-pane .actions .tab.active {
+    background-color: #fff;
+    border-color: #ddd;
+    color: #222;
+    margin-bottom: -2px;
+    border-style: solid;
+    border-width: 1px;
+    border-bottom-color: #fff;
+  }
+
+  .layout .bottom-pane .actions .tab.error {
+    border-color: red;
+    color: red;
+  }
+
+  .layout .bottom-pane .actions .tab.active.error {
+    background-color: #fafafa;
+    border-bottom-color: #fafafa;
+  }
+
+  .layout .bottom-pane {
+    height: 2.9rem;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 0;
+    padding-top: 0.5rem;
+    box-sizing: border-box;
+  }
+
+  .layout .bottom-pane.active {
+    height: 33vh;
+    border-top: 1px solid #ddd;
+  }
+
+  .result {
+    display: flex;
+    flex-grow: 2;
+    background-color: #fff;
+  }
+
+  iframe {
+    display: block;
+    border: none;
+  }
+
+  .bar {
+    height: 2rem;
+    background-color: #555;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    font-size: 0.75rem;
+    border-bottom: 1px solid;
+    box-sizing: border-box;
+    padding: 0 0.25rem;
+  }
+
+  .bar * {
+    margin: 0 0.5em 0 0;
+  }
+
+  .bar button, .bar .btn {
+    background: none;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: inherit;
+    padding: 0 0.5em;
+  }
+
+  .bar select {
+    background: none;
+    border: none;
+    color: #fff;
+    height: 1rem;
+    font-size: 0.6rem;
+    padding: 0;
+  }
+
+  div.widgets {
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+    height: min-content;
+    width: calc(100% + 2px);
+    left: -1px;
+  }
+
+  div.widgets.manual {
+    display: inline-block;
+  }
+
+  div.widget {
+    cursor: pointer;
+    display: block;
+    border: 1px dotted rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    font-size: 0.75rem;
+    position: relative;
+  }
+
+  div.widgets.manual > .widget {
+    float: left;
+  }
+  div.widgets.manual > .active-widget {
+    cursor: move;
+  }
+
+  div.active-widget {
+    border-color: #4596ff;
+    border-style: solid;
+    background-color: #4596ff20;
+    user-select: none;
+  }
+
+  div.hover-widget {
+    border-color: #26bf10;
+    border-style: solid;
+    background-color: #26bf1017;
+  }
+
+  .active-widget > .bar, .bar.active {
+    background-color: #4596ff;
+  }
+
+  .hover-widget > .bar, .bar.hover {
+    background-color: #26bf10;
+  }
+
+  .widget > .btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+    background-color: #000;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 0.2rem;
+    width: 0.9rem;
+    height: 0.9rem;
+    text-align: center;
+    line-height: 0.9rem;
+    font-size: 0.7rem;
+  }
+  .widget > .preview.btn {
+    right: 1.2rem;
+  }
+  .widget > .autosize.btn {
+    right: 2.3rem;
+  }
+
+  .widget:hover > .btn {
+    opacity: 1;
+  }
+
+  .label, .html {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .html .preview {
+    font-size: 1rem;
+    line-height: 1rem;
+    white-space: normal;
+    word-break: break-all;
+    display: block;
+  }
+
+  .widget > .content {
+    display: block;
+  }
+
+  .sheet .toggles {
+    margin-bottom: 0.5rem;
+  }
+
+  .toggle {
+    font-size: 0.6rem;
+    border: 1px dotted;
+    padding: 0.2rem;
+    border-radius: 0.2rem;
+    display: inline-block;
+    margin: 0.1em;
+    line-height: 0.8rem;
+    color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+  }
+
+  .toggle.active {
+    border: 1px solid;
+    color: #222;
+  }
+
+  .sides {
+    display: flex;
+    flex-wrap: wrap;
+    width: 12em;
+    margin: 0.5em;
+  }
+
+  .properties .sheet .sides > input {
+    width: 3em;
+    margin: 0 0.5em;
+  }
+  
+  .sides .square {
+    width: 4em;
+    height: 4em;
+    background-color: #4596ff;
+    border: 1px solid;
+  }
+  
+  .sides span {
+    width: 4em;
+    height: 1em;
+    display: inline-block;
+  }
+
+  .shrinky {
+    flex-shrink: 5;
+  }
+  .growy {
+    flex-grow: 5;
+  }
+
+  .scrolled-wrapper {
+    position: relative;
+    overflow: hidden;
+    min-height: 4em;
+    display: flex;
+    flex-direction: column;
+  }
+  .scrolled {
+    height: 100%;
+    overflow-y: auto;
+  }
+  .scrolled:before, .scrolled:after {
+    content: ' ';
+    display: block;
+    position: absolute;
+    z-index: 2;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    height: 5px;
+    width: 100%;
+    opacity: 1;
+    transition: opacity 0.25s ease-in-out;
+  }
+  .scrolled:before {
+    top: -5px;
+  }
+  .scrolled:after {
+    bottom: -5px;
+  }
+  .scrolled.scroll-top:before {
+    opacity: 0;
+    transition: opacity 0s linear;
+  }
+  .scrolled.scroll-bottom:after {
+    opacity: 0;
+    transition: opacity 0s linear;
+  }
+</style>

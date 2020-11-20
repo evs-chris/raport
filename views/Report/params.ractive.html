@@ -1,0 +1,47 @@
+<div class-scrolled-wrapper style-flex-grow=1><div as-scrolled>
+  <button on-click="@.set('report.defaultParams', params)" class-ico title="Save these values as the report defaults">Save as Defaults</button>
+  {{#each ~/report.parameters}}
+    <div class-param>
+      {{#if .type === 'boolean'}}
+        <label class-check><input type=checkbox checked="{{~/params[.name]}}" /> {{.label || .name}}?</label>
+      {{elseif .options.length}}
+        <label class-pick>{{.label || .name}}<select value="{{~/params[.name]}}">
+          {{#each .options}}
+            {{#if typeof . === 'string'}}<option>{{.}}</option>
+            {{else}}<option value="{{.value}}">{{.label}}</option>{{/if}}
+          {{/each}}
+        </select></label>
+      {{else}}
+        <label class-string>{{.label || .name}}
+          {{#if .type === 'number'}}<input type=number value="{{~/params[.name]}}" />
+          {{else}}<input value="{{~/params[.name]}}" />{{/if}}
+        </label>
+      {{/if}}
+    </div>
+  {{/each}}
+</div></div>
+
+<style>
+  .param {
+    width: 18rem;
+    margin: 0.5rem;
+  }
+
+  .param label {
+    width: 100%;
+  }
+
+  .param label input, .param label select {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem;
+  }
+
+  .param label.check input {
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0;
+  }
+</style>

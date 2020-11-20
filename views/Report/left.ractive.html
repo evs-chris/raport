@@ -1,0 +1,374 @@
+<div class-properties>
+  <div class-header style-height=3rem>
+    <h3>Widgets</h3>
+    {{#if ~/report.type !== 'delimited' && (~/widget.type === 'container' || ~/temp.widget === 'report')}}
+      <select value="{{~/add}}" on-change="@.addWidget(@node.value)">
+        <option>container</option>
+        <option>label</option>
+        <option>repeater</option>
+        <option>html</option>
+        <option>image</option>
+        <option>measured</option>
+      </select>
+      <button on-click="@.addWidget(~/add)" class=add>+</button>
+    {{/if}}
+  </div>
+  <div class="shrinky scrolled-wrapper" style-max-height="20%">
+    <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
+      <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="@.selectWidget('report')"><span class-line style-height=1.8rem on-mouseover="@.set('temp.hover', 'report'), false">Report</span>
+        {{#if report.type === 'delimited'}}
+          {{>delimited-fields}}
+        {{else}}
+          {{#with report}}{{>widget-tree}}{{/with}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+  {{#if ~/temp.widget}}
+    <div class=header>
+      <h3>{{~/temp.name}}Properties</h3>
+    </div>
+    {{#if ~/temp.widget === 'report'}}
+      <div class="growy scrolled-wrapper"><div as-scrolled>
+        <div class=sheet>
+          <label><span>Name</span><span><input value="{{report.name}}" /></span></label>
+          <label><span>Type</span><span><select value="{{report.type}}">
+            <option value="page">Paged</option>
+            <option value="flow">Continuous</option>
+            <option value="delimited">Delimited</option>
+          </select></span></label>
+          {{#if report.type !== 'delimited'}}
+            <label><span>Combine styles into classes?</span><span><input type=checkbox checked="{{report.classifyStyles}}" /></span></label>
+            {{#if report.type === 'page'}}
+              <label><span>Paper size</span><span><select value="{{report.size}}">{{#each ~/pageSizes}}<option value="{{.}}">{{@key}}</option>{{/each}}</select></span></label>
+              <label><span>Orientation</span><span><select value="{{report.orientation}}">
+                <option>landscape</option>
+                <option>portrait</option>
+              </select></span></label>
+            {{else}}
+              <label><span>Width</span><span><input type=number value="{{report.width}}" /></span></label>
+              {{#if !report.width}}
+                <label><span>Paper size</span><span><select value="{{report.size}}"><option value="{{undefined}}">(None)</option>{{#each ~/pageSizes}}<option value="{{.}}">{{@key}}</option>{{/each}}</select></span></label>
+                <label><span>Orientation</span><span><select value="{{report.orientation}}">
+                  <option>landscape</option>
+                  <option>portrait</option>
+                </select></span></label>
+              {{/if}}
+            {{/if}}
+          {{else}}
+            <label><span>Record Delimiter</span><span><input value="{{temp.record}}" /></span></label>
+            <label><span>Field Delimiter</span><span><input value="{{temp.field}}" /></span></label>
+            <label><span>Quote</span><span><input value="{{temp.quote}}" /></span></label>
+          {{/if}}
+        </div>
+      </div></div>
+      <div class=header>
+        <h3>Parameters</h3>
+        <button on-click="@.push('report.parameters', {})" class=add>+</button>
+      </div>
+      {{#if report.parameters}}
+        <div class-parameter class-head>
+          <div class-param-name>Name</div>
+          <div class-param-type>Type</div>
+          <div class-param-require style-width=30%>Require</div>
+        </div>
+      {{/if}}
+      <div class=scrolled-wrapper><div as-scrolled>
+        {{#each report.parameters}}
+          <div class-parameter on-focusin="@.editParam(@context)">
+            <div class-param-name><input value="{{.name}}" /></div>
+            <div class-param-type><select value="{{.type}}">
+              {{>types}}
+            </select></div>
+            <div class-param-require><input type=checkbox checked="{{.required}}" /></div>
+            <div class-param-btn><button class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button></div>
+          </div>
+        {{/each}}
+      </div></div>
+      {{#if ~/sources}}
+        <div class=header>
+          <h3>Provided Sources</h3>
+          <button on-click="@.push('sources', {})" class=add>+</button>
+        </div>
+        {{#if ~/sources}}
+          <div class-src class-head>
+            <div class-src-name>Name</div>
+          </div>
+        {{/if}}
+        <div class=scrolled-wrapper><div as-scrolled>
+          {{#each ~/sources}}
+            <div class-src>
+              <div class-src-name><input value="{{.name}}" /></div>
+              <div class-src-btn>
+                <button class-ico class-large title="Log data to console..." on-click="@.logData(.)">&#9744;</button>
+                <button class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button>
+              </div>
+            </div>
+          {{/each}}
+        </div></div>
+      {{/if}}
+      <div class=header>
+        <h3>Source{{#if report.type !== 'delimited'}}s{{/if}}</h3>
+        {{#if report.type !== 'delimited' || report.sources.length < 1}}<button on-click="@.push('report.sources', { name: '', parameters: {} })" class=add>+</button>{{/if}}
+      </div>
+      {{#if report.sources.length}}
+        <div class-src class-head>
+          <div class-src-name style-width="100%">Name</div>
+        </div>
+      {{/if}}
+      <div class=scrolled-wrapper><div as-scrolled>
+        {{#each report.sources}}
+          <div class-src on-focusin="@.editReportSrc(@context)">
+            <div class-rsrc-name><input value="{{.name}}" /></div>
+            <div class-rsrc-src><select value="{{.source}}">{{#each ~/sources}}<option>{{.name}}</option>{{/each}}</select></div>
+            <div class-rsrc-btn>
+              <button class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button>
+            </div>
+          </div>
+          <!--<div class=report-source>
+            <label>Name <input value="{{.name}}" /></label>
+            <input value="{{temp.paramname}}" /> <button on-click="@context.set('parameters.' + temp.paramname, ''), @.set('temp.paramname', '')" disabled="{{!temp.paramname}}">+</button>
+            <div class-parameters>
+              {{#each .parameters}}
+                <label>{{@key}} <input value="{{^^/parameters[@key]}}" /></label>
+              {{/each}}
+            </div>
+            <button on-click="@context.splice('../', @index, 1)">X</button>
+          </div>-->
+        {{/each}}
+      </div></div>
+    {{elseif ~/widget}}
+      <div class=scrolled-wrapper><div as-scrolled>
+        <div class=sheet>
+          {{#with ~/widget}}
+          {{>.type + '-props'}}
+          {{>widget-props}}
+          {{/with}}
+        </div>
+      </div></div>
+    {{/if}}
+  {{else}}
+    <div class-placeholder>Click on a Widget</div>
+  {{/if}}
+</div>
+
+<template id="delimited-fields">
+  <div class="delimited children">
+    {{#each report.fields}}
+      <div class-node class-active="@keypath === ~/temp.expr.path" on-click="@.editExpr(@context)">
+        <span class-line on-mouseover="@.set('temp.expr.hover', @keypath), false" on-mouseout="@.set('temp.expr.hover', ''), false"><span>{{@index}}. {{.}}</span>
+          <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context, '../', @index), ~/report.header && @.moveUp(@context, '~/report.header', @index), false">&#9650;</button>
+          <button class-ico disabled="{{@index === @last}}" on-click="@.moveDown(@context, '../', @index), ~/report.header && @.moveDown(@context, '~/report.header', @index), false">&#9660;</button>
+          <button class-ico class-large on-click="@context.splice('../', @index, 1), ~/report.header && @context.splice('~/report.header', @index, 1), @.checkExpr(), false">&times;</button>
+        </span>
+    {{/each}}
+  </div>
+</template>
+
+<template id="widget-tree" src="./widgets.ractive.html" />
+
+<style>
+  .properties {
+    width: 20em;
+    flex-grow: 0;
+    flex-shrink: 0;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    background-color: #fafafa;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .placeholder {
+    flex-grow: 1;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    font-size: 1.7rem;
+    color: #aaa;
+  }
+
+  .properties .header {
+    display: flex;
+    flex: 1 1 auto;
+    flex-grow: 0;
+    flex-shrink: 0;
+    align-items: center;
+    margin-top: 1em;
+  }
+  .properties .header:first-of-type {
+    margin-top: 0;
+  }
+
+  .properties .header h3 {
+    flex-grow: 5;
+  }
+
+  .properties .tree {
+    overflow-y: auto;
+  }
+
+  .properties .tree .children {
+    margin-left: 0.5em;
+    padding-left: 0.5em;
+    border-left: 1px dotted #ddd;
+  }
+
+  .properties .tree .node {
+    color: #222;
+    cursor: pointer;
+  }
+
+  .properties .tree .node.active > .line {
+    background-color: #4596ff;
+    color: #fff;
+  }
+
+  .properties .tree .node.active {
+    background-color: #4596ff20;
+  }
+
+  .properties .tree .node .line:hover ~ .children > .node,
+  .properties .tree .node.hover > .children > .node {
+    background-color: #26bf1017;
+  }
+
+  .properties .tree .node .line {
+    display: flex;
+    align-items: center;
+    padding: 0.1rem 0.25rem;
+    margin: 0.1rem;
+  }
+
+  .properties .tree .node .line:hover,
+  .properties .tree .node.hover > .line {
+    background-color: #26bf10;
+    color: #fff;
+  }
+
+  .properties .tree .node .line span {
+    flex-grow: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .properties .tree .node.active > .line button,
+  .properties .tree .node .line:hover button,
+  .properties .tree .node.hover > .line button {
+    color: #fff;
+  }
+  .properties .tree .node.active > .line button:disabled,
+  .properties .tree .node .line:hover button:disabled,
+  .properties .tree .node.hover > .line button:disabled {
+    color: #ccc;
+    cursor: default;
+  }
+
+  .properties .sheet {
+    display: table;
+    border-collapse: collapse;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .properties .sheet > label {
+    display: table-row;
+  }
+
+  .properties .sheet > label > * {
+    display: table-cell;
+    line-height: 1rem;
+    padding: 0.4rem;
+    vertical-align: middle;
+    border-style: solid;
+    border-width: 1px 0;
+    border-color: #ddd;
+  }
+
+  .properties .sheet > label > *:first-of-type {
+    border-width: 1px 1px 1px 0;
+  }
+
+  .properties .sheet input, .properties .sheet select {
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    background-color: transparent;
+    outline: none;
+  }
+
+  .properties .sheet textarea {
+    background: transparent;
+    border: none;
+    width: 100%;
+    height: 100%;
+    margin: -0.2rem;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  .properties .sheet label:focus-within {
+    background-color: #efefef;
+  }
+
+  .parameter, .src {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+  }
+  .parameter:focus-within, .src:focus-within {
+    background-color: #efefef;
+  }
+  .parameter.head, .src.head {
+    border-top: 1px solid #ccc;
+    font-weight: bold;
+  }
+  .parameter > *, .src > * {
+    border-left: 1px solid #ccc;
+    padding: 0.2rem;
+    flex-grow: 0;
+    flex-shrink: 0;
+    box-sizing: border-box;
+  }
+  .parameter > *:first-of-type, .src > *:first-of-type {
+    border-left: none;
+  }
+  .parameter input:not([type=checkbox]), .parameter select, .src input:not([type=checkbox]), .src select {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+  }
+  .param-name {
+    width: 40%;
+  }
+  .param-type {
+    width: 30%;
+  }
+  .param-require {
+    width: 19%;
+    text-align: center;
+  }
+  .param-btn {
+    width: 10%;
+  }
+
+  .src-name {
+    width: 75%;
+  }
+  .rsrc-name {
+    width: 43%;
+  }
+  .rsrc-src {
+    width: 43%;
+  }
+  .src-btn {
+    width: 25%;
+    text-align: center;
+  }
+  .rsrc-btn {
+    width: 14%;
+  }
+</style>

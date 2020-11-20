@@ -1,14 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2018",
     "module": "es2015",
     "moduleResolution": "node",
-    "declaration": true,
     "sourceMap": true,
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": false,
     "strictNullChecks": false,
-    "outDir": "../build/lib",
     "lib": [
       "dom",
       "es2017"
@@ -18,9 +16,7 @@
   },
   "compileOnSave": false,
   "include": [
-    "../src/lib"
-  ],
-  "exclude": [
-    "../src/play"
+    "test", "src/lib"
   ]
 }
+

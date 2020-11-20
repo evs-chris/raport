@@ -1,24 +1,29 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2018",
     "module": "es2015",
     "moduleResolution": "node",
-    "declaration": true,
+    "declaration": false,
     "sourceMap": true,
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": false,
     "strictNullChecks": false,
-    "outDir": "build",
     "lib": [
-      "dom",
+      "DOM",
       "es2017"
     ],
     "preserveWatchOutput": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "views/*": [".views/views/*"],
+      "raport/*": ["src/lib/*"],
+      "design/*": ["src/design/*"]
+    }
   },
   "compileOnSave": false,
   "include": [
-    "src"
-  ],
-  "exclude": []
+    "src/**/*.ts",
+    ".views/**/*.ts"
+  ]
 }

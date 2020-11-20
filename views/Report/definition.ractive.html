@@ -1,0 +1,50 @@
+<div class="delimited paper">
+  <input type="file" style="display: none;" id="definition-file" accept="application/json" />
+  <div class-definition>
+    <div class-actions>
+      <button class-ico on-click="@.loadReportFile()" title="Load report definition from a file">Load</button>
+      <button class-ico on-click="@.download((~/report.name || 'report') + '.json', JSON.stringify(~/report))" title="Save report definition to a file">Save</button>
+    </div>
+    <div class-json>
+      <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate="@.autosize(@node)" twoway=false value="{{JSON.stringify(report, null, 2)}}" on-change="@.loadReportString(@node.value), @.update('temp')" /></div></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .report-definition .paper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tab.report-definition {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .definition {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .definition .json {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 10em;
+  }
+
+  .definition .json > * {
+    flex-grow: 1;
+  }
+
+  .definition .json textarea {
+    flex-shrink: 0;
+    flex-grow: 1;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 99%;
+  }
+</style>

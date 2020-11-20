@@ -1,0 +1,164 @@
+<label><span>Width <button class-ico on-click="@context.set('.width', typeof .width === 'number' || .width === undefined ? { percent: .width } : .width.percent)" title="{{typeof .width === 'number' || .width === undefined ? 'Change to percent' : 'Change to REM'}}">
+    {{#if typeof .width === 'number' || .width === undefined}}#{{else}}%{{/if}}
+  </button></span>
+  <span><div>
+    {{#if typeof .width === 'number' || .width === undefined}}
+      <input type="number" value="{{.width}}" style-width="calc(100% - 2rem)" /><span class-unit>rem</span>
+    {{else}}
+      <input type="number" value="{{.width.percent}}" style-width="calc(100% - 2rem)" /><span class-unit>%</span>
+    {{/if}}
+  </div></span>
+</label>
+<label><span>Height <button class-ico on-click="@context.set('.height', typeof .height === 'number' || .height  === undefined ? { percent: .height } : .height.percent)" title="{{typeof .height === 'number' || .height  === undefined ? 'Change to percent' : 'Change to REM'}}">
+    {{#if typeof .height === 'number' || .height === undefined}}#{{else}}%{{/if}}
+  </button></span>
+  <span><div>
+    {{#if typeof .height === 'number' || .height === undefined}}
+      <input type="number" value="{{.height}}" style-width="calc(100% - 2rem)" /><span class-unit>rem</span>
+    {{else}}
+      <input type="number" value="{{.height.percent}}" style-width="calc(100% - 2rem)" /><span class-unit>%</span>
+    {{/if}}
+  </div></span>
+</label>
+{{#with ~/[@.split(~/temp.widget, 2)]}}
+  {{#if Array.isArray(.layout)}}
+    <label><span>X</span><span><input type="number" value="{{.layout[@.lastKey(~/temp.widget)][0]}}" /></span></label>
+    <label><span>Y</span><span><input type="number" value="{{.layout[@.lastKey(~/temp.widget)][1]}}" /></span></label>
+  {{else}}
+    <label><span>Break?</span><span><input type=checkbox checked="{{^^/br}}" /></span></label>
+  {{/if}}
+{{/with}}
+<label><span>Hidden <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')">&#9998;</button></span><span><textarea>{{.hide}}</textarea></span></label>
+<label><span>Margin</span><span>
+  <div class=toggles>
+    <span class-toggle class-active="typeof .margin === 'undefined'" {{#if typeof .margin !== 'undefined'}}on-click="@context.set('.margin', undefined)"{{/if}}>None</span>
+    <span class-toggle class-active="typeof .margin === 'number'" {{#if typeof .margin !== 'number'}}on-click="@context.set('.margin', 1)"{{/if}}>All</span>
+    <span class-toggle class-active=".margin.length === 2" {{#if .margin.length !== 2}}on-click="@context.set('.margin', [1, 1])"{{/if}}>Paired</span>
+    <span class-toggle class-active=".margin.length === 4" {{#if .margin.length !== 2}}on-click="@context.set('.margin', [1, 1, 1, 1])"{{/if}}>Individual</span>
+  </div>
+  {{#if typeof .margin === 'number'}}
+    <input type=number value="{{.margin}}" />
+  {{elseif .margin.length === 2}}
+    <div class=sides>
+      <span /><input type=number value="{{.margin[0]}}" /><span />
+      <span /><div class=square /><input type=number value="{{.margin[1]}}" />
+      <span /><span /><span />
+    </div>
+  {{elseif .margin.length === 4}}
+    <div class=sides>
+      <span /><input type=number value="{{.margin[0]}}" /><span />
+      <input type=number value="{{.margin[3]}}" /><div class=square /><input type=number value="{{.margin[1]}}" />
+      <span /><input type=number value="{{.margin[2]}}" /><span />
+    </div>
+  {{/if}}
+</span></label>
+<label><span>Border {{#if typeof .border === 'string'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.border')">&#9998;</button>{{/if}}</span><span>
+  <div class=toggles>
+    <span class-toggle class-active="typeof .border === 'undefined'" {{#if typeof .border !== 'undefined'}}on-click="@context.set('.border', undefined)"{{/if}}>None</span>
+    <span class-toggle class-active="typeof .border === 'number'" {{#if typeof .border !== 'number'}}on-click="@context.set('.border', 1)"{{/if}}>Bottom</span>
+    <span class-toggle class-active=".border.length === 1" {{#if .border.length !== 1}}on-click="@context.set('.border', [1])"{{/if}}>All</span>
+    <span class-toggle class-active=".border.length === 2" {{#if .border.length !== 2}}on-click="@context.set('.border', [1, 1])"{{/if}}>Paired</span>
+    <span class-toggle class-active=".border.length === 4" {{#if .border.length !== 2}}on-click="@context.set('.border', [1, 1, 1, 1])"{{/if}}>Individual</span>
+    <span class-toggle class-active="typeof .border === 'string'" {{#if typeof .border !== 'string'}}on-click="@context.set('.border', '')"{{/if}}>Computed</span>
+  </div>
+  {{#if typeof .border === 'number'}}
+    <input type=number value="{{.border}}" />
+  {{elseif typeof .border === 'string'}}
+    <textarea>{{.border}}</textarea>
+  {{elseif .border.length === 1}}
+    <input type=number value="{{.border[0]}}" />
+  {{elseif .border.length === 2}}
+    <div class=sides>
+      <span /><input type=number value="{{.border[0]}}" /><span />
+      <span /><div class=square /><input type=number value="{{.border[1]}}" />
+      <span /><span /><span />
+    </div>
+  {{elseif .border.length === 4}}
+    <div class=sides>
+      <span /><input type=number value="{{.border[0]}}" /><span />
+      <input type=number value="{{.border[3]}}" /><div class=square /><input type=number value="{{.border[1]}}" />
+      <span /><input type=number value="{{.border[2]}}" /><span />
+    </div>
+  {{/if}}
+</span></label>
+<label><span>Alignment</span><span>
+  <select value="{{.font.align}}">
+    <option value="{{undefined}}">(default)</option>
+    <option>left</option>
+    <option>center</option>
+    <option>right</option>
+  </select>
+</span></label>
+<label><span>Significant Space?</span><span><input type=checkbox twoway=false checked="{{.font.pre}}" on-change="@context.set('.font.pre', @node.checked ? true : undefined)" /></span></label>
+<label><span>Text Size</span><span><input type=number value="{{.font.size}}" /></span></label>
+<label><span>Line Height</span><span><input type=number value="{{.font.line}}" /></span></label>
+<label><span>Font</span><span><input value="{{.font.family}}" /></span></label>
+<label><span>Color</span><span><input value="{{.font.color}}" /></span></label>
+<label><span>Weight</span><span>
+  <select value="{{.font.weight}}">
+    <option value="{{undefined}}">(default)</option>
+    <option value="400">light</option>
+    <option value="500">normal</option>
+    <option value="600">bold</option>
+    <option value="700">bolder</option>
+  </select>
+</span></label>
+<label><span>Right Pad</span><span><input type=number value="{{.font.right}}" /></span></label>
+
+<template id="page-props">
+</template>
+
+<template id="sure" src="./test.ractive.html" />
+
+<template id="label-props">
+  <label><span>Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text')">&#9998;</button></span><span><textarea>{{.text}}</textarea></span></label>
+</template>
+
+<template id="html-props">
+  <label><span>HTML <button title="Edit in Expression Editor" class-ico title="Edit in Expression Editor" on-click="@.editExpr('.html', { html: true })">&#9998;</button></span><span><textarea>{{.html}}</textarea></span></label>
+</template>
+
+<template id="container-props">
+  {{#with ~/[@.split(~/temp.widget, 2)] as repeater, @.lastKey(~/temp.widget) as index}}
+  {{#if repeater.footer && repeater.group[index]}}
+    <label><span>Show Footer?</span><span><input type=checkbox checked="{{repeater.groupEnds[index]}}" /></span></label>
+  {{/if}}
+  {{/with}}
+  <label><span>Layout</span><span>
+    <select twoway="false" value="{{Array.isArray(.layout) ? 'manual' : 'auto'}}" on-change="@context.set('.layout', @node.value === 'manual' ? [] : undefined)">
+      <option value="auto">Auto</option>
+      <option value="manual">Manual</option>
+    </select>
+  </span></label>
+</template>
+
+<template id="measured-props">
+  <label><span>Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text')">&#9998;</button></span><span><textarea>{{.text}}</textarea></span></label>
+</template>
+
+<template id="repeater-props">
+  <label><span>Source <button class-ico on-click="typeof .source === 'string' ? @.editExpr(@keypath + '.source') : @.editReportSrc(@context, '.source')">&#9998;</button></span><span>
+    <div class=toggles>
+      <span class-toggle class-active="typeof .source === 'string'" {{#if typeof .source !== 'string'}}on-click="@context.set('.source', '')"{{/if}}>Expression</span>
+      <span class-toggle class-active="typeof .source !== 'string'" {{#if typeof .source === 'string'}}on-click="@context.set('.source', { source: '' })"{{/if}}>Source</span>
+    </div>
+    {{#if typeof .source === 'string'}}<input value="{{.source}}" />{{/if}}
+    {{#if typeof .source !== 'string'}}<select value="{{.source.source}}"><option value="">(None)</option>{{#each ~/report.sources}}<option value="{{.name || .source}}">{{.label || .name || .source}}</option>{{/each}}</select>{{/if}}
+  </span></label>
+  {{#with ~/[@.split(~/temp.widget)] as repeater}}
+  {{#if repeater.footer && repeater.group.length}}
+    <label><span>Show Footer?</span><span><input type=checkbox checked="{{repeater.groupEnds[repeater.group.length]}}" /></span></label>
+  {{/if}}
+  {{/with}}
+</template>
+
+<template id="image-props">
+  <label><span>URL <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.url')">&#9998;</button></span><span><textarea>{{.url}}</textarea></span></label>
+</template>
+
+<style>
+  .unit {
+    font-size: 0.6rem;
+    margin-left: 1em;
+  }
+</style>
