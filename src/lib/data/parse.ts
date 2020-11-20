@@ -1,11 +1,11 @@
 import { parser as makeParser, Parser, bracket, opt, alt, seq, str, map, read, chars, rep1sep, repsep, read1To, read1, rep, check, verify, ErrorOptions } from 'sprunge/lib';
-import { ws, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
+import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
 import { Value, Operation, Literal } from './index';
 
 const space = ' \r\n\t';
-const sigils = '!@#+';
+const sigils = '!@*~.';
 const endSym = space + '():{}[]';
-const endRef = endSym + ',"\'`\\;&';
+const endRef = endSym + ',"\'`\\;&#';
 
 export const keywords = map<string, any>(str('null', 'true', 'false', 'undefined'), v => {
   switch (v) {
@@ -18,7 +18,7 @@ export const keywords = map<string, any>(str('null', 'true', 'false', 'undefined
 
 export const ident = read1To(endRef, true);
 
-export const ref = map(seq(read('^'), opt(chars(1, sigils)), rep1sep(read1To(endRef + '.=><', true), str('.'), 'path part', 'disallow')), v => ({ r: v[0] + (v[1] || '') + v[2].join('.') }));
+export const ref = map(seq(read('^'), opt(chars(1, sigils)), rep1sep(read1To(endRef + '.=><', true), str('.'), 'path part', 'disallow')), v => ({ r: v[0] + (v[1] === '.' ? '' : (v[1] || '')) + v[2].join('.') }));
 
 export const args: Parser<Value[]> = {};
 export const array: Parser<Value> = {};
@@ -39,9 +39,53 @@ function stringInterp(parts: Value[]): Value {
 
   if (res.length > 0 && (!('v' in res[0]) || typeof res[0].v !== 'string')) res.unshift({ v: '' });
 
-  if (res.length === 1) return res[0];
+  if (res.length === 0) return { v: '' };
+  else if (res.length === 1) return res[0];
   return { op: '+', args: res };
 }
+
+export const date = map(seq(
+  str('#'),
+  chars(4, digits),
+  chars(1, '-/'),
+  chars(2, digits),
+  chars(1, '-/'),
+  chars(2, digits),
+  opt(seq(
+    chars(1, ' T'), chars(2, digits), str(':'), chars(2, digits),
+    opt(seq(
+      str(':'), chars(2, digits),
+        opt(seq(str('.'), chars(3, digits)))
+    )),
+  )),
+  opt(alt<string|[string, string, [string, string]]>('timezone',
+    str('Z'),
+    opt(seq(chars(1, '+-'), chars(2, digits),
+      opt(seq(str(':'), chars(2, digits)))
+    ))
+  )),
+  str('#'),
+), v => {
+  const time = v[6];
+  const ss = time && time[4];
+  const ms = ss && ss[2];
+  const offset = v[7];
+  if (offset) {
+    const dt = new Date(Date.UTC(+v[1], +v[3] - 1, +v[5], time && +time[2] || 0, time && +time[3] || 0, ss && +ss[1] || 0, ms && +ms[1]));
+    if (typeof offset !== 'string') {
+      if (offset[0] === '-') {
+        dt.setUTCHours(dt.getUTCHours() - +offset[1])
+        if (offset[2]) dt.setUTCMinutes(dt.getUTCMinutes() - +offset[2][1])
+      } else {
+        dt.setUTCHours(dt.getUTCHours() + +offset[1])
+        if (offset[2]) dt.setUTCMinutes(dt.getUTCMinutes() + +offset[2][1])
+      }
+    }
+    return dt;
+  } else {
+    return new Date(+v[1], +v[3] - 1, +v[5], time && +time[2] || 0, time && +time[3] || 0, ss && +ss[1] || 0, ms && +ms[1]);
+  }
+});
 
 export const string = alt<Value>(
   map(seq(str(':'), ident), v => ({ v: v[1]})),
@@ -67,7 +111,7 @@ export const string = alt<Value>(
     map(JStringEscape, v => ({ v })),
   )), str('`')), stringInterp),
 );
-export const literal = map(alt(JNum, keywords), v => ({ v }));
+export const literal = map(alt(JNum, keywords, date), v => ({ v }));
 export const operation = map(bracket(
   check(str('('), ws),
   seq(ident, ws, opt(seq(str('+'), value)), ws, opt(seq(str('=>'), ws, value)), ws, opt(seq(str('&('), verify(args, args => (!!args.length || 'expected at least one local argument')), str(')'))), ws, args),
@@ -88,13 +132,13 @@ const pair: Parser<[Value, Value]> = map(seq(alt(string, map(ident, v => ({ v })
 array.parser = map(bracket(
   check(ws, str('['), ws),
   repsep(value, read1(space + ','), 'allow'),
-  check(ws, str(']'), ws),
+  check(ws, str(']')),
 ), args => args.filter(a => !('v' in a)).length ? { op: 'array', args } : { v: args.map(a => (a as Literal).v) });
 
 object.parser = map(bracket(
   check(ws, str('{'), ws),
   repsep(pair, read1(space + ','), 'allow'),
-  check(ws, str('}'), ws),
+  check(ws, str('}')),
 ), pairs => pairs.filter(p => !('v' in p[0] && 'v' in p[1])).length ?
   { op: 'object', args: pairs.reduce((a, c) => (a.push(c[0], c[1]), a), []) } : 
   { v: pairs.reduce((a, c) => (a[(c[0] as Literal).v] = (c[1] as Literal).v, a), {}) }
@@ -110,7 +154,7 @@ export function parse(input: string, opts?: ErrorOptions): Value {
   return _parse(input.trim(), Object.assign({ detailed: false, consumeAll: true }, opts));
 }
 
-const checkIdent = new RegExp(endRef);
+const checkIdent = new RegExp(`[${endRef.split('').map(v => `\\${v}`).join('')}]`);
 const opKeys = ['op', 'source', 'apply', 'locals', 'args'];
 export interface StringifyOpts {
   noSymbols?: boolean;
@@ -128,7 +172,7 @@ export function stringify(value: Value, opts?: StringifyOpts): string {
 
 function _stringify(value: Value): string {
   if ('r' in value) {
-    return value.r;
+    return /^[0-9]/.test(value.r) ? `.${value.r}` : value.r;
   } else if ('op' in value) {
     if (value.op === 'array') {
       return `[${value.args ? value.args.map(a => _stringify(a)).join(' ') : ''}]`;
@@ -148,7 +192,7 @@ function _stringify(value: Value): string {
     }
   } else if ('v' in value) {
     if (typeof value.v === 'string') {
-      if ((_key || !_noSym) && !checkIdent.test(value.v)) return `${_key ? '' : ':'}${value.v}`;
+      if ((_key || !_noSym) && !checkIdent.test(value.v) && value.v.length) return `${_key ? '' : ':'}${value.v}`;
       else if (!~value.v.indexOf("'")) return `'${value.v.replace(/[\$']/g, v => `\\${v}`)}'`;
       else if (!~value.v.indexOf('`')) return `\`${value.v.replace(/[\$`]/g, v => `\\${v}`)}\``;
       else if (!~value.v.indexOf('"')) return `"${value.v}"`;
@@ -162,11 +206,15 @@ function _stringify(value: Value): string {
     } else if (Array.isArray(value.v)) {
       return `[${value.v.map(v => _stringify({ v })).join(' ')}]`;
     } else if (typeof value.v === 'object') {
-      const keys = Object.keys(value.v);
-      if ((keys.length === 1 && (keys[0] === 'r' || keys[0] === 'v')) || !keys.find(k => !opKeys.includes(k))) {
-        return `%${_stringify(value.v)}`;
+      if (value.v instanceof Date) {
+        return `#${value.v.getFullYear()}-${value.v.getMonth() + 1}-${value.v.getDate()}#`;
       } else {
-        return `{${keys.map(k => `${_key = true, _stringify({ v: k })}:${_key = false, _stringify({ v: value.v[k] })}`).join(' ')}}`;
+        const keys = Object.keys(value.v);
+        if ((keys.length === 1 && (keys[0] === 'r' || keys[0] === 'v')) || ('op' in value.v && !keys.find(k => !opKeys.includes(k)))) {
+          return `%${_stringify(value.v)}`;
+        } else {
+          return `{${keys.map(k => `${_key = true, _stringify({ v: k })}:${_key = false, _stringify({ v: value.v[k] })}`).join(' ')}}`;
+        }
       }
     }
   }

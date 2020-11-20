@@ -4,7 +4,7 @@ const q = QUnit;
 
 function parseErr(str: string): string {
   const res = parse(str, { detailed: true });
-  if ('v' in res && 'l' in res) return res.m;
+  if (typeof res === 'object' && 'message' in res) return res.message;
   else return '<no error>';
 }
 
@@ -52,18 +52,18 @@ q.test('references', t => {
 });
 
 q.test('simple special references', t => {
-  t.deepEqual(parse('#foo'), { r: '#foo' });
-  t.deepEqual(parse('#foo.bar'), { r: '#foo.bar' });
-  t.deepEqual(parse('#foo.0.bar'), { r: '#foo.0.bar' });
+  t.deepEqual(parse('~foo'), { r: '~foo' });
+  t.deepEqual(parse('~foo.bar'), { r: '~foo.bar' });
+  t.deepEqual(parse('~foo.0.bar'), { r: '~foo.0.bar' });
   t.deepEqual(parse('@foo'), { r: '@foo' });
   t.deepEqual(parse('@foo.bar'), { r: '@foo.bar' });
   t.deepEqual(parse('@foo.0.bar'), { r: '@foo.0.bar' });
   t.deepEqual(parse('!foo'), { r: '!foo' });
   t.deepEqual(parse('!foo.bar'), { r: '!foo.bar' });
   t.deepEqual(parse('!foo.0.bar'), { r: '!foo.0.bar' });
-  t.deepEqual(parse('+foo'), { r: '+foo' });
-  t.deepEqual(parse('+foo.bar'), { r: '+foo.bar' });
-  t.deepEqual(parse('+foo.0.bar'), { r: '+foo.0.bar' });
+  t.deepEqual(parse('*foo'), { r: '*foo' });
+  t.deepEqual(parse('*foo.bar'), { r: '*foo.bar' });
+  t.deepEqual(parse('*foo.0.bar'), { r: '*foo.0.bar' });
   t.deepEqual(parse('^foo'), { r: '^foo' });
   t.deepEqual(parse('^foo.bar'), { r: '^foo.bar' });
   t.deepEqual(parse('^foo.0.bar'), { r: '^foo.0.bar' });
@@ -79,7 +79,7 @@ q.test('simple ops', t => {
   t.deepEqual(parse('(+ a, b)'), { op: '+', args: [{ r: 'a' }, { r: 'b' }] });
   t.deepEqual(parse('(+ a "foo")'), { op: '+', args: [{ r: 'a' }, { v: 'foo' }] });
   t.deepEqual(parse('(+ a, "foo")'), { op: '+', args: [{ r: 'a' }, { v: 'foo' }] });
-  t.deepEqual(parse('(+ #a !b)'), { op: '+', args: [{ r: '#a' }, { r: '!b' }] });
+  t.deepEqual(parse('(+ ~a !b)'), { op: '+', args: [{ r: '~a' }, { r: '!b' }] });
 });
 
 q.test('complex ops - source', t => {
@@ -138,7 +138,7 @@ q.test('there must be something to parse', t => {
 });
 
 q.test('source sigil requires source', t => {
-  t.matches(parseErr('(foo +)'), 'expected');
+  t.matches(parseErr('(foo *)'), 'expected');
 });
 
 q.test('application sigil requires application', t => {
@@ -174,6 +174,10 @@ q.test(`a list may have whitespace just before its closing paren`, t => {
 q.test(`array literal`, t => {
   t.deepEqual(parse('[1 2 asdf]'), { op: 'array', args: [{ v: 1 }, { v: 2 }, { r: 'asdf' }] });
   t.deepEqual(parse('[1 2 :asdf]'), { v: [1, 2, 'asdf'] });
+});
+
+q.test(`array literal in an op`, t =>{
+  t.deepEqual(parse('(op [1] a)'), { op: 'op', args: [{ v: [1] }, { r: 'a' }] });
 });
 
 q.test(`object literal`, t => {

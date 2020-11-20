@@ -3,7 +3,8 @@ import { ParseError } from 'sprunge/lib';
 
 // Data
 export interface Schema {
-  fields: Field[];
+  root: Type;
+  fields?: Field[];
 }
 
 export interface DataSource<T = any, R = any> {
@@ -36,10 +37,13 @@ export type ArrayType = 'string[]'|'number[]'|'boolean[]'|'date[]'|'object[]';
 export type Type = ValueType|ArrayType|'value'|'array'|'any';
 
 export interface Field {
+  /** The property name for the field */
   name: string;
-  value: Reference;
-  type?: Type; // no type means any
-  /** Nested object definition */
+  /** A user-friendly name for the field */
+  label?: string;
+  /** An optional type for the field */
+  type?: Type;
+  /** Child fields belonging to the field */
   fields?: Field[];
 }
 
@@ -112,7 +116,7 @@ export function safeGet(root: Context, path: string): any {
   if (path[0] === '!') { // param
     path = path.substr(1);
     o = root.root.parameters;
-  } else if (path[0] === '#') { // root
+  } else if (path[0] === '~') { // root
     path = path.substr(1);
     o = root.root.value;
   } else if (path[0] === '^') { // pop context
@@ -121,7 +125,7 @@ export function safeGet(root: Context, path: string): any {
       path = path.substr(1);
     }
     o = ctx ? ctx.value : undefined;
-  } else if (path[0] === '+') {
+  } else if (path[0] === '*') {
     path = path.substr(1);
     o = root.root.sources;
 
@@ -132,7 +136,7 @@ export function safeGet(root: Context, path: string): any {
       path = path.substr(idx + 1);
 
       // if it's a subpath request, drill into the datasource
-      if (o && path.length && o.value) o = o.value;
+      if (o && path.length && o.value && path.substr(0, 5) !== 'value') o = o.value;
     }
   }
 
@@ -203,6 +207,9 @@ export function unregisterOperator<T = any>(...ops: Operator<T>[]) {
   for (const op of ops) {
     for (const name of op.names) delete opMap[name];
   }
+}
+export function getOperatorMap(): { [key: string]: Operator } {
+  return Object.assign({}, opMap);
 }
 
 function mungeSort(context: Context, sorts: Sort[]|ValueOrExpr): Sort[] {
