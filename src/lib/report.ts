@@ -1,6 +1,6 @@
-import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, Root, Context, extend, evaluate, filter } from './data/index';
+import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, Root, Context, RootContext, extend, evaluate, filter } from './data/index';
 
-import { renderWidget, RenderContext, RenderResult, RenderState } from './render/index';
+import { renderWidget, RenderContext, RenderResult, RenderState, expandMargin } from './render/index';
 import { styleClass } from './render/style';
 
 export type ReportType = 'delimited'|'flow'|'page';
@@ -17,11 +17,14 @@ export interface PartSource {
   /** An expression to apply to the base data source before filtering, sorting, or grouping */
   base?: ValueOrExpr;
   /** The name of the data source to be pulled from the root context */
-  name: string;
+  source: string;
 }
 
 export interface ReportSource extends PartSource {
-  source: string;
+  /** The destination for the applied source, defaults to the source */
+  name?: string;
+  /** A user-friendly name for the source */
+  label?: string;
   parameters?: { [name: string]: ValueOrExpr };
 }
 
@@ -29,10 +32,12 @@ export interface ReportSource extends PartSource {
 
 interface BaseReport<T = {}> {
   type: ReportType;
+  name?: string;
   parameters?: Parameter<T>[];
   sources?: ReportSource[];
   context?: ParameterMap;
   classifyStyles?: boolean;
+  defaultParams?: ParameterMap;
 }
 
 // delimited
@@ -40,7 +45,7 @@ export interface Delimited<T = {}> extends BaseReport<T> {
   type: 'delimited';
   source?: string;
   fields: ValueOrExpr[];
-  header?: ValueOrExpr[];
+  headers?: ValueOrExpr[];
   record?: string;
   field?: string;
   quote?: string;
@@ -122,6 +127,8 @@ export interface Placement {
   y: number;
   availableX?: number;
   availableY?: number;
+  maxX?: number;
+  maxY?: number;
 }
 export type Layout = Array<[number, number]>|Placement[]|'row'|string;
 
@@ -134,7 +141,7 @@ export interface Borders {
 
 export interface Style {
   font?: Font;
-  border?: number|Borders;
+  border?: number|Borders|number[]|string;
 }
 
 export type Margin = number|[number, number]|[number, number, number, number];
@@ -168,6 +175,10 @@ export interface Label extends Widget {
   text: ValueOrExpr|Span|Array<ValueOrExpr|Span>;
 }
 
+export interface HTML extends Widget {
+  html: ValueOrExpr;
+}
+
 export interface Repeater extends Widget {
   source: PartSource|ValueOrExpr;
   header?: Container;
@@ -198,10 +209,7 @@ export function run(report: Report, sources: SourceMap, parameters?: ParameterMa
 
   if (report.sources) {
     for (const src of report.sources) {
-      let base = sources[src.source || src.name] || { value: [] };
-      if (src.base) base = { value: evaluate(extend(ctx, { value: base.value }), src.base) };
-      if (src.filter || src.sort || src.group) ctx.sources[src.name] = filter(base, src.filter, src.sort, src.group, ctx);
-      else ctx.sources[src.name] = base;
+      applySource(ctx, src, sources);
     }
     for (const k in ctx.sources) { // set sources in root of context
       ctx.value[k] = ctx.sources[k].value;
@@ -213,10 +221,17 @@ export function run(report: Report, sources: SourceMap, parameters?: ParameterMa
   else return runPage(report, ctx);
 }
 
+export function applySource(context: RootContext, source: ReportSource, sources: SourceMap) {
+  let base = sources[source.source || source.name] || { value: [] };
+  if (source.base) base = { value: evaluate(extend(context, { value: base.value }), source.base) };
+  if (source.filter || source.sort || source.group) context.sources[source.name || source.source] = filter(base, source.filter, source.sort, source.group, context);
+  else context.sources[source.name || source.source] = base;
+}
+
 function runDelimited(report: Delimited, context: Context): string {
-  const source = context.root.sources[report.source ? report.source : report.sources[0].name];
+  const source = context.root.sources[report.source ? report.source : (report.sources[0].name || report.sources[0].source)];
   let res = '';
-  if (report.header) res += report.header.map(h => `${report.quote || ''}${h}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
+  if (report.headers) res += report.headers.map(h => `${report.quote || ''}${evaluate(context, h)}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
   const values = Array.isArray(source.value) ? source.value : [source.value];
   const unquote: RegExp = report.quote ? new RegExp(report.quote, 'g') : undefined;
   for (const value of values) {
@@ -232,6 +247,7 @@ function runDelimited(report: Delimited, context: Context): string {
 
 function runPage(report: Page, context: Context): string {
   let size: PageSize = report.orientation === 'landscape' ? { width: report.size.height, height: report.size.width, margin: [report.size.margin[1], report.size.margin[0]] } : report.size;
+
   const ctx: RenderContext = { context, report, styles: {}, styleMap: { ids: {}, styles: {} } };
   context.special = context.special || {};
   context.special.page = 0;
@@ -240,29 +256,32 @@ function runPage(report: Page, context: Context): string {
   const pages: string[] = [''];
   let page = 0;
   let availableY = size.height - 2 * size.margin[0];
+  let maxY = availableY;
   let y = 0;
   const availableX = size.width - 2 * size.margin[1];
   let state: RenderState<any> = null;
 
   let headSize = 0;
   if (report.header) {
-    const r = renderWidget(report.header, ctx, { x: 0, y: 0, availableX, availableY });
+    const r = renderWidget(report.header, ctx, { x: 0, y: 0, availableX, availableY, maxX: availableX, maxY });
     headSize = r.height;
     availableY -= headSize;
+    maxY -= headSize;
     y += headSize;
   }
 
   let footSize = 0;
   if (report.footer) {
-    const r = renderWidget(report.footer, ctx, { x: 0, y: 0, availableX, availableY });
+    const r = renderWidget(report.footer, ctx, { x: 0, y: 0, availableX, availableY, maxX: availableX, maxY });
     footSize = r.height;
     availableY -= footSize;
+    maxY -= footSize;
   }
 
   for (const w of report.widgets) {
     let r: RenderResult;
     do {
-      r = renderWidget(w, ctx, { x: 0, y, availableX, availableY }, state);
+      r = renderWidget(w, ctx, { x: 0, y, availableX, availableY, maxX: availableX, maxY }, state);
       pages[page] += r.output;
       if (r.continue) {
         page++;
@@ -285,12 +304,12 @@ function runPage(report: Page, context: Context): string {
     let n = `<div class="page-back pb${i}"><div${styleClass(ctx, ['page', `ps${i}`], ['', ''], '', 'p')}>\n`;
     context.special.page = i + 1;
     if (report.header) {
-      const r = renderWidget(report.header, ctx, { x: 0, y: 0 });
+      const r = renderWidget(report.header, ctx, { x: 0, y: 0, maxX: availableX, maxY });
       n += r.output + '\n';
     }
     n += p;
     if (report.footer) {
-      const r = renderWidget(report.footer, ctx, { x: 0, y: footTop });
+      const r = renderWidget(report.footer, ctx, { x: 0, y: footTop, maxX: availableX, maxY });
       n += r.output + '\n';
     }
     n += '\n</div></div>';
@@ -301,6 +320,7 @@ function runPage(report: Page, context: Context): string {
     .page { width: ${size.width - 2 * size.margin[1]}rem; height: ${size.height - 2 * size.margin[0]}rem; position: absolute; overflow: hidden; left: ${size.margin[1]}rem; top: ${size.margin[0]}rem; }
     .page-back { width: ${size.width}rem; height: ${size.height}rem; }
     @media screen {
+      html { min-width: ${size.width + 2}rem; }
       body { background-color: #999; display: flex; flex-direction: column; align-items: center; }
       .page-back { background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); position: relative; overflow: hidden; box-sizing: border-box; margin: 0.5em; }
     }
@@ -331,7 +351,7 @@ function runFlow(report: Flow, context: Context): string {
     let r: RenderResult;
     let yy = 0;
     do {
-      r = renderWidget(w, ctx, { x: 0, y: yy, availableX: width }, state);
+      r = renderWidget(w, ctx, { x: 0, y: yy, availableX: width, maxX: width }, state);
       if (typeof r === 'string') throw new Error(`Container widget didn't specify used height`);
       else {
         html += r.output;
@@ -347,5 +367,15 @@ function runFlow(report: Flow, context: Context): string {
     html += `</div>\n`;
   }
 
-  return `<html style="font-size:100%;margin:0;padding:0;"><head><style>${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}</style></head><body style="font-size:0.83rem;padding:0;margin:0;">\n${html}</body></html>`;
+  const margin = report.size && report.size.margin ? expandMargin(report.size) : [1.5, 1.5, 1.5, 1.5];
+
+  return `<html><head><style>
+    html { font-size: 100%; margin: 0; padding: 0; }
+    body { font-size: 0.83rem; padding: 0; margin: 0;${width ? ` width: ${width}rem;` : ''} }
+    #wrapper { height:${y}rem; position: relative; }
+    @media screen {
+      body { margin: 1rem; background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem ${margin[2]}rem ${margin[3]}rem; }
+      html { background-color: #999; }
+    }${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}
+  </style></head><body>\n<div id=wrapper>${html}</div></body></html>`;
 }

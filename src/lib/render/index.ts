@@ -1,4 +1,4 @@
-import { Displayed, Layout, Placement, Widget, MeasureFont } from '../report';
+import { Displayed, Layout, Placement, Widget, Margin, MeasureFont } from '../report';
 import { extend as extendContext, Context, ExtendOptions as ContextExtendOptions, evaluate } from '../data/index';
 
 export interface RenderContext {
@@ -83,7 +83,9 @@ export let measure: (text: string, width: number, font?: MeasureFont) => number 
 export interface RenderContinuation<T = any> {
   output: string;
   continue?: RenderState<T>;
-  height: number;
+  height?: number;
+  width?: number;
+  cancel?: boolean;
 }
 
 export type RenderResult<T = any> = string|RenderContinuation<T>;
@@ -106,12 +108,17 @@ export interface RenderState<T = any> {
 /** Render the given widget to string or a continuation using a registered renderer */
 export function renderWidget(w: Widget, context: RenderContext, placement: Placement, state?: RenderState): RenderContinuation {
   const renderer = renderers[w.type];
-  if (!renderer || (w.hide && evaluate(context, w.hide))) return { output: '', height: 0 };
+  if (!renderer || (w.hide && evaluate(context, w.hide))) return { output: '' };
 
   if (!('height' in w) && renderer.container) w.height = 'auto'; 
   const h = getHeightWithMargin(w, placement);
-  // TODO: allow for components that allow breaking
-  if (placement.availableY && h > placement.availableY) return { output: '', height: 0, continue: { offset: 0 } };
+
+  if (placement.maxY && !isNaN(h) && h > placement.maxY) {
+    addStyle(context, 'error', `.error { position: absolute; box-sizing: border-box; color: red; border: 1px dotted; width: 100%; height: 2rem; padding: 0.5rem; }`);
+    return { output: `<div class="error" style="top: ${placement.y}rem;">Widget overflow error</div>`, height: 2 };
+  }
+
+  if (placement.availableY && h > placement.availableY) return { output: '', continue: { offset: 0 }, cancel: true };
 
   let extraHeight = 0;
 
@@ -127,32 +134,39 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   }
 
   const r = renderer.render(w, context, placement, state);
-  if (typeof r === 'string') return { output: r, height: h };
+  if (typeof r === 'string') return { output: r, height: h, width: getWidthWithMargin(w, placement) };
   else r.height = r.height + extraHeight;
   
+  if (placement.maxY && r.height > placement.maxY) {
+    addStyle(context, 'error', `.error { position: absolute; box-sizing: border-box; color: red; border: 1px dotted; width: 100%; height: 2rem; padding: 0.5rem; }`);
+    return { output: `<div class="error" style="top: ${placement.y}rem;">Widget overflow error</div>`, height: 2 };
+  }
+  if (isNaN(h) && placement.availableY && r.height > placement.availableY) return { output: '', continue: { offset: 0 }, height: r.height, cancel: true };
+
   return r;
 }
 
-const layouts: { [name: string]: (widget: Widget, offset: number, margin: [number, number, number, number], placement: Placement, placements: Array<[number, number, number, number]>) => Placement } = {
-  row: (w, o, m, p, ps) => {
-    let n: Placement;
-    if (w.br || (p.availableX && ps[0][0] + ps[0][2] + getWidthWithMargin(w, p) > p.availableX)) {
-      n = { x: m[3], y: maxOffset(ps), availableX: p.availableX && (p.availableX - m[3]) };
-    } else {
-      n = { x: ps[0][0] + ps[0][2], y: ps[0][1] };
-      if (p.availableX) n.availableX = p.availableX - (ps[0][0] + ps[0][2]);
-    }
+const layouts: { [name: string]: (widget: Widget, offset: number, margin: [number, number, number, number], placement: Placement, placements: Array<[number, number, number, number]>) => Placement } = {};
 
-    n.y -= o;
-
-    if (p.availableY) n.availableY = p.availableY - ps[0][1];
-
-    return n;
-  }
-};
 export function registerLayout(name: string, layout: (widget: Widget, offset: number, margin: [number, number, number, number], placement: Placement, placements: Array<[number, number, number, number]>) => Placement) {
   layouts[name] = layout;
 }
+
+registerLayout('row', (w, o, m, p, ps) => {
+  let n: Placement;
+  if (w.br || (p.availableX && ps[0][0] + ps[0][2] + getWidthWithMargin(w, p) > p.availableX)) {
+    n = { x: m[3], y: maxYOffset(ps), availableX: p.availableX && (p.availableX - m[3]), maxX: p.maxX };
+  } else {
+    n = { x: ps[0][0] + ps[0][2], y: ps[0][1], maxX: p.maxX };
+    if (p.availableX) n.availableX = p.availableX - (ps[0][0] + ps[0][2]);
+  }
+
+  n.y -= o;
+
+  if (p.availableY) n.availableY = p.availableY - ps[0][1];
+
+  return n;
+});
 
 /** Render child widgets handling continuation across pages */
 export function renderWidgets(widget: Widget, context: RenderContext, placement: Placement, state?: RenderState, layout?: Layout): RenderContinuation {
@@ -169,55 +183,60 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
       const w: Widget = widget.widgets[i];
       if (w.hide && evaluate(context, w.hide)) continue;
 
-      if (placement && placement.availableY && getHeightWithMargin(w, placement) > placement.availableY) {
-        state = state || { offset: maxOffset(ps) };
+      // allow widgets that are taller than max height to be dropped
+      let h = placement && getHeightWithMargin(w, placement);
+      if (h > placement.maxY) h = 1;
+
+      if (placement && placement.availableY && h > placement.availableY) {
+        state = state || { offset: maxYOffset(ps) };
         state.last = i;
         return { output: s, continue: state, height: ps.map(([y, h]) => y + h).reduce((a, c) => c > a ? c : a, 0) };
       } else {
         const lp = Array.isArray(layout) && layout[i];
-        let p = Array.isArray(lp) ? { x: lp[0] + m[3], y: lp[1] + m[0] } : (lp || placement);
+        let p = Array.isArray(lp) ? { x: lp[0] + m[3], y: lp[1] + m[0], maxX: placement.maxX } : (lp || placement);
 
         if (!layout || typeof layout === 'string') {
           const l = layout ? layouts[layout as string] || layouts.row : layouts.row;
           p = l(w, offset, m, placement, ps);
         }
 
+        p.maxX = p.maxX || placement.maxX;
+        p.maxY = p.maxY || placement.maxY;
+
         const { x, y } = p;
         const r = renderWidget(w, context, p, state && state.child);
 
         // skip empty output
-        if (typeof r === 'string' && !r || (!r.output && !r.height)) continue;
+        if (typeof r === 'string' && !r || (!r.cancel && !r.output && !r.height)) continue;
 
         if (typeof r === 'string') {
           s += r;
           ps.unshift([x, y, getWidthWithMargin(w, placement), getHeightWithMargin(w, placement)]);
         } else {
+          if (r.cancel && !ps.length) return { output: '', cancel: true };
           s += r.output;
-          ps.unshift([x, y, getWidthWithMargin(w, placement), r.height]);
+          ps.unshift([x, y, r.width || getWidthWithMargin(w, placement), r.height || getHeightWithMargin(w, placement)]);
           if (r.continue) {
             state = state || { offset: 0 };
             state.child = r.continue;
             state.last = i;
-            state.offset = maxOffset(ps);
-            return { output: s, continue: state, height: maxOffset(ps) };
+            state.offset = maxYOffset(ps);
+            return { output: s, continue: state, height: maxYOffset(ps), width: maxXOffset(ps) };
           }
         }
       }
     }
 
-    return { output: s, height: getHeightWithMargin(widget, placement) || maxOffset(ps) - m[0] };
+    return { output: s, height: getHeightWithMargin(widget, placement) || maxYOffset(ps) - m[0], width: getWidthWithMargin(widget, placement) || maxXOffset(ps) - m[3] };
   }
-  return { output: '', height: 0 };
+  return { output: '' };
 }
 
-// TODO: make base width settable
-const base = 51;
-// TODO: account for margins
 export function getWidth(w: Widget, placement: Placement): number {
   const width = w.width;
-  if (!width) return base;
+  if (!width) return placement.maxX || 51;
   else if (typeof width === 'number') return width;
-  else return (width.percent / 100) * (placement.availableX || base);
+  else return (width.percent / 100) * (placement.availableX || placement.maxX || 51);
 }
 
 export function getWidthWithMargin(w: Widget, placement: Placement): number {
@@ -248,11 +267,15 @@ export function getHeightWithMargin(w: Widget, placement: Placement, computed?: 
   return h;
 }
 
-function maxOffset(points: Array<[number, number, number, number]>): number {
+function maxYOffset(points: Array<[number, number, number, number]>): number {
   return points.reduce((a, c) => a > c[1] + c[3] ? a : c[1] + c[3], 0);
 }
 
-export function expandMargin(w: Widget): [number, number, number, number] {
+function maxXOffset(points: Array<[number, number, number, number]>): number {
+  return points.reduce((a, c) => a > c[0] + c[2] ? a : c[0] + c[2], 0);
+}
+
+export function expandMargin(w: { margin?: Margin }): [number, number, number, number] {
   if (w.margin) {
     const m = w.margin;
     if (Array.isArray(m)) {
