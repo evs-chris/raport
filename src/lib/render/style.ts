@@ -44,7 +44,9 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   const h = getHeightWithMargin(w, placement, opts && opts.computedHeight) || 1;
   if (opts && opts.container && opts.computedHeight) i = `height:${h}rem;`;
   else s += `height:${h}rem;`;
-  s += `${!opts || !opts.container || (w.font && w.font.line) ? `line-height:${(w.font && w.font.line) || getHeight(w, placement, opts && opts.computedHeight)}rem;` : ''}`;
+
+  if (w.font && w.font.line === 0) s += `line-height: initial;`
+  else s += `${!opts || !opts.container || (w.font && w.font.line) ? `line-height:${(w.font && w.font.line) || getHeight(w, placement, opts && opts.computedHeight)}rem;` : ''}`;
 
   if (w.margin) {
     const m = expandMargin(w);
