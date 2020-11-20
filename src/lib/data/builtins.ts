@@ -147,7 +147,16 @@ registerOperator(
   simple(['%'], (_name: string, values: any[]): number => {
     const first = values.shift();
     return values.reduce((a, c) => a % (isNaN(c) ? 1 : +c), isNaN(first) ? 0 : +first);
-  })
+  }),
+  simple(['round'], (_name: string, values: [number]): number => {
+    return Math.round(values[0]);
+  }),
+  simple(['floor'], (_name: string, values: [number]): number => {
+    return Math.floor(values[0]);
+  }),
+  simple(['ceil'], (_name: string, values: [number]): number => {
+    return Math.ceil(values[0]);
+  }),
 );
 
 // string
@@ -179,6 +188,10 @@ registerOperator(
   }),
   simple(['slice', 'substr'], (_name: string, [src, start, end]: any[]) => {
     if (src && typeof src.slice === 'function') return src.slice(start, end);
+  }),
+  simple(['len', 'length'], (_name: string, [src]: any[]) => {
+    if (src && 'length' in src) return src.length;
+    return 0;
   }),
   simple(['replace', 'replace-all'], (name: string, [str, find, rep, flags]: any[]) => {
     str = `${str}`;
@@ -407,8 +420,8 @@ registerOperator<any[]>({
 });
 
 // basic formats
-registerFormat('dollar', (n, [fmt]) => {
-  return dollar(n, fmt);
+registerFormat('dollar', (n, [dec, sign]) => {
+  return dollar(n, undefined, dec, sign);
 });
 
 registerFormat('date', (n, [fmt]) => {
@@ -418,8 +431,14 @@ registerFormat('date', (n, [fmt]) => {
 registerFormat('integer', (n, []) => {
   return number(n, 0);
 });
+registerFormat('int', (n, []) => {
+  return number(n, 0);
+});
 
 registerFormat('number', (n, [dec]) => {
+  return number(n, dec);
+});
+registerFormat('num', (n, [dec]) => {
   return number(n, dec);
 });
 
