@@ -10,6 +10,7 @@ class App extends Ractive {
     super(opts);
   }
 }
+
 Ractive.extendWith(App, {
   template: '#template',
   data() {
@@ -29,6 +30,17 @@ Ractive.extendWith(App, {
 
 const app = globalThis.app = new App({
   target: 'body',
+});
+
+// simple debug helper
+let el: HTMLElement;
+document.body.addEventListener('click', ev => {
+  el = ev.target as any;
+}, { capture: true });
+Object.defineProperty(globalThis, 'R', {
+  get() {
+    return Ractive.getContext(el);
+  }
 });
 
 // delimtied example
