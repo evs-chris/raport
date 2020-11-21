@@ -139,6 +139,11 @@ function bracket_op<T>(parser: Parser<T>): Parser<T> {
 }
 
 export const binop: Parser<Value> = {};
+
+const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyz-_'), bracket_op(repsep(value, read1(space + ',')))), ([op, args]) => {
+  return { op, args };
+});
+
 export const operand: Parser<Value> = fmt_op(alt(values, verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`)));
 export const unop = map(seq(str('not ', '+'), operand), ([op, arg]) => ({ op: op === '+' ? op : 'not', args: [arg] }));
 
@@ -185,7 +190,7 @@ object.parser = map(bracket(
 
 value.parser = alt(operation, array, object, literal, string, expr, ref);
 
-values.parser = alt(unop, array, object, literal, string, expr, ref);
+values.parser = alt(unop, call_op, array, object, literal, string, expr, ref);
 
 args.parser = repsep(value, read1(space + ','), 'allow');
 
