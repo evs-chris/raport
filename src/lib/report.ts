@@ -204,7 +204,14 @@ export interface MeasuredLabel extends Widget {
 }
 
 // execution
-export function run(report: Report, sources: SourceMap, parameters?: ParameterMap|Root): string {
+interface ReportExtras {
+  /** Extra content to be rendered at the bottom of the <head> */
+  head?: string;
+  /** Extra content to be rendered at the bottom of the <body> */
+  foot?: string;
+}
+
+export function run(report: Report, sources: SourceMap, parameters?: ParameterMap|Root, extra?: ReportExtras): string {
   const ctx = parameters && 'root' in parameters && parameters.root === parameters ? parameters as Root : new Root(Object.assign({}, report.context), { parameters });
 
   if (report.sources) {
@@ -217,8 +224,8 @@ export function run(report: Report, sources: SourceMap, parameters?: ParameterMa
   }
 
   if (report.type === 'delimited') return runDelimited(report, ctx);
-  else if (report.type === 'flow') return runFlow(report, ctx);
-  else return runPage(report, ctx);
+  else if (report.type === 'flow') return runFlow(report, ctx, extra);
+  else return runPage(report, ctx, extra);
 }
 
 export function applySource(context: RootContext, source: ReportSource, sources: SourceMap) {
@@ -245,7 +252,7 @@ function runDelimited(report: Delimited, context: Context): string {
   return res;
 }
 
-function runPage(report: Page, context: Context): string {
+function runPage(report: Page, context: Context, extras?: ReportExtras): string {
   let size: PageSize = report.orientation === 'landscape' ? { width: report.size.height, height: report.size.width, margin: [report.size.margin[1], report.size.margin[0]] } : report.size;
 
   const ctx: RenderContext = { context, report, styles: {}, styleMap: { ids: {}, styles: {} } };
@@ -332,10 +339,10 @@ function runPage(report: Page, context: Context): string {
     @page {
       size: ${size.width}em ${size.height}em;
     }${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}
-  </style></head><body>\n${pages.reduce((a, c) => a + c, '')}</body></html>`;
+  </style>${extras && extras.head || ''}</head><body>\n${pages.reduce((a, c) => a + c, '')}${extras && extras.foot || ''}</body></html>`;
 }
 
-function runFlow(report: Flow, context: Context): string {
+function runFlow(report: Flow, context: Context, extras?: ReportExtras): string {
   const ctx: RenderContext = { context, report, styles: {}, styleMap: { ids: {}, styles: {} } };
   let html = '';
   let y = 0;
@@ -377,5 +384,5 @@ function runFlow(report: Flow, context: Context): string {
       body { margin: 1rem; background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem ${margin[2]}rem ${margin[3]}rem; }
       html { background-color: #999; }
     }${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}
-  </style></head><body>\n<div id=wrapper>${html}</div></body></html>`;
+  </style>${extras && extras.head || ''}</head><body>\n<div id=wrapper>${html}</div>${extras && extras.foot || ''}</body></html>`;
 }

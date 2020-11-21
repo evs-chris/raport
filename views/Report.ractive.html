@@ -17,7 +17,7 @@
       {{>definition}}
     </div>
     <div class-result class-tab class-active-tab="tab === 'result'">
-      <iframe srcdoc="{{~/report.type === 'delimited' ? '<style>pre { margin: 1rem; background-color: #fff; padding: 0.5rem; }</style><code><pre>' + result + '</pre></code>' : result}}"></iframe>
+      <iframe id=result srcdoc="{{~/report.type === 'delimited' ? '<style>pre { margin: 1rem; background-color: #fff; padding: 0.5rem; }</style><code><pre>' + result + '</pre></code>' + @.frameExtra() : result}}"></iframe>
     </div>
     <div class-bottom-pane class-active="~/temp.bottom.pop">
       {{>bottom}}

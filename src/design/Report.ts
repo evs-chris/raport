@@ -36,9 +36,37 @@ export class Designer extends Ractive {
   async run() {
     const report: Report = this.get('report');
     const ctx = await this.buildRoot();
-    const text = run(report, ctx.sources, ctx);
+    const text = run(report, ctx.sources, ctx, {
+      foot: this.frameExtra()
+    });
     this.set('result', text);
     return true;
+  }
+
+  frameExtra() {
+    return `
+      <style>
+        html:before, html:after { content: ' '; position: fixed; display: block; z-index: 2; box-shadow: 0 0 10px #000; transition: opacity 0.4s ease-in-out; opacity: 1; width: 100%; height: 5px; }
+        html:before { top: -5px; }
+        html:after { bottom: -5px; }
+        html.scrolled-top:before { opacity: 0; }
+        html.scrolled-bottom:after { opacity: 0; }
+      </style>
+      <script>
+        const html = document.scrollingElement || document.documentElement;
+        const listener = ev => {
+          if (html.scrollTop === 0) html.classList.add('scrolled-top');
+          else html.classList.remove('scrolled-top');
+
+          if (html.scrollTop + html.clientHeight >= html.scrollHeight) html.classList.add('scrolled-bottom');
+          else html.classList.remove('scrolled-bottom');
+        };
+        html.addEventListener('scroll', listener, { passive: true });
+        window.addEventListener('resize', listener);
+        window.addEventListener('scroll', listener);
+        html.classList.add('scrolled-top');
+      </script>
+    `;
   }
 
   paperSize(): string {
@@ -243,7 +271,7 @@ export class Designer extends Ractive {
   autosize(node: HTMLElement) {
     node.style.height = '';
     setTimeout(() => {
-      node.style.height = `${node.scrollHeight + 5}px`;
+      node.style.height = `${node.scrollHeight + 1}px`;
     });
   }
 
@@ -553,7 +581,7 @@ Ractive.extendWith(Designer, {
     },
     'temp.bottom.pop'() {
       setTimeout(() => this.resetScrollers());
-    }
+    },
   },
   on: {
     init() {
