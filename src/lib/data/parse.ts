@@ -114,17 +114,27 @@ export const string = alt<Value>(
 );
 export const literal = map(alt(JNum, keywords, date), v => ({ v }));
 
+export const fn_args = map(seq(
+  opt(seq(str('+'), value)), ws,
+  opt(seq(str('=>'), ws, value)), ws,
+  opt(seq(str('&('), verify(args, args => (!!args.length || 'expected at least one local argument')), str(')'))), ws,
+  args
+), ([src, , apply, , locals, , args]) => {
+  const op: Operation = { op: '' };
+  if (src) op.source = src[1];
+  if (apply) op.apply = apply[2];
+  if (locals && locals[1].length) op.locals = locals[1];
+  if (args && args.length) op.args = args;
+  return op;
+});
+
 export const sexp = map(bracket(
   check(str('('), ws),
-  seq(ident, ws, opt(seq(str('+'), value)), ws, opt(seq(str('=>'), ws, value)), ws, opt(seq(str('&('), verify(args, args => (!!args.length || 'expected at least one local argument')), str(')'))), ws, args),
+  seq(ident, ws, fn_args),
   check(ws, str(')')),
-), ([op, , src, , apply, , locals, , args]) => {
-  const res: Operation = { op };
-  if (src) res.source = src[1];
-  if (apply) res.apply = apply[2];
-  if (locals && locals[1].length) res.locals = locals[1];
-  if (args && args.length) res.args = args;
-  return res;
+), ([op, , val]) => {
+  val.op = op;
+  return val;
 });
 
 function fmt_op(parser: Parser<Value>): Parser<Value> {
@@ -140,8 +150,9 @@ function bracket_op<T>(parser: Parser<T>): Parser<T> {
 
 export const binop: Parser<Value> = {};
 
-const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyz-_'), bracket_op(repsep(value, read1(space + ',')))), ([op, args]) => {
-  return { op, args };
+const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyz-_'), bracket_op(fn_args)), ([op, val]) => {
+  val.op = op;
+  return val;
 });
 
 export const operand: Parser<Value> = fmt_op(alt(values, verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`)));
