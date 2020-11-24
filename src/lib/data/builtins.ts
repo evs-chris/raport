@@ -324,16 +324,17 @@ registerOperator<number>({
   }
 });
 
-type MaybeNum = { value?: number };
-registerOperator<MaybeNum>({
+type MaybeVal = { value?: any };
+registerOperator<MaybeVal>({
   type: 'aggregate',
   names: ['min', 'max'],
   init() { return {}; },
-  apply(name: string, state: MaybeNum, _base: any, value: any) {
-    if (!isNaN(value) && (state.value == null || (name === 'min' ? value < state.value : value > state.value))) state.value = value;
+  apply(name: string, state: MaybeVal, _base: any, value: any) {
+    if (!isNaN(value)) value = +value;
+    if (!('value' in state) || (name === 'min' ? value < state.value : value > state.value)) state.value = value;
     return state;
   },
-  final(_name: string, { value }: MaybeNum): number {
+  final(_name: string, { value }: MaybeVal): number {
     return value;
   }
 });
