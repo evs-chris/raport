@@ -121,7 +121,7 @@
 <template id="container-props">
   {{#with ~/[@.split(~/temp.widget, 2)] as repeater, @.lastKey(~/temp.widget) as index}}
   {{#if repeater.footer && repeater.group[index]}}
-    <label><span>Show Footer?</span><span><input type=checkbox checked="{{repeater.groupEnds[index]}}" /></span></label>
+    <label><span>Show Footer?</span><span><input type=checkbox checked="{{repeater.groupEnds[repeater.group.length - 1 - index]}}" /></span></label>
   {{/if}}
   {{/with}}
   <label><span>Layout</span><span>
