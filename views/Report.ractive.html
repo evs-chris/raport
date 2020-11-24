@@ -3,18 +3,27 @@
   <div class=layout>
     <div class-actions>
       <button disabled="{{report.type === 'delimited' && report.sources.length !== 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>&#9655;</button>
-      <button on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'definition'">Designer</button>
+      <button on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'definition' && tab !== 'import'">Designer</button>
       <button on-click="@.set('tab', 'definition')" class-tab class-active="tab === 'definition'">Definition</button>
+      {{#if data && @.readLink('data')}}
+        <button on-click="@.set('tab', 'import')" class-tab class-active="tab === 'import'">Import Data</button>
+      {{/if}}
       {{#if result}}
         <button on-click="@.set('tab', 'result')" class-tab class-active="tab === 'result'">Output</button>
         {{#if tab === 'result'}}<button class-ico on-click="@.download((~/report.name || 'report') + (~/report.type === 'delimited' ? '.csv' : '.html'), ~/result, ~/report.type === 'delimited' ? 'text/csv' : 'text/html')" title="Save output to a file">Save Output</button>{{/if}}
       {{/if}}
+      {{#if data && tab === 'import'}}
+        <span class-which><button class-ico class-large on-click="@.unlink('data'), @.set('tab', 'definition')">&times;</button> Close Import</span>
+      {{/if}}
     </div>
-    <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'definition'">
+    <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'definition' && tab !== 'import'">
       {{>design}}
     </div>
     <div class-tab class-report-definition class-active-tab="tab === 'definition'">
       {{>definition}}
+    </div>
+    <div class-tab class-data-import class-active-tab="tab === 'import'">
+      {{>data-import}}
     </div>
     <div class-result class-tab class-active-tab="tab === 'result'">
       <iframe id=result srcdoc="{{~/report.type === 'delimited' ? '<style>pre { margin: 1rem; background-color: #fff; padding: 0.5rem; }</style><code><pre>' + result + '</pre></code>' + @.frameExtra() : result}}"></iframe>
@@ -28,6 +37,7 @@
 <template id="left" src="./Report/left.ractive.html" />
 <template id="design" src="./Report/design.ractive.html" />
 <template id="definition" src="./Report/definition.ractive.html" />
+<template id="data-import" src="./Report/import.ractive.html" />
 <template id="bottom" src="./Report/bottom.ractive.html" />
 
 <template id="types">

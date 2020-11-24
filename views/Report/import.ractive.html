@@ -1,0 +1,29 @@
+<div class="delimited import paper">
+  <input type="file" style="display: none;" id="import-file" accept="application/json" />
+  <div class-definition>
+    <div class-actions>
+      <button class-ico on-click="@.loadImportFile()" title="Import data from a file">Load</button>
+    </div>
+    <div class-json>
+      <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate="@.autosize(@node)">{{data.data}}</textarea></div></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .tab.data-import {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .import.paper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .import .definition {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

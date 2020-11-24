@@ -10,6 +10,7 @@ export interface ExprOptions {
 export interface AvailableSource {
   name: string;
   values(params?: object): Promise<any>;
+  data?: any;
 }
 
 export class Designer extends Ractive {
@@ -195,7 +196,7 @@ export class Designer extends Ractive {
   }
 
   async logData(source: AvailableSource) {
-    console.log(await source.values());
+    console.log(source.data ? source.data : await source.values());
   }
 
   editExpr(path: string, options?: ExprOptions) {
@@ -288,7 +289,7 @@ export class Designer extends Ractive {
     const sources: SourceMap = {};
     for (const src of report.sources) {
       const av = avs.find(s => s.name === src.source);
-      if (av) sources[src.name || src.source] = await av.values(this.get('params'));
+      if (av) sources[src.name || src.source] = av.data ? { value: JSON.parse(av.data) } : await av.values(this.get('params'));
     }
     
     const res = new Root({}, { parameters: this.get('params') });
@@ -452,6 +453,22 @@ export class Designer extends Ractive {
         const file = input.files[0];
         const reader = new FileReader();
         reader.onload = txt => this.loadReportString(txt.target.result as string);
+        reader.readAsText(file);
+      }
+    }
+    input.addEventListener('change', load);
+    input.click();
+  }
+
+  loadImportFile() {
+    const input: HTMLInputElement = this.find('#import-file') as any;
+    let load: () => void;
+    load = () => {
+      input.removeEventListener('change', load);
+      if (input.files.length) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = txt => this.set('data.data', txt.target.result as string);
         reader.readAsText(file);
       }
     }

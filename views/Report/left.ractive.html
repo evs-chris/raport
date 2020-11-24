@@ -100,6 +100,7 @@
             <div class-src>
               <div class-src-name><input value="{{.name}}" /></div>
               <div class-src-btn>
+                <button class-ico title="Import data..." on-click="@context.link(@keypath, '~/data'), @.set('tab', 'import')">&#9650;</button>
                 <button class-ico class-large title="Log data to console..." on-click="@.logData(.)">&#9744;</button>
                 <button class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button>
               </div>
@@ -125,16 +126,6 @@
               <button class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button>
             </div>
           </div>
-          <!--<div class=report-source>
-            <label>Name <input value="{{.name}}" /></label>
-            <input value="{{temp.paramname}}" /> <button on-click="@context.set('parameters.' + temp.paramname, ''), @.set('temp.paramname', '')" disabled="{{!temp.paramname}}">+</button>
-            <div class-parameters>
-              {{#each .parameters}}
-                <label>{{@key}} <input value="{{^^/parameters[@key]}}" /></label>
-              {{/each}}
-            </div>
-            <button on-click="@context.splice('../', @index, 1)">X</button>
-          </div>-->
         {{/each}}
       </div></div>
     {{elseif ~/widget}}
@@ -356,7 +347,7 @@
   }
 
   .src-name {
-    width: 75%;
+    width: 65%;
   }
   .rsrc-name {
     width: 43%;
@@ -365,8 +356,9 @@
     width: 43%;
   }
   .src-btn {
-    width: 25%;
-    text-align: center;
+    width: 35%;
+    display: flex;
+    justify-content: space-around;
   }
   .rsrc-btn {
     width: 14%;
