@@ -172,7 +172,7 @@ registerOperator(
     if (typeof pad !== 'string') pad = '' + pad;
     if (pad.length < 1) pad = ' ';
 
-    for (let i = str.length; i < pad; i = str.length) {
+    for (let i = str.length; i < count; i = str.length) {
       if (name === 'padl') str = pad + str;
       else str += pad;
     }
