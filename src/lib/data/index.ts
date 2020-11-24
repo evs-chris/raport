@@ -156,10 +156,14 @@ export function safeGet(root: Context, path: string): any {
       } else {
         path = '';
       }
-
-      while (ctx && (!ctx.special || !(first in ctx.special))) ctx = ctx.parent;
       
-      o = ctx && ctx.special && ctx.special[first];
+      if (first === 'value') {
+        o = ctx.value;
+      } else {
+        while (ctx && (!ctx.special || !(first in ctx.special))) ctx = ctx.parent;
+        o = ctx && ctx.special && ctx.special[first];
+      }
+
       if (!o && first === 'date') {
         o = root.root.special.date = new Date();
       }
