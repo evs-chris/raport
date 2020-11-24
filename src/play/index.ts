@@ -24,6 +24,12 @@ Ractive.extendWith(App, {
   on: {
     'report.init'(ctx) {
       globalThis.cmp = ctx.component;
+    },
+    'report.running'() {
+      console.time('run');
+    },
+    'report.run'() {
+      console.timeEnd('run');
     }
   }
 });

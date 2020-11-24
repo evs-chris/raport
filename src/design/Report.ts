@@ -37,9 +37,14 @@ export class Designer extends Ractive {
   async run() {
     const report: Report = this.get('report');
     const ctx = await this.buildRoot();
-    const text = run(report, ctx.sources, ctx, {
-      foot: this.frameExtra()
-    });
+    let text: string;
+    this.fire('running');
+    try {
+      text = run(report, ctx.sources, ctx, {
+        foot: this.frameExtra()
+      });
+    } catch {}
+    this.fire('run');
     this.set('result', text);
     return true;
   }
@@ -177,7 +182,7 @@ export class Designer extends Ractive {
     const ctx = await this.buildLocalContext(v);
     const parsed = parse(str, { detailed: true });
     const res = evaluate(ctx, str);
-    this.set('temp.expr.parsed', JSON.stringify(parsed, null, '  '));
+    this.set('temp.expr.parsed', JSON.stringify(parsed, null, '  ') + ('marked' in parsed ? `\n\n${parsed.marked}` : ''));
     this.set('temp.expr.result', res);
     this.set('temp.expr.tab', 'result');
   }
