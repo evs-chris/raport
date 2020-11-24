@@ -366,17 +366,25 @@ function applyOperator(root: Context, operation: Operation): any {
 }
 
 function applyAggregate(root: Context, agg: AggregateOperation, op: AggregateOperator): [any, any[]] {
-  let arr: any[] = evaluate(root, agg.source);
+  const args = (agg.args || []).map(a => evaluate(root, a));
+
+  let arr: any[]; 
+
+  if (!agg.source && args[0]) {
+    if (Array.isArray(args[0])) arr = args.shift();
+    else if (typeof args[0] === 'object' && Array.isArray(args[0].value)) arr = args.shift().value;
+  } else {
+    arr = evaluate(root, agg.source);
+  }
   let apply = agg.apply;
 
-  if (arr && typeof arr === 'object' && 'value' in arr) arr = (arr as any).value;
+  if (arr && typeof arr === 'object' && Array.isArray((arr as any).value)) arr = (arr as any).value;
   if (!Array.isArray(arr)) {
     arr = evaluate(root, { r: '@source' });
-    if (arr && typeof arr === 'object' && 'value' in arr) arr = (arr as any).value;
+    if (arr && typeof arr === 'object' && Array.isArray((arr as any).value)) arr = (arr as any).value;
     if (!Array.isArray(arr)) arr = [];
   }
 
-  const args = (agg.args || []).map(a => evaluate(root, a));
   let state = op.init(agg.op, args);
 
   arr.forEach((e, i) => {
