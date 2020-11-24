@@ -158,7 +158,7 @@
         <div class-options style="height: 100%; width: 20rem;">
           <h3>
             <button class-ico class-large title="Add group" style-float=right on-click="@context.push('.group', '')">+</button>
-            <label><input type="checkbox" checked on-change="@context.set('.groups', undefined)" /> Groups</label>
+            <label><input type="checkbox" checked="{{.group}}" twoway=false on-change="@context.set('.group', undefined)" /> Groups</label>
           </h3>
           <div class-scrolled-wrapper><div as-scrolled>
             {{#each .group}}
