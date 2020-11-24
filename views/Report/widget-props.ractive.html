@@ -1,4 +1,4 @@
-<label><span>Width <button class-ico on-click="@context.set('.width', typeof .width === 'number' || .width === undefined ? { percent: .width } : .width.percent)" title="{{typeof .width === 'number' || .width === undefined ? 'Change to percent' : 'Change to REM'}}">
+<label><span>Width <button class-hide /><button class-ico on-click="@context.set('.width', typeof .width === 'number' || .width === undefined ? { percent: .width } : .width.percent)" title="{{typeof .width === 'number' || .width === undefined ? 'Change to percent' : 'Change to REM'}}">
     {{#if typeof .width === 'number' || .width === undefined}}#{{else}}%{{/if}}
   </button></span>
   <span><div>
@@ -9,7 +9,7 @@
     {{/if}}
   </div></span>
 </label>
-<label><span>Height <button class-ico on-click="@context.set('.height', typeof .height === 'number' || .height  === undefined ? { percent: .height } : .height.percent)" title="{{typeof .height === 'number' || .height  === undefined ? 'Change to percent' : 'Change to REM'}}">
+<label><span>Height <button class-hide /><button class-ico on-click="@context.set('.height', typeof .height === 'number' || .height  === undefined ? { percent: .height } : .height.percent)" title="{{typeof .height === 'number' || .height  === undefined ? 'Change to percent' : 'Change to REM'}}">
     {{#if typeof .height === 'number' || .height === undefined}}#{{else}}%{{/if}}
   </button></span>
   <span><div>

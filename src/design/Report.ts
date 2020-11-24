@@ -271,8 +271,10 @@ export class Designer extends Ractive {
 
   autosize(node: HTMLElement) {
     node.style.height = '';
+    node.style.overflow = '';
     setTimeout(() => {
       node.style.height = `${node.scrollHeight + 1}px`;
+      node.style.overflow = 'hidden';
     });
   }
 
