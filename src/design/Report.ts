@@ -172,7 +172,9 @@ export class Designer extends Ractive {
 
   async eval() {
     const str: string = this.get('temp.expr.str');
-    const ctx = await this.buildLocalContext(this.get('temp.expr.path'));
+    let v: string = this.get('temp.expr.path');
+    if (v && v.startsWith('widget.')) v = v.replace('widget', this.get('temp.widget'));
+    const ctx = await this.buildLocalContext(v);
     const parsed = parse(str, { detailed: true });
     const res = evaluate(ctx, str);
     this.set('temp.expr.parsed', JSON.stringify(parsed, null, '  '));
@@ -315,15 +317,21 @@ export class Designer extends Ractive {
         else ctx = extend(ctx, { value: evaluate(ctx, `*${this.get(`report.sources.${parts[1]}.source`)}.0`) });
       } else {
         while (loc && parts.length) {
-          loc = loc[parts.shift()];
+          const part = parts.shift();
+          loc = loc[part];
           if (loc) {
             if (loc.context) {
               ctx = extend(ctx, { value: evaluate(ctx, loc.context) });
             } else if (loc.source && loc.source.source) {
-              ctx = extend(ctx, { value: filter(root.sources[loc.source.source] || { value: [] }, loc.source.filter, loc.source.sort, loc.source.group, ctx).value });
+              const source = filter(root.sources[loc.source.source] || { value: [] }, loc.source.filter, loc.source.sort, loc.source.group, ctx);
+              ctx = extend(ctx, { value: source.value, special: { source } });
             } else if (loc.source) {
               ctx = extend(ctx, { value: evaluate(ctx, loc.source) });
             }
+          }
+
+          if (loc && loc.type === 'repeater' && parts[0] === 'row') {
+            ctx = extend(ctx, { value: evaluate(ctx, '@value.0') });
           }
         }
       }
