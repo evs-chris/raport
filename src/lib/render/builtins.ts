@@ -1,16 +1,25 @@
 import { Container, Label, Repeater, Image, MeasuredLabel, HTML } from '../report';
 import { evaluate, filter, Group, isValueOrExpr } from '../data/index';
 
-import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, getHeightWithMargin, expandMargin } from './index';
+import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin } from './index';
 import { styleClass, style, styleFont } from './style';
 
 registerRenderer<Label>('label', (w, ctx, placement) => {
   addStyle(ctx, 'label', `.label { position: absolute; box-sizing: border-box; }`);
-  const str = (Array.isArray(w.text) ? w.text : [w.text]).map(v => {
-    if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font), ''])}>${evaluate(ctx, v.text)}</span>`;
-    else return evaluate(ctx, v);
+  const val = (Array.isArray(w.text) ? w.text : [w.text]).map(v => {
+    let val = evaluate(ctx, typeof v === 'object' && 'text' in v ? v.text : v);
+    if (w.id) {
+      let c = ctx.context;
+      while (c) {
+        if (c.special && c.special.values) (c.special.values[w.id] || (c.special.values[w.id] = [])).push(val);
+        c = c.parent;
+      }
+    }
+    if (w.format && w.format.name) val = evaluate(ctx, { op: 'format', args: [val, `'${w.format.name}'`].concat(w.format.args || []) });
+    if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font), ''])}>${val}</span>`;
+    else return val;
   }).join('');
-  return `<span${styleClass(ctx, ['label'], style(w, placement, ctx))}>${escapeHTML(str)}</span>`
+  return `<span${styleClass(ctx, ['label'], style(w, placement, ctx))}>${escapeHTML(val)}</span>`
 });
 
 registerRenderer<Container>('container', (w, ctx, placement, state) => {

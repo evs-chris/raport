@@ -466,6 +466,10 @@ export class Designer extends Ractive {
     }
     setTimeout(() => this.set('temp.fontSize', ''));
   }
+
+  inRepeater(path: string) {
+    return /\.row\./.test(path);
+  }
 }
 
 Ractive.extendWith(Designer, {

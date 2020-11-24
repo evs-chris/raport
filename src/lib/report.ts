@@ -171,8 +171,14 @@ export interface Span {
   text: ValueOrExpr;
   font?: Font;
 }
+export interface LabelFormat {
+  name: string;
+  args?: ValueOrExpr[];
+}
 export interface Label extends Widget {
   text: ValueOrExpr|Span|Array<ValueOrExpr|Span>;
+  format?: LabelFormat;
+  id?: string;
 }
 
 export interface HTML extends Widget {

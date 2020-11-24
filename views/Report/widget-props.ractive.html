@@ -112,6 +112,26 @@
 
 <template id="label-props">
   <label><span>Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text')">&#9998;</button></span><span><textarea>{{.text}}</textarea></span></label>
+  {{#if @.inRepeater(~/temp.widget)}}
+    <label><span>ID {{#if .id != null}}
+        <button class-ico class-large title="Remove aggregate id" on-click="@context.set('.id', undefined)">&times;</button>
+      {{else}}
+        <button class-ico class-large title="Add aggregate id" on-click="@context.set('.id', '')">+</button>
+      {{/if}}
+    </span><span>{{#if .id != null}}<input value="{{.id}}" />{{/if}}</span></label>
+  {{/if}}
+  <label><span>Format <button class-hide />{{#if .format != null}}
+      <button class-ico class-large title="Remove format" on-click="@context.set('.format', undefined)">&times;</button>
+    {{else}}
+      <button class-ico class-large title="Add format" on-click="@context.set('.format', {})">+</button>
+    {{/if}}
+  </span><span>{{#if .format != null}}
+    <input value="{{.format.name}}" style-width="80%" />
+    <button class-ico class-large title="Add parameter" on-click="@context.push('.format.args', '')">+</button>
+    {{#each .format.args}}
+      <input value="{{.}}" style-width="80%" /><button class-ico class-large title="Remove parameter" on-click="@context.splice('../', @index)">&times;</button>
+    {{/each}}
+  {{/if}}</span></label>
 </template>
 
 <template id="html-props">
