@@ -149,13 +149,14 @@ function bracket_op<T>(parser: Parser<T>): Parser<T> {
 }
 
 export const binop: Parser<Value> = {};
+export const if_op: Parser<Value> = {};
 
 const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyz-_'), bracket_op(fn_args)), ([op, val]) => {
   val.op = op;
   return val;
 });
 
-export const operand: Parser<Value> = fmt_op(alt(values, verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`)));
+export const operand: Parser<Value> = fmt_op(alt(values, fmt_op(bracket_op(if_op)), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`)));
 export const unop = map(seq(str('not ', '+'), operand), ([op, arg]) => ({ op: op === '+' ? op : 'not', args: [arg] }));
 
 function leftassoc(left: Value, [, op, , right]: [string, string, string, Value]) {
@@ -165,20 +166,20 @@ function leftassoc(left: Value, [, op, , right]: [string, string, string, Value]
 const rws = skip1(space);
 export const binop_md = map(seq(operand, rep(seq(rws, str('*', '/', '%'), rws, operand))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 export const binop_as = map(seq(binop_md, rep(seq(rws, str('+', '-'), rws, binop_md))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
-export const binop_cmp = map(seq(binop_as, rep(seq(rws, str('>', '>=', '<', '<=', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain'), rws, binop_as))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
+export const binop_cmp = map(seq(binop_as, rep(seq(rws, str('>=', '>', '<=', '<', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain'), rws, binop_as))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 export const binop_eq = map(seq(binop_cmp, rep(seq(rws, str('is', 'is-not'), rws, binop_cmp))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 export const binop_or = map(seq(binop_eq, rep(seq(rws, str('or'), rws, binop_eq))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 export const binop_and = map(seq(binop_or, rep(seq(rws, str('and'), rws, binop_or))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 binop.parser = binop_and;
 
-const if_op = map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(seq(rws, str('else if', 'elseif', 'elsif', 'elif'), rws, value, rws, str('then'), rws, value)), opt(seq(rws, str('else'), rws, value))), ([,, cond1,,,, val1, elifs, el]) => {
+if_op.parser = map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(seq(rws, str('else if', 'elseif', 'elsif', 'elif'), rws, value, rws, str('then'), rws, value)), opt(seq(rws, str('else'), rws, value))), ([,, cond1,,,, val1, elifs, el]) => {
   const op = { op: 'if', args: [cond1, val1] };
   for (const [,,, cond,,,, val] of elifs) op.args.push(cond, val);
   if (el) op.args.push(el[3]);
   return op;
 });
 
-export const operation = alt<Value>(alt(fmt_op(bracket_op(if_op)), if_op), binop, fmt_op(sexp));
+export const operation = alt<Value>(if_op, binop, fmt_op(sexp));
 
 export const expr = map(seq(str('%'), value), v => ({ v: v[1] }));
 
