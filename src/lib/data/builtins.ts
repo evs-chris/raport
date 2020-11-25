@@ -147,6 +147,15 @@ registerOperator(
   simple(['ceil'], (_name: string, values: [number]): number => {
     return Math.ceil(values[0]);
   }),
+  simple(['rand', 'random'], (_name: string, [min, max, dec]: [number, number|boolean, boolean]): number => {
+    let res: number;
+    if (min == null) return Math.random();
+    else if (typeof max !== 'number') res = Math.random() * min;
+    else if (typeof max === 'number') res = Math.random() * (max - min) + min;
+
+    if (max === true || dec === true) return res;
+    else return Math.round(res);
+  }),
 );
 
 // string
