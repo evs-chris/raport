@@ -1,5 +1,5 @@
-import { filter, safeGet, registerOperator, CheckResult, ValueOperator, Context, Root, evaluate, extend, formats, registerFormat } from './index';
-import { parse } from './expr';
+import { filter, safeGet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, extend, formats, registerFormat } from './index';
+import { parse } from './parse';
 import { date, dollar, number, phone } from './format';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
@@ -73,16 +73,6 @@ registerOperator(
       else return [];
     }
     return filter({ value: arr }, flt, sorts, groups, ctx).value;
-  }),
-  simple(['find'], (_name: string, values: any[], ctx?: Context): any => {
-    ctx = ctx || new Root({});
-    let [arr, flt] = values;
-    if (!Array.isArray(arr)) return;
-    if (typeof flt === 'string') flt = parse(flt);
-    if (typeof flt !== 'object') flt = { v: flt };
-    if (flt.v) return arr.find(e => e == flt.v);
-    else if (flt.r) return arr.find(e => e == evaluate(ctx, flt));
-    else return arr.find(e => evaluate(extend(ctx, { value: e }), flt));
   }),
   simple(['source'], (_name: string, values: any[]): any => {
     const [val] = values;
@@ -286,137 +276,85 @@ registerOperator({
 });
 
 // aggregates
-registerOperator<[number, number]>({
+registerOperator({
   type: 'aggregate',
   names: ['avg'],
-  init() { return [0, 0]; },
-  apply(_name: string, state: [number, number], _base: any, value: any) {
-    state[0]++;
-    if (!isNaN(value)) state[1] += +value;
-    return state;
+  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+    return arr.reduce((a, c) => a + (args[0] ? evaluate(ctx, args[0], c) : c), 0) / arr.length;
   },
-  final(_name: string, [count, total]: [number, number]): number {
-    return count < 1 ? 0 : total / count;
-  }
-});
-
-registerOperator<number>({
+}, {
   type: 'aggregate',
   names: ['sum'],
-  init() { return 0; },
-  apply(_name: string, state: number, _base: any, value: any) {
-    if (!isNaN(value)) return state + +value;
-    else return state;
-  },
-  final(_name: string, value: number) {
-    return value;
+  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+    return arr.reduce((a, c) => a + (args[0] ? evaluate(ctx, args[0], c) : c), 0);
   }
 }, {
   type: 'aggregate',
   names: ['count'],
-  init() { return 0; },
-  apply(_name: string, state: number, _base: any, value: any) {
-    if (value !== false) return state + 1;
-    else return state;
-  },
-  final(_name: string, value: number): number {
-    return value;
-  }
-});
-
-type MaybeVal = { value?: any };
-registerOperator<MaybeVal>({
-  type: 'aggregate',
-  names: ['min', 'max'],
-  init() { return {}; },
-  apply(name: string, state: MaybeVal, _base: any, value: any) {
-    if (!isNaN(value)) value = +value;
-    if (!('value' in state) || (name === 'min' ? value < state.value : value > state.value)) state.value = value;
-    return state;
-  },
-  final(_name: string, { value }: MaybeVal): number {
-    return value;
-  }
-});
-
-type Nth = { value?: any, nth?: number, iter?: number; };
-registerOperator<Nth>({
-  type: 'aggregate',
-  names: ['first', 'nth', 'last'],
-  init(_name, args: any[]) { return { nth: args[0] }; },
-  apply(name: string, state: Nth, _base: any, value: any) {
-    if (name === 'first') {
-      if (!state.iter) {
-        state.iter = 1;
-        state.value = value;
-      }
-    } else if (name === 'last') {
-      state.value = value;
-    } else if (name === 'nth') {
-      if (!state.iter) state.iter = 1;
-      if (state.iter === state.nth) state.value = value;
-      state.iter++;
-    }
-    return state;
-  },
-  final(_name: string, { value }: Nth): any {
-    return value;
-   }
-});
-
-registerOperator<any[]>({
-  type: 'aggregate',
-  names: ['map'],
-  init() { return []; },
-  apply(_name: string, state: any[], _base: any, value: any) {
-    state.push(value);
-    return state;
-  },
-  final(_name: string, value: any[]): any[] {
-    return value;
+  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+    if (args.length) return arr.filter(e => evaluate(ctx, args[0], e)).length;
+    else return arr.length;
   }
 }, {
   type: 'aggregate',
-  names: ['unique'],
-  init() { return []; },
-  apply(_name: string, state: any[], _base: any, value: any) {
-    if (!~state.indexOf(value)) state.push(value);
-    return state;
-  },
-  final(_name: string, value: any[]): any[] {
-    return value;
+  names: ['min', 'max'],
+  apply(name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+    if (args[0]) arr = arr.map(e => evaluate(ctx, args[0], e));
+    return Math[name].apply(Math, arr);
   }
-});
-
-registerOperator<[any[], any[]]>({
+}, {
   type: 'aggregate',
-  names: ['unique-by'],
-  init() { return [[], []]; },
-  apply(_name: string, state: [any[], any[]], base: any, value: any) {
-    if (!~state[0].indexOf(value)) {
-      state[0].push(value);
-      state[1].push(base);
+  names: ['first', 'nth', 'last'],
+  apply(name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+    let val: any;
+    let apply = 0;
+    if (name === 'first') val = arr[0];
+    else if (name === 'last') val = arr[arr.length - 1];
+    else if (args[0]) {
+      const i = evaluate(ctx, args[0]);
+      if (typeof i === 'number') {
+        val = arr[i];
+        apply = 1;
+      }
     }
-    return state;
-  },
-  final(_name: string, [, values]: [any[], any[]]): any[] {
-    return values;
-  },
-  check(_name: string, final: any[], base: any) {
-    return !!~final.indexOf(base);
+    if (args[apply]) val = evaluate(ctx, args[apply]);
+    return val;
   }
-});
-
-registerOperator<any[]>({
+}, {
+  type: 'aggregate',
+  names: ['map'],
+  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+    if (!args[0]) return arr;
+    return arr.map(e => evaluate(ctx, args[0], e));
+  }
+}, {
+  type: 'aggregate',
+  names: ['unique', 'unique-map'],
+  apply(name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+    const seen = [];
+    const res = [];
+    for (const e of arr) {
+      const f = args[0] ? evaluate(ctx, args[0], e) : e;
+      if (!~seen.indexOf(f)) {
+        seen.push(f);
+        res.push(e);
+      }
+    }
+    return name === 'unique' ? res : seen;
+  }
+}, {
   type: 'aggregate',
   names: ['join'],
-  init() { return []; },
-  apply(_name: string, state: any[], _base: any, value: any) {
-    state.push(value);
-    return state;
-  },
-  final(_name: string, value: any[], [join]: [string]): string {
-    return value.join(join);
+  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+    if (args.length > 1) return arr.map(e => evaluate(ctx, args[0], e)).join(evaluate(ctx, args[1]));
+    return arr.join(evaluate(ctx, args[0]));
+  }
+}, {
+  type: 'aggregate',
+  names: ['find'],
+  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+    if (!args[0]) return;
+    return arr.find(e => evaluate(ctx, args[0], e));
   }
 });
 

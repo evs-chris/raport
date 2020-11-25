@@ -1,6 +1,6 @@
 import { parser as makeParser, Parser, bracket, opt, alt, seq, str, map, read, chars, rep1sep, repsep, read1To, read1, skip1, rep, check, verify, ErrorOptions } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
-import { Value, Operation, Literal } from './index';
+import { Value, Literal } from './index';
 
 const space = ' \r\n\t';
 const sigils = '!@*~.';
@@ -114,27 +114,14 @@ export const string = alt<Value>(
 );
 export const literal = map(alt(JNum, keywords, date), v => ({ v }));
 
-export const fn_args = map(seq(
-  opt(seq(str('+'), value)), ws,
-  opt(seq(str('=>'), ws, value)), ws,
-  opt(seq(str('&('), verify(args, args => (!!args.length || 'expected at least one local argument')), str(')'))), ws,
-  args
-), ([src, , apply, , locals, , args]) => {
-  const op: Operation = { op: '' };
-  if (src) op.source = src[1];
-  if (apply) op.apply = apply[2];
-  if (locals && locals[1].length) op.locals = locals[1];
-  if (args && args.length) op.args = args;
-  return op;
-});
-
 export const sexp = map(bracket(
   check(str('('), ws),
-  seq(ident, ws, fn_args),
+  seq(ident, ws, args),
   check(ws, str(')')),
-), ([op, , val]) => {
-  val.op = op;
-  return val;
+), ([op, , args]) => {
+  const res: Value = { op };
+  if (args && args.length) res.args = args;
+  return res;
 });
 
 function fmt_op(parser: Parser<Value>): Parser<Value> {
@@ -151,9 +138,10 @@ function bracket_op<T>(parser: Parser<T>): Parser<T> {
 export const binop: Parser<Value> = {};
 export const if_op: Parser<Value> = {};
 
-const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyz-_'), bracket_op(fn_args)), ([op, val]) => {
-  val.op = op;
-  return val;
+const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyz-_'), bracket_op(args)), ([op, args]) => {
+  const res: Value = { op };
+  if (args && args.length) res.args = args;
+  return res;
 });
 
 export const operand: Parser<Value> = fmt_op(alt(values, fmt_op(bracket_op(if_op)), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`)));
@@ -204,7 +192,8 @@ value.parser = alt(operation, array, object, literal, string, expr, ref);
 
 values.parser = alt(unop, call_op, array, object, literal, string, expr, ref);
 
-args.parser = repsep(value, read1(space + ','), 'allow');
+const application = map(seq(str('=>'), value), ([, value]) => ({ a: value }));
+args.parser = repsep(alt(value, application), read1(space + ','), 'allow');
 
 const _parse = makeParser(value);
 
@@ -213,7 +202,7 @@ export function parse(input: string, opts?: ErrorOptions): Value {
 }
 
 const checkIdent = new RegExp(`[${endRef.split('').map(v => `\\${v}`).join('')}]`);
-const opKeys = ['op', 'source', 'apply', 'locals', 'args'];
+const opKeys = ['op', 'args'];
 export interface StringifyOpts {
   noSymbols?: boolean;
 }
@@ -247,8 +236,10 @@ function _stringify(value: Value): string {
     } else if (value.op === '+' && value.args && value.args.length > 0 && typeof value.args[0] === 'object' && typeof (value.args[0] as any).v === 'string') {
       return `'${value.args.map(a => 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `\$\{${_stringify(a)}}`).join('')}'`
     } else {
-      return `(${value.op}${'source' in value ? ` +${_stringify(value.source)}` : ''}${'apply' in value ? ` =>${_stringify(value.apply)}` : ''}${'locals' in value ? ` &(${value.locals.map(v => _stringify(v)).join(' ')})` : ''}${value.args && value.args.length ? ` ${value.args.map(v => _stringify(v)).join(' ')}`: ''})`;
+      return `(${value.op}${value.args && value.args.length ? ` ${value.args.map(v => _stringify(v)).join(' ')}`: ''})`;
     }
+  } else if ('a' in value) {
+    return `=>${_stringify(value.a)}`;
   } else if ('v' in value) {
     if (typeof value.v === 'string') {
       if ((_key || !_noSym) && !checkIdent.test(value.v) && value.v.length) return `${_key ? '' : ':'}${value.v}`;

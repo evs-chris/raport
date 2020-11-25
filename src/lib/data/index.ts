@@ -47,19 +47,9 @@ export interface Field {
   fields?: Field[];
 }
 
-export type Operation = FunctionOperation|AggregateOperation;
-
-export interface FunctionOperation {
+export interface Operation {
   op: string;
-  args: Value[];
-}
-
-export interface AggregateOperation {
-  op: string;
-  source?: Value;
-  apply?: Value;
   args?: Value[];
-  locals?: Value[];
 }
 
 export type Sort = ValueOrExpr|SortBy;
@@ -68,7 +58,7 @@ export interface SortBy {
   desc?: ValueOrExpr|boolean;
 }
 
-export type Operator<T = any> = AggregateOperator<T> | ValueOperator | CheckedOperator;
+export type Operator<T = any> = AggregateOperator | ValueOperator | CheckedOperator;
 
 export interface BaseOperator {
   names: string[];
@@ -84,12 +74,9 @@ export interface CheckedOperator extends BaseOperator {
   checkArg: (name: string, num: number, last: number, value: any, context?: Context) => CheckResult;
 }
 
-export interface AggregateOperator<T = any> extends BaseOperator {
+export interface AggregateOperator extends BaseOperator {
   type: 'aggregate';
-  init(name: string, args?: any[]): T;
-  apply(name: string, state: T, base: any, value: any, locals?: any[], args?: any[], context?: Context): T;
-  final(name: string, state: T, args?: any[]): any;
-  check?: (name: string, final: any, base: any, value: any, locals?: any[], args?: any[], context?: Context) => any;
+  apply(name: string, values: any[], args?: ValueOrExpr[], context?: Context): any;
 }
 
 export type CheckResult = 'continue'|{ result: any }|{ skip: number, value?: any };
@@ -183,22 +170,33 @@ export function safeGet(root: Context, path: string): any {
   return o;
 }
 
-export function evaluate(value: ValueOrExpr): any;
-export function evaluate(root: Context|{ context: Context }|any, value: ValueOrExpr): any;
-export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, value?: ValueOrExpr): any {
-  if (arguments.length === 1) {
-    value = root as ValueOrExpr;
-    root = new Root();
+export function evaluate(value: ValueOrExpr, local?: any): any;
+export function evaluate(root: Context|{ context: Context }|any, value: ValueOrExpr, local?: any): any;
+export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, value?: ValueOrExpr|any, local?: any): any {
+  let r: Context;
+  let e: ValueOrExpr;
+  let l: any = local;
+  if (isContext(root)) {
+    r = root;
+    e = value;
+  } else if (root && 'context' in root && isContext(root.context)) {
+    r = root.context;
+    e = value;
+  } else if (isValueOrExpr(value)) {
+    r = new Root(root);
+    e = value;
+  } else {
+    r = new Root();
+    e = root;
+    l = value;
   }
-  if (!isContext(root)) {
-    if (root && 'context' in root && isContext(root.context)) root = root.context;
-    else root = new Root(root);
-  }
-  if (typeof value === 'string') value = (root as Context).root.exprs[value] || ((root as Context).root.exprs[value] = parse(value));
-  if (typeof value !== 'object') value = { v: value };
-  if (value && 'r' in value) return safeGet(root as Context, value.r);
-  else if (value && 'v' in value) return value.v;
-  else if (value && 'op' in value) return applyOperator(root as Context, value);
+
+  if (typeof e === 'string') e = r.root.exprs[e] || (r.root.exprs[e] = parse(e));
+  if (typeof e !== 'object') e = { v: e };
+  if (e && 'r' in e) return safeGet(r, e.r);
+  else if (e && 'v' in e) return e.v;
+  else if (e && 'op' in e) return applyOperator(r, e);
+  else if (e && 'a' in e) return evaluate(l ? extend(r, { value: l }) : r, e.a);
 }
 
 const opMap: { [key: string]: Operator } = {};
@@ -240,22 +238,17 @@ function mungeSort(context: Context, sorts: Sort[]|ValueOrExpr): Sort[] {
   return sortArr;
 }
 
-interface OpAggregateMap {
-  map: Array<[Operation, any]>;
-}
-
 export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context): DataSet {
   if (!ds || !Array.isArray(ds.value)) return ds;
   if (!context) context = new Root(ds.value, { special: { source: ds } });
   else context = extend(context, { special: { source: ds.value } });
-  const cache = { ops: { map: [] } };
   const values = filter ? [] : ds.value.slice();
 
   if (filter) {
     let flt: Value = typeof filter === 'string' ? parse(filter) : filter;
     if ('m' in flt) flt = { v: true };
     ds.value.forEach((row, index) => {
-      if (!!evaluate(extend(context, { value: row, special: { value: row, index }, cache }), flt)) values.push(row);
+      if (!!evaluate(extend(context, { value: row, special: { value: row, index } }), flt)) values.push(row);
     });
   }
 
@@ -349,68 +342,40 @@ function applyOperator(root: Context, operation: Operation): any {
     args = (operation.args || []).map(a => evaluate(root, a));
     return op.apply(operation.op, args, root);
   } else {
-    const agg = operation as AggregateOperation;
-    if (!agg.source && root.cache) {
-      let fin = root.cache.ops.map.find(e => e[0] === agg);
-      let args: any[];
-      if (fin) {
-        ([, fin, args] = fin);
-      } else {
-        ([fin, args] = applyAggregate(root, agg, op));
-        root.cache.ops.map.push([agg, fin[0], fin[1]]);
-      }
-      if (op.check) return op.check(agg.op, fin, root.value, agg.apply && evaluate(root, agg.apply), agg.locals && agg.locals.map(e => evaluate(root, e)), args, root);
-      else return fin;
-    } else return applyAggregate(root, agg, op)[0];
+    let arr: any[];
+    const args = (operation.args || []).slice();
+    const arg = evaluate(root, args[0]);
+    if (Array.isArray(arg)) {
+      args.shift();
+      arr = arg;
+    } else if (typeof arg === 'object' && 'value' in arg && Array.isArray(arg.value)) {
+      args.shift();
+      arr = arg.value;
+    }
+    if (!arr) {
+      const src = evaluate(root, { r: '@source' });
+      if (Array.isArray(src)) arr = src;
+      else if (typeof src === 'object' && 'value' in src && Array.isArray(src.value)) arr = src.values;
+      else arr = [];
+    }
+    return op.apply(operation.op, arr, args, root);
   }
 }
 
-function applyAggregate(root: Context, agg: AggregateOperation, op: AggregateOperator): [any, any[]] {
-  const args = (agg.args || []).map(a => evaluate(root, a));
-
-  let arr: any[]; 
-
-  if (!agg.source && args[0]) {
-    if (Array.isArray(args[0])) arr = args.shift();
-    else if (typeof args[0] === 'object' && Array.isArray(args[0].value)) arr = args.shift().value;
-  } else {
-    arr = evaluate(root, agg.source);
-  }
-  let apply = agg.apply;
-
-  if (arr && typeof arr === 'object' && Array.isArray((arr as any).value)) arr = (arr as any).value;
-  if (!Array.isArray(arr)) {
-    arr = evaluate(root, { r: '@source' });
-    if (arr && typeof arr === 'object' && Array.isArray((arr as any).value)) arr = (arr as any).value;
-    if (!Array.isArray(arr)) arr = [];
-  }
-
-  let state = op.init(agg.op, args);
-
-  arr.forEach((e, i) => {
-    const ctx = apply || agg.locals ? extend(root, { value: e, special: { index: i, value: e } }) : root;
-    const locals: any[] = agg.locals ? agg.locals.map(e => evaluate(ctx, e)) : [];
-    state = op.apply(agg.op, state, e, apply ? evaluate(ctx, apply) : e, locals, args, root);
-  });
-
-  return [op.final(agg.op, state, args), args];
-}
-
-export type Reference = { r: string };
+export interface Reference { r: string };
+export interface Application { a: Value };
+export interface Literal { v: any };
 
 export type ValueOrExpr = string|Value;
-export type Value = Reference | Literal | Operation | ParseError;
+export type Value = Reference | Literal | Operation | Application | ParseError;
 
 export function isValueOrExpr(o: any): o is ValueOrExpr {
   return typeof o === 'string' || (typeof o === 'object' && o && (
     ('r' in o && typeof o.r === 'string') ||
     ('op' in o && typeof o.op === 'string') ||
-    ('v' in o)
+    ('v' in o) ||
+    ('a' in o)
   ) );
-}
-
-export interface Literal {
-  v: any;
 }
 
 export type Parameter<T = any> = ParameterBase & T;
@@ -427,16 +392,12 @@ export interface ParameterMap {
 export function isContext(v: any): v is Context {
   return typeof v === 'object' && typeof v.path === 'string' && typeof v.root == 'object' && 'value' in v && (typeof v.parent === 'object' || v.root === v);
 }
-export type ContextCache = {
-  ops: OpAggregateMap;
-} & any;
 export interface Context {
   path: string;
   root: RootContext;
   parent?: Context;
   special?: ParameterMap;
   value: any;
-  cache?: ContextCache;
 }
 
 export interface RootContext extends Context {
@@ -455,14 +416,12 @@ export class Root implements RootContext {
   parent: undefined;
   exprs = {};
   path: '' = '';
-  cache?: ContextCache;
 
   constructor(root: any = {}, opts?: ExtendOptions & { parameters?: ParameterMap }) {
     this.value = root;
     if (opts) {
       Object.assign(this.parameters, opts.parameters);
       Object.assign(this.special, opts.special);
-      this.cache = opts.cache;
     }
   }
 }
@@ -479,7 +438,6 @@ export function join(context: Context, path: string): Context {
 export interface ExtendOptions {
   value?: any;
   special?: any;
-  cache?:  ContextCache;
 }
 
 export function extend(context: Context, opts: ExtendOptions): Context {
@@ -489,7 +447,6 @@ export function extend(context: Context, opts: ExtendOptions): Context {
     path: '',
     value: 'value' in opts ? opts.value : context.value,
     special: opts.special || {},
-    cache: opts.cache
   };
 }
 

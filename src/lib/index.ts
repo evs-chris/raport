@@ -13,7 +13,7 @@ export {
   Context, Root, Parameter,
   DataSet, DataSource, Field, Group, Schema, Sort, SourceMap,
   Operator, AggregateOperator, CheckedOperator, ValueOperator,
-  Operation, AggregateOperation, FunctionOperation,
+  Operation,
   Type, ArrayType, ValueType, Value, Literal, Reference,
 } from './data/index';
 export { inspect } from './data/schema';
