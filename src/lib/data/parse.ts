@@ -1,11 +1,10 @@
-import { parser as makeParser, Parser, bracket, opt, alt, seq, str, map, read, chars, rep1sep, repsep, read1To, read1, skip1, rep, check, verify, ErrorOptions } from 'sprunge/lib';
+import { parser as makeParser, Parser, bracket, opt, alt, seq, str, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, ErrorOptions } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
-import { Value, Literal } from './index';
+import { Value, Literal, Keypath } from './index';
 
 const space = ' \r\n\t';
-const sigils = '!@*~.';
 const endSym = space + '():{}[]';
-const endRef = endSym + ',"\'`\\;&#';
+const endRef = endSym + ',"\'`\\;&#=.';
 
 export const keywords = map<string, any>(str('null', 'true', 'false', 'undefined'), v => {
   switch (v) {
@@ -18,14 +17,32 @@ export const keywords = map<string, any>(str('null', 'true', 'false', 'undefined
 
 export const ident = read1To(endRef, true);
 
-export const ref = map(seq(read('^'), opt(chars(1, sigils)), rep1sep(read1To(endRef + '.=><', true), str('.'), 'path part', 'disallow')), v => ({ r: v[0] + (v[1] === '.' ? '' : (v[1] || '')) + v[2].join('.') }));
-
 export const args: Parser<Value[]> = {};
 export const array: Parser<Value> = {};
 export const object: Parser<Value> = {};
 export const value: Parser<Value> = {};
 export const values: Parser<Value> = {};
 export const tpl: Parser<Value> = {};
+
+const escmap: { [k: string]: string } = { n: '\n', r: '\r', t: '\t', b: '\b' };
+const pathesc = map(seq(str('\\'), chars(1)), ([, char]) => escmap[char] || char);
+const pathident = map(rep1(alt(ident, pathesc)), parts => parts.join(''));
+const dotpath = map(seq(str('.'), pathident), ([, part]) => part);
+const bracketpath = bracket(seq(str('['), ws), value, seq(ws, str(']')));
+export const keypath = map(seq(alt<'!'|'~'|'*'|[string,string]>(str('!', '~', '*') as any, seq(read('^'), opt(str('@', '.')))), alt<string|Value>(pathident, bracketpath), rep(alt<string|Value>(dotpath, bracketpath))), ([prefix, init, parts]) => {
+  const res: Keypath = { k: [init].concat(parts) };
+  if (Array.isArray(prefix)) {
+    if (prefix[0]) res.u = prefix[0].length;
+    if (prefix[1] === '@') res.p = '@';
+  } else if (prefix) {
+    res.p = prefix;
+  }
+  return res;
+});
+
+export const parsePath = makeParser(keypath);
+
+export const ref = map(keypath, r => ({ r }));//map(seq(read('^'), opt(chars(1, sigils)), rep1sep(read1To(endRef + '.=><', true), str('.'), 'path part', 'disallow')), v => ({ r: v[0] + (v[1] === '.' ? '' : (v[1] || '')) + v[2].join('.') }));
 
 function stringInterp(parts: Value[]): Value {
   const res = parts.reduce((a, c) => {
@@ -125,9 +142,10 @@ export const sexp = map(bracket(
 });
 
 function fmt_op(parser: Parser<Value>): Parser<Value> {
-  return map(seq(parser, opt(seq(str('#'), ident, opt(str(',')), repsep(value, str(','))))), ([value, fmt]) => {
+  return map(seq(parser, opt(seq(str('#'), ident, opt(seq(str(','), rep1sep(value, str(','))))))), ([value, fmt]) => {
     if (!fmt) return value;
-    return { op: 'fmt', args: [value, { v: fmt[1] }, ...fmt[3]] };
+    if (fmt[2]) return { op: 'fmt', args: [value, { v: fmt[1] }, ...fmt[2][1]] };
+    else return { op: 'fmt', args: [value, { v: fmt[1] }] };
   });
 }
 
@@ -144,7 +162,7 @@ const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyz-_'), bracket_op(ar
   return res;
 });
 
-export const operand: Parser<Value> = fmt_op(alt(values, fmt_op(bracket_op(if_op)), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`)));
+export const operand: Parser<Value> = postfix_path(fmt_op(alt(values, fmt_op(bracket_op(if_op)), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`), fmt_op(sexp))));
 export const unop = map(seq(str('not ', '+'), operand), ([op, arg]) => ({ op: op === '+' ? op : 'not', args: [arg] }));
 
 function leftassoc(left: Value, [, op, , right]: [string, string, string, Value]) {
@@ -167,7 +185,14 @@ if_op.parser = map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(
   return op;
 });
 
-export const operation = alt<Value>(if_op, binop, fmt_op(sexp));
+function postfix_path(parser: Parser<Value>): Parser<Value> {
+  return map(seq(parser, rep(alt<string|Value>(dotpath, bracketpath))), ([v, k]) => {
+    if (k.length) return { op: 'get', args: [v, { v: { k } }] };
+    else return v;
+  });
+}
+
+export const operation = alt<Value>(if_op, binop, postfix_path(fmt_op(sexp)));
 
 export const expr = map(seq(str('%'), value), v => ({ v: v[1] }));
 
@@ -217,10 +242,20 @@ export function stringify(value: Value, opts?: StringifyOpts): string {
   return _stringify(value);
 }
 
+function fill(char: string, len: number): string {
+  let res = '';
+  for (let i = 0; i < len; i++) res += char;
+  return res;
+}
+
 // TODO: output non-s-exps for known ops and conditionals?
 function _stringify(value: Value): string {
   if ('r' in value) {
-    return /^[0-9]/.test(value.r) ? `.${value.r}` : value.r;
+    if (typeof value.r === 'string') return /^[0-9]/.test(value.r) ? `.${value.r}` : value.r;
+    else {
+      const r = value.r;
+      return `${fill('^', r.u || 0)}${r.p || ''}${r.k.map((p, i) => typeof p === 'string' ? `${i ? '' : '.'}{{p}` : `[${_stringify(p)}]`).join('')}`;
+    }
   } else if ('op' in value) {
     if (value.op === 'array') {
       return `[${value.args ? value.args.map(a => _stringify(a)).join(' ') : ''}]`;

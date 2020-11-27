@@ -54,7 +54,7 @@ registerOperator(
   }),
   simple(['get'], (_name: string, values: any[], ctx): any => {
     const [l, r] = values;
-    return safeGet(extend(ctx, { value: l }), `${r}`);
+    return safeGet(extend(ctx, { value: l }), r);
   }),
   simple(['array'], (_name: string, values: any[]) => {
     return values;
@@ -82,7 +82,7 @@ registerOperator(
     ctx = ctx || new Root({});
     let [arr, groups] = values;
     if (!Array.isArray(arr)) {
-      if (arr && Array.isArray(arr.value)) arr =arr.value;
+      if (arr && Array.isArray(arr.value)) arr = arr.value;
       else return {};
     }
     return filter({ value: arr }, null, null, groups, ctx);
@@ -113,7 +113,7 @@ registerOperator(
 // math
 registerOperator(
   simple(['+'], (_name: string, values: any[]): number|string => {
-    const num = values.reduce((a, c) => a && !isNaN(c), true);
+    const num = values.reduce((a, c) => a && !isNaN(c) && c !== '', true);
     if (num) {
       return values.reduce((a, c) => a + +c, 0);
     } else {

@@ -1,4 +1,4 @@
-import { parse } from './parse';
+import { parse, parsePath } from './parse';
 import { ParseError } from 'sprunge/lib';
 
 // Data
@@ -58,7 +58,7 @@ export interface SortBy {
   desc?: ValueOrExpr|boolean;
 }
 
-export type Operator<T = any> = AggregateOperator | ValueOperator | CheckedOperator;
+export type Operator = AggregateOperator | ValueOperator | CheckedOperator;
 
 export interface BaseOperator {
   names: string[];
@@ -90,84 +90,52 @@ export interface Group<R = any> {
 }
 
 // eval
-const splitPattern = /([^\\](?:\\\\)*)\./;
-const escapePattern = /((?:\\)+)\1|\\(\.)/g;
-export function safeGet(root: Context, path: string): any {
+export function safeGet(root: Context, path: string|Keypath): any {
   if (!path) return root.value;
+  const p = typeof path === 'string' ? parsePath(path) : path;
 
-  let match: RegExpMatchArray;
-  let idx: number;
-  let ctx = root;
-  let o: any = root.value;
+  if ('error' in p) return;
+  else if ('k' in p) {
+    const parts = p.k;
+    const prefix = p.p;
+    let idx = 0;
+    let ctx = root;
+    let o: any = root.value;
 
-  if (path[0] === '!') { // param
-    path = path.substr(1);
-    o = root.root.parameters;
-  } else if (path[0] === '~') { // root
-    path = path.substr(1);
-    o = root.root.value;
-  } else if (path[0] === '^') { // pop context
-    while (path[0] === '^') {
-      ctx && (ctx = ctx.parent);
-      path = path.substr(1);
-    }
+    for (let i = 0; i < p.u; i++) ctx && (ctx = ctx.parent);
     o = ctx ? ctx.value : undefined;
-  } else if (path[0] === '*') {
-    path = path.substr(1);
-    o = root.root.sources;
 
-    // grab the data source
-    if (o && (match = splitPattern.exec(path))) {
-      idx = match.index + match[1].length;
-      o = o[path.substr(0, idx).replace(escapePattern, '$1$2')];
-      path = path.substr(idx + 1);
+    if (prefix) {
+      if (prefix === '!') o = root.root.parameters;
+      else if (prefix === '~') o = root.root.value;
+      else if (prefix === '*') {
+        o = root.root.sources[parts[idx++] as string];
+        if (o && idx < parts.length + 1 && parts[idx] !== 'value') o = o.value;
+      } else if (prefix === '@') {
+        const which = parts[idx++] as string;
+        if (parts[idx] === 'value') idx++;
+        else {
+          while (ctx && (!ctx.special || !(which in ctx.special))) ctx = ctx.parent;
+          o = ctx && ctx.special[which] || undefined;
 
-      // if it's a subpath request, drill into the datasource
-      if (o && path.length && o.value && path.substr(0, 5) !== 'value') o = o.value;
-    }
-  }
-
-  if (path[0] === '@') { // special ref, which can follow pops
-    path = path.substr(1);
-    if (!path) {
-      while (ctx && !ctx.special) ctx = ctx.parent;
-      return ctx.special;
-    } else {
-      let first: string = path;
-
-      match = splitPattern.exec(path);
-      if (match) {
-        idx = match.index + match[1].length;
-        first = path.substr(0, idx).replace(escapePattern, '$1$2');
-        path = path.substr(idx + 1);
-      } else {
-        path = '';
-      }
-      
-      if (first === 'value') {
-        o = ctx.value;
-      } else {
-        while (ctx && (!ctx.special || !(first in ctx.special))) ctx = ctx.parent;
-        o = ctx && ctx.special && ctx.special[first];
-      }
-
-      if (!o && first === 'date') {
-        o = root.root.special.date = new Date();
+          if (o && which === 'source' && parts[idx] !== 'value') o = o.value;
+          if (!o && which === 'date') o = root.root.special.date = new Date();
+        }
       }
     }
-  }
 
-  while (o && (match = splitPattern.exec(path))) {
-    idx = match.index + match[1].length;
-    o = o[path.substr(0, idx).replace(escapePattern, '$1$2')];
-    path = path.substr(idx + 1);
-  }
+    for (let i = idx; i < parts.length; i++) {
+      const part = parts[i];
+      if (typeof part !== 'object') o = o && o[part];
+      else {
+        const v = evaluate(ctx, part);
+        o = o && o[v];
+      }
+      if (o == null) return;
+    }
 
-  if (path) {
-    o && (o = o[path.replace(escapePattern, '$1$2')]);
+    return o;
   }
-
-  return o;
 }
 
 export function evaluate(value: ValueOrExpr, local?: any): any;
@@ -200,12 +168,12 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, val
 }
 
 const opMap: { [key: string]: Operator } = {};
-export function registerOperator<T = any>(...ops: Operator<T>[]) {
+export function registerOperator(...ops: Operator[]) {
   for (const op of ops) {
     for (const name of op.names) opMap[name] = op;
   }
 }
-export function unregisterOperator<T = any>(...ops: Operator<T>[]) {
+export function unregisterOperator(...ops: Operator[]) {
   for (const op of ops) {
     for (const name of op.names) delete opMap[name];
   }
@@ -362,7 +330,13 @@ function applyOperator(root: Context, operation: Operation): any {
   }
 }
 
-export interface Reference { r: string };
+export interface Keypath {
+  u?: number;
+  p?: '!'|'~'|'*'|'@';
+  k: Array<string|Value>;
+}
+
+export interface Reference { r: string|Keypath };
 export interface Application { a: Value };
 export interface Literal { v: any };
 
