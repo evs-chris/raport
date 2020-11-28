@@ -1,10 +1,26 @@
-import { parser as makeParser, Parser, bracket, opt, alt, seq, str, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, ErrorOptions } from 'sprunge/lib';
+import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, ErrorOptions, debug } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
-import { Value, Literal, Keypath } from './index';
+import { Value, DateRel, Literal, Keypath } from './index';
+
+export const week = 604800000;
+export const day = 86400000;
+export const hour = 3600000;
+export const minute = 60000;
+export const second = 1000;
+
+const timespan_map = {
+  week, weeks: week,
+  day, days: day,
+  hour, hours: hour,
+  minute, minutes: minute,
+  second, seconds: second,
+};
 
 const space = ' \r\n\t';
 const endSym = space + '():{}[]';
 const endRef = endSym + ',"\'`\\;&#=.';
+
+const rws = skip1(space);
 
 export const keywords = map<string, any>(str('null', 'true', 'false', 'undefined'), v => {
   switch (v) {
@@ -42,7 +58,7 @@ export const keypath = map(seq(alt<'!'|'~'|'*'|[string,string]>(str('!', '~', '*
 
 export const parsePath = makeParser(keypath);
 
-export const ref = map(keypath, r => ({ r }));//map(seq(read('^'), opt(chars(1, sigils)), rep1sep(read1To(endRef + '.=><', true), str('.'), 'path part', 'disallow')), v => ({ r: v[0] + (v[1] === '.' ? '' : (v[1] || '')) + v[2].join('.') }));
+export const ref = map(keypath, r => ({ r }));
 
 function stringInterp(parts: Value[]): Value {
   const res = parts.reduce((a, c) => {
@@ -62,8 +78,19 @@ function stringInterp(parts: Value[]): Value {
   return { op: '+', args: res };
 }
 
-export const date = map(seq(
-  str('#'),
+const timespan = map(rep1sep(seq(JNum, rws, istr('week', 'weeks', 'day', 'days', 'hour', 'hours', 'minute', 'minutes', 'second', 'seconds', 'millisecond', 'milliseconds')), rws, 'disallow'), parts => {
+  let n = 0;
+  for (let i = 0; i < parts.length; i++) n += parts[i][0] * timespan_map[parts[i][2]];
+  return n;
+});
+
+const daterel = alt<DateRel>(
+  map(seq(istr('last', 'this', 'next'), rws, istr('week', 'month', 'year'), opt(seq(rws, istr('to'), rws, istr('date')))), ([o, , f, d]) => ({ f: f[0] === 'w' ? 'w' : f[0] === 'm' ? 'm' : 'y', o: o === 'last' ? -1 : o === 'this' ? 0 : 1, d: d ? 1 : undefined })),
+  map(istr('yesterday', 'today', 'tomorrow', 'now'), v => (v === 'now' ? { f: 'n', o: 0 } : { f: 'd', o: v === 'yesterday' ? -1 : v === 'today' ? 0 : 1 })),
+  map(seq(timespan, rws, alt<string|any[]>(istr('ago'), seq(istr('from'), rws, istr('now')))), ([span, , ref]) => ({ f: 'n', o: span * (ref === 'ago' ? -1 : 1) })),
+);
+
+export const dateexact: Parser<Date> = map(seq(
   chars(4, digits),
   chars(1, '-/'),
   chars(2, digits),
@@ -82,14 +109,13 @@ export const date = map(seq(
       opt(seq(str(':'), chars(2, digits)))
     ))
   )),
-  str('#'),
 ), v => {
-  const time = v[6];
-  const ss = time && time[4];
-  const ms = ss && ss[2];
-  const offset = v[7];
+  const time = v[5];
+  const ss = time && time[3];
+  const ms = ss && ss[1];
+  const offset = v[6];
   if (offset) {
-    const dt = new Date(Date.UTC(+v[1], +v[3] - 1, +v[5], time && +time[2] || 0, time && +time[3] || 0, ss && +ss[1] || 0, ms && +ms[1]));
+    const dt = new Date(Date.UTC(+v[0], +v[2] - 1, +v[4], time && +time[1] || 0, time && +time[2] || 0, ss && +ss[1] || 0, ms && +ms[1]));
     if (typeof offset !== 'string') {
       if (offset[0] === '-') {
         dt.setUTCHours(dt.getUTCHours() - +offset[1])
@@ -101,9 +127,11 @@ export const date = map(seq(
     }
     return dt;
   } else {
-    return new Date(+v[1], +v[3] - 1, +v[5], time && +time[2] || 0, time && +time[3] || 0, ss && +ss[1] || 0, ms && +ms[1]);
+    return new Date(+v[0], +v[2] - 1, +v[4], time && +time[1] || 0, time && +time[3] || 0, ss && +ss[1] || 0, ms && +ms[1]);
   }
 });
+
+export const date = bracket(str('#'), alt<Date|DateRel|number>(dateexact, daterel, timespan), str('#'));
 
 export const string = alt<Value>(
   map(seq(str(':'), ident), v => ({ v: v[1]})),
@@ -156,7 +184,7 @@ function bracket_op<T>(parser: Parser<T>): Parser<T> {
 export const binop: Parser<Value> = {};
 export const if_op: Parser<Value> = {};
 
-const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyz-_'), bracket_op(args)), ([op, args]) => {
+const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_$0123456789'), bracket_op(args)), ([op, args]) => {
   const res: Value = { op };
   if (args && args.length) res.args = args;
   return res;
@@ -169,7 +197,6 @@ function leftassoc(left: Value, [, op, , right]: [string, string, string, Value]
   return { op, args: [left, right] };
 }
 
-const rws = skip1(space);
 export const binop_md = map(seq(operand, rep(seq(rws, str('*', '/', '%'), rws, operand))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 export const binop_as = map(seq(binop_md, rep(seq(rws, str('+', '-'), rws, binop_md))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 export const binop_cmp = map(seq(binop_as, rep(seq(rws, str('>=', '>', '<=', '<', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain'), rws, binop_as))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);

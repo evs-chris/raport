@@ -340,6 +340,21 @@ export interface Reference { r: string|Keypath };
 export interface Application { a: Value };
 export interface Literal { v: any };
 
+export interface DateRelSpan {
+  f: 'n';
+  o: number;
+}
+export interface DateRelRange {
+  f: 'd'|'w'|'m'|'y';
+  o: -1|0|1;
+}
+export interface DateRelToDate {
+  f: 'w'|'m'|'y';
+  o: 0;
+  d: 1;
+}
+export type DateRel = DateRelSpan | DateRelRange | DateRelToDate;
+
 export type ValueOrExpr = string|Value;
 export type Value = Reference | Literal | Operation | Application | ParseError;
 
@@ -430,4 +445,51 @@ export function registerFormat<T = any>(name: string, format: (value: T, args?: 
 }
 export function unregisterFormat(name: string) {
   delete formats[name];
+}
+
+export function dateRelToRange(rel: DateRel): [Date, Date] {
+  const range: [Date, Date] = [null, null];
+  let from = new Date();
+  let to: Date = 'd' in rel && rel.d ? new Date() : undefined;
+  from.setHours(0, 0, 0, 0);
+
+  if (rel.f === 'n') {
+    from = new Date(+new Date() + rel.o);
+    return [from, from];
+  } else if (rel.f === 'd') {
+    from.setDate(from.getDate() + rel.o);
+    if (!to) to = new Date(from);
+  } else if (rel.f === 'w') {
+    from.setDate(from.getDate() - (from.getDay() + (rel.o === -1 ? 7 : rel.o === 1 ? -7 : 0)));
+    if (!to) {
+      to = new Date(from);
+      to.setDate(from.getDate() + 6);
+    }
+  } else if (rel.f === 'm') {
+    from.setDate(1);
+    from.setMonth(from.getMonth() + rel.o);
+    if (!to) {
+      to = new Date(from);
+      to.setMonth(from.getMonth() + 1);
+      to.setDate(0);
+    }
+  } else if (rel.f === 'y') {
+    from.setDate(1);
+    from.setMonth(0);
+    from.setDate(1);
+    if (!to) {
+      to = new Date(from);
+      to.setFullYear(from.getFullYear() + 1);
+      to.setDate(0);
+    }
+  }
+
+  if (!('d' in rel) || !rel.d) to.setHours(23, 59, 59, 999);
+  range[0] = from;
+  range[1] = to;
+  return range;
+}
+
+export function isDateRel(v: any): v is DateRel {
+  return typeof v === 'object' && 'f' in v && 'o' in v;
 }
