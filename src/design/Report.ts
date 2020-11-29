@@ -214,7 +214,7 @@ export class Designer extends Ractive {
     const html = options && options.html;
     const tab = this.get('temp.expr.tab');
     this.set('temp.expr.html', html);
-    this.set('temp.expr.tab', html ? 'html' : tab === 'ast' || tab === 'text' ? tab : 'ast');
+    this.set('temp.expr.tab', html ? 'html' : tab === 'ast' || tab === 'text' ? tab : 'text');
     this.set('temp.bottom.tab', 'expr');
 
     this.link(path, 'expr');
@@ -376,7 +376,7 @@ export class Designer extends Ractive {
   }
 
   insertRef(path: string) {
-    const tab = this.get('temp.expr.tab') || 'ast';
+    const tab = this.get('temp.expr.tab') || 'text';
 
     const parts = Ractive.splitKeypath(path);
     let ps = [];
@@ -406,7 +406,7 @@ export class Designer extends Ractive {
   }
 
   insertOp(name: string) {
-    const tab = this.get('temp.expr.tab') || 'ast';
+    const tab = this.get('temp.expr.tab') || 'text';
 
     if (tab === 'text') {
       const node: HTMLTextAreaElement = this.find('textarea.expr-text') as any;
@@ -521,7 +521,7 @@ Ractive.extendWith(Designer, {
       },
       temp: {
         expr: {
-          tab: 'ast',
+          tab: 'text',
         }
       }
     };

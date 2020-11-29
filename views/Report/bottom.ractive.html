@@ -15,7 +15,7 @@
     <div class-editor>
       <div class-actions>
         <button disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-ico class-large>&#9655;</button>
-        <button class-tab class-active="!~/temp.expr.tab || ~/temp.expr.tab === 'ast'" class-error="~/temp.expr.error" on-click="@.set('temp.expr.tab', 'ast')">AST</button>
+        <!--<button class-tab class-active="!~/temp.expr.tab || ~/temp.expr.tab === 'ast'" class-error="~/temp.expr.error" on-click="@.set('temp.expr.tab', 'ast')">AST</button>-->
         <button class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">Text</button>
         <button class-tab style-display="{{~/temp.expr.html ? '' : 'none'}}" class-active="~/temp.expr.tab === 'html'" on-click="@.set('temp.expr.tab', 'html')">HTML</button>
         <div style-flex-grow=2 />
@@ -24,7 +24,7 @@
           <button class-tab class-active="~/temp.expr.tab === 'parsed'" on-click="@.set('temp.expr.tab', 'parsed')">Parsed</button>
         {{/if}}
       </div>
-      <div class-tab class-ast class-active-tab="!~/temp.expr.tab || ~/temp.expr.tab === 'ast'" class-error="~/temp.expr.error">
+      <!--<div class-tab class-ast class-active-tab="!~/temp.expr.tab || ~/temp.expr.tab === 'ast'" class-error="~/temp.expr.error">
         <div class-scrolled-wrapper style-flex-grow=1>
           <div as-scrolled on-click="@node === @event.target && @.set('temp.expr.partpath', '')">
             {{#if ~/temp.expr.ast}}
@@ -34,8 +34,8 @@
             {{/if}}
           </div>
         </div>
-      </div>
-      <div class-tab class-text class-active-tab="~/temp.expr.tab === 'text'">
+      </div>-->
+      <div class-tab class-text class-active-tab="!~/temp.expr.tab || ~/temp.expr.tab === 'text'">
         <div class-scrolled-wrapper style-flex-grow=1>
           <div as-scrolled>
             <textarea lazy="500" on-input="@.autosize(@node)" class-expr-text>{{~/temp.expr.str}}</textarea>
@@ -188,8 +188,6 @@
       <div class-ast-content>
         {{#if . && 'op' in .}}
           <div class-ast-op-name><div>{{prefix}}(<input value={{.op}} list=operators /></div>{{>ast-actions}}</div>
-          {{#if .source}}{{>ast-node .source, '+ ' as prefix}}{{/if}}
-          {{#if .apply}}{{>ast-node .apply, '=>' as prefix}}{{/if}}
           {{#each .args}}{{>ast-node}}{{/each}}
           <div>) <button class-ico on-click="@context.push('.args', { v: '' })">+</button></div>
           {{elseif . && 'v' in .}}{{!TODO: array, object, date?}}
