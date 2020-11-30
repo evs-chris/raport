@@ -121,7 +121,7 @@ export function safeGet(root: Context, path: string|Keypath): any {
           if (!o && which === 'date') o = root.root.special.date = new Date();
         }
       }
-    }
+    } else if (parts[0] === '_') parts.shift();
 
     for (let i = idx; i < parts.length; i++) {
       const part = parts[i];
