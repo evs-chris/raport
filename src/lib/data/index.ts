@@ -340,7 +340,7 @@ function applyOperator(root: Context, operation: Operation): any {
 export interface Keypath {
   u?: number;
   p?: '!'|'~'|'*'|'@';
-  k: Array<string|Value>;
+  k: Array<string|number|Value>;
 }
 
 export interface Reference { r: string|Keypath };

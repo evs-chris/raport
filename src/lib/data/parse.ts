@@ -42,11 +42,11 @@ export const tpl: Parser<Value> = {};
 
 const escmap: { [k: string]: string } = { n: '\n', r: '\r', t: '\t', b: '\b' };
 const pathesc = map(seq(str('\\'), chars(1)), ([, char]) => escmap[char] || char);
-const pathident = map(rep1(alt(ident, pathesc)), parts => parts.join(''));
+const pathident = map(rep1(alt(read1To(endRef + '=', true), pathesc)), parts => parts.join(''));
 const dotpath = map(seq(str('.'), pathident), ([, part]) => part);
 const bracketpath = bracket(seq(str('['), ws), value, seq(ws, str(']')));
 export const keypath = map(seq(alt<'!'|'~'|'*'|[string,string]>(str('!', '~', '*') as any, seq(read('^'), opt(str('@', '.')))), alt<string|Value>(pathident, bracketpath), rep(alt<string|Value>(dotpath, bracketpath))), ([prefix, init, parts]) => {
-  const res: Keypath = { k: [init].concat(parts) };
+  const res: Keypath = { k: [init].concat(parts).map(p => typeof p === 'object' && 'v' in p && (typeof p.v === 'string' || typeof p.v === 'number') ? p.v : p) };
   if (Array.isArray(prefix)) {
     if (prefix[0]) res.u = prefix[0].length;
     if (prefix[1] === '@') res.p = '@';
@@ -281,7 +281,7 @@ function _stringify(value: Value): string {
     if (typeof value.r === 'string') return /^[0-9]/.test(value.r) ? `.${value.r}` : value.r;
     else {
       const r = value.r;
-      return `${fill('^', r.u || 0)}${r.p || ''}${r.k.map((p, i) => typeof p === 'string' ? `${i ? '' : '.'}{{p}` : `[${_stringify(p)}]`).join('')}`;
+      return `${fill('^', r.u || 0)}${r.p || ''}${r.k.map((p, i) => typeof p === 'string' || typeof p === 'number' ? `${i ? '' : '.'}{{p}` : `[${_stringify(p)}]`).join('')}`;
     }
   } else if ('op' in value) {
     if (value.op === 'array') {
