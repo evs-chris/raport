@@ -285,7 +285,7 @@ registerOperator(
   }),
   simple(['date'], (_name: string, [v, w]: any[]): Date|[Date,Date] => {
     if (v !== undefined) {
-      if (typeof v === 'object' && 'f' in v && 'o' in v) {
+      if (isDateRel(v)) {
         const r = dateRelToRange(v);
         if (w === 's' || w === 'start') return r[0];
         else if (w === 'e' || w === 'end') return r[1];

@@ -360,7 +360,10 @@ export interface DateRelToDate {
   o: 0;
   d: 1;
 }
-export type DateRel = DateRelSpan | DateRelRange | DateRelToDate;
+export interface DateExactRange {
+  f: [number, number?, number?, number?, number?, number?, number?, number?];
+}
+export type DateRel = DateRelSpan | DateRelRange | DateRelToDate | DateExactRange;
 
 export type ValueOrExpr = string|Value;
 export type Value = Reference | Literal | Operation | Application | ParseError;
@@ -491,12 +494,32 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
     }
   }
 
-  if (!('d' in rel) || !rel.d) to.setHours(23, 59, 59, 999);
+  if (Array.isArray(rel.f)) {
+    const v = rel.f.slice();
+    if (v[7] != null) {
+      from = new Date(Date.UTC(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0));
+      if (v[7]) from.setUTCHours(from.getUTCHours() + Math.floor(v[7] / 60));
+      if (v[7] % 60) from.setUTCMinutes(from.getUTCMinutes() + v[7] % 60);
+    } else from = new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
+    for (let i = 1; i < 7; i++) {
+      if (v[i] == null) {
+        v[i - 1]++;
+        break;
+      }
+    }
+    if (v[7] != null) {
+      to = new Date(Date.UTC(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0));
+      if (v[7]) to.setUTCHours(to.getUTCHours() + Math.floor(v[7] / 60));
+      if (v[7] % 60) to.setUTCMinutes(to.getUTCMinutes() + v[7] % 60);
+    } else to = new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
+    to.setMilliseconds(-1);
+  } else if (!('d' in rel) || !rel.d) to.setHours(23, 59, 59, 999);
+
   range[0] = from;
   range[1] = to;
   return range;
 }
 
 export function isDateRel(v: any): v is DateRel {
-  return typeof v === 'object' && 'f' in v && 'o' in v;
+  return typeof v === 'object' && 'f' in v && (Array.isArray(v.f) || 'o' in v);
 }
