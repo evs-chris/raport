@@ -197,7 +197,21 @@ function leftassoc(left: Value, [, op, , right]: [string, string, string, Value]
   return { op, args: [left, right] };
 }
 
-export const binop_md = map(seq(operand, rep(seq(rws, str('*', '/', '%'), rws, operand))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
+function rightassoc(left: Value, more: Array<[string, string, string, Value]>) {
+  if (more.length === 1) return { op: more[0][1], args: [left, more[0][3]] };
+  const end = more.pop();
+  let op = more[more.length - 1][1];
+  const first = { op: end[1], args: [more.pop()[3], end[3]] }
+  const right = more.reverse().reduce((a, c) => {
+    const res = { op, args: [c[3], a] };
+    op = c[1];
+    return res;
+  }, first);
+  return { op, args: [left, right] };
+}
+
+export const binop_e = map(seq(operand, rep(seq(rws, str('**'), rws, operand))), ([arg1, more]) => more.length ? rightassoc(arg1, more) : arg1);
+export const binop_md = map(seq(binop_e, rep(seq(rws, str('*', '/', '%'), rws, binop_e))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 export const binop_as = map(seq(binop_md, rep(seq(rws, str('+', '-'), rws, binop_md))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 export const binop_cmp = map(seq(binop_as, rep(seq(rws, str('>=', '>', '<=', '<', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain'), rws, binop_as))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 export const binop_eq = map(seq(binop_cmp, rep(seq(rws, str('is', 'is-not', '==', '!='), rws, binop_cmp))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);

@@ -192,6 +192,11 @@ registerOperator(
     const first = values.shift();
     return values.reduce((a, c) => a % (isNaN(c) ? 1 : +c), isNaN(first) ? 0 : +first);
   }),
+  simple(['pow', '**'], (_name: string, values: any[]): number => {
+    const pow = values.pop();
+    const first = Math.pow(values.pop(), pow);
+    return values.reverse().reduce((a, c) => Math.pow(c, a), first);
+  }),
   simple(['round'], (_name: string, values: [number]): number => {
     return Math.round(values[0]);
   }),
