@@ -46,62 +46,52 @@ q.test('strings with escapes', t => {
 });
 
 q.test('references', t => {
-  t.deepEqual(parse('foo'), { r: 'foo' });
-  t.deepEqual(parse('foo.bar'), { r: 'foo.bar' });
-  t.deepEqual(parse('foo.0.bar'), { r: 'foo.0.bar' });
+  t.deepEqual(parse('foo'), { r: { k: ['foo'] } });
+  t.deepEqual(parse('foo.bar'), { r: { k: ['foo', 'bar'] } });
+  t.deepEqual(parse('foo.0.bar'), { r: { k: ['foo', '0', 'bar'] } });
 });
 
 q.test('simple special references', t => {
-  t.deepEqual(parse('~foo'), { r: '~foo' });
-  t.deepEqual(parse('~foo.bar'), { r: '~foo.bar' });
-  t.deepEqual(parse('~foo.0.bar'), { r: '~foo.0.bar' });
-  t.deepEqual(parse('@foo'), { r: '@foo' });
-  t.deepEqual(parse('@foo.bar'), { r: '@foo.bar' });
-  t.deepEqual(parse('@foo.0.bar'), { r: '@foo.0.bar' });
-  t.deepEqual(parse('!foo'), { r: '!foo' });
-  t.deepEqual(parse('!foo.bar'), { r: '!foo.bar' });
-  t.deepEqual(parse('!foo.0.bar'), { r: '!foo.0.bar' });
-  t.deepEqual(parse('*foo'), { r: '*foo' });
-  t.deepEqual(parse('*foo.bar'), { r: '*foo.bar' });
-  t.deepEqual(parse('*foo.0.bar'), { r: '*foo.0.bar' });
-  t.deepEqual(parse('^foo'), { r: '^foo' });
-  t.deepEqual(parse('^foo.bar'), { r: '^foo.bar' });
-  t.deepEqual(parse('^foo.0.bar'), { r: '^foo.0.bar' });
-  t.deepEqual(parse('^^^foo'), { r: '^^^foo' });
-  t.deepEqual(parse('^^^foo.bar'), { r: '^^^foo.bar' });
-  t.deepEqual(parse('^^^foo.0.bar'), { r: '^^^foo.0.bar' });
+  t.deepEqual(parse('~foo'), { r: { p: '~', k: ['foo'] } });
+  t.deepEqual(parse('~foo.bar'), { r: { p: '~', k: ['foo', 'bar'] } });
+  t.deepEqual(parse('~foo.0.bar'), { r: { p: '~', k: ['foo', '0', 'bar'] } });
+  t.deepEqual(parse('@foo'), { r: { p: '@', k: ['foo'] } });
+  t.deepEqual(parse('@foo.bar'), { r: { p: '@', k: ['foo', 'bar'] } });
+  t.deepEqual(parse('@foo.0.bar'), { r: { p: '@', k: ['foo', '0', 'bar'] } });
+  t.deepEqual(parse('!foo'), { r: { p: '!', k: ['foo'] } });
+  t.deepEqual(parse('!foo.bar'), { r: { p: '!', k: ['foo', 'bar'] } });
+  t.deepEqual(parse('!foo.0.bar'), { r: { p: '!', k: ['foo', '0', 'bar'] } });
+  t.deepEqual(parse('*foo'), { r: { p: '*', k: ['foo'] } });
+  t.deepEqual(parse('*foo.bar'), { r: { p: '*', k: ['foo', 'bar'] } });
+  t.deepEqual(parse('*foo.0.bar'), { r: { p: '*', k: ['foo', '0', 'bar'] } });
+  t.deepEqual(parse('^foo'), { r: { u: 1, k: ['foo'] } });
+  t.deepEqual(parse('^foo.bar'), { r: { u: 1, k: ['foo', 'bar'] } });
+  t.deepEqual(parse('^foo.0.bar'), { r: { u: 1, k: ['foo', '0', 'bar'] } });
+  t.deepEqual(parse('^^^foo'), { r: { u: 3, k: ['foo'] } });
+  t.deepEqual(parse('^^^foo.bar'), { r: { u: 3, k: ['foo', 'bar'] } });
+  t.deepEqual(parse('^^^foo.0.bar'), { r: { u: 3, k: ['foo', '0', 'bar'] } });
 });
 
 q.test('simple ops', t => {
   t.deepEqual(parse('(a)'), { op: 'a' });
-  t.deepEqual(parse('(+ a b)'), { op: '+', args: [{ r: 'a' }, { r: 'b' }] });
-  t.deepEqual(parse('(+ 10 (- 20 c))'), { op: '+', args: [{ v: 10 }, { op: '-', args: [{ v: 20 }, { r: 'c' }] }] });
-  t.deepEqual(parse('(+ a, b)'), { op: '+', args: [{ r: 'a' }, { r: 'b' }] });
-  t.deepEqual(parse('(+ a "foo")'), { op: '+', args: [{ r: 'a' }, { v: 'foo' }] });
-  t.deepEqual(parse('(+ a, "foo")'), { op: '+', args: [{ r: 'a' }, { v: 'foo' }] });
-  t.deepEqual(parse('(+ ~a !b)'), { op: '+', args: [{ r: '~a' }, { r: '!b' }] });
-});
-
-q.test('complex ops - source', t => {
-  t.deepEqual(parse('(a +b)'), { op: 'a', source: { r: 'b' } });
-  t.deepEqual(parse('(a +b b c)'), { op: 'a', source: { r: 'b' }, args: [{ r: 'b' }, { r: 'c' }] });
+  t.deepEqual(parse('(+ a b)'), { op: '+', args: [{ r: { k: ['a'] } }, { r: { k: ['b'] } }] });
+  t.deepEqual(parse('(+ 10 (- 20 c))'), { op: '+', args: [{ v: 10 }, { op: '-', args: [{ v: 20 }, { r: { k: ['c'] } }] }] });
+  t.deepEqual(parse('(+ a, b)'), { op: '+', args: [{ r: { k: ['a'] } }, { r: { k: ['b'] } }] });
+  t.deepEqual(parse('(+ a "foo")'), { op: '+', args: [{ r: { k: ['a'] } }, { v: 'foo' }] });
+  t.deepEqual(parse('(+ a, "foo")'), { op: '+', args: [{ r: { k: ['a'] } }, { v: 'foo' }] });
+  t.deepEqual(parse('(+ ~a !b)'), { op: '+', args: [{ r: { p: '~', k: ['a'] } }, { r: { p: '!', k: ['b'] } }] });
 });
 
 q.test('complex ops - applicative', t => {
-  t.deepEqual(parse('(a =>b)'), { op: 'a', apply: { r: 'b' } });
-  t.deepEqual(parse('(a =>(b "c"))'), { op: 'a', apply: { op: 'b', args: [{ v: 'c' }] } });
-  t.deepEqual(parse('(a =>(b "c") d)'), { op: 'a', apply: { op: 'b', args: [{ v: 'c' }] }, args: [{ r: 'd' }] });
-  t.deepEqual(parse('(a =>b c)'), { op: 'a', apply: { r: 'b' }, args: [{ r: 'c' }] });
-  t.deepEqual(parse('(a => b c)'), { op: 'a', apply: { r: 'b' }, args: [{ r: 'c' }] });
+  t.deepEqual(parse('(a =>b)'), { op: 'a', args: [{ a: { r: { k: ['b'] } } }] });
+  t.deepEqual(parse('(a =>(b "c"))'), { op: 'a', args: [{ a: { op: 'b', args: [{ v: 'c' }] } }] });
+  t.deepEqual(parse('(a =>(b "c") d)'), { op: 'a', args: [{ a: { op: 'b', args: [{ v: 'c' }] } }, { r: { k: ['d'] } }] });
+  t.deepEqual(parse('(a =>b c)'), { op: 'a', args: [{ a: { r: { k: ['b'] } } }, { r: { k: ['c'] } }] });
 });
 
 q.test('complex ops - local args', t => {
-  t.deepEqual(parse('(a &(b))'), { op: 'a', locals: [{ r: 'b' }] });
-  t.deepEqual(parse('(a &(b c) d)'), { op: 'a', locals: [{ r: 'b' }, { r: 'c' }], args: [{ r: 'd' }] });
-});
-
-q.test('complex ops', t => {
-  t.deepEqual(parse('(a +d =>foo &(b) e (- f 10))'), { op: 'a', source: { r: 'd' }, apply: { r: 'foo' }, locals: [{ r: 'b' }], args: [{ r: 'e' }, { op: '-', args: [{ r: 'f' }, { v: 10 }] }] });
+  t.deepEqual(parse('(a =>b)'), { op: 'a', args: [{ a: { r: { k: ['b'] } } }] });
+  t.deepEqual(parse('(a =>b =>c d)'), { op: 'a', args: [{ a: { r: { k: ['b'] } } }, { a: { r: { k: ['c'] } } }, { r: { k: ['d'] } }] });
 });
 
 q.test('references with a path separator must have path after the separator', t => {
@@ -145,12 +135,6 @@ q.test('application sigil requires application', t => {
   t.matches(parseErr('(foo =>)'), 'expected');
 });
 
-q.test('local args require correct surround', t => {
-  t.matches(parseErr('(foo &()'), 'expected');
-  t.matches(parseErr('(foo &(a'), 'expected');
-  t.matches(parseErr('(foo &())'), 'expected');
-});
-
 q.test('operator requires a closing )', t => {
   t.matches(parseErr('(a b'), 'expected');
 });
@@ -160,27 +144,27 @@ q.test('operator requires a name', t => {
 });
 
 q.test(`expression literals`, t => {
-  t.deepEqual(parse('%a'), { v: { r: 'a' } });
-  t.deepEqual(parse('%10'), { v: { v: 10 } });
-  t.deepEqual(parse('%:10'), { v: { v: '10' } });
-  t.deepEqual(parse('%(+ 10 2)'), { v: { op: '+', args: [{ v: 10 }, { v: 2 }] } });
-  t.deepEqual(parse('(foo %(+ 10 2))'), { op: 'foo', args: [{ v: { op: '+', args: [{ v: 10 }, { v: 2 }] } }] });
+  t.deepEqual(parse('=>a'), { a: { r: { k: ['a'] } } });
+  t.deepEqual(parse('=>10'), { a: { v: 10 } });
+  t.deepEqual(parse('=>:10'), { a: { v: '10' } });
+  t.deepEqual(parse('=>(+ 10 2)'), { a: { op: '+', args: [{ v: 10 }, { v: 2 }] } });
+  t.deepEqual(parse('(foo =>(+ 10 2))'), { op: 'foo', args: [{ a: { op: '+', args: [{ v: 10 }, { v: 2 }] } }] });
 });
 
 q.test(`a list may have whitespace just before its closing paren`, t => {
-  t.deepEqual(parse('(a b c )'), { op: 'a', args: [{ r: 'b' }, { r: 'c' }] });
+  t.deepEqual(parse('(a b c )'), { op: 'a', args: [{ r: { k: ['b'] } }, { r: { k: ['c'] } }] });
 });
 
 q.test(`array literal`, t => {
-  t.deepEqual(parse('[1 2 asdf]'), { op: 'array', args: [{ v: 1 }, { v: 2 }, { r: 'asdf' }] });
+  t.deepEqual(parse('[1 2 asdf]'), { op: 'array', args: [{ v: 1 }, { v: 2 }, { r: { k: ['asdf'] } }] });
   t.deepEqual(parse('[1 2 :asdf]'), { v: [1, 2, 'asdf'] });
 });
 
 q.test(`array literal in an op`, t =>{
-  t.deepEqual(parse('(op [1] a)'), { op: 'op', args: [{ v: [1] }, { r: 'a' }] });
+  t.deepEqual(parse('(op [1] a)'), { op: 'op', args: [{ v: [1] }, { r: { k: ['a'] } }] });
 });
 
 q.test(`object literal`, t => {
-  t.deepEqual(parse('{ foo:12 :bar:21 baz:asdf }'), { op: 'object', args: [{ v: 'foo' }, { v: 12 }, { v: 'bar' }, { v: 21 }, { v: 'baz' }, { r: 'asdf' }] });
+  t.deepEqual(parse('{ foo:12 :bar:21 baz:asdf }'), { op: 'object', args: [{ v: 'foo' }, { v: 12 }, { v: 'bar' }, { v: 21 }, { v: 'baz' }, { r: { k: ['asdf'] } }] });
   t.deepEqual(parse('{ foo:12 :bar:21 baz::asdf }'), { v: { foo: 12, bar: 21, baz: 'asdf' } });
 });

@@ -72,8 +72,8 @@ q.test('array', t => {
 });
 
 q.test('avg', t => {
-  t.equal(evaluate('(avg +(array 10 5 0))'), 5);
-  t.equal(evaluate('(avg +(array 3 5 7 9 11 13))'), 8);
+  t.equal(evaluate('(avg (array 10 5 0))'), 5);
+  t.equal(evaluate('(avg (array 3 5 7 9 11 13))'), 8);
 });
 
 q.test('call', t => {
@@ -115,7 +115,7 @@ q.test('contains', t => {
 });
 
 q.test('count', t => {
-  t.equal(evaluate('(count +(array 1 2 3))'), 3);
+  t.equal(evaluate('(count (array 1 2 3))'), 3);
 });
 
 q.test('date', t => {
@@ -132,15 +132,15 @@ q.test('does-not-contain', t => {
 
 q.test('filter', t => {
   // TODO: there's a lot more available here
-  t.equal(evaluate('(filter (array 1 2 3) %(is @value 2))')[0], 2);
-  t.equal(evaluate('(filter (array 1 2 3) %(> @value 4))').length, 0);
-  t.deepEqual(evaluate('(filter (array (object :foo 1) (object :foo 2)) %(is foo 2))'), [{ foo: 2 }]);
+  t.equal(evaluate('(filter (array 1 2 3) =>(is @value 2))')[0], 2);
+  t.equal(evaluate('(filter (array 1 2 3) =>(> @value 4))').length, 0);
+  t.deepEqual(evaluate('(filter (array (object :foo 1) (object :foo 2)) =>(is foo 2))'), [{ foo: 2 }]);
 });
 
 q.test('find', t => {
-  t.equal(evaluate('(find (array 1 2 3) %2)'), 2);
-  t.equal(evaluate('(find (array 1 2 3) %4)'), undefined);
-  t.deepEqual(evaluate('(find (array (object :foo 1) (object :foo 2)) %(is foo 2))'), { foo: 2 });
+  t.equal(evaluate('(find (array 1 2 3) 2)'), 2);
+  t.equal(evaluate('(find (array 1 2 3) 4)'), undefined);
+  t.deepEqual(evaluate('(find (array (object :foo 1) (object :foo 2)) =>(is foo 2))'), { foo: 2 });
 });
 
 q.test('format', t => {
@@ -150,7 +150,7 @@ q.test('format', t => {
 
 q.test('get', t => {
   t.equal(evaluate('(get (object :foo 42) :foo)'), 42);
-  t.equal(evaluate('(get (object :foo (object :bar 42)) :foo.bar)'), 42);
+  t.equal(evaluate('(get (object :foo (object :bar 42)) "foo.bar")'), 42);
 });
 
 // TODO: group
@@ -266,5 +266,5 @@ q.test('or', t => {
 
 q.test('unique-by', t => {
   const vals = [{ a: 10, b: 'a' }, { a: 12, b: 'b' }, { a: 10, b: 'c' }];
-  t.deepEqual(evaluate({ vals }, '(map +(unique-by +vals =>a) => b)'), ['a', 'b']);
+  t.deepEqual(evaluate({ vals }, '(map (unique vals =>a) => b)'), ['a', 'b']);
 });

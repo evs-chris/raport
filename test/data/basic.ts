@@ -66,5 +66,5 @@ q.test('nested simple operations', t => {
 
 q.test('simple applicative operations', t => {
   const data = new Root({ foo: [1, 2, 3] });
-  t.deepEqual(evaluate(data, '(map +foo =>(+ @value 2))'), [3, 4, 5]);
+  t.deepEqual(evaluate(data, '(map foo =>(+ @value 2))'), [3, 4, 5]);
 });

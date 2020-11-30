@@ -1,4 +1,4 @@
-import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, ErrorOptions, debug } from 'sprunge/lib';
+import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, ErrorOptions } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
 import { Value, DateRel, Literal, Keypath } from './index';
 
@@ -18,7 +18,7 @@ const timespan_map = {
 
 const space = ' \r\n\t';
 const endSym = space + '():{}[]';
-const endRef = endSym + ',"\'`\\;&#=.';
+const endRef = endSym + ',"\'`\\;&#.';
 
 const rws = skip1(space);
 
@@ -134,7 +134,7 @@ export const dateexact: Parser<Date> = map(seq(
 export const date = bracket(str('#'), alt<Date|DateRel|number>(dateexact, daterel, timespan), str('#'));
 
 export const string = alt<Value>(
-  map(seq(str(':'), ident), v => ({ v: v[1]})),
+  map(seq(str(':'), read1To(endRef.replace('.', ''), true)), v => ({ v: v[1]})),
   map(bracket(str('"'), rep(alt<string>('string part',
     read1To('\\"'), JStringEscape, JStringUnicode, JStringHex
   )), str('"')), a => ({ v: ''.concat(...a) })), 
@@ -190,7 +190,7 @@ const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyzABCDEFGHIJKLMNOPQRS
   return res;
 });
 
-export const operand: Parser<Value> = postfix_path(fmt_op(alt(values, fmt_op(bracket_op(if_op)), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`), fmt_op(sexp))));
+export const operand: Parser<Value> = fmt_op(postfix_path(alt(bracket_op(if_op), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`), sexp, values)));
 export const unop = map(seq(str('not ', '+'), operand), ([op, arg]) => ({ op: op === '+' ? op : 'not', args: [arg] }));
 
 function leftassoc(left: Value, [, op, , right]: [string, string, string, Value]) {
@@ -201,9 +201,9 @@ export const binop_md = map(seq(operand, rep(seq(rws, str('*', '/', '%'), rws, o
 export const binop_as = map(seq(binop_md, rep(seq(rws, str('+', '-'), rws, binop_md))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 export const binop_cmp = map(seq(binop_as, rep(seq(rws, str('>=', '>', '<=', '<', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain'), rws, binop_as))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
 export const binop_eq = map(seq(binop_cmp, rep(seq(rws, str('is', 'is-not'), rws, binop_cmp))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
-export const binop_or = map(seq(binop_eq, rep(seq(rws, str('or'), rws, binop_eq))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
-export const binop_and = map(seq(binop_or, rep(seq(rws, str('and'), rws, binop_or))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
-binop.parser = binop_and;
+export const binop_and = map(seq(binop_eq, rep(seq(rws, str('and'), rws, binop_eq))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
+export const binop_or = map(seq(binop_and, rep(seq(rws, str('or'), rws, binop_and))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
+binop.parser = binop_or;
 
 if_op.parser = map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(seq(rws, str('else if', 'elseif', 'elsif', 'elif'), rws, value, rws, str('then'), rws, value)), opt(seq(rws, str('else'), rws, value))), ([,, cond1,,,, val1, elifs, el]) => {
   const op = { op: 'if', args: [cond1, val1] };
@@ -219,9 +219,7 @@ function postfix_path(parser: Parser<Value>): Parser<Value> {
   });
 }
 
-export const operation = alt<Value>(if_op, binop, postfix_path(fmt_op(sexp)));
-
-export const expr = map(seq(str('%'), value), v => ({ v: v[1] }));
+export const operation = alt<Value>(if_op, binop);
 
 const pair: Parser<[Value, Value]> = map(seq(alt(string, map(ident, v => ({ v }))), ws, str(':'), ws, value), t => [t[0], t[4]]);
 
@@ -240,12 +238,12 @@ object.parser = map(bracket(
   { v: pairs.reduce((a, c) => (a[(c[0] as Literal).v] = (c[1] as Literal).v, a), {}) }
 );
 
-value.parser = alt(operation, array, object, literal, string, expr, ref);
+value.parser = operation;
 
-values.parser = alt(unop, call_op, array, object, literal, string, expr, ref);
+const application = map(seq(str('=>'), ws, value), ([, , value]) => ({ a: value }));
+args.parser = repsep(value, read1(space + ','), 'allow');
 
-const application = map(seq(str('=>'), value), ([, value]) => ({ a: value }));
-args.parser = repsep(alt(value, application), read1(space + ','), 'allow');
+values.parser = alt(array, object, literal, string, application, unop, call_op, ref);
 
 const _parse = makeParser(value);
 
