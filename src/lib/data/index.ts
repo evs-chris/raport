@@ -113,8 +113,7 @@ export function safeGet(root: Context, path: string|Keypath): any {
         if (o && idx < parts.length + 1 && parts[idx] !== 'value') o = o.value;
       } else if (prefix === '@') {
         const which = parts[idx++] as string;
-        if (parts[idx] === 'value') idx++;
-        else {
+        if (which !== 'value') {
           while (ctx && (!ctx.special || !(which in ctx.special))) ctx = ctx.parent;
           o = ctx && ctx.special[which] || undefined;
 
