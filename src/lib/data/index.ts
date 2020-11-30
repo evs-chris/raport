@@ -143,7 +143,11 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, val
   let r: Context;
   let e: ValueOrExpr;
   let l: any = local;
-  if (isContext(root)) {
+  if (isValueOrExpr(root)) {
+    r = new Root();
+    e = root;
+    l = value;
+  } else if (isContext(root)) {
     r = root;
     e = value;
   } else if (root && 'context' in root && isContext(root.context)) {
