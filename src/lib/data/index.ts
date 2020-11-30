@@ -137,29 +137,33 @@ export function safeGet(root: Context, path: string|Keypath): any {
   }
 }
 
+const nope = {};
 export function evaluate(value: ValueOrExpr, local?: any): any;
 export function evaluate(root: Context|{ context: Context }|any, value: ValueOrExpr, local?: any): any;
 export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, value?: ValueOrExpr|any, local?: any): any {
   let r: Context;
   let e: ValueOrExpr;
-  let l: any = local;
+  let l: any = nope;
   if (isValueOrExpr(root)) {
     r = new Root();
     e = root;
-    l = value;
+    arguments.length > 1 && (l = value);
   } else if (isContext(root)) {
     r = root;
     e = value;
+    arguments.length > 2 && (l = local);
   } else if (root && 'context' in root && isContext(root.context)) {
     r = root.context;
     e = value;
+    arguments.length > 2 && (l = local);
   } else if (isValueOrExpr(value)) {
     r = new Root(root);
     e = value;
+    arguments.length > 2 && (l = local);
   } else {
     r = new Root();
     e = root;
-    l = value;
+    arguments.length > 1 && (l = local);
   }
 
   if (typeof e === 'string') e = r.root.exprs[e] || (r.root.exprs[e] = parse(e));
@@ -167,7 +171,7 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, val
   if (e && 'r' in e) return safeGet(r, e.r);
   else if (e && 'v' in e) return e.v;
   else if (e && 'op' in e) return applyOperator(r, e);
-  else if (e && 'a' in e) return evaluate(l ? extend(r, { value: l }) : r, e.a);
+  else if (e && 'a' in e) return l === nope ? e.a : evaluate(extend(r, { value: l }), e.a);
 }
 
 const opMap: { [key: string]: Operator } = {};
