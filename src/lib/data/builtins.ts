@@ -425,7 +425,11 @@ registerOperator({
   names: ['find'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
     if (!args[0]) return;
-    return arr.find(e => evaluate(ctx, args[0], e));
+    if (typeof args[0] === 'object' && 'a' in args[0]) return arr.find(e => evaluate(ctx, args[0], e));
+    else {
+      const v = evaluate(ctx, args[0]);
+      return arr.find(e => e == v);
+    }
   }
 });
 
