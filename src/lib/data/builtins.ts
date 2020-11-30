@@ -10,10 +10,10 @@ function simple(names: string[], apply: (name: string, values: any[], ctx: Conte
 
 // basic ops
 registerOperator(
-  simple(['is', 'is-not'], (name: string, values: any[]): boolean => {
+  simple(['is', 'is-not', '==', '!='], (name: string, values: any[]): boolean => {
     const [l, r] = values;
     const res = l == r; // eslint-disable-line eqeqeq
-    return name === 'is' ? res : !res;
+    return name === 'is' || name === '==' ? res : !res;
   }),
   simple(['not'], (_name: string, values: any[]) => !values[0]),
   simple(['<', '>', '<=', '>='], (name: string, values: any[]): boolean => {
@@ -305,19 +305,19 @@ registerOperator(
 // short circuiting
 registerOperator({
   type: 'checked',
-  names: ['and'],
+  names: ['and', '&&'],
   checkArg(_name: string, _i: number, _total: number, value: any): CheckResult {
     if (value) return 'continue';
-    else return { result: false };
+    else return { result: value };
   },
-  apply(): boolean {
-    return true; // passed the check, all is well
+  apply(_name: string, args: any[]): boolean {
+    return args[args.length - 1]; // passed the check, all is well
   },
 }, {
   type: 'checked',
-  names: ['or'],
+  names: ['or', '||'],
   checkArg(_name: string, _i: number, _total: number, value: any): CheckResult {
-    if (value) return { result: true };
+    if (value) return { result: value };
     else return 'continue';
   },
   apply(): boolean {
