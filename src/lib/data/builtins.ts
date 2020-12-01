@@ -1,4 +1,4 @@
-import { filter, safeGet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, extend, formats, registerFormat, dateRelToRange, isDateRel } from './index';
+import { filter, safeGet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, extend, formats, registerFormat, dateRelToRange, isDateRel, isKeypath } from './index';
 import { date, dollar, number, phone } from './format';
 import { week, day, hour, minute, second } from './parse';
 
@@ -78,7 +78,9 @@ registerOperator(
   }),
   simple(['get'], (_name: string, values: any[], ctx): any => {
     const [l, r] = values;
-    return safeGet(extend(ctx, { value: l }), r);
+    const c = extend(ctx, { value: l });
+    if (isKeypath(r)) return safeGet(c, r);
+    else return evaluate(c, r);
   }),
   simple(['array'], (_name: string, values: any[]) => {
     return values;

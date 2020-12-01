@@ -343,6 +343,10 @@ export interface Keypath {
   k: Array<string|number|Value>;
 }
 
+export function isKeypath(v: any): v is string|Keypath {
+  return typeof v === 'string' || (typeof v === 'object' && Array.isArray(v.k));
+}
+
 export interface Reference { r: string|Keypath };
 export interface Application { a: Value };
 export interface Literal { v: any };
