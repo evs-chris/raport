@@ -203,6 +203,10 @@ registerOperator(
     const first = Math.pow(values.pop(), pow);
     return values.reverse().reduce((a, c) => Math.pow(c, a), first);
   }),
+  simple(['abs'], (_name: string, values: any[]) => {
+    if (typeof values[0] !== 'number') return values[0];
+    return Math.abs(values[0]);
+  }),
   simple(['round'], (_name: string, values: [number]): number => {
     return Math.round(values[0]);
   }),
