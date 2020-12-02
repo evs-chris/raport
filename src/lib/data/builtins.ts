@@ -92,6 +92,10 @@ registerOperator(
     }
     return res;
   }),
+  simple(['split'], (_name: string, [str, split]: any[]) => {
+    if (typeof str !== 'string') return [str];
+    else return str.split(split || '');
+  }),
   simple(['filter'], (_name: string, values: any[], ctx?: Context): any => {
     let [arr, flt, sorts, groups] = values;
     if (!Array.isArray(arr)) {
