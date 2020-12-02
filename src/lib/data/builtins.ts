@@ -173,6 +173,7 @@ registerOperator(
 // math
 registerOperator(
   simple(['+'], (_name: string, values: any[]): number|string => {
+    if (Array.isArray(values[0])) return values[0].concat.apply(values[0], values.slice(1));
     const num = values.reduce((a, c) => a && !isNaN(c) && c !== '', true);
     if (num) {
       return values.reduce((a, c) => a + +c, 0);
