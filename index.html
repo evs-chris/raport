@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <title>Raport: Simple reports. No ragrets.</title>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 1em;
+      }
+
+      iframe {
+        flex-grow: 2;
+      }
+
+      div.run {
+        display: flex;
+        align-items: center;
+      }
+
+      div.parse {
+        display: flex;
+        height: 20vh;
+        overflow: auto;
+      }
+
+      div#parsed {
+        white-space: pre-wrap;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="ractive" id="template">
+      <report bind-sources on-init="@.set('@.report', $1)" />
+    </script>
+    <script src="js/ractive.min.js"></script>
+    <script src="js/raport.umd.min.js"></script>
+    <script src="js/raport.design.umd.min.js"></script>
+    <script src="js/index.js"></script>
+  </body>
+</html>
