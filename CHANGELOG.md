@@ -1,3 +1,47 @@
+## 0.3.0
+
+2020-12-02
+
+### Report
+
+* There is now an `html` widget that will not escape its content.
+* Widgets can now break on page boundaries or stop breaking on a page boundary if necessary.
+* Flowed layout will now track available width in addition to height as it goes so that grid-like layouts can be achieved.
+* Labels may have a format applied to their value spearately.
+* Labels may have an `id` if they appear within a repeater. This `id` is used to collect values to be used in footers for aggregation without having to repeat complex expressions.
+* The report runner now supports passing additional html strings for the header and body end of the generated report.
+
+### Parser
+
+The parser has been switched from hand-coded to be based on [sprunge](https://github.com/evs-chris/sprunge), which gives up a bit of performance in some areas while gaining in others and being much more flexible.
+
+* __BREAKING__: The root reference sigil has been changed from `#` to `~`.
+* __BREAKING__: The source reference sigil has been changed from `+` to `*`.
+* __BREAKING__: Aggregate operators no longer have local arguments or a special source sigil. The source is the first argument, if it's an array or source, or the implicit `@source` otherwise. Application is handled by application literals, as are local arguments.
+* __BREAKING__: Expression literals are now handled by application e.g. `=>_ + 5`.
+* There is now a bit of sugar for array and object literals similar to JS, except allowing just space as a spearator in addition to commas. Array and object literals containing only literals will become literals, and those containing expressions will become operations. Quotes on object keys are optional if they don't have spaces.
+* Single- and backtick-quoted strings now support interpolation with `${...}`.
+* There is now support for date literals between `#`s e.g. `#2012-2-22#`, `#today#`, `#last week#`, `#2020#`, `#2020-4#`, `#2032-5-30 -8`, `#1999-12-3 12:45#`. Relative dates result in a time range, as do exact dates that are specified to at most the hour, as specifying a minute results in zeroed out seconds and milliseconds. Timespans can be specified in weeks, days, hours, minutes, seconds, and milliseconds as anumbers followed by the unit e.g. `# 3 weeks 2 days#` and evaluate to a number literal in milliseconds.
+* The parser now supports unary, binary, call, if, bracketed access, postfix access, and postfix format expressions to make the language a little more familiar non-lispers.
+* `_` is now an alias for `@value`, which always refers to the value of the current context.
+* The reference parser will now parse references into a keypath array, a prefix, and a number of context bumps. The keypath array may contain expressions if they appear in brackets.
+
+### Data
+
+* __BUG__: `pad` now works correctly.
+* `like` now supports non-anchored comparison by passing a second argument (`'free'`).
+* Added `keys` and `values` operations that correspond to `Object.keys` and `Object.values`.
+* Added `ceil`, `floor`, `round`, `**` (alias `pow`), and `rand` math operations.
+* Added `num` and `int` formats.
+* Added `split` operation for strings.
+* `min` and `max` now work on strings.
+* `and` and `or` now return the matched value if it's not a boolean and have aliases `&&` and `||`.
+
+### Designer
+
+There is now a [Ractive.js](https://ractive.js.org)-based designer available. It has initial support for paged, flowed, and delimited reports, all of the built-in widgets, manual and flowed layout, multiple dynamic sources with parameters and filter/sort/grouping, and evaluating expressions in the correct context in most cases.
+
+
 ## 0.2.2
 
 2020-04-17

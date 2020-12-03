@@ -8,17 +8,23 @@
     "noImplicitAny": false,
     "suppressImplicitAnyIndexErrors": false,
     "strictNullChecks": false,
-    "outDir": "build/lib",
+    "outDir": "build",
     "lib": [
       "dom",
       "es2017"
     ],
     "preserveWatchOutput": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "views/*": ["./.views/views/*"],
+      "raport/*": ["./src/lib/*"]
+    }
   },
   "compileOnSave": false,
   "include": [
-    "src/lib"
+    "src/lib",
+    "src/design"
   ],
   "exclude": [
     "src/play"

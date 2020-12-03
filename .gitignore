@@ -1,6 +1,7 @@
 /build
 /node_modules
 /lib
+/design
 play/index.js*
 src/play/
 .views

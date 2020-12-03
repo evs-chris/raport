@@ -10,7 +10,7 @@
     "strictNullChecks": false,
     "lib": [
       "DOM",
-      "es2017"
+      "es2018"
     ],
     "preserveWatchOutput": true,
     "skipLibCheck": true,

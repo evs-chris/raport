@@ -8,7 +8,7 @@ const configs = [
   {
     input: 'src/lib/index.ts',
     output: [{
-      file: 'build/lib/raport.umd.js',
+      file: 'lib/raport.umd.js',
       format: 'umd',
       name: 'Raport',
       sourcemap: true,
@@ -25,7 +25,7 @@ const configs = [
     input: 'src/design/index.ts',
     external: ['ractive', /^raport/],
     output: [{
-      file: 'build/lib/raport.design.umd.js',
+      file: 'design/raport.design.umd.js',
       format: 'umd',
       name: 'Raport.Design',
       sourcemap: true,
@@ -46,7 +46,7 @@ const configs = [
         include: [
           "src/**/*.ts",
           ".views/**/*.ts",
-        ]
+        ],
       }),
       sourcemaps(),
       node(),
@@ -81,14 +81,14 @@ if (process.env.ENV === 'dev') {
   });
 } else if (process.env.ENV === 'prod') {
   configs[0].output.push({
-    file: 'build/lib/raport.min.umd.js',
+    file: 'lib/raport.umd.min.js',
     format: 'umd',
     name: 'Raport',
     sourcemap: true,
     plugins: [terser()],
   });
   configs[1].output.push({
-    file: 'build/lib/raport.design.min.umd.js',
+    file: 'design/raport.design.umd.min.js',
     format: 'umd',
     name: 'Raport.Design',
     sourcemap: true,

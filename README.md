@@ -38,6 +38,7 @@ In addition to containers, the basic widgets supplied in this library are the `L
 * `Measured Label`: This is a label that estimates its height based on its content and applied styles. The estimation is not exact and is based on average character width for a few standard font metrics.
 * `Image`: This is also what you'd expect. You can supply a `url` as a literal, reference, or operator that is used to render the image into the output HTML.
 * `Repeater`: This is the most useful widget for reporting purposes. It is composed of an optional `header`, an optional `footer`, optional `group` headers, and `row`s. The row `source` must be either an array or a grouping that eventually results in an array. A repeater will render each of its pieces in a page-aware way, so if there's not room left in the report for a header, footer, or row, it will suspend rendering and resume at the appropriate place when called again. Repeaters automatically handle grouped datasources and support footers for each nested group automatically if required. Footers get access to a special `@source` reference that allows aggregate operators to automatically apply to all of the rows in the repeater. 
+* `HTML`: This is somewhat like a label, except it doesn't escape any html in its content. It also doesn't verify that there's nothing malformed, so it's possible to break your output with a missed closing tag.
 
   The grouping of the data source for a repeater will determine how many nested sections show up on the report with actual rows only being rendered for the innermost (rightmost in the array) grouping. The `group` key on the repeater widget is an array that can specify a header for each grouping in the source. The `groupEnds` key on the repeater widget specifies whether footers should be rendered for each group in reverse order with an additional entry at the end for the whole repeater, meaning that the first entry is for the innermost group, proceeding outward to the extra entry for all data before groupings are applied.
 
@@ -45,7 +46,7 @@ In addition to containers, the basic widgets supplied in this library are the `L
 
 | Property | Type | Applies To | Description |
 | -------- | ---- | ---------- | ----------- |
-| `type` | `string` | *all* | Specifies what registered widget this should be. The built-ins are `container`, `label`, `measured`, `image`, and `repeater`. |
+| `type` | `string` | *all* | Specifies what registered widget this should be. The built-ins are `container`, `label`, `measured`, `image`, `html`, and `repeater`. |
 | `hide` | `boolean \| value` | *all* | If the property is or evaluates to `true` the widget will be skipped during render. |
 | `font` | `font-object` | *all* | Specifies text properties for a widget and its children (CSS cascade). See below for supported properties. |
 | `border` | `number \| number[] \| object \| value` | *all* | Specifies borders for a widget as widths in 16ths of a `rem`. If a `number`, specifies bottom border width. If an `object`, it may have `top`, `bottom`, `left`, and `right` properties with number values that correspond to those border widths. If a `number[]`, the arrity determines behavior: `1` sets all widths to the first element; `2` sets `top` and `bottom` to the first element and `left` and `right` to the second element; `3` sets `top` to the first element, `right` and `left` to the second element, and `bottom` to the third element; and `4` sets `top`, `bottom`, `left`, and `right` to the elements in that order. If a value, the evaluate can be a `number`, `number[]`, or `object` corresponding to the design-time constructs enumerated here. |
@@ -54,8 +55,11 @@ In addition to containers, the basic widgets supplied in this library are the `L
 | `layout` | `string \| {x,y}[]` | containers | If a `string`, uses the named registered layout. If an array of objects with `x` and `y` properties, child widgets are placed at the coordinates specified at the index in the `layout` array that corresponds to their index in the `widgets` array. |
 | `widgets` | `object[]` | containers | Child widgets to render within this widget. |
 | `height` | `'auto' \| number \| object` | *all* | If a `number`, specifies the height of the widget in `rem`. If an `object` with a `percent` property, specifies the height of the widget in percent of the available space. If `'auto'` or not set, sets the height to whatever contains its children or `1rem` if there are no children. |
+| `format` | `value` | `label` | The format to apply to the value produced by the label. This can be paired with a label `id` to allow aggregates to be applied to fields in a repeater without recomputing. |
 | `text` | `value \| object[]` | `label` | The text content for the `label`. If this is an array of `object`s, each object may specify a `text` property and a `font` property, where the `text` will be wrapped in a `<span>` with the `font` properties applied. |
 | `text` | `value` | `measured` | The text content for the `measured` label. |
+| `id` | `string` | `label` | A string used to collect the values of labels in a repeater. |
+| `html` | `value` | `html` | The HTML content to be displayed. |
 | `url` | `value` | `image` | The url of the image to display. |
 | `context` | `value` | `container` | A new context to add to the context stack for the widgets within the container. This can be used to introduce values that will need to be referenced from child widgets. |
 | `source` | `value \| object` | `repeater` | The source of data for the repeater. If an `object`, this can be a report source with a `name` and optional `filter`, `sort`, and `group` properties. Otherwise, the evaluated value should be a source or an array. |
@@ -101,25 +105,65 @@ Contexts are used to give a report access to data in a particular widget. The re
 
 Values are one of a reference, a literal, or an operation, which are composed of operators, references, and literals. There is a built-in expression syntax that simplifies building operations a bit using strings. The direct definition form uses a tree of nested objects and arrays.
 
-Literal expressions can be `true`, `false`, `null`, `undefined`, numbers without scientific notation but with as many `_`s as you want for separators, and strings with any of `'`, `"`, and `` ` `` as quotes and `\` to escape quotes or other backslashes. Simple strings can also be specified in a sort of symbol form using a prefixed `:`. Symbol-style strings end at the first space or parenthesis. Literals in definition form are an object with a `v` property containing the literal value, and when in this form, the value can be any valid js value. Examples in definition form: `{ v: true }`, `{ v: 'some string' }`, `{ v: ['an', 'array'] }`, `{ v: someVariable }`.
+#### Literals
 
-References are in dotted path notation that start at the current context and include arrays as a simple number in the path. `.`s and `\`s can be escaped with `\`. There are also a number of prefixes to aid in referencing data that exists in the context but not specifically part of the piece of data at the core of the current context. Things like report parameters, access to the parent context, special data like the current iteration index, and report data sources are accessible using reference prefixes.
+| Literal | Type | Example | Notes |
+| ------- | ---- | ------- | ----- |
+| `true` | `boolean` | `true` | |
+| `false`| `boolean` | `false` | |
+| `null` | any | `null` | |
+| `undefined` | any | `undefined` | |
+| number | `number` | `-3`, `10.420`, `1_723_636`, `-1.523e3` | Numbers follow the format `/[-+]?\d+[_\d]*(\.[_\d]*)?([eE][-+]?[_\d]+)?/`, which is a perfectly readable way to describe a number format. In actual words, that's an optional leading `+`/`-`, at least one digit, as many digits or underscore separators as you like, an optional decimal with as many digits and underscore spearators as you like, and an optional exponent (scientific notation) with as many digits and underscores as you like. |
+| symbol string | `string` | `:joe`, `:some.string` | Symbol strings are a shorthand that avoid quotes. They start with a leading `:` and run until a space, quote, or brace/bracket/paren. |
+| quoted string | `string`| `'a string'`, `"here're double quotes\nand an escape"` | Quoted strings are your typical strings with support for backslash escapes. They support the usual c-style single char escapes, 2-digit hex escapes, and 4 digit unicode escapes. Quotes supported are single, double, and backticks. |
+| interpolated string | `string` | `'an ${interpolated} string'` | Interpolated strings are actually syntax sugar for a `+` operation in most cases. They are like regular quoted strings, except any `${ ... }` sequences are evaluated and injected into the string. These support everything a quoted string does, except being quoted with double quotes. |
+| date | `Date|DateRel|number` | `#2012-2-22#`, `#last week#`, `#2012-02-22 22:33#`, `#3 weeks 22 hours 7 seconds#` | Date literals allow you to refer to a date that is either exact (if it has a time down to the minute specified), as a millisecond interval (if it is just a timespan specified in a number of weeks, days, hours, minutes, seconds, and/or milliseconds), or a range of times (if it is relative, like last week, today, 2012-2-22, or 2012). The exact form also accepts an optional timezone. Dates in the exact form that don't specify anything more precise than to the hour are automatically a range from the smallest possible value to the largest possible value e.g. 2012 is from 2012-01-01T00:00:00.000 to 2012-12-31T23:59:59.999. |
 
-* `#`: Starts the reference from the root context rather than the current context.
+Literals in definition form are an object with a `v` property containing the literal value, and when in this form, the value can be any valid js value. Examples in definition form: `{ v: true }`, `{ v: 'some string' }`, `{ v: ['an', 'array'] }`, `{ v: someVariable }`. Dates are a bit more complicated, and I wouldn't recommend constructing them by hand.
+
+#### References
+
+References may appear in any mix of dotted path or bracketed path notation. Any character within a path may also be escaped with a backslash, which allows referencing dotted keys in object more easily e.g. `person.time\.span`. Number and string literals in bracketed paths are automatically converted to the dotted form, but any other expression will result in that expression being evaluated in the current context before being used as a key. References are resolved with the first key in their path starting in the current evaluation context. There are also a few sigils with special meaning that may appear at the beginning of a reference:
+
+* `~`: Starts the reference from the root context rather than the current context.
 * `!`: Refers to the report parameters.
-* `+`: Refers to the report sources.
+* `*`: Refers to the report sources.
 * `@`: Refers to the nearest context with special references. These are managed by the report widgets that build context e.g. a repeater or container.
 * `^`: Starts the reference from the current context's parent. These can be stacked e.g. `^^` refers to the grandparent context.
 
-In defintion form, references are an object with the path as a string at an `r` key. Examples in definition form: `{ r: 'name.length' }`, `{ r: '#info.address.line1' }`, `{ r: '@index' }`.
+In defintion form, references are an object with the path as a string at an `r` key. Examples in definition form: `{ r: 'name.length' }`, `{ r: '~info.address.line1' }`, `{ r: '@index' }`. The paths can also be specified already split with separated prefixes as `{ r: { k: ['name', 'length'] } }`, `{ r: { p: '~', k: ['info', 'address', 'line1'] } }`, `{ r: { p: '@', k: ['index'] } }`, and further, context bumps are a separate number e.g. `{ r: { p: '@', k: ['index'], u: 2 } }` would be `^^@index`. `*info.addresses[@index].line1` is an example of a bracketed, which would be `{ r: { p: '*', k: ['info', 'addresses', { r: { p: '@', k: ['index' ] } }, 'line1'] } }` in definition form.
 
-Operations in expression form can be one of two types: a function call or an aggregate. There are other types of operator, but they share the form of a function call syntactically. Any operation consists of an operator and optional arguments. An aggregate operator can also optionally specify a source, an application, and local arguments. In expression form, an operator is wrapped with `()` with the name first, followed by source, application, local arguments, and finally regular arguments `(op-name [+source] [=>application] [&(...local args)] [...args])`. Commas are optional between arguments, and any arguments are evaluated in the current context before being passed to the operator.
+##### Special references
 
-Aggregate operators evaluate their regular arguments in the context of the call and their local arguments within the context of each iteration. Local arguments are not particularly common. The source will default to the nearest `@source` special reference within the context stack or an empty array if none is found. The application is applied to each iteration of the aggregate before the iteration is passed to the operator, so for something like a `map` operator, `(map =>(upper name))` will result in an array of strings that are the uppercased name property of each element in the local source. In that example, `upper` is also an operator that simply uppercases its first argument.
+There are a number of special references that are context-specific:
 
-There is a bit of sugar available for objects and arrays that translates into `object` and `array` operator calls. An array may be specified with `[` followed by a list of comma or space separated values followed by a `]`. An object may be specified with `{` followed by a number of comma or space separated key/value pairs, which are themselves separated by `:`, followed by `}`. The keys may be specified as any valid string or an identifier in key position will be turned into a string and not evaluated as a reference. JSON is legal here, but the syntax supports much more relaxed formatting as well. Since these are sugar for operator calls, any references in value positions will be evaluated as the array/object is being evaluated.
+| Reference | Scope | Value |
+| --------- | ----- | ----- |
+| `@value` | any | The value of the current context. This is useful for passing the whole value of a context as an argument. |
+| `_` | any | Sugar for `@value` |
+| `@index` | repeater | The index of the nearest repeater iteration. |
+| `@group` | repeater | The nearest group by value, if any. |
+| `@level` | repeater | The nearest group level, if any. |
+| `@source` | repeater | The nearest repeater source, if any. |
+| `@values` | repeater | An object with keys pointing to an array of values collected from labels in the repeater ids mapping to keys. |
 
-There is a final literal form that returns the expression form in definition form. This can be useful for some operators that want to apply an expression as part of the operation rather than having it applied before the operator is called. Expression literals start with a `%`, so `%foo` is equivalent to `(object :r :foo)` or `{ r: 'foo' }` in definition form. The same applies to literals and operations e.g. `%10` and `%(+ 20 foo)` are both valid and result in literals that match their definition form. As a final example, consider the `find` operator, where you want to find the first element that matches a predicate `(find arr %(ilike name '*joe*'))` where any elements of `arr` that have a property `name` that matches `/.*joe.*/i` will be the result. The `%(ilike name '*joe*')` is not evaluated along with the `arr` argument to `find`, which allows the `find` operator to apply the predicate to each of `arr`s members more easily than, for instance, requiring it to be passed as another string and parsed on the fly.
+#### Operations
+
+Raport has a universal call syntax based on s-expressions in addition to some sugar to make it a bit more comfortable to those who don't often frequent the lispy bushes on the fringes of programming languages. Anything that executes is called an operation, and there are three different types of operators that share the same syntax: simple, checked, and aggregate. All three accept arguments, and aggregates may accept an implicit source argument. The expression form looks like `(op-name arg1 arg2)` and the definition form looks like `{ op: 'op-name', args: ['arg1', 'arg2'] }`. Any of the arguments may be another expression, including another operation. Using that simple form, you can compose just about anything you could want to. Arguments may be separated by space and/or commas.
+
+##### Syntax sugar
+
+| Name | Example | Notes |
+| ---- | ------- | ----- |
+| unary operator | `not true` | Supported unary operators are `not` and `+`. |
+| binary operator | `2 + 5`, `7 * 4 ** 2 + 1`, `person.birthdate in #today#` | Supported binary operators in order of precedence are exponentiation (`**`), mutiplication/division (`*`, `/`, `%`), addition/subtraction (`+`, `-`), comparison (`>=`, `>`, `<=`, `<`, `in`, `like`, `not-like`, `not-in`, `contains`, `does-not-contain`), equality (`is`, `is-not`, `==`, `!=`), boolean and (`and`, `&&`), and boolean or (`or`, `||`). At least one space is required on either side of a binary operator. |
+| call | `op-name(arg1 arg2)` | Call syntax is supported as convenience over s-expressions because it tends to be more familiar. It supports fewer operator names than the s-expression syntax, and the unavailable operators tend to be binary or unary. The example converts to `{ op: 'op-name', args: [{ r: { k: ['arg1'] } }, { r: { k: ['arg2'] } }] }` |
+| array | `[1, 2, 3]`, `[first middle last]` | Array expressions are surrounded by square brackets and contain any number of space and/or comma separated expressions. If all of the expressions are literals, the result will be a literal. If not, the result will be an array operation e.g. `{ op: 'array', args: [{ r: 'first' }, { r: 'middle' }, { r: 'last' }] }`. |
+| object | `{ "foo": 2, "bar": "baz" }`, `{ foo:2 bar:[1 2 3] }` | Object expressions are surrounded by curly braces and contain any number of key-value pairs. The keys are optionally quoted strings, followed by a `:`. The values are any expression, and pairs are separated by space and/or commas. Like array expressions, objects containing only literals evaluate to a literal, and are otherwise an `object` operation. |
+| application | `=>_ like :%a%` | Application expressions evaluate to their expression's definition form. This is used in many operations, and just about all aggregate operations, to apply an expression to an internal context e.g. `find(*people =>name is :Susan)`, where the find operator iterates over its source, in this case the data source named `people`, and evaluates its second argument, an application, with the current iteration as the context. |
+| postfix reference | `op-name(arg1).path[ref]` | Postfix references allow an operation's result to be further paired down using a `get` operation. The example is equivalent to `(get (op-name arg1) =>path[ref])`. |
+| postfix format | `person.birthdate#date`, `(amount * rate)#number,4` | Postfix format expressions apply a format operation to their expression. The name of the formatter follows the `#`, and it can be passed any number or optional arguments by following the name with a comma with no extra space. Further arguments are also separated by commas with no extra space. The second example is equivalent to `(format (* amount rate) :number 4)`. |
+| if | `if foo then bar else baz`, `if not true then 42`, `if birthdate in #this week# then 0.10 else if lower(name[0]) == :a then 0.2 else 0` | If expressions allow you to set up one or more conditional branches, where the first starts with `if`, followed by a condition expression, followed by `then`, followed by the result expression that is returned if the condition expression is truthy, followed by 0 or more conditional branches, followed by an optional final case with no condition. The conditional branches start with `else if`, `elseif`, `elsif`, or `elif`; followed by the condition expression, followed by `then`, followed by the result expression that is returne if the conditional expression is truthy. The final case with no condition starts with `else` followed by the result expression. These convert to an `if` operation in the form of `(if cond1 res1 cond2 res2 alt)` |
 
 ### Filtering, sorting, and grouping
 
@@ -137,19 +181,25 @@ There are a few operations built-in to the library to handle common expressions:
 
 | Operator | Arguments | Result | Description |
 | -------- | --------- | ------ | ----------- |
+| `!=` | `...any` | `boolean` | This is an alias for `is-not`. |
 | `%` | `...any` | `number` | Returns the modulus of the given values starting with the first. |
+| `&&` | `...any` | `boolean` | This is an alias for `and`. |
 | `*` | `...any` | `number` | Multiplies the given values starting with the first. |
+| `**` |  `...number` | `number` | Applies exponentiation to the given arguments with right associativity e.g. `(** 1 2 3)` is `1^(2^3)`. |
 | `+` | `...any` | `string\|number` | Adds the given values if they all pass `isNaN` or concatenates them as a string otherwise. |
 | `-` | `...any` | `number` | Subtracts the given values starting with the first. |
 | `/` | `...any` | `number` | Divides the given values starting with the first. |
 | `<` | `any, any` | `boolean` | Returns true if the first value is less than the second value. |
 | `<=` | `any, any` | `boolean` | Returns true if the first value is less than or equal to the second value. |
+| `==` | `...any` | `boolean` | This is an alias for `is`. |
 | `>` | `any, any` | `boolean` | Returns true if the first value is greater than the second value. |
 | `>=` | `any, any` | `boolean` | Returns true if the first value is greater than or equal to the second value. |
-| `and` | `...any` | `boolean` | This will lazily evaluate its arguments and return false if any are not truthy. |
+| `||` | `...any` | `boolean` | This is an alias for `or`. |
+| `and` | `...any` | `boolean` | This will lazily evaluate its arguments and return false if any are not truthy or the last argument if all are truthy. |
 | `array` | `...any` | `array` | Returns the given values in an array. |
 | `avg` | aggregate | `number` | This will compute the average of the given application of source. |
-| `call` | `object, string, ...args` or `function, ...args` | `any` | This will call the given method or function with the remaining args returning the result. |
+| `call` | `object, string, ...args` or `function, ...args` | `any` | This will call the given method or function with the remaining args returning the result. This operator should be avoided if possible becuase it is very much dependent on a JS runtime. |
+| `ceil` | `number` | `number` | This will return the given number rounded up if there is a decimal. |
 | `coalesce` | `...any` | `any` | This will lazily return its first non-nullish argument. |
 | `coalesce-truth` | `...any` | `any` | This will lazily return its first truthy argument. |
 | `contains` | `array\|string, any` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf` |
@@ -159,13 +209,14 @@ There are a few operations built-in to the library to handle common expressions:
 | `filter` | `array, filter?, sort?, group?` | `array\|any` | Applies any supplied filter, sort, and group to the given array. This operator is an interface the function that powers report sources. |
 | `find` | `array, value` | `any` | Finds the first element in the given array that matches the second argument, where the second argument is a data value e.g. an operation, reference, or literal that evaluates to true when the element matches. |
 | `first` | aggregate | `any` | This will return the first application in the given source. |
+| `floor` | `number` | `number` | This will return the given number rounded down if there is a decimal. |
 | `fmt` | `any, string, ...any` | `string` | This is an alias for `format`. |
 | `format` | `any, string, ...any` | `string` | Formats the first argument as a string using the formatter named by the second argument, passing any further arguments the formatter. |
 | `get` | `any, string` | `any` | Safely retrieves the value at the path given by the `string` from the given value. |
 | `group` | `array, group` | `any` | Like `filter`, but can only apply groupings. |
 | `if` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is truthy, the second argument in the pair will be the final value of the operation. If none of pairs has a truthy condition and there is an odd last argument, the odd last argument will be returned. This roughly mirrors `icase` functions from some languages. |
 | `ilike` | `string\|array, string, 'free'` | `boolean` | `like`, but case insensitive. |
-| `in` | `any, array\|string` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf` |
+| `in` | `any, array\|string\|DateRange\|any` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf`. If the target is a date range, it will check to see if the value as a date is in the range. If the target is anything else, it will check for equality. |
 | `is` | `any, any` | `boolean` | Returns true if the given values are equal (not strict). |
 | `is-not` | `any, any` | `boolean` | Returns true if the given values are not equal (not strict). |
 | `join` | aggregate `string` | `string` | This will join the values in the given source using the first non-local argument. |
@@ -181,23 +232,27 @@ There are a few operations built-in to the library to handle common expressions:
 | `not-like` | `string\|array, string, 'free'` | `boolean` | `like`, but negated. |
 | `nth` | aggregate `number` | This will return the nth application in the given source, using the 1-based index specified by the parameter. |
 | `object` | `...(key: string, value: any)` | `any` | Creates an object from the given values where the odd-numbered args are keys and their subsequent event-numbered args are values e.g. `(object 'foo' true 'bar' 3.14159)` is `{ foo: true, bar: 3.14159 }`. |
-| `or` | `...any` | `boolean` | This will lazily evaluate its arguments and return true if any are truthy. |
+| `or` | `...any` | `boolean` | This will lazily evaluate its arguments and return the first truthy value or `false` if there aren't any. |
 | `padl` | `string, number, string?` | `string` | Pads the given string to the given number of characters by adding the last argument or a space to the left side if necessary. |
 | `padr` | `string, number, string?` | `string` | Pads the given string to the given number of characters by adding the last argument or a space to the right side if necessary. |
+| `pow` | `...number` | `number` | This is an alias for `**`. |
 | `rand` | `number?, number|boolean?, number?` | `number` | Returns a random number. If one `number` param is passed, the result will be an integer between 1 and the given number, inclusive. If the second param is `true`, the number will be a float. If the second arg is a `number`, the result will be an integer between the first number and second number, inclusive. If two numbers and `true` are passed, the result will be a float. |
 | `replace-all` | `string, string, string, string?` | `string` | Calling the arguments `haystack`, `needle`, `replacement`, `flags`, this replaces all instances of `needle` in the `haystack` with `replacement`. If `flags` is provided, and it may be empty, `needle` is a regex with the given `flags`. |
 | `replace` | `string, string, string, string?` | `string` | Calling the arguments `haystack`, `needle`, `replacement`, `flags`, this replaces `needle` in the `haystack` with `replacement`. If `flags` is provided, and it may be empty, `needle` is a regex with the given `flags`. |
 | `reverse` | `string\|array` | `string\|array` | Reverses the given string or array. |
+| `round` | `number` | `number` | This will return the given number rounded to the nearest integer. |
 | `slice` | `string\|array, number?, number?` | `string\|array` | Slices the given string or array from the first number argument index to the second number argument index. This is a proxy for the `slice` method on the first argument. |
 | `sort` | `array, sort` | `array` | Like `filter`, but can only apply sorts. |
 | `source` | `any` | `DataSet` | Takes the given value and turns it into a `DataSet` |
+| `split` | `string, string?` | `string[]` | Takes the given string and splits it into an array of strings based on the second argument. If no second argument is provided, the resulting array will consist of each individual character of the source string. |
 | `substr` | `string\|array, number?, number?` | `string\|array` | This is an alias for `slice`. |
 | `sum` | aggregate | `number` | This will compute the sum of the given application of source. |
+| `time-span-ms` | `number, number = 2` | `string` | This takes the given number of milliseconds and produces a time span from the largest whole unit down to the number of units specified by the second number parameter, which defaults to 2. The largest possible unit is weeks, since without a reference point, months and years can't be determined with any accuracy. |
 | `trim` | `string` | `string` | Trims whitespace from both sides of the given string. |
 | `triml` | `string` | `string` | Trims whitespace from the left side of the given string. |
 | `trimr` | `string` | `string` | Trims whitespace from the right side of the given string. |
-| `unique` | aggregate | `array` | This will create a new array from the given source ensuring that the same value does not appear more than once using `indexOf` |
-| `unique-by` | aggregate | `array` | This will create a new array from the given source using the specified application to determine whether a value is unique. |
+| `unique` | aggregate | `array` | This will create a new array from the given source ensuring that the same value does not appear more than once using `indexOf`. If an application is passed in, then the application is used to determine the uniqueness of the items. |
+| `unique-map` | aggregate | `array` | This is similar to `unique` with an application, but it will return the unique applications rather than the records of the source. |
 | `unless` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is not truthy, the second argument in the pair will be the final value of the operation. If all of pairs have a truthy condition and there is an odd last argument, the odd last argument will be returned. This is the negated version of `if`. |
 | `upper` | `string` | `string` | Uppercases the given string. |
 | `values` | `object` | `array` | This will return an array of values from the given object, equivalent to `Object.values(arg)` |
@@ -241,7 +296,7 @@ There are a few operations built-in to the library to handle common expressions:
 
 * [ ] Moar tests!
 * [x] (slightly) Better docs
-* [ ] Designer and schema generator
+* [x] Designer and schema generator
 * [ ] Some sort of simple built-in graph widget
 * [x] Cleaner output styles
 
@@ -262,11 +317,23 @@ cd raport
 # install the deps
 npm i
 
+# test all the things... or at least some of the things
+npm run test
+
 # if you build it, they will come
 npm run build
+
+# you can also have a watched build
+npm start
 
 # play with the playground
 firefox play/index.html
 ```
 
-Note that the print function in the playground only seems to reliably work with Chrome.
+## Designer
+
+There is a basic report designer, which is built as a [Ractive.js](https://ractive.js.org/) component, with an environment to design reports in paged, flowed, or delimited formats. It also has a expression evaluation engine that takes into account context in most cases.
+
+## Notes
+
+Note that the print function in the playground only seems to reliably work with Chrome, as Firefox has issues from the second page on for... uh... reasons?

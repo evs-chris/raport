@@ -1,6 +1,6 @@
 {
   "name": "raport",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Simple reports. No ragrets.",
   "main": "./lib/raport.umd.js",
   "types": "./lib/index.d.ts",
@@ -24,19 +24,22 @@
     "rollup": "^2.8",
     "rollup-plugin-sourcemaps": "^0.4.2",
     "source-map-support": "^0.5",
-    "sprunge": "^0.0.4",
+    "sprunge": "^0.1.0",
     "typescript": "^4"
   },
   "scripts": {
     "start": "ENV=dev rollup -c rollup.config.js -w",
     "build": "ENV=dev rollup -c rollup.config.js",
-    "package": "rm -r lib &>/dev/null; ENV=prod rollup -c rollup.config.js && tsc -p lib.tsconfig.json && cp -r build/lib lib",
+    "build:prod": "ENV=prod rollup -c rollup.config.js",
+    "tsc": "tsc -p lib.tsconfig.json",
+    "package": "rm -r lib &>/dev/null; rm -r design &>/dev/null; ENV=prod rollup -c rollup.config.js && tsc -p lib.tsconfig.json && cp -r build/src/lib/* lib && cp -r build/src/design/* design",
     "dev": "ENV=dev rollup -c rollup.config.js -w",
     "clean": "rm -r build &>/dev/null; rm -r lib &>/dev/null",
     "test": "rollup -c test.rollup.config.js && qunit --require 'source-map-support/register' build/test.js"
   },
   "files": [
     "lib",
+    "design",
     "README.md",
     "CHANGELOG.md"
   ]
