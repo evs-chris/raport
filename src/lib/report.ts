@@ -236,7 +236,7 @@ export function run(report: Report, sources: SourceMap, parameters?: ParameterMa
 
 export function applySource(context: RootContext, source: ReportSource, sources: SourceMap) {
   let base = sources[source.source || source.name] || { value: [] };
-  if (source.base) base = { value: evaluate(extend(context, { value: base.value }), source.base) };
+  if (source.base) base = { value: evaluate(extend(context, { value: base.value, special: { source: base } }), source.base) };
   if (source.filter || source.sort || source.group) context.sources[source.name || source.source] = filter(base, source.filter, source.sort, source.group, context);
   else context.sources[source.name || source.source] = base;
 }
