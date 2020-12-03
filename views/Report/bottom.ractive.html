@@ -14,14 +14,14 @@
   <div class-tab class-active-tab="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'">
     <div class-editor>
       <div class-actions>
-        <button disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-ico class-large>&#9655;</button>
+        <button disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>&#9655;</button>
         <!--<button class-tab class-active="!~/temp.expr.tab || ~/temp.expr.tab === 'ast'" class-error="~/temp.expr.error" on-click="@.set('temp.expr.tab', 'ast')">AST</button>-->
         <button class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">Text</button>
         <button class-tab style-display="{{~/temp.expr.html ? '' : 'none'}}" class-active="~/temp.expr.tab === 'html'" on-click="@.set('temp.expr.tab', 'html')">HTML</button>
         <div style-flex-grow=2 />
         <button class-tab class-active="~/temp.expr.tab === 'result'" on-click="@.set('temp.expr.tab', 'result')">Result</button>
         {{#if ~/temp.expr.parsed}}
-          <button class-tab class-active="~/temp.expr.tab === 'parsed'" on-click="@.set('temp.expr.tab', 'parsed')">Parsed</button>
+          <button class-tab class-active="~/temp.expr.tab === 'parsed'" class-error="~/temp.expr.error" on-click="@.set('temp.expr.tab', 'parsed')">Parsed</button>
         {{/if}}
       </div>
       <!--<div class-tab class-ast class-active-tab="!~/temp.expr.tab || ~/temp.expr.tab === 'ast'" class-error="~/temp.expr.error">
@@ -87,7 +87,7 @@
       </div>
       <div class-tab class-parsed class-active-tab="~/temp.expr.tab === 'parsed'">
         <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
-          <code><pre>{{~/temp.expr.parsed}}</pre></code>
+          <code><pre style-margin="1em">{{~/temp.expr.parsed}}</pre></code>
         </div></div>
       </div>
     </div>

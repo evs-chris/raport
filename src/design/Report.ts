@@ -1,7 +1,9 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { InitOpts, ContextHelper } from 'ractive';
-import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, evaluate, inspect, SourceMap, getOperatorMap } from 'raport/index';
+import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, SourceMap, getOperatorMap } from 'raport/index';
+
+let sourceTm: any;
 
 export interface ExprOptions {
   html?: boolean;
@@ -180,9 +182,7 @@ export class Designer extends Ractive {
     let v: string = this.get('temp.expr.path');
     if (v && v.startsWith('widget.')) v = v.replace('widget', this.get('temp.widget'));
     const ctx = await this.buildLocalContext(v);
-    const parsed = parse(str, { detailed: true });
     const res = evaluate(ctx, str);
-    this.set('temp.expr.parsed', JSON.stringify(parsed, null, '  ') + ('marked' in parsed ? `\n\n${parsed.marked}` : ''));
     this.set('temp.expr.result', res);
     this.set('temp.expr.tab', 'result');
   }
@@ -293,16 +293,13 @@ export class Designer extends Ractive {
   }
 
   async buildRoot(): Promise<Root> {
+    const res = new Root({}, { parameters: this.get('params') });
     const report: Report = this.get('report');
     const avs: AvailableSource[] = this.get('sources');
-    const sources: SourceMap = {};
     for (const src of report.sources) {
       const av = avs.find(s => s.name === src.source);
-      if (av) sources[src.name || src.source] = av.data ? { value: JSON.parse(av.data) } : await av.values(this.get('params'));
+      if (av) applySource(res, src, { [src.source]: av.data ? { value: JSON.parse(av.data) } : await av.values(this.get('params')) });
     }
-    
-    const res = new Root({}, { parameters: this.get('params') });
-    res.sources = sources;
     return res;
   }
 
@@ -552,7 +549,12 @@ Ractive.extendWith(Designer, {
       if (!this.evalLock) {
         this.evalLock = true;
         try {
-          const parsed = parse(v);
+          const parsed = parse(v, { detailed: true, contextLines: 3 });
+          const msg = ('marked' in parsed ? 
+            `${'latest' in parsed ? `${parsed.latest.message || '(no message)'} on line ${parsed.latest.line} at column ${parsed.latest.column}\n\n${parsed.latest.marked}\n\n` : ''}${parsed.message || '(no message)'} on line ${parsed.line} at column ${parsed.column}\n\n${parsed.marked}\n\n` : '') + JSON.stringify(parsed, null, '  ');
+
+          this.set('temp.expr.parsed', msg);
+
           if ('message' in parsed) {
             this.set('temp.expr.error', parsed)
             this.set('temp.expr.ast', undefined);
@@ -611,13 +613,19 @@ Ractive.extendWith(Designer, {
       }
     },
     async 'temp.expr.path report.parameters report.sources'() {
-      let v: string = this.get('temp.expr.path');
-      if (v) {
-        if (v.startsWith('widget.')) v = v.replace('widget', this.get('temp.widget'));
-        this.set('temp.expr.ctx', this.getSchema(await this.buildLocalContext(v)));
-      } else {
-        this.set('temp.expr.ctx', this.getSchema(await this.buildLocalContext()));
+      if (sourceTm) {
+        clearTimeout(sourceTm);
       }
+      sourceTm = setTimeout(async () => {
+        sourceTm = 0;
+        let v: string = this.get('temp.expr.path');
+        if (v) {
+          if (v.startsWith('widget.')) v = v.replace('widget', this.get('temp.widget'));
+          this.set('temp.expr.ctx', this.getSchema(await this.buildLocalContext(v)));
+        } else {
+          this.set('temp.expr.ctx', this.getSchema(await this.buildLocalContext()));
+        }
+      }, 1000);
     },
     'temp.bottom.pop'() {
       setTimeout(() => this.resetScrollers());

@@ -42,10 +42,10 @@ export const tpl: Parser<Value> = {};
 
 const escmap: { [k: string]: string } = { n: '\n', r: '\r', t: '\t', b: '\b' };
 const pathesc = map(seq(str('\\'), chars(1)), ([, char]) => escmap[char] || char);
-const pathident = map(rep1(alt(read1To(endRef + '=', true), pathesc)), parts => parts.join(''));
+const pathident = map(rep1(alt('ref part', read1To(endRef + '=', true), pathesc)), parts => parts.join(''));
 const dotpath = map(seq(str('.'), pathident), ([, part]) => part);
 const bracketpath = bracket(seq(str('['), ws), value, seq(ws, str(']')));
-export const keypath = map(seq(alt<'!'|'~'|'*'|[string,string]>(str('!', '~', '*') as any, seq(read('^'), opt(str('@', '.')))), alt<string|Value>(pathident, bracketpath), rep(alt<string|Value>(dotpath, bracketpath))), ([prefix, init, parts]) => {
+export const keypath = map(seq(alt<'!'|'~'|'*'|[string,string]>('ref sigil', str('!', '~', '*') as any, seq(read('^'), opt(str('@', '.')))), alt<string|Value>('keypath', pathident, bracketpath), rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([prefix, init, parts]) => {
   const res: Keypath = { k: [init].concat(parts).map(p => typeof p === 'object' && 'v' in p && (typeof p.v === 'string' || typeof p.v === 'number') ? p.v : p) };
   if (Array.isArray(prefix)) {
     if (prefix[0]) res.u = prefix[0].length;
@@ -84,10 +84,10 @@ const timespan = map(rep1sep(seq(JNum, rws, istr('week', 'weeks', 'day', 'days',
   return n;
 });
 
-const daterel = alt<DateRel>(
+const daterel = alt<DateRel>('date',
   map(seq(istr('last', 'this', 'next'), rws, istr('week', 'month', 'year'), opt(seq(rws, istr('to'), rws, istr('date')))), ([o, , f, d]) => ({ f: f[0] === 'w' ? 'w' : f[0] === 'm' ? 'm' : 'y', o: o === 'last' ? -1 : o === 'this' ? 0 : 1, d: d ? 1 : undefined })),
   map(istr('yesterday', 'today', 'tomorrow', 'now'), v => (v === 'now' ? { f: 'n', o: 0 } : { f: 'd', o: v === 'yesterday' ? -1 : v === 'today' ? 0 : 1 })),
-  map(seq(timespan, rws, alt<string|any[]>(istr('ago'), seq(istr('from'), rws, istr('now')))), ([span, , ref]) => ({ f: 'n', o: span * (ref === 'ago' ? -1 : 1) })),
+  map(seq(timespan, rws, alt<string|any[]>('relative time anchor', istr('ago'), seq(istr('from'), rws, istr('now')))), ([span, , ref]) => ({ f: 'n', o: span * (ref === 'ago' ? -1 : 1) })),
 );
 
 function setIndex<T, U = Array<T>>(array: U, index: number, value: T): U {
@@ -135,15 +135,15 @@ export const dateexact: Parser<Date|DateRel> = map(seq(
   } else return new Date(+y, +m - 1, +d, +h, +mm, s && +s || 0, ms && +ms || 0);
 });
 
-export const date = bracket(str('#'), alt<Date|DateRel|number>(dateexact, daterel, timespan), str('#'));
+export const date = bracket(str('#'), alt<Date|DateRel|number>('date', dateexact, daterel, timespan), str('#'));
 
-export const string = alt<Value>(
+export const string = alt<Value>('string',
   map(seq(str(':'), read1To(endRef.replace('.', ''), true)), v => ({ v: v[1]})),
   map(bracket(str('"'), rep(alt<string>('string part',
     read1To('\\"'), JStringEscape, JStringUnicode, JStringHex
   )), str('"')), a => ({ v: ''.concat(...a) })), 
   map(bracket(str(`'`), rep(alt('string part',
-    map(read1To(`'\\$`), v => ({ v })),
+    map(read1To(`'\\$`, true), v => ({ v })),
     map(str('\\$', '$$'), () => ({ v: '$' })),
     bracket(str('${'), value, str('}')),
     map(str('$'), v => ({ v })),
@@ -152,7 +152,7 @@ export const string = alt<Value>(
     map(JStringEscape, v => ({ v })),
   )), str(`'`)), stringInterp),
   map(bracket(str('`'), rep(alt('string part',
-    map(read1To('`\\$'), v => ({ v })),
+    map(read1To('`\\$', true), v => ({ v })),
     map(str('\\$', '$$'), () => ({ v: '$' })),
     bracket(str('${'), value, str('}')),
     map(str('$'), v => ({ v })),
@@ -161,7 +161,7 @@ export const string = alt<Value>(
     map(JStringEscape, v => ({ v })),
   )), str('`')), stringInterp),
 );
-export const literal = map(alt(JNum, keywords, date), v => ({ v }));
+export const literal = map(alt('literal', JNum, keywords, date), v => ({ v }));
 
 export const sexp = map(bracket(
   check(str('('), ws),
@@ -194,7 +194,7 @@ const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyzABCDEFGHIJKLMNOPQRS
   return res;
 });
 
-export const operand: Parser<Value> = fmt_op(postfix_path(alt(bracket_op(if_op), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`), sexp, values)));
+export const operand: Parser<Value> = fmt_op(postfix_path(alt('operand', bracket_op(if_op), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`), sexp, values)));
 export const unop = map(seq(str('not ', '+'), operand), ([op, arg]) => ({ op: op === '+' ? op : 'not', args: [arg] }));
 
 function leftassoc(left: Value, [, op, , right]: [string, string, string, Value]) {
@@ -231,15 +231,15 @@ if_op.parser = map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(
 });
 
 function postfix_path(parser: Parser<Value>): Parser<Value> {
-  return map(seq(parser, rep(alt<string|Value>(dotpath, bracketpath))), ([v, k]) => {
+  return map(seq(parser, rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([v, k]) => {
     if (k.length) return { op: 'get', args: [v, { v: { k } }] };
     else return v;
   });
 }
 
-export const operation = alt<Value>(if_op, binop);
+export const operation = alt<Value>('expression', if_op, binop);
 
-const pair: Parser<[Value, Value]> = map(seq(alt(string, map(ident, v => ({ v }))), ws, str(':'), ws, value), t => [t[0], t[4]]);
+const pair: Parser<[Value, Value]> = map(seq(alt('key', string, map(ident, v => ({ v }))), ws, str(':'), ws, value), t => [t[0], t[4]]);
 
 array.parser = map(bracket(
   check(ws, str('['), ws),
@@ -261,7 +261,7 @@ value.parser = operation;
 const application = map(seq(str('=>'), ws, value), ([, , value]) => ({ a: value }));
 args.parser = repsep(value, read1(space + ','), 'allow');
 
-values.parser = alt(array, object, literal, string, application, unop, call_op, ref);
+values.parser = alt('expression', array, object, literal, string, application, unop, call_op, ref);
 
 const _parse = makeParser(value);
 
