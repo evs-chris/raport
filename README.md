@@ -292,6 +292,21 @@ There are a few operations built-in to the library to handle common expressions:
 | `a` | 1+ | AM or PM |
 
 
+## Designer
+
+The [raport designer](https://evs-chris.github.io/raport/) is a [Ractive.js](https://ractive.js.org) component that can be used to build report definitions and evaluate expressions. The demo version linked in the first sentence of this section has one provided source with a bunch of random people. With a non-demo implementation, you can provide any number of sources that can either contain data directly or run an async function that accepts the parameter values for the report and returns data. You can also import JSON data sources, and there are plans to add a CSV importer and a way to run a fetch to import data.
+
+The designer is not mobile-friendly at the moment and is laid out as a side panel where widget properties are managed, a main pain where the designer, definition, and output are shown, and a hide-able bottom pane where evaluation and more complex report properties, like sources and parameters, are edited. If any particular tab is currently linked to some property, the path will appear to the right of the tab along with an `x` button to unlink the property.
+
+In manual layout mode, widgets within a container can be dragged around with the mouse once they are selected. Selecting a label will automatically link its `text` property to the evaluation pane. Selecting an html widget will automatically like its `html` property to the evaluation pane. Hovering over a widget in the designer pane will expose action buttons for the widget on the right of the widget's placeholder. Widgets try to appear on the screen with the same dimensions that they'll have in a rendered report, but for some widgets, like repeaters and containers, there is also a title bar that exposes more control.
+
+At the top of the left pane is the widget tree as it exists within the current report. If a widget that can have children is selected, a select with widget types and a `+` button will appear at the top. Changing the select or clicking the `+` will result in a widget being added to the selected widget. You can move children up and down within a widget, but you cannot currently move a child from one container to another. Hovering over a widget in the tree will also highlight the widget in the designer.
+
+The triangle-y play buttons to the left of tabs will run things - the report for the main pane, and the expression for the bottom evaluation pane. If there is a problem with an expression, the bottom play button will turn red, as will the parsed tab, which will have a description of the error.
+
+The definition tab of the main pane can be used to load and save report definitions to your local machine in a plain old JSON format.
+
+
 ## TODO
 
 * [ ] Moar tests!
@@ -328,6 +343,9 @@ npm start
 
 # play with the playground
 firefox play/index.html
+
+# make a production build
+npm run package
 ```
 
 ## Designer
