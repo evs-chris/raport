@@ -527,7 +527,11 @@ Ractive.extendWith(Designer, {
     };
   },
   computed: {
-    operators() { return getOperatorMap(); }
+    operators() {
+      const map = getOperatorMap();
+      const keys = Object.keys(map).sort();
+      return keys.reduce((a, c) => (a[c] = map[c], a), {} as typeof map);
+    }
   },
   observe: {
     'report.type'(v: 'delimited'|'page'|'flow') {
