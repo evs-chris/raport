@@ -188,7 +188,7 @@ function bracket_op<T>(parser: Parser<T>): Parser<T> {
 export const binop: Parser<Value> = {};
 export const if_op: Parser<Value> = {};
 
-const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwzyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_$0123456789'), bracket_op(args)), ([op, args]) => {
+const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_$0123456789'), bracket_op(args)), ([op, args]) => {
   const res: Value = { op };
   if (args && args.length) res.args = args;
   return res;
