@@ -1,3 +1,12 @@
+## 0.3.1
+
+2020-12-04
+
+### Package
+
+* __BUG__: `sprunge` is now properly bundled within the ES module.
+
+
 ## 0.3.0
 
 2020-12-02
