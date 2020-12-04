@@ -117,7 +117,7 @@ export function safeGet(root: Context, path: string|Keypath): any {
           while (ctx && (!ctx.special || !(which in ctx.special))) ctx = ctx.parent;
           o = ctx && ctx.special[which] || undefined;
 
-          if (o && which === 'source' && parts[idx] !== 'value') o = o.value;
+          if (o && which === 'source' && parts[idx] !== undefined && parts[idx] !== 'value' && o.value) o = o.value;
           if (!o && which === 'date') o = root.root.special.date = new Date();
         }
       }
