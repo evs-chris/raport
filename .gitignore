@@ -2,6 +2,6 @@
 /node_modules
 /lib
 /design
-play/index.js*
+play/index*js*
 src/play/
 .views
