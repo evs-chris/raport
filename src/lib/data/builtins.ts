@@ -8,6 +8,11 @@ function simple(names: string[], apply: (name: string, values: any[], ctx: Conte
   };
 }
 
+function num(v: any): number {
+  if (isNaN(v) || !v) return 0;
+  return +v;
+}
+
 // basic ops
 registerOperator(
   simple(['is', 'is-not', '==', '!='], (name: string, values: any[]): boolean => {
@@ -368,13 +373,13 @@ registerOperator({
   type: 'aggregate',
   names: ['avg'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
-    return arr.reduce((a, c) => a + (args[0] ? evaluate(ctx, args[0], c) : c), 0) / arr.length;
+    return arr.reduce((a, c) => a + num(args[0] ? evaluate(ctx, args[0], c) : c), 0) / arr.length;
   },
 }, {
   type: 'aggregate',
   names: ['sum'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
-    return arr.reduce((a, c) => a + (args[0] ? evaluate(ctx, args[0], c) : c), 0);
+    return arr.reduce((a, c) => a + num(args[0] ? evaluate(ctx, args[0], c) : c), 0);
   }
 }, {
   type: 'aggregate',
