@@ -189,6 +189,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `+` | `...any` | `string\|number` | Adds the given values if they all pass `isNaN` or concatenates them as a string otherwise. |
 | `-` | `...any` | `number` | Subtracts the given values starting with the first. |
 | `/` | `...any` | `number` | Divides the given values starting with the first. |
+| `/%` | `...any` | `number` | Divides the given values starting with the first using integer division. |
 | `<` | `any, any` | `boolean` | Returns true if the first value is less than the second value. |
 | `<=` | `any, any` | `boolean` | Returns true if the first value is less than or equal to the second value. |
 | `==` | `...any` | `boolean` | This is an alias for `is`. |

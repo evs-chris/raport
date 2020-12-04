@@ -190,10 +190,11 @@ registerOperator(
     if (isNaN(first)) return 0;
     return values.reduce((a, c) => a * (isNaN(c) ? 0 : +c), +first);
   }),
-  simple(['/'], (_name: string, values: any[]): number => {
+  simple(['/', '/%'], (name: string, values: any[]): number => {
     const first = values.shift();
     if (isNaN(first)) return 0;
-    return values.reduce((a, c) => a / (isNaN(c) ? 1 : +c), +first);
+    if (name.length > 1) return values.reduce((a, c) => Math.floor(a / (isNaN(c) ? 1 : +c)), +first);
+    else return values.reduce((a, c) => a / (isNaN(c) ? 1 : +c), +first);
   }),
   simple(['%'], (_name: string, values: any[]): number => {
     const first = values.shift();
