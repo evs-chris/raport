@@ -47,7 +47,8 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   let html = '';
   let commit = false;
   const m = expandMargin(w);
-  let y = m[0];
+  let y = !state || !state.state || state.state.part === 'header' ? m[0] : 0;
+  availableY -= y;
   let group: Group;
   let groupNo: number|boolean = false;
 
@@ -85,7 +86,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
     }
   }
 
-  if (w.header && ((state && state.state.part === 'body' && w.headerPerPage !== false && (!group || !group.grouped)) || (!group || !group.grouped) && (!state || !state.state || state.state.part === 'header' || state.state.part === 'group'))) {
+  if (w.header && ((state && state.state && state.state.part === 'body' && w.headerPerPage !== false && (!group || !group.grouped)) || (!group || !group.grouped) && (!state || !state.state || state.state.part === 'header' || state.state.part === 'group'))) {
     r = renderWidget(w.header, ctx, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
 
     if (r.height > availableY) return { output: '', height: 0, continue: { offset: 0, state: { part: 'header', src, current: 0 } } }
