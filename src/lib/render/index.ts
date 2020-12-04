@@ -135,13 +135,14 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
 
   const r = renderer.render(w, context, placement, state);
   if (typeof r === 'string') return { output: r, height: h, width: getWidthWithMargin(w, placement) };
-  else r.height = r.height + extraHeight;
   
   if (placement.maxY && r.height > placement.maxY) {
     addStyle(context, 'error', `.error { position: absolute; box-sizing: border-box; color: red; border: 1px dotted; width: 100%; height: 2rem; padding: 0.5rem; }`);
     return { output: `<div class="error" style="top: ${placement.y}rem;">Widget overflow error</div>`, height: 2 };
   }
   if (isNaN(h) && placement.availableY && r.height > placement.availableY) return { output: '', continue: { offset: 0 }, height: r.height, cancel: true };
+
+  r.height += extraHeight;
 
   return r;
 }
