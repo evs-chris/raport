@@ -17,7 +17,9 @@ export {
   Type, ArrayType, ValueType, Value, Literal, Reference,
 } from './data/index';
 export { inspect } from './data/schema';
-export { parse, stringify } from './data/parse';
+export { parse } from './data/parse';
+export { stringify } from './data/parse/stringify';
+export { parse as parseTemplate } from './data/parse/template';
 
 export {
   registerLayout, registerRenderer,

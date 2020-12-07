@@ -174,6 +174,13 @@ registerOperator(
       return str;
     }
   }),
+  simple(['string'], (_name: string, [value]: any[]): string => {
+    if (value === null || value === undefined) return '';
+    if (Array.isArray(value)) return value.join(', ');
+    let res = `${value}`;
+    if (res.slice(0, 7) === '[object') return JSON.stringify(value);
+    return res;
+  }),
   simple(['call'], (_name: string, args: any[]): any => {
     if (args[0] != null && typeof args[1] === 'string' && typeof args[0][args[1]] === 'function') {
       const obj = args.shift();
@@ -371,6 +378,48 @@ registerOperator({
     else return { result: value }; // odd branch that wasn't skipped means previous condition matched
   },
   apply() {}
+}, {
+  type: 'checked',
+  names: ['each'],
+  checkArg(_name: string, i: number, last: number, value: any): CheckResult {
+    if (i === 0) {
+      if (Array.isArray(value) || typeof value === 'object') return 'continue';
+      else return { skip: 1 };
+    } else if (i === 1) return { skip: last - i, value };
+    else if (i === last) return { result: value };
+    else if (i % 2 === 0) { // condition
+      if (value) return 'continue';
+      else return { skip: 1 };
+    } else return { result: value };
+  },
+  apply(_name: string, [value, body]: [any[]|object, ValueOrExpr], ctx?: Context) {
+    ctx = ctx || new Root();
+    if (Array.isArray(value)) {
+      const last = value.length - 1;
+      return value.map((v, i) => evaluate(extend(ctx, { value: v, special: { last, index: i, key: i, 'last-key': last } }), body, v)).join('');
+    } else {
+      const entries = Object.entries(value);
+      const lastKey = entries[entries.length - 1][0];
+      const last = entries.length - 1;
+      return Object.entries(value).map(([k, v], i) => evaluate(extend(ctx, { value: v, special: { last, 'last-key': lastKey, index: i, key: k } }), body, v)).join('');
+    }
+  }
+}, {
+  type: 'checked',
+  names: ['with'],
+  checkArg(_name: string, i: number, last: number, value: any): CheckResult {
+    if (i === 0 && typeof value === 'object') return 'continue';
+    else if (i === 1) return { skip: last - i, value };
+    else if (i === last) return { result: value };
+    else if (i % 2 === 0) {
+      if (value) return 'continue';
+      else return { skip: 1 };
+    } else return { result: value };
+  },
+  apply(_name: string, [value, body]: [any, ValueOrExpr], ctx?: Context) {
+    ctx = ctx || new Root();
+    return evaluate(extend(ctx, { value }), body, value);
+  }
 }, {
   type: 'checked',
   names: ['coalesce', 'coalesce-truth'],

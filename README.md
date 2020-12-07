@@ -209,6 +209,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `count` | aggregate | `number` | This will count the values in the given source. |
 | `date` | `string` | `date` | Creates a new `Date` with the given value. |
 | `does-not-contain` | `array\|string, any` | `boolean` | `contains`, but negated. |
+| `each` | `array|object, application, ...(condition: boolean, result: any)` | `string` | This will iterate over its source array or object and evaluate the body application once for each iteration. The results are then concatenated. Special references provided within the iteration context are `@index`, `@last` (the index of the last iteration), `@key`, `@last-key` (the key of the last iteration). For array values, `@key` and `@last-key` are the same as `@index` and `@last`, respectively. |
 | `filter` | `array, filter?, sort?, group?` | `array\|any` | Applies any supplied filter, sort, and group to the given array. This operator is an interface the function that powers report sources. |
 | `find` | `array, value` | `any` | Finds the first element in the given array that matches the second argument, where the second argument is a data value e.g. an operation, reference, or literal that evaluates to true when the element matches. |
 | `first` | aggregate | `any` | This will return the first application in the given source. |
@@ -260,6 +261,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `unless` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is not truthy, the second argument in the pair will be the final value of the operation. If all of pairs have a truthy condition and there is an odd last argument, the odd last argument will be returned. This is the negated version of `if`. |
 | `upper` | `string` | `string` | Uppercases the given string. |
 | `values` | `object` | `array` | This will return an array of values from the given object, equivalent to `Object.values(arg)` |
+| `with` | `any, application, any?` | `string` | This will set its value as the context in an extension of the current context and then return its application in that context. If the value is falsey, then the option last argument will be returned. |
 
 #### Built-in formats
 
@@ -295,6 +297,24 @@ There are a few operations built-in to the library to handle common expressions:
 | `k` or `h` | 1+ | non-padded hour integer (12 hour) |
 | `a` | 1+ | AM or PM |
 
+## Templates
+
+There is a second mode available for the raport parser that reads templates similar to mustache/handlebars templates. In this mode, interpolators are surrounded by `{{` and `}}`, and there are four special interpolators for conditionals, context, and looping. All of the special interpolators must be closed with an end tag `{{/}}`, where there may be any text between the `/` and the `}}`. Each block level has all of its contents concatenated, so this mode is effectively equivalent to bulding expression trees with concatenation operations.
+
+| Thing | Expression? | Content |
+| ----- | ----------- | ------- |
+| text | no | Just plain old text. This is the stuff outside of the interpolators. |
+| `{{if [expression]}}` | yes | Branches (see below) are evaluated and the first true condition or the final default will have its body rendered. |
+| `{{unless [expression]}}` | yes | If the value is true the body is rendered. Alternate branches are not supported. |
+| `{{with [expression]}}` | yes | The `with` interpolator sets its value as the context for its body and renders the body. If the value is falsey, the body will not be rendered. |
+| `{{each [expression]}}` | yes | The `each` interpolator will iterate over its value and render the body once for each iteration. This supports alternate branches if the value is not iterable (an object or array). |
+| `{{[expression]}}` | yes | A plain interpolator will render its value through the `string` operator. |
+| `@index` | no | A special reference provided for the current iteration index. |
+| `@key` | no | A special reference provided for the current iteration key. |
+| `@last` | no | A special reference provided for the index of the last iteration. |
+| `@last-key` | no | A special reference provided for the key of the last iteration. |
+| `{{else if [expression]}}`, `{{elseif [expression]}}`, `{{elsif [expression]}}`, `{{elif [expression]}}` | yes | An alternate branch that may appear within and `if` body or an `each` body. |
+| `{{else}}` | no | A default branch that may appear within an `if`, `each`, or `with` body. |
 
 ## Designer
 
