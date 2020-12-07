@@ -91,7 +91,7 @@
         </div></div>
       </div>
     </div>
-    <div class-context style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' ? '' : 'none'}}">
+    <div class-context style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
       <div class-header>Context</div>
       <div class-panel class-scrolled-wrapper><div as-scrolled>
         {{#if ~/temp.expr.ctx}}
@@ -99,13 +99,13 @@
         {{/if}}
       </div></div>
     </div>
-    <div class-ops style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' ? '' : 'none'}}">
+    <div class-ops style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
       <div class-header>Operators</div>
       <div class-panel class-scrolled-wrapper><div as-scrolled>
         {{~/temp.expr.tab === 'ast' && @context.decorators.scrolled && @context.decorators.scrolled.invalidate() || '' && ''}}
         {{#each ~/operators}}
           <div class-entry-details>
-            <div class-expr-operator on-click="@.insertOp(@key)">{{@key}}</div>
+            <button class-expr-operator on-click="@.insertOp(@key)">{{@key}}</button>
             <div class-entry-type>{{.type}}</div>
           </div>
         {{/each}}
@@ -254,7 +254,7 @@
   {{#each .fields}}
     <div class-context-entry>
       <div class-entry-details>
-        <div class-entry-name on-click="@.insertRef(@keypath)">{{.name}}</div>
+        <button class-entry-name on-click="@.insertRef(@keypath)">{{.name}}</button>
         <div class-entry-type>{{.type}}</div>
       </div>
       {{#if .fields}}{{>expr-context}}{{/if}}
@@ -489,6 +489,15 @@
   .entry-type {
     opacity: 0.5;
     padding: 0 0.5em;
+  }
+
+  .entry-details button {
+    text-align: left;
+    padding: 0;
+    background: none;
+    border: none;
+    margin: 0;
+    font-size: 1rem;
   }
 
   .context-entry {

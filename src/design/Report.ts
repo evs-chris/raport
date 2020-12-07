@@ -382,7 +382,8 @@ export class Designer extends Ractive {
       parts.pop();
     }
     if (ps[0][0] === '*' && ps[1] === 'value' && ps.length > 2) ps[1] = '0';
-    const ref = Ractive.joinKeys.apply(Ractive, ps);
+    let ref = Ractive.joinKeys.apply(Ractive, ps);
+    if (this.get('temp.expr.html')) ref = `{{${ref}}}`;
 
     if (tab === 'text') {
       const node: HTMLTextAreaElement = this.find('textarea.expr-text') as any;
@@ -395,6 +396,8 @@ export class Designer extends Ractive {
       node.dispatchEvent(new InputEvent('input'));
       node.dispatchEvent(new InputEvent('change'));
       node.focus();
+    } else if (tab === 'html') {
+      return this.command('insertText', false, ref);
     } else if (tab === 'ast') {
       const active = this.get('temp.expr.partpath') || 'temp.expr.ast';
       this.set(active, { r: ref });
@@ -404,10 +407,12 @@ export class Designer extends Ractive {
   insertOp(name: string) {
     const tab = this.get('temp.expr.tab') || 'text';
 
+    let op = `${name}()`;
+    if (this.get('temp.expr.html')) op = `{{${op}}}`;
+
     if (tab === 'text') {
       const node: HTMLTextAreaElement = this.find('textarea.expr-text') as any;
 
-      const op = `(${name})`;
       const cur = node.value;
       const pos = [node.selectionStart, node.selectionEnd];
       node.value = cur.substring(0, pos[0]) + op + cur.substr(pos[1]);
@@ -416,6 +421,8 @@ export class Designer extends Ractive {
       node.dispatchEvent(new InputEvent('input'));
       node.dispatchEvent(new InputEvent('change'));
       node.focus();
+    } else if (tab === 'html') {
+      return this.command('insertText', false, op);
     } else if (tab === 'ast') {
       const active = this.get('temp.expr.partpath') || 'temp.expr.ast';
       const part = this.get(active);
