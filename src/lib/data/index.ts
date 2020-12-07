@@ -115,7 +115,7 @@ export function safeGet(root: Context, path: string|Keypath): any {
         const which = parts[idx++] as string;
         if (which !== 'value') {
           while (ctx && (!ctx.special || !(which in ctx.special))) ctx = ctx.parent;
-          o = ctx && ctx.special[which] || undefined;
+          o = ctx && ctx.special[which];
 
           if (o && which === 'source' && parts[idx] !== undefined && parts[idx] !== 'value' && o.value) o = o.value;
           if (!o && which === 'date') o = root.root.special.date = new Date();
@@ -130,7 +130,7 @@ export function safeGet(root: Context, path: string|Keypath): any {
         const v = evaluate(ctx, part);
         o = o && o[v];
       }
-      if (o == null) return;
+      if (o === null || o === undefined) return;
     }
 
     return o;
