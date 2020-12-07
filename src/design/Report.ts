@@ -442,7 +442,8 @@ export class Designer extends Ractive {
     }
   }
 
-  download(name: string, data: string, type: string = 'application/json') {
+  async download(name: string, data: string, type: string = 'application/json') {
+    name = evaluate(extend(await this.buildRoot(), { parser: parseTemplate }), name);
     const blob = new Blob([data], { type });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
