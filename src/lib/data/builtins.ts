@@ -8,6 +8,10 @@ function simple(names: string[], apply: (name: string, values: any[], ctx: Conte
   };
 }
 
+const space = /^\s*$/;
+function isNum(v: any): v is number {
+  return !isNaN(v) && !space.test(v);
+}
 function num(v: any): number {
   if (isNaN(v) || !v) return 0;
   return +v;
@@ -190,11 +194,11 @@ registerOperator(
     if (Array.isArray(values[0])) return values[0].concat.apply(values[0], values.slice(1));
     else if (isDateRel(values[0]) && values.slice(1).reduce((a, c) => a && isTimespan(c), true)) return values.slice(1).reduce((a, c) => dateAndTimespan(a, c, 1), dateRelToDate(values[0])); 
     else if (typeof values[0] !== 'number' && isTimespan(values[0])) return values.slice(1).reduce((a, c) => addTimespan(a, c), values[0]);
-    const num = values.reduce((a, c) => a && !isNaN(c) && c !== '', true);
+    const num = values.reduce((a, c) => a && isNum(c), true);
     if (num) {
       return values.reduce((a, c) => a + +c, 0);
     } else {
-      return values.reduce((a, c) => a + c, '');
+      return values.reduce((a, c) => a + (c === undefined || c === null ? '' : c), '');
     }
   }),
   simple(['-'], (_name: string, values: any[]): number => {
@@ -203,12 +207,12 @@ registerOperator(
       if (values.reduce((a, c) => a && isDateRel(c), true)) return values.reduce((a, c) => a - +dateRelToDate(c), +dateRelToDate(first));
       if (values.reduce((a, c) => a && isTimespan(c), true)) return values.reduce((a, c) => dateAndTimespan(a, c, -1), dateRelToDate(first));
     }
-    return values.reduce((a, c) => a - (isNaN(c) ? 0 : +c), isNaN(first) ? 0 : +first);
+    return values.reduce((a, c) => a - (!isNum(c) ? 0 : +c), !isNum(first) ? 0 : +first);
   }),
   simple(['*'], (_name: string, values: any[]): number => {
     const first = values.shift();
-    if (isNaN(first)) return 0;
-    return values.reduce((a, c) => a * (isNaN(c) ? 0 : +c), +first);
+    if (!isNum(first)) return 0;
+    return values.reduce((a, c) => a * (!isNum(c) ? 0 : +c), +first);
   }),
   simple(['/', '/%'], (name: string, values: any[]): number => {
     const first = values.shift();
@@ -257,7 +261,7 @@ registerOperator(
   simple(['padl', 'padr'], (name: string, args: any[]): string => {
     let [str, count, pad] = args;
     if (typeof str !== 'string') str = '' + str;
-    if (isNaN(count)) return str;
+    if (!isNum(count)) return str;
     if (!pad) pad = ' ';
     if (typeof pad !== 'string') pad = '' + pad;
     if (pad.length < 1) pad = ' ';
