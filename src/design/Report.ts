@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { InitOpts, ContextHelper } from 'ractive';
-import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, SourceMap, getOperatorMap } from 'raport/index';
+import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate } from 'raport/index';
 
 let sourceTm: any;
 
@@ -30,7 +30,8 @@ export class Designer extends Ractive {
       if (path !== 'report') widget.width = 10;
       widget.text = ':label';
     } else if (type === 'html') {
-      widget.html = ':<div>html</div>';
+      widget.html = '<div>html</div>';
+      widget.font = { line: 0 };
     }
 
     this.push(`${path}.widgets`, widget);
@@ -182,15 +183,13 @@ export class Designer extends Ractive {
     let v: string = this.get('temp.expr.path');
     if (v && v.startsWith('widget.')) v = v.replace('widget', this.get('temp.widget'));
     const ctx = await this.buildLocalContext(v);
-    const res = evaluate(ctx, str);
+    const res = evaluate(ctx, this.get('temp.expr.html') ? parseTemplate(str) : str);
     this.set('temp.expr.result', res);
     this.set('temp.expr.tab', 'result');
   }
 
-  readHtml(expr: string): string {
-    if (expr[0] === ':') return expr.substr(1);
-    else if (expr[0] === "'" || expr[0] === '"' || expr[0] === '`') return expr.slice(1, -1);
-    else return expr;
+  evalExpr(expr: string, template?: boolean): string {
+    return evaluate(template ? parse(expr) : parseTemplate(expr));
   }
 
   autosizeHtml(ctx: ContextHelper) {
@@ -545,11 +544,12 @@ Ractive.extendWith(Designer, {
     },
     'temp.expr.str'(v) {
       const path = this.get('temp.expr.path');
+      const html = this.get('temp.expr.html');
       if (path) this.set(path, v);
       if (!this.evalLock) {
         this.evalLock = true;
         try {
-          const parsed = parse(v, { detailed: true, contextLines: 3 });
+          const parsed = (html ? parseTemplate : parse)(v, { detailed: true, contextLines: 3 });
           const msg = ('marked' in parsed ? 
             `${'latest' in parsed ? `${parsed.latest.message || '(no message)'} on line ${parsed.latest.line} at column ${parsed.latest.column}\n\n${parsed.latest.marked}\n\n` : ''}${parsed.message || '(no message)'} on line ${parsed.line} at column ${parsed.column}\n\n${parsed.marked}\n\n` : '') + JSON.stringify(parsed, null, '  ');
 
@@ -563,13 +563,8 @@ Ractive.extendWith(Designer, {
             this.set('temp.expr.error', undefined);
           }
 
-          if (v[0] === '`' || v[0] === `'` || v[0] === '"') {
-            this.set('temp.expr.htmlstr', v.slice(1, -1));
-          } else if ('v' in parsed && v[0] === ':') {
-            this.set('temp.expr.htmlstr', v.substr(1));
-          } else {
-            this.set('temp.expr.htmlstr', '');
-          }
+          if (html) this.set('temp.expr.htmlstr', v);
+          else this.set('temp.expr.htmlstr', '');
         } catch {}
         this.evalLock = false;
       }
@@ -594,14 +589,7 @@ Ractive.extendWith(Designer, {
     },
     'temp.expr.htmlstr'(v) {
       if (!this.evalLock) {
-        this.evalLock = true;
-        try {
-          const parsed = parse(`'${v.replace(/'/g, "\\'")}'`);
-          this.set('temp.expr.ast', parsed);
-          this.set('temp.expr.error', undefined);
-          this.set('temp.expr.str', stringify(parsed));
-        } catch {}
-        this.evalLock = false;
+        this.set('temp.expr.str', v);
       }
     },
     'temp.widget'() {

@@ -4,7 +4,7 @@
   {{#if ~/temp.bottom.param}}<span class-tab class-active="~/temp.bottom.tab === 'param'" on-click="@.set('temp.bottom.tab', 'param'), @.set('temp.bottom.pop', true)">Parameter</span>{{/if}}
   {{#if ~/temp.bottom.source}}<span class-tab class-active="~/temp.bottom.tab === 'source'" on-click="@.set('temp.bottom.tab', 'source'), @.set('temp.bottom.pop', true)">Source</span>{{/if}}
   <span class-which>
-    {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button class-ico class-large on-click="@.unlink('expr'), @.set('temp.expr.path', undefined), @.set('temp.expr.str', '')">&times;</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
+    {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button class-ico class-large on-click="@.unlink('expr'), @.set('temp.expr.path', undefined), @.set('temp.expr.str', ''), @.set('temp.expr.html', false), @.set('temp.expr.tab', 'text')">&times;</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
     {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button class-ico class-large on-click="@.unlink('param'), @.set('temp.bottom.param', undefined), @.set('temp.bottom.tab', 'expr')">&times;</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
     {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button class-ico class-large on-click="@.unlink('source'), @.set('temp.bottom.source', undefined), @.set('temp.bottom.tab', 'expr')">&times;</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
   </span>

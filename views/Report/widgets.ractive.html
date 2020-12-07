@@ -83,7 +83,7 @@
   {{#with @local as ctx}}
     <span class="preview btn" title="Toggle Preview" on-click="@context.toggle('ctx.preview')">&#9678;</span>
     {{#if ctx.preview}}
-      <img src="{{@.readHtml(.url)}}" style="width: 100%; height: 100%;" />
+      <img src="{{@.evalExpr(.url)}}" style="width: 100%; height: 100%;" />
     {{/if}}
   {{/with}}
 </template>
@@ -92,7 +92,7 @@
   {{#with @local as ctx}}
     <span class="preview btn" title="Toggle Preview" on-click="@context.toggle('ctx.preview')">&#9678;</span>
     <span class="autosize btn" title="Autosize Block" on-click="@.autosizeHtml(@context)">&#8597;</span>
-    <span class-content on-click="@.editExpr(@context.resolve('.html'), { html: true })" class-preview="ctx.preview" {{#if ctx.preview}}style-font-size="{{.font.size || 1}}rem" style-line-height="{{.font.line === 0 ? 'initial' : (.font.line || .font.size || 1) + 'rem'}}"{{/if}} {{#if ctx.autosize}}style="height: auto;"{{/if}} title="{{.html}}">{{#if ctx.preview}}{{{@.readHtml(.html)}}}{{else}}{{.html}}{{/if}}</span>
+    <span class-content on-click="@.editExpr(@context.resolve('.html'), { html: true })" class-preview="ctx.preview" {{#if ctx.preview}}style-font-size="{{.font.size || 1}}rem" style-line-height="{{.font.line === 0 ? 'initial' : (.font.line || .font.size || 1) + 'rem'}}"{{/if}} {{#if ctx.autosize}}style="height: auto;"{{/if}} title="{{.html}}">{{#if ctx.preview}}{{{.html}}}{{else}}{{.html}}{{/if}}</span>
   {{/with}}
 </template>
 

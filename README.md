@@ -59,7 +59,7 @@ In addition to containers, the basic widgets supplied in this library are the `L
 | `text` | `value \| object[]` | `label` | The text content for the `label`. If this is an array of `object`s, each object may specify a `text` property and a `font` property, where the `text` will be wrapped in a `<span>` with the `font` properties applied. |
 | `text` | `value` | `measured` | The text content for the `measured` label. |
 | `id` | `string` | `label` | A string used to collect the values of labels in a repeater. |
-| `html` | `value` | `html` | The HTML content to be displayed. |
+| `html` | `value` | `html` | The HTML content to be displayed, supplied as a template rather than a plain expression. |
 | `url` | `value` | `image` | The url of the image to display. |
 | `context` | `value` | `container` | A new context to add to the context stack for the widgets within the container. This can be used to introduce values that will need to be referenced from child widgets. |
 | `source` | `value \| object` | `repeater` | The source of data for the repeater. If an `object`, this can be a report source with a `name` and optional `filter`, `sort`, and `group` properties. Otherwise, the evaluated value should be a source or an array. |
