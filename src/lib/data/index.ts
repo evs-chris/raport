@@ -351,23 +351,38 @@ export interface Reference { r: string|Keypath };
 export interface Application { a: Value };
 export interface Literal { v: any };
 
-export interface DateRelSpan {
+export interface DateRelSpanMS {
   f: 'n';
   o: number;
 }
+export interface DateRelSpanFull {
+  f: 'n';
+  o: [number?, number?, number?, number?, number?, number?, number?];
+  d?: -1;
+}
+export type DateRelSpan = DateRelSpanMS | DateRelSpanFull;
+
 export interface DateRelRange {
   f: 'd'|'w'|'m'|'y';
   o: -1|0|1;
+  e?: 1;
 }
 export interface DateRelToDate {
   f: 'w'|'m'|'y';
   o: 0;
   d: 1;
+  e?: 1;
 }
 export interface DateExactRange {
   f: [number, number?, number?, number?, number?, number?, number?, number?];
+  e?: 1;
 }
-export type DateRel = DateRelSpan | DateRelRange | DateRelToDate | DateExactRange;
+export type DateRel = Date | DateRelSpan | DateRelRange | DateRelToDate | DateExactRange;
+
+export type TimeSpan = number|FullTimeSpan;
+export interface FullTimeSpan {
+  d: [number?, number?, number?, number?, number?, number?, number?];
+}
 
 export type ValueOrExpr = string|Value;
 export type Value = Reference | Literal | Operation | Application | ParseError;
@@ -467,8 +482,9 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
   let to: Date = 'd' in rel && rel.d ? new Date() : undefined;
   from.setHours(0, 0, 0, 0);
 
+  if (rel instanceof Date) return [rel, rel];
   if (rel.f === 'n') {
-    from = new Date(+new Date() + rel.o);
+    from = typeof rel.o === 'number' ? new Date(+new Date() + rel.o) : dateAndTimespan(new Date(), { d: rel.o }, 1);
     return [from, from];
   } else if (rel.f === 'd') {
     from.setDate(from.getDate() + rel.o);
@@ -525,5 +541,68 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
 }
 
 export function isDateRel(v: any): v is DateRel {
-  return typeof v === 'object' && 'f' in v && (Array.isArray(v.f) || 'o' in v);
+  return typeof v === 'object' && (('f' in v && (Array.isArray(v.f) || 'o' in v)) || v instanceof Date);
+}
+
+export function dateRelToDate(rel: DateRel): Date {
+  const range = dateRelToRange(rel);
+  if ('e' in rel && rel.e != null) return range[1];
+  else return range[0];
+}
+
+export function isTimespan(v: any): v is TimeSpan {
+  return typeof v === 'number' || (typeof v === 'object' && Array.isArray(v.d));
+}
+
+export function addTimespan(l: TimeSpan, r: TimeSpan): TimeSpan {
+  if (typeof l === 'number' && typeof r === 'number') return l + r;
+  else {
+    const res: TimeSpan = { d: [] };
+    if (typeof l === 'number') res.d[6] = l;
+    else for (let i = 0; i < 7; i++) if (l.d[i]) res.d[i] = l.d[i];
+
+    if (typeof r === 'number') res.d[6] = (res.d[6] || 0) + r;
+    else for (let i = 0; i < 7; i++) if (r.d[i]) res.d[i] = (res.d[i] || 0) + r.d[i];
+    return res;
+  }
+}
+
+export function subtractTimespan(l: TimeSpan, r: TimeSpan): TimeSpan {
+  if (typeof l === 'number' && typeof r === 'number') return l - r;
+  else {
+    if (typeof l === 'number') {
+      const res = ({ d: (r as FullTimeSpan).d.slice() }) as FullTimeSpan;
+      for (let i = 0; i < 7; i++) if (res.d[i]) res.d[i] = 0 - res.d[i];
+      res.d[6] = (res.d[6] || 0) + l;
+      return res;
+    } else if (typeof r === 'number') {
+      const res = ({ d: (l as FullTimeSpan).d.slice() }) as FullTimeSpan;
+      res.d[6] = (res.d[6] || 0) - r;
+      return res;
+    } else {
+      const res = ({ d: (l as FullTimeSpan).d.slice() }) as FullTimeSpan;
+      for (let i = 0; i < 7; i++) if (r.d[i]) l.d[i] = (l.d[i] || 0) - r.d[i];
+      return res;
+    }
+  }
+}
+
+export function dateAndTimespan(l: Date, r: TimeSpan, m: 1|-1): Date {
+  if (typeof r === 'number') return new Date(+l + r * m);
+  else {
+    let d = new Date(l);
+    if (r.d[0]) d.setFullYear(d.getFullYear() + r.d[0] * m);
+    if (r.d[1]) d.setMonth(d.getMonth() + r.d[1] * m);
+    if (r.d[2]) d.setDate(d.getDate() + r.d[2] * m);
+    if (r.d[3]) d.setHours(d.getHours() + r.d[3] * m);
+    if (r.d[4]) d.setMinutes(d.getMinutes() + r.d[4] * m);
+    if (r.d[5]) d.setSeconds(d.getSeconds() + r.d[5] * m);
+    if (r.d[6]) d.setMilliseconds(d.getMilliseconds() + r.d[6] * m);
+    return d;
+  }
+}
+
+export function timeSpanToNumber(v: TimeSpan): number {
+  if (typeof v === 'number') return v;
+  else return ((((((((((((v.d[0] || 0) * 12) + (v.d[1] || 0)) * 30.45) + (v.d[2] || 0)) * 24) + (v.d[3] || 0)) * 60) + (v.d[4] || 0)) * 60) + (v.d[5] || 0)) * 1000) + (v.d[6] || 0);
 }

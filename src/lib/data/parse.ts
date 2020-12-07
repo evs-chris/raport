@@ -1,20 +1,20 @@
 import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, ErrorOptions } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
-import { Value, DateRel, Literal, Keypath } from './index';
+import { Value, DateRel, Literal, Keypath, TimeSpan } from './index';
 
-export const week = 604800000;
-export const day = 86400000;
-export const hour = 3600000;
-export const minute = 60000;
-export const second = 1000;
-
-const timespan_map = {
-  week, weeks: week,
-  day, days: day,
-  hour, hours: hour,
-  minute, minutes: minute,
-  second, seconds: second,
+export const timespans = {
+  y: 0,
+  m: 0,
+  w: 0,
+  d: 86400000,
+  h: 3600000,
+  mm: 60000,
+  s: 1000,
 };
+
+timespans.w = timespans.d * 7;
+timespans.y = Math.floor(timespans.d * 365.25);
+timespans.m = Math.floor(timespans.d * 30.45);
 
 const space = ' \r\n\t';
 const endSym = space + '():{}[]';
@@ -78,16 +78,47 @@ function stringInterp(parts: Value[]): Value {
   return { op: '+', args: res };
 }
 
-const timespan = map(rep1sep(seq(JNum, rws, istr('week', 'weeks', 'day', 'days', 'hour', 'hours', 'minute', 'minutes', 'second', 'seconds', 'millisecond', 'milliseconds')), rws, 'disallow'), parts => {
-  let n = 0;
-  for (let i = 0; i < parts.length; i++) n += parts[i][0] * timespan_map[parts[i][2]];
-  return n;
+const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 'month', 'minutes', 'minute', 'milliseconds', 'millisecond', 'mm', 'ms', 'm', 'weeks', 'week', 'w', 'days', 'day', 'd', 'hours', 'hour', 'h', 'seconds', 'second', 's')), ws), parts => {
+  const span = { y: 0, m: 0, d: 0, h: 0, mm: 0, s: 0, ms: 0 };
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i][2][0] === 'y') span.y += parts[i][0];
+    else if (parts[i][2] === 'm' || parts[i][2] === 'months' || parts[i][2] === 'month') span.m += parts[i][0];
+    else if (parts[i][2][0] === 'd') span.d += parts[i][0];
+    else if (parts[i][2][0] === 'w') span.d += parts[i][0] * 7;
+    else if (parts[i][2][0] === 's') span.s += parts[i][0];
+    else if (parts[i][2] === 'mm' || parts[i][2] === 'minutes' || parts[i][2] === 'minute') span.mm += parts[i][0];
+    else if (parts[i][2] === 'ms' || parts[i][2] === 'milliseconds' || parts[i][2] === 'millisecond') span.ms += parts[i][0];
+  }
+
+  if (!span.y && !span.m) {
+    delete span.y; delete span.m;
+    let n = 0;
+    for (const k in span) n += span[k] * (timespans[k] || 1);
+    return n;
+  } else {
+    const s: [number?, number?, number?, number?, number?, number?, number?] = [];
+    if (span.y) s[0] = span.y;
+    if (span.m) s[1] = span.m;
+    if (span.d) s[2] = span.d;
+    if (span.h) s[3] = span.h;
+    if (span.mm) s[4] = span.mm;
+    if (span.s) s[5] = span.s;
+    if (span.ms) s[6] = span.ms;
+    return { d: s };
+  }
 });
 
+const dateend = opt(seq(ws, str('>')));
 const daterel = alt<DateRel>('date',
-  map(seq(istr('last', 'this', 'next'), rws, istr('week', 'month', 'year'), opt(seq(rws, istr('to'), rws, istr('date')))), ([o, , f, d]) => ({ f: f[0] === 'w' ? 'w' : f[0] === 'm' ? 'm' : 'y', o: o === 'last' ? -1 : o === 'this' ? 0 : 1, d: d ? 1 : undefined })),
-  map(istr('yesterday', 'today', 'tomorrow', 'now'), v => (v === 'now' ? { f: 'n', o: 0 } : { f: 'd', o: v === 'yesterday' ? -1 : v === 'today' ? 0 : 1 })),
-  map(seq(timespan, rws, alt<string|any[]>('relative time anchor', istr('ago'), seq(istr('from'), rws, istr('now')))), ([span, , ref]) => ({ f: 'n', o: span * (ref === 'ago' ? -1 : 1) })),
+  map(seq(istr('last', 'this', 'next'), rws, istr('week', 'month', 'year'), opt(seq(rws, istr('to'), rws, istr('date'))), dateend), ([o, , f, d, e]) => ({ f: f[0] === 'w' ? 'w' : f[0] === 'm' ? 'm' : 'y', o: o === 'last' ? -1 : o === 'this' ? 0 : 1, d: d ? 1 : undefined, e: e ? 1 : undefined })),
+  map(seq(istr('yesterday', 'today', 'tomorrow', 'now'), dateend), ([v, e]) => (v === 'now' ? { f: 'n', o: 0 } : { f: 'd', o: v === 'yesterday' ? -1 : v === 'today' ? 0 : 1, e: e ? 1 : undefined })),
+  map(seq(timespan, rws, alt<string|any[]>('relative time anchor', istr('ago'), seq(istr('from'), rws, istr('now')))), ([span, , ref]) => {
+    if (typeof span === 'number') {
+      return { f: 'n', o: span * (ref === 'ago' ? -1 : 1) };
+    } else {
+      return { f: 'n', o: span.d, d: ref === 'ago' ? -1 : undefined };
+    }
+  }),
 );
 
 function setIndex<T, U = Array<T>>(array: U, index: number, value: T): U {
@@ -114,6 +145,7 @@ export const dateexact: Parser<Date|DateRel> = map(seq(
       opt(seq(str(':'), chars(2, digits)))
     ))
   ))),
+  dateend,
 ), v => {
   const y = v[0];
   const m = v[1] && v[1][1];
@@ -123,10 +155,11 @@ export const dateexact: Parser<Date|DateRel> = map(seq(
   const s = mm && v[1][2][2][2][2] && v[1][2][2][2][2][1];
   const ms = s && v[1][2][2][2][2][2] && v[1][2][2][2][2][2][1];
   const tz = v[2] && v[2][1] && (typeof v[2][1] === 'string' ? 0 : ((+v[2][1][1] * 60 + (+v[2][1][2] || 0)) * (v[2][1][0] === '+' ? -1 : 1)));
-  if (!m) return { f: setIndex([+y], 7, tz) };
-  else if (!d) return { f: setIndex([+y, +m - 1], 7, tz) };
-  else if (!h) return { f: setIndex([+y, +m - 1, +d], 7, tz) }
-  else if (!mm) return { f: setIndex([+y, +m - 1, +d, +h], 7, tz) };
+  const e = v[3] ? 1 : undefined;
+  if (!m) return { f: setIndex([+y], 7, tz), e };
+  else if (!d) return { f: setIndex([+y, +m - 1], 7, tz), e };
+  else if (!h) return { f: setIndex([+y, +m - 1, +d], 7, tz), e }
+  else if (!mm) return { f: setIndex([+y, +m - 1, +d, +h], 7, tz), e };
   else if (tz != null) {
     const dt = new Date(Date.UTC(+y, +m - 1, +d, +h, +mm, s && +s || 0, ms && +ms || 0));
     if (tz) dt.setUTCHours(dt.getUTCHours() + Math.floor(tz / 60));
@@ -135,7 +168,7 @@ export const dateexact: Parser<Date|DateRel> = map(seq(
   } else return new Date(+y, +m - 1, +d, +h, +mm, s && +s || 0, ms && +ms || 0);
 });
 
-export const date = bracket(str('#'), alt<Date|DateRel|number>('date', dateexact, daterel, timespan), str('#'));
+export const date = bracket(str('#'), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), str('#'));
 
 export const string = alt<Value>('string',
   map(seq(str(':'), read1To(endRef.replace('.', ''), true)), v => ({ v: v[1]})),
@@ -247,19 +280,27 @@ array.parser = map(bracket(
   check(ws, str(']')),
 ), args => args.filter(a => !('v' in a)).length ? { op: 'array', args } : { v: args.map(a => (a as Literal).v) });
 
+function objectOp(pairs: [Value, Value][]): Value {
+  return pairs.filter(p => !('v' in p[0] && 'v' in p[1])).length ?
+  { op: 'object', args: pairs.reduce((a, c) => (a.push(c[0], c[1]), a), []) } : 
+  { v: pairs.reduce((a, c) => (a[(c[0] as Literal).v] = (c[1] as Literal).v, a), {}) };
+}
+
 object.parser = map(bracket(
   check(ws, str('{'), ws),
   repsep(pair, read1(space + ','), 'allow'),
   check(ws, str('}')),
-), pairs => pairs.filter(p => !('v' in p[0] && 'v' in p[1])).length ?
-  { op: 'object', args: pairs.reduce((a, c) => (a.push(c[0], c[1]), a), []) } : 
-  { v: pairs.reduce((a, c) => (a[(c[0] as Literal).v] = (c[1] as Literal).v, a), {}) }
-);
+), objectOp);
 
 value.parser = operation;
 
+const namedArg: Parser<[Value, Value]> = map(seq(ident, str(':'), ws, value), ([k, , , v]) => [{ v: k }, v]);
 const application = map(seq(str('=>'), ws, value), ([, , value]) => ({ a: value }));
-args.parser = repsep(value, read1(space + ','), 'allow');
+args.parser = map(repsep(alt<[Value, Value] | Value>('argument', namedArg, value), read1(space + ','), 'allow'), (args) => {
+  const [plain, obj] = args.reduce((a, c) => ((Array.isArray(c) ? a[1].push(c) : a[0].push(c)), a), [[], []] as [Array<Value>, Array<[Value, Value]>]);
+  if (obj.length) plain.push(objectOp(obj));
+  return plain;
+});
 
 values.parser = alt('expression', array, object, literal, string, application, unop, call_op, ref);
 

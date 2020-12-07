@@ -1,6 +1,6 @@
-import { filter, safeGet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, extend, formats, registerFormat, dateRelToRange, isDateRel, isKeypath } from './index';
+import { filter, safeGet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan } from './index';
 import { date, dollar, number, phone } from './format';
-import { week, day, hour, minute, second } from './parse';
+import { timespans } from './parse';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
   return {
@@ -131,35 +131,44 @@ registerOperator(
     }
     return filter({ value: arr }, null, sort, null, ctx);
   }),
-  simple(['time-span-ms'], (_name: string, [ms, precision]: any[]): any => {
-    if (!precision) precision = 1;
-    const res = [0, 0, 0, 0, 0, 0];
-    check: if (ms !== '' && !isNaN(ms)) {
-      ms = Math.abs(+ms);
-      res[0] = Math.floor(ms / week);
-      if (precision < res.filter(x => x).length) break check;
-      ms = ms % week;
-      res[1] = Math.floor(ms / day);
-      if (precision < res.filter(x => x).length) break check;
-      ms = ms % day;
-      res[2] = Math.floor(ms / hour);
-      if (precision < res.filter(x => x).length) break check;
-      ms = ms % hour;
-      res[3] = Math.floor(ms / minute);
-      if (precision < res.filter(x => x).length) break check;
-      ms = ms % minute;
-      res[4] = Math.floor(ms / second);
-      if (precision < res.filter(x => x).length) break check;
-      res[5] = ms % second;
-    } else return '';
-    let str = '';
-    if (res[0]) str += `${res[0]} week${res[0] > 1 ? 's' : ''}`;
-    if (res[1]) str += `${str.length ? ' ' : ''}${res[1]} day${res[1] > 1 ? 's' : ''}`;
-    if (res[2]) str += `${str.length ? ' ' : ''}${res[2]} hour${res[2] > 1 ? 's' : ''}`;
-    if (res[3]) str += `${str.length ? ' ' : ''}${res[3]} minute${res[3] > 1 ? 's' : ''}`;
-    if (res[4]) str += `${str.length ? ' ' : ''}${res[4]} second${res[4] > 1 ? 's' : ''}`;
-    if (res[5]) str += `${str.length ? ' ' : ''}${res[5]} millisecond${res[5] > 1 ? 's' : ''}`;
-    return str;
+  simple(['time-span', 'time-span-ms'], (_name: string, args: any[]): any => {
+    let ms = args[0];
+    let unit = typeof args[args.length - 1] === 'object' ? args[args.length - 1].unit : null;
+    if (typeof unit !== 'string') unit = null;
+    unit = unit && (unit[0] === 'y' ? 'y' : unit[0] === 'w' ? 'w' : unit[0] === 'd' ? 'd' : unit[0] === 'h' ? 'h' : unit[0] === 's' ? 's' : (unit === 'm' || unit.substr(0, 2) === 'mo') ? 'm' : (unit === 'mm' || unit.substr(0, 3) === 'min') ? 'mm' : (unit === 'ms' || unit.substr(0, 3) === 'mil') ? 'ms' : null);
+    const precision = typeof args[1] === 'number' ? args[1] : unit ? 0 : 1;
+    if (unit) {
+      if (precision) return (ms / timespans[unit]).toFixed(precision);
+      else return Math.floor(ms / timespans[unit]);
+    } else {
+      const res = [0, 0, 0, 0, 0, 0];
+      check: if (ms !== '' && !isNaN(ms)) {
+        ms = Math.abs(+ms);
+        res[0] = Math.floor(ms / timespans.w);
+        if (precision < res.filter(x => x).length) break check;
+        ms = ms % timespans.w;
+        res[1] = Math.floor(ms / timespans.d);
+        if (precision < res.filter(x => x).length) break check;
+        ms = ms % timespans.d;
+        res[2] = Math.floor(ms / timespans.h);
+        if (precision < res.filter(x => x).length) break check;
+        ms = ms % timespans.h;
+        res[3] = Math.floor(ms / timespans.mm);
+        if (precision < res.filter(x => x).length) break check;
+        ms = ms % timespans.mm;
+        res[4] = Math.floor(ms / timespans.s);
+        if (precision < res.filter(x => x).length) break check;
+        res[5] = ms % timespans.s;
+      } else return '';
+      let str = '';
+      if (res[0]) str += `${res[0]} week${res[0] > 1 ? 's' : ''}`;
+      if (res[1]) str += `${str.length ? ' ' : ''}${res[1]} day${res[1] > 1 ? 's' : ''}`;
+      if (res[2]) str += `${str.length ? ' ' : ''}${res[2]} hour${res[2] > 1 ? 's' : ''}`;
+      if (res[3]) str += `${str.length ? ' ' : ''}${res[3]} minute${res[3] > 1 ? 's' : ''}`;
+      if (res[4]) str += `${str.length ? ' ' : ''}${res[4]} second${res[4] > 1 ? 's' : ''}`;
+      if (res[5]) str += `${str.length ? ' ' : ''}${res[5]} millisecond${res[5] > 1 ? 's' : ''}`;
+      return str;
+    }
   }),
   simple(['call'], (_name: string, args: any[]): any => {
     if (args[0] != null && typeof args[1] === 'string' && typeof args[0][args[1]] === 'function') {
@@ -179,6 +188,8 @@ registerOperator(
 registerOperator(
   simple(['+'], (_name: string, values: any[]): number|string => {
     if (Array.isArray(values[0])) return values[0].concat.apply(values[0], values.slice(1));
+    else if (isDateRel(values[0]) && values.slice(1).reduce((a, c) => a && isTimespan(c), true)) return values.slice(1).reduce((a, c) => dateAndTimespan(a, c, 1), dateRelToDate(values[0])); 
+    else if (typeof values[0] !== 'number' && isTimespan(values[0])) return values.slice(1).reduce((a, c) => addTimespan(a, c), values[0]);
     const num = values.reduce((a, c) => a && !isNaN(c) && c !== '', true);
     if (num) {
       return values.reduce((a, c) => a + +c, 0);
@@ -188,6 +199,10 @@ registerOperator(
   }),
   simple(['-'], (_name: string, values: any[]): number => {
     const first = values.shift();
+    if (isDateRel(first)) {
+      if (values.reduce((a, c) => a && isDateRel(c), true)) return values.reduce((a, c) => a - +dateRelToDate(c), +dateRelToDate(first));
+      if (values.reduce((a, c) => a && isTimespan(c), true)) return values.reduce((a, c) => dateAndTimespan(a, c, -1), dateRelToDate(first));
+    }
     return values.reduce((a, c) => a - (isNaN(c) ? 0 : +c), isNaN(first) ? 0 : +first);
   }),
   simple(['*'], (_name: string, values: any[]): number => {
@@ -300,14 +315,9 @@ registerOperator(
     if (!src) return [];
     return Object.values(src);
   }),
-  simple(['date'], (_name: string, [v, w]: any[]): Date|[Date,Date] => {
+  simple(['date'], (_name: string, [v]: any[]): Date => {
     if (v !== undefined) {
-      if (isDateRel(v)) {
-        const r = dateRelToRange(v);
-        if (w === 's' || w === 'start') return r[0];
-        else if (w === 'e' || w === 'end') return r[1];
-        return r;
-      }
+      if (isDateRel(v)) return dateRelToDate(v);
       return new Date(v);
     }
     else return new Date();
