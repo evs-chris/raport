@@ -166,7 +166,7 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, val
     arguments.length > 1 && (l = local);
   }
 
-  if (typeof e === 'string') e = r.root.exprs[e] || (r.root.exprs[e] = parse(e));
+  if (typeof e === 'string') e = r.root.exprs[e] || (r.root.exprs[e] = (r.parser || parse)(e));
   if (typeof e !== 'object') e = { v: e };
   if (e && 'r' in e) return safeGet(r, e.r);
   else if (e && 'v' in e) return e.v;
@@ -416,6 +416,7 @@ export interface Context {
   parent?: Context;
   special?: ParameterMap;
   value: any;
+  parser?: (txt: string) => Value;
 }
 
 export interface RootContext extends Context {
@@ -456,6 +457,7 @@ export function join(context: Context, path: string): Context {
 export interface ExtendOptions {
   value?: any;
   special?: any;
+  parser?: (txt: string) => Value;
 }
 
 export function extend(context: Context, opts: ExtendOptions): Context {
@@ -465,6 +467,7 @@ export function extend(context: Context, opts: ExtendOptions): Context {
     path: '',
     value: 'value' in opts ? opts.value : context.value,
     special: opts.special || {},
+    parser: opts.parser,
   };
 }
 
