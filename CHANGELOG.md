@@ -1,3 +1,47 @@
+## 0.4.0
+
+2020-12-08
+
+### Report
+
+* __BUG__: Rendered heights are no longer checked for fit in available y area after adding the already-accounted-for widget margin, so things that fit within a tolerance of the margin no longer cause an unnecessary break.
+* __BUG__: Repeater margins are no longer applied after the header is rendered.
+* __BUG__: Percentage widths are now correctly applied against total width rather than remaining width.
+* __BUG__: Continuing a render due to lack of available height now passes the would-be height up so that the continuation properly breaks.
+* __BUG__: Width constrained repeater rows now wrap properly if the items happen to use the available width exactly.
+* HTML widgets now evaluate their html as a template rather than an expression.
+* Contexts can now include a parser, so that evaluation in a context without a pre-parsed expression can control which parser should be used.
+
+### Parser
+
+* __BUG__: Call operations with an identifier that includes an `x` are now parsed correctly.
+* Integer division `/%` is supported as a binary operator with the same precedence as division.
+* Timespans now support years and months in literals.
+* Timespan literals can specify shortened units e.g. `:y, :m, :w, :d, :h, :mm, :s, :ms`.
+* Date range literals can specify that they should convert to the end date by default with a final `>` sigil e.g. `#2012>#` or `#2012 >#`.
+* Operators now support named arguments in `indentifier`: `value` form, where the space after the `:` is optional. Named arguments are gathered into an object argument and passed as the final argument in the arguments array to the operator.
+* There is now a special parser that reads a template, similar to mustache/handlebars. This supports plain interpolators, `if`s with branches, `with`s with an optional alternate, `each`s with optional branches, and `unless`.
+
+### Data
+
+* __BUG__: `@source` special references will once again evaluate correctly if they refer directly to an array.
+* __BUG__: `sum` and `avg` now coerce their arguments to numbers.
+* __BUG__: Accessing a path that includes a falsey non-null (`0`, `''`, `false`, etc) no longer results in `undefined`.
+* __BUG__: Unary `+` properly converts a date to a number.
+* Added the integer division operator `/%`.
+* Date ranges can be converted to dates, and default to the start of the range if no end sigil is included.
+* Subtracting a date from another date will result in a timespan.
+* Adding or subtracting a timespan and a date will result in a date. First-order addition and subtraction works exactly with years and months e.g. `#2012-12-22# + #5y2m#` will result in `2018-2-22`.
+* The `time-span-ms` operator is now aliased as `time-span`.
+* The `time-span` operator now has support for extracting a particular unit of time like `days` or `years` by passing a named `unit` argument e.g. `time-span(#72w# unit::y 2)` results in `1.38`. The default precision for a unit extraction is `0`, so without passing a second non-named argument, only the floored value will be returned.
+* There is now a `string` operator that eats `undefineds` and stringifies objects more nicely. This is used by default for plain template interpolators.
+
+### Designer
+
+* The report name is now evaluated as a template, which allows the saved output to include expressions, like parameters.
+* There is now extremely limited support for inserting context references and operators into HTML.
+
+
 ## 0.3.1
 
 2020-12-04
