@@ -237,7 +237,7 @@ export function getWidth(w: Widget, placement: Placement): number {
   const width = w.width;
   if (!width) return placement.maxX || 51;
   else if (typeof width === 'number') return width;
-  else return (width.percent / 100) * (placement.availableX || placement.maxX || 51);
+  else return (width.percent / 100) * (placement.maxX || 51);
 }
 
 export function getWidthWithMargin(w: Widget, placement: Placement): number {
