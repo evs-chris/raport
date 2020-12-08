@@ -155,11 +155,12 @@ export function registerLayout(name: string, layout: (widget: Widget, offset: nu
 
 registerLayout('row', (w, o, m, p, ps) => {
   let n: Placement;
-  if (w.br || (p.availableX && ps[0][0] + ps[0][2] + getWidthWithMargin(w, p) > p.availableX)) {
+  const nw = getWidthWithMargin(w, p);
+  if (w.br || (p.availableX && ps[0][0] + ps[0][2] + nw > p.availableX)) {
     n = { x: m[3], y: maxYOffset(ps), availableX: p.availableX && (p.availableX - m[3]), maxX: p.maxX };
   } else {
     n = { x: ps[0][0] + ps[0][2], y: ps[0][1], maxX: p.maxX };
-    if (p.availableX) n.availableX = p.availableX - (ps[0][0] + ps[0][2]);
+    if (p.availableX) n.availableX = p.availableX - (ps[0][0] + ps[0][2]) - nw;
   }
 
   n.y -= o;

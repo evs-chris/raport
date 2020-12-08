@@ -29,10 +29,12 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
   if (!w.height) w.height = 'auto';
   else if (typeof w.height === 'number') h = getHeightWithMargin(w, placement);
   const wctx = w.context ? extend(ctx, { value: evaluate(ctx, w.context) }) : ctx;
-  const r = renderWidgets(w, wctx, { x: 0, y: 0, availableX: typeof w.width === 'number' ? w.width : placement.availableX, availableY: h || placement.availableY, maxX: placement.maxX, maxY: placement.maxY }, state, w.layout);
+  const cw = getWidth(w, placement) || placement.availableX;
+  const r = renderWidgets(w, wctx, { x: 0, y: 0, availableX: cw, availableY: h || placement.availableY, maxX: cw, maxY: placement.maxY }, state, w.layout);
   if (!r.cancel) {
     r.output = `<div${styleClass(ctx, ['container'], style(w, placement, ctx, { computedHeight: h || r.height, container: true }))}>${r.output}</div>`;
     r.height = h || r.height;
+    r.width = cw || r.width;
   }
   return r;
 }, { container: true });
