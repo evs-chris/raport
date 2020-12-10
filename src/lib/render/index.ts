@@ -238,7 +238,7 @@ export function getWidth(w: Widget, placement: Placement): number {
   const width = w.width;
   if (!width) return placement.maxX || 51;
   else if (typeof width === 'number') return width;
-  else return (width.percent / 100) * (placement.maxX || 51);
+  else return +((width.percent / 100) * (placement.maxX || 51)).toFixed(4);
 }
 
 export function getWidthWithMargin(w: Widget, placement: Placement): number {
@@ -255,7 +255,7 @@ export function getWidthWithMargin(w: Widget, placement: Placement): number {
 export function getHeight(w: Widget, placement: Placement, computed?: number): number {
   let r = 1;
   if (typeof w.height === 'number') r = w.height;
-  else if (typeof w.height === 'object' && w.height.percent && placement.availableY) r = placement.availableY * (w.height.percent / 100);
+  else if (typeof w.height === 'object' && w.height.percent && placement.availableY) r = +(placement.availableY * (w.height.percent / 100)).toFixed(4);
   else if (w.height === 'auto' || (computed && !w.height)) return computed || NaN;
   return r;
 }
