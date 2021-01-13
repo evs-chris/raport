@@ -544,3 +544,35 @@ registerFormat('num', (n, [dec]) => {
 registerFormat('phone', n => {
   return phone(n);
 });
+
+{
+  const space = /\s+/g;
+  const br = /\b\w/g;
+  const alphaNum = /[^a-zA-Z0-9]+([a-zA-Z0-9])/g;
+  const alphaNumSpace = /[^\sa-zA-Z0-9]/g;
+  const camelBreak = /([a-z])([A-Z])/g;
+  const spaceChar = /\s([^\s])/g;
+  function normalize(s: string) {
+    return s.replace(alphaNum, (_m, c) => c ? ` ${c}` : '').replace(alphaNumSpace, '').replace(camelBreak, (_m, c1, c2) => `${c1} ${c2}`).trim();
+  }
+  registerFormat('case', (n, whiches) => {
+    let str = `${n || ''}`.trim();
+    for (const which of whiches) {
+      if (which === 'upper' || which === 'up') str = str.toUpperCase();
+      else if (which === 'lower' || which === 'down') str = str.toLowerCase();
+      else if (which === 'snake') str = normalize(str).toLowerCase().replace(space, '_');
+      else if (which === 'kebab') str = normalize(str).toLowerCase().replace(space, '-');
+      else if (which === 'pascal') {
+        const s = normalize(str);
+        str = s[0].toUpperCase() + s.toLowerCase().substr(1).replace(spaceChar, (_m, c) => (c || '').toUpperCase());
+      } else if (which === 'camel') {
+        const s = normalize(str);
+        str = s[0].toLowerCase() + s.toLowerCase().substr(1).replace(spaceChar, (_m, c) => (c || '').toUpperCase());
+      } else if (which === 'proper') {
+        if (/[a-z]/.test(str)) str = str.trim().replace(br, m => m.toUpperCase());
+        else str = str.toLowerCase().trim().replace(br, m => m.toUpperCase());
+      }
+    }
+    return str;
+  });
+}
