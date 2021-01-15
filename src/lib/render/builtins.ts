@@ -179,7 +179,7 @@ registerRenderer<MeasuredLabel>('measured', (w, ctx, placement, state) => {
 });
 
 registerRenderer<HTML>('html', (w, ctx, placement) => {
-  addStyle(ctx, 'html', `.html {position:absolute;box-sizing:border-box;overflow:hidden;word-break:break-all;line-height:1rem;}`);
+  addStyle(ctx, 'html', `.html {position:absolute;box-sizing:border-box;overflow:hidden;line-height:1rem;}`);
   const html = evaluate(extend(ctx, { parser: parseTemplate }), w.html);
   return `<div${styleClass(ctx, ['html'], style(w, placement, ctx, { container: true }))}>${html}</div>`;
 });

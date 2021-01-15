@@ -332,13 +332,14 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
   return `<html style="font-size:100%;margin:0;padding:0;"><head><style>
     .page { width: ${size.width - 2 * size.margin[1]}rem; height: ${size.height - 2 * size.margin[0]}rem; position: absolute; overflow: hidden; left: ${size.margin[1]}rem; top: ${size.margin[0]}rem; }
     .page-back { width: ${size.width}rem; height: ${size.height}rem; }
+    body { font-size: 0.83rem; }
     @media screen {
       html { min-width: ${size.width + 2}rem; }
       body { background-color: #999; display: flex; flex-direction: column; align-items: center; }
       .page-back { background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); position: relative; overflow: hidden; box-sizing: border-box; margin: 0.5em; }
     }
     @media print {
-      body { font-size: 0.83rem; margin: 0; padding: 0; ${size ? `width:${size.width}rem;` : ''}background-color: none; display: block; height: ${pages.length * size.height}rem }
+      body { margin: 0; padding: 0; ${size ? `width:${size.width}rem;` : ''}background-color: none; display: block; height: ${pages.length * size.height}rem }
       .page-back { position: absolute; box-shadow: none; background-color: none; margin: 0; padding: 0; left: 0rem; }
       ${pages.map((p, i) => `.pb${i} { top: ${i * size.height}rem; }`).join('')}
     }
