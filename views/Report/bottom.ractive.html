@@ -252,9 +252,12 @@
 
 <template id="expr-context">
   {{#each .fields}}
-    <div class-context-entry>
+    <div class-context-entry class-expanded="~/exprExpand[@keypath]">
       <div class-entry-details>
-        <button class-entry-name on-click="@.insertRef(@keypath)">{{.name}}</button>
+        <div>
+          {{#if .fields}}<button class-expand on-click="@.exprToggle(@keypath)">{{~/exprExpand[@keypath] ? '-' : '+'}}</button>{{/if}}
+          <button class-entry-name on-click="@.insertRef(@keypath)">{{.name}}</button>
+        </div>
         <div class-entry-type>{{.type}}</div>
       </div>
       {{#if .fields}}{{>expr-context}}{{/if}}
@@ -500,12 +503,29 @@
     font-size: 1rem;
   }
 
+  .entry-details button.expand {
+    margin-left: -1em;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    width: 1em;
+    height: 1em;
+    text-align: center;
+    line-height: 0.6em;
+  }
+
   .context-entry {
     padding-left: 0.5em;
+    border-left: 1px dotted rgba(0, 0, 0, 0.2);
+    margin-left: 1em;
   }
   .context-entry .context-entry {
     margin-left: 0.5em;
-    border-left: 1px dotted rgba(0, 0, 0, 0.2);
+  }
+  .context-entry > .context-entry {
+    display: none;
+  }
+  .context-entry.expanded > .context-entry {
+    display: block;
   }
 
   .expr-operator, .context-entry {

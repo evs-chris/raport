@@ -2,6 +2,7 @@ import { css, template } from 'views/Report';
 
 import Ractive, { InitOpts, ContextHelper } from 'ractive';
 import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate } from 'raport/index';
+import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 let sourceTm: any;
 
@@ -14,6 +15,8 @@ export interface AvailableSource {
   values(params?: object): Promise<any>;
   data?: any;
 }
+
+let autosizeTm: any;
 
 export class Designer extends Ractive {
   constructor(opts?: InitOpts) {
@@ -276,12 +279,22 @@ export class Designer extends Ractive {
   }
 
   autosize(node: HTMLElement) {
-    node.style.height = '';
-    node.style.overflow = '';
-    setTimeout(() => {
-      node.style.height = `${node.scrollHeight + 1}px`;
-      node.style.overflow = 'hidden';
-    });
+    if (autosizeTm) clearTimeout(autosizeTm);
+    autosizeTm = setTimeout(() => {
+      autosizeTm = 0;
+      const pos = node.parentElement.scrollTop;
+      const sh = node.parentElement.scrollHeight;
+      const ch = node.parentElement.clientHeight;
+      const old = parseInt(node.style.height);
+      node.style.height = '';
+      node.style.overflow = '';
+      setTimeout(() => {
+        const next = node.scrollHeight + 1;
+        node.style.height = `${next}px`;
+        node.style.overflow = 'hidden';
+        node.parentElement.scrollTop = old && pos + ch + (next - old) >= sh ? pos + (next - old) : pos;
+      });
+    }, 500);
   }
 
   checkExpr() {
@@ -291,13 +304,18 @@ export class Designer extends Ractive {
     }
   }
 
+  exprToggle(path: string) {
+    this.toggle('exprExpand.' + Ractive.escapeKey(path));
+  }
+
   async buildRoot(): Promise<Root> {
     const res = new Root({}, { parameters: this.get('params') });
     const report: Report = this.get('report');
     const avs: AvailableSource[] = this.get('sources');
     for (const src of report.sources) {
       const av = avs.find(s => s.name === src.source);
-      if (av) applySource(res, src, { [src.source]: av.data ? { value: JSON.parse(av.data) } : await av.values(this.get('params')) });
+      if (av) applySource(res, src, { [src.source]: av.data ? { value: tryJSON(av.data) } : await av.values(this.get('params')) });
+      if (!((src.name || src.source) in res.value)) res.value[src.name || src.source] = (res.sources[src.name || src.source] || {}).value;
     }
     return res;
   }
@@ -348,9 +366,11 @@ export class Designer extends Ractive {
     let c = ctx;
     let prefix = '';
 
-    let t = inspect(ctx.root.sources);
-    t.fields.forEach(f => (f.name = `*${f.name}`, pl.fields.push(f)));
-    t = inspect(ctx.root.special);
+    for (const k in ctx.root.sources) {
+      pl.fields.push({ name: `*${k}`, type: 'any' });
+    }
+
+    let t = inspect(ctx.root.special);
     t.fields.forEach(f => (f.name = `@${f.name}`, pl.fields.push(f)));
 
     (this.get('report.parameters') || []).forEach(p => pl.fields.push({ name: `!${p.name}`, type: p.type }));
@@ -506,6 +526,13 @@ export class Designer extends Ractive {
   inRepeater(path: string) {
     return /\.row\./.test(path);
   }
+
+  nodeForPosition(pos: number, name?: true): ParseError|ParseNode[] {
+    const str = this.get('temp.expr.str');
+    const r = (this.get('temp.expr.html') ? parseTemplate : parse)(str, { tree: true });
+    if ('message' in r) return r;
+    else return nodeForPosition(r, pos, name);
+  }
 }
 
 Ractive.extendWith(Designer, {
@@ -527,7 +554,8 @@ Ractive.extendWith(Designer, {
         expr: {
           tab: 'text',
         }
-      }
+      },
+      exprExpand: {},
     };
   },
   computed: {
@@ -785,3 +813,11 @@ Ractive.extendWith(Designer, {
     },
   },
 });
+
+function tryJSON(str: string): any {
+  try {
+    return JSON.parse(str);
+  } catch {
+    return {};
+  }
+}
