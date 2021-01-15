@@ -1,4 +1,4 @@
-import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, ErrorOptions } from 'sprunge/lib';
+import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
 import { Value, DateRel, Literal, Keypath, TimeSpan } from './index';
 
@@ -54,11 +54,11 @@ export const keypath = map(seq(alt<'!'|'~'|'*'|[string,string]>('ref sigil', str
     res.p = prefix;
   }
   return res;
-});
+}, 'keypath');
 
 export const parsePath = makeParser(keypath);
 
-export const ref = map(keypath, r => ({ r }));
+export const ref = map(keypath, r => ({ r }), 'reference');
 
 function stringInterp(parts: Value[]): Value {
   const res = parts.reduce((a, c) => {
@@ -106,7 +106,7 @@ const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 
     if (span.ms) s[6] = span.ms;
     return { d: s };
   }
-});
+}, 'timespan');
 
 const dateend = opt(seq(ws, str('>')));
 const daterel = alt<DateRel>('date',
@@ -204,7 +204,7 @@ export const sexp = map(bracket(
   const res: Value = { op };
   if (args && args.length) res.args = args;
   return res;
-});
+}, 'sexp');
 
 function fmt_op(parser: Parser<Value>): Parser<Value> {
   return map(seq(parser, opt(seq(str('#'), ident, opt(seq(str(','), rep1sep(value, str(','))))))), ([value, fmt]) => {
@@ -221,14 +221,14 @@ function bracket_op<T>(parser: Parser<T>): Parser<T> {
 export const binop: Parser<Value> = {};
 export const if_op: Parser<Value> = {};
 
-const call_op = map(seq(read1('abcdefghifghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_$0123456789'), bracket_op(args)), ([op, args]) => {
+const call_op = map(seq(name(read1('abcdefghifghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_$0123456789'), 'op'), bracket_op(args)), ([op, args]) => {
   const res: Value = { op };
   if (args && args.length) res.args = args;
   return res;
-});
+}, 'call');
 
 export const operand: Parser<Value> = fmt_op(postfix_path(alt('operand', bracket_op(if_op), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`), sexp, values)));
-export const unop = map(seq(str('not ', '+'), operand), ([op, arg]) => ({ op: op === '+' ? op : 'not', args: [arg] }));
+export const unop = map(seq(str('not ', '+'), operand), ([op, arg]) => ({ op: op === '+' ? op : 'not', args: [arg] }), 'unary');
 
 function leftassoc(left: Value, [, op, , right]: [string, string, string, Value]) {
   return { op, args: [left, right] };
@@ -247,13 +247,13 @@ function rightassoc(left: Value, more: Array<[string, string, string, Value]>) {
   return { op, args: [left, right] };
 }
 
-export const binop_e = map(seq(operand, rep(seq(rws, str('**'), rws, operand))), ([arg1, more]) => more.length ? rightassoc(arg1, more) : arg1);
-export const binop_md = map(seq(binop_e, rep(seq(rws, str('*', '/%', '/', '%'), rws, binop_e))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
-export const binop_as = map(seq(binop_md, rep(seq(rws, str('+', '-'), rws, binop_md))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
-export const binop_cmp = map(seq(binop_as, rep(seq(rws, str('>=', '>', '<=', '<', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain'), rws, binop_as))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
-export const binop_eq = map(seq(binop_cmp, rep(seq(rws, str('is', 'is-not', '==', '!='), rws, binop_cmp))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
-export const binop_and = map(seq(binop_eq, rep(seq(rws, str('and', '&&'), rws, binop_eq))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
-export const binop_or = map(seq(binop_and, rep(seq(rws, str('or', '||'), rws, binop_and))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
+export const binop_e = map(seq(operand, rep(seq(rws, name(str('**'), 'exp op'), rws, operand))), ([arg1, more]) => more.length ? rightassoc(arg1, more) : arg1);
+export const binop_md = map(seq(binop_e, rep(seq(rws, name(str('*', '/%', '/', '%'), 'muldiv op'), rws, binop_e))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
+export const binop_as = map(seq(binop_md, rep(seq(rws, name(str('+', '-'), 'addsub op'), rws, binop_md))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
+export const binop_cmp = map(seq(binop_as, rep(seq(rws, name(str('>=', '>', '<=', '<', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain'), 'cmp op'), rws, binop_as))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
+export const binop_eq = map(seq(binop_cmp, rep(seq(rws, name(str('is', 'is-not', '==', '!='), 'eq op'), rws, binop_cmp))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
+export const binop_and = map(seq(binop_eq, rep(seq(rws, name(str('and', '&&'), 'and op'), rws, binop_eq))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1);
+export const binop_or = map(seq(binop_and, rep(seq(rws, name(str('or', '||'), 'or op'), rws, binop_and))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'binop');
 binop.parser = binop_or;
 
 if_op.parser = map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(seq(rws, str('else if', 'elseif', 'elsif', 'elif'), rws, value, rws, str('then'), rws, value)), opt(seq(rws, str('else'), rws, value))), ([,, cond1,,,, val1, elifs, el]) => {
@@ -261,7 +261,7 @@ if_op.parser = map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(
   for (const [,,, cond,,,, val] of elifs) op.args.push(cond, val);
   if (el) op.args.push(el[3]);
   return op;
-});
+}, 'if');
 
 function postfix_path(parser: Parser<Value>): Parser<Value> {
   return map(seq(parser, rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([v, k]) => {
@@ -272,13 +272,13 @@ function postfix_path(parser: Parser<Value>): Parser<Value> {
 
 export const operation = alt<Value>('expression', if_op, binop);
 
-const pair: Parser<[Value, Value]> = map(seq(alt('key', string, map(ident, v => ({ v }))), ws, str(':'), ws, value), t => [t[0], t[4]]);
+const pair: Parser<[Value, Value]> = map(seq(alt('key', string, map(ident, v => ({ v }))), ws, str(':'), ws, value), t => [t[0], t[4]], 'pair');
 
 array.parser = map(bracket(
   check(ws, str('['), ws),
   repsep(value, read1(space + ','), 'allow'),
   check(ws, str(']')),
-), args => args.filter(a => !('v' in a)).length ? { op: 'array', args } : { v: args.map(a => (a as Literal).v) });
+), args => args.filter(a => !('v' in a)).length ? { op: 'array', args } : { v: args.map(a => (a as Literal).v) }, 'array');
 
 function objectOp(pairs: [Value, Value][]): Value {
   return pairs.filter(p => !('v' in p[0] && 'v' in p[1])).length ?
@@ -290,22 +290,18 @@ object.parser = map(bracket(
   check(ws, str('{'), ws),
   repsep(pair, read1(space + ','), 'allow'),
   check(ws, str('}')),
-), objectOp);
+), objectOp, 'object');
 
 value.parser = operation;
 
-const namedArg: Parser<[Value, Value]> = map(seq(ident, str(':'), ws, value), ([k, , , v]) => [{ v: k }, v]);
+const namedArg: Parser<[Value, Value]> = map(seq(ident, str(':'), ws, value), ([k, , , v]) => [{ v: k }, v], 'named arg');
 const application = map(seq(str('=>'), ws, value), ([, , value]) => ({ a: value }));
 args.parser = map(repsep(alt<[Value, Value] | Value>('argument', namedArg, value), read1(space + ','), 'allow'), (args) => {
   const [plain, obj] = args.reduce((a, c) => ((Array.isArray(c) ? a[1].push(c) : a[0].push(c)), a), [[], []] as [Array<Value>, Array<[Value, Value]>]);
   if (obj.length) plain.push(objectOp(obj));
   return plain;
-});
+}, 'application');
 
 values.parser = alt('expression', array, object, literal, string, application, unop, call_op, ref);
 
-const _parse = makeParser(value);
-
-export function parse(input: string, opts?: ErrorOptions): Value {
-  return _parse(input.trim(), Object.assign({ detailed: false, consumeAll: true }, opts));
-}
+export const parse = makeParser(value, { trim: true });

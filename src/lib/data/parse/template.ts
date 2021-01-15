@@ -1,18 +1,18 @@
 import { Value } from '../index';
 import { value, rws } from '../parse';
-import { Parser, parser as makeParser, ErrorOptions, rep, rep1, seq, alt, map, read1To, chars, str, readTo, check, andNot } from 'sprunge';
+import { Parser, parser as makeParser, rep, rep1, seq, alt, map, read1To, chars, str, readTo, check, andNot, name } from 'sprunge';
 import { ws } from 'sprunge/lib/json';
 
 const endTxt = '\\{';
 
 const txtEsc = alt(map(str('\\{{'), () => '{{'), map(seq(str('\\'), chars(1)), ([, c]) => c));
-const text = map(rep1(alt(read1To(endTxt, true), txtEsc, andNot(str('{'), str('{')))), txts => ({ v: txts.join('') }));
+const text = map(rep1(alt(read1To(endTxt, true), txtEsc, andNot(str('{'), str('{')))), txts => ({ v: txts.join('') }), 'text');
 
 function tag_value(names: string[]): Parser<[string, Value]> {
-  return map(seq(str('{{'), ws, str(...names), rws, value, ws, str('}}')), arr => [arr[2], arr[4]]);
+  return map(seq(str('{{'), ws, str(...names), rws, value, ws, str('}}')), arr => [arr[2], arr[4]], 'tag');
 }
 
-const tag_end = check(seq(str('{{/'), readTo('}'), str('}}')));
+const tag_end = name(check(seq(str('{{/'), readTo('}'), str('}}'))), 'tag end');
 
 const content: Parser<Value> = {};
 
@@ -25,7 +25,7 @@ type Content = Value|Branch;
 
 function branch(names: string[], value?: boolean): Parser<Branch> {
   if (value) return map(tag_value(names), ([name, value]) => ({ name, value }));
-  else return map(seq(str('{{'), ws, str(...names), ws, str('}}')), ([, , name]) => ({ name }));
+  else return map(seq(str('{{'), ws, str(...names), ws, str('}}')), ([, , name]) => ({ name }), 'tag');
 }
 
 function min_one<T>(values: Parser<Array<T>>): Parser<Array<T|Value>> {
@@ -40,9 +40,9 @@ const if_op = map(seq(tag_value(['if']), min_one(rep(alt<Content>(branch_tag, el
 const with_op = map(seq(tag_value(['with']), min_one(rep(alt<Content>(else_tag, content))), tag_end), ([tag, content]) => ({ op: 'with', args: [tag[1]].concat(apply_first(cond_branches(content))) }));
 const unless_op = map(seq(tag_value(['unless']), min_one(rep(content)), tag_end), ([tag, content]) => ({ op: 'unless', args: [tag[1]].concat(concat(content)) }));
 
-const interpolator = map(seq(str('{{'), ws, value, ws, str('}}')), ([, , value]) => ({ op: 'string', args: [value] }));
+const interpolator = map(seq(str('{{'), ws, value, ws, str('}}')), ([, , value]) => ({ op: 'string', args: [value] }), 'interpolator');
 
-content.parser = alt<Value>(text, each_op, if_op, with_op, unless_op, interpolator);
+content.parser = alt<Value>('content', text, each_op, if_op, with_op, unless_op, interpolator);
 
 function apply_first(content: Value[]): Value[] {
   if (content.length) content[0] = { a: content[0] };
@@ -77,9 +77,4 @@ function concat(values: Value[]): Value {
   return { op: '+', args: values };
 }
 
-const _parse = makeParser(map(rep1(content), args => concat(args)));
-
-export function parse(input: string, opts?: ErrorOptions): Value {
-  if (!input) return { v: '' };
-  return _parse(input, Object.assign({ detailed: false, consumeAll: true }, opts));
-}
+export const parse = makeParser(alt<Value>(map(rep1(content), args => concat(args)), map(ws, () => ({ v: '' }))), { trim: true });
