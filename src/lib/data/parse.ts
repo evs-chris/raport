@@ -85,6 +85,7 @@ const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 
     else if (parts[i][2] === 'm' || parts[i][2] === 'months' || parts[i][2] === 'month') span.m += parts[i][0];
     else if (parts[i][2][0] === 'd') span.d += parts[i][0];
     else if (parts[i][2][0] === 'w') span.d += parts[i][0] * 7;
+    else if (parts[i][2][0] === 'h') span.h += parts[i][0];
     else if (parts[i][2][0] === 's') span.s += parts[i][0];
     else if (parts[i][2] === 'mm' || parts[i][2] === 'minutes' || parts[i][2] === 'minute') span.mm += parts[i][0];
     else if (parts[i][2] === 'ms' || parts[i][2] === 'milliseconds' || parts[i][2] === 'millisecond') span.ms += parts[i][0];
