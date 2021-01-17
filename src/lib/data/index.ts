@@ -351,33 +351,64 @@ export interface Reference { r: string|Keypath };
 export interface Application { a: Value };
 export interface Literal { v: any };
 
+/** A timespan specified in milliseconds */
 export interface DateRelSpanMS {
+  /** Starting point (now) */
   f: 'n';
+  /** Offset in ms */
   o: number;
 }
+/** A timespan specified in individual units years, months, days, hours, minutes, seconds, and/or milliseconds */
 export interface DateRelSpanFull {
+  /** Starting point (now) */
   f: 'n';
+  /** Offset array [years, months, days, hours, minutes, seconds, milliseconds] */
   o: [number?, number?, number?, number?, number?, number?, number?];
+  /** Offset direction is before starting point */
   d?: -1;
 }
 export type DateRelSpan = DateRelSpanMS | DateRelSpanFull;
 
+/** A date span covering last|this|next day|week|month|year */
 export interface DateRelRange {
+  /** Starting point (d: day, w: week, m: month, y: year) */
   f: 'd'|'w'|'m'|'y';
+  /** Offset in units (-1: last, 0: this, 1: next) */
   o: -1|0|1;
+  /** Anchor to the end for non-range usage */
   e?: 1;
 }
+/** A date span by time relative to yesterday, today, or tomorrow */
+export interface DateRelTimeRange {
+  /** Starting point (day) */
+  f: 'd';
+  /** Offset in units (-1: yesterday, 0: today, 1: tomorrow) */
+  o: -1|0|1;
+  /** Time array [hour, minute, second, millisecond, timezone offset] */
+  t: [number, number?, number?, number?, number?];
+  /** Anchor to the end for non-range usage */
+  e?: 1;
+}
+/** A date span covering this year, month, or week to the current date */
 export interface DateRelToDate {
+  /** Starting point */
   f: 'w'|'m'|'y';
+  /** Offset */
   o: 0;
+  /** Relative to current date */
   d: 1;
+  /** Anchor to the end for non-range usage */
   e?: 1;
 }
+/** A date range covering a specific range in time at most a year, optionally more specific by scoping farther
+ * down with a month, date, hour, minute, second, and millisecond. It may also specify a timezone. */
 export interface DateExactRange {
+  /** Starting point [year, month, date, hour, minute, second, millisecond, timezone] */
   f: [number, number?, number?, number?, number?, number?, number?, number?];
+  /** Anchor to the end for non-range usage */
   e?: 1;
 }
-export type DateRel = Date | DateRelSpan | DateRelRange | DateRelToDate | DateExactRange;
+export type DateRel = Date | DateRelSpan | DateRelRange | DateRelTimeRange | DateRelToDate | DateExactRange;
 
 export type TimeSpan = number|FullTimeSpan;
 export interface FullTimeSpan {
@@ -492,6 +523,22 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
   } else if (rel.f === 'd') {
     from.setDate(from.getDate() + rel.o);
     if (!to) to = new Date(from);
+    if ('t' in rel) {
+      const t = rel.t;
+      if (t[4] != null) {
+        const h = Math.floor(t[4] / 60);
+        const m = t[4] % 60;
+        from.setUTCHours(t[0] + h, (t[1] || 0) + m, t[2] || 0, t[3] || 0);
+        to.setUTCHours(t[0] + h, (t[1] || 59) + m, t[2] || 59, t[3] || 999);
+      } else {
+        from.setHours(t[0], t[1] || 0, t[2] || 0, t[3] || 0);
+        to.setHours(t[0], t[1] == null ? 59 : t[1], t[2] == null ? 59 : t[2], t[3] == null ? 999 : t[3]);
+      }
+
+      range[0] = from;
+      range[1] = to;
+      return range;
+    }
   } else if (rel.f === 'w') {
     from.setDate(from.getDate() - (from.getDay() + (rel.o === -1 ? 7 : rel.o === 1 ? -7 : 0)));
     if (!to) {
@@ -534,7 +581,7 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
       to = new Date(Date.UTC(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0));
       if (v[7]) to.setUTCHours(to.getUTCHours() + Math.floor(v[7] / 60));
       if (v[7] % 60) to.setUTCMinutes(to.getUTCMinutes() + v[7] % 60);
-    } else to = new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
+    } else to = new Date(v[0], v[1] || 0, v[2] || 1, v[3] == null ? 23 : v[3], v[4] == null ? 59 : v[4], v[5] == null ? 59 : v[5], v[6] == null ? 999 : v[6]);
     to.setMilliseconds(-1);
   } else if (!('d' in rel) || !rel.d) to.setHours(23, 59, 59, 999);
 

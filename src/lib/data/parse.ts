@@ -109,10 +109,56 @@ const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 
   }
 }, 'timespan');
 
+export const timezone = map(seq(ws, alt<string|[string, string, [string, string]]>('timezone',
+  istr('z'),
+  seq(opt(chars(1, '+-')), read1(digits),
+    opt(seq(str(':'), chars(2, digits)))
+  )
+)), v => {
+  if (v[1][0] === 'z') return 0;
+  else {
+    let res = +v[1][1] * 60;
+    if (v[1][2]) res += +v[1][2][1];
+    if (v[1][0] === '-') res *= -1;
+    return res;
+  }
+});
+
+export const timeexact = alt<[number, number?, number?, number?]>(
+  map(seq(
+    read1(digits),
+    opt(seq(
+      str(':'), chars(2, digits), opt(
+        seq(str(':'), chars(2, digits), opt(
+          seq(str('.'), chars(3, digits))
+        ))
+      )
+    ))
+  ), v => {
+    const h = v[0];
+    const m = v[1] && v[1][1];
+    const s = m && v[1][2] && v[1][2][1];
+    const ms = s && v[1][2][2] && v[1][2][2][1];
+    const res: [number, number?, number?, number?] = [+h];
+    if (m) res[1] = +m;
+    if (s) res[2] = +s;
+    if (ms) res[3] = +ms;
+    return res;
+  }),
+  map(istr('noon'), () => [12, 0, 0, 0]),
+  map(istr('midnight'), () => [0, 0, 0, 0]),
+);
+
 const dateend = opt(seq(ws, str('>')));
 const daterel = alt<DateRel>('date',
   map(seq(istr('last', 'this', 'next'), rws, istr('week', 'month', 'year'), opt(seq(rws, istr('to'), rws, istr('date'))), dateend), ([o, , f, d, e]) => ({ f: f[0] === 'w' ? 'w' : f[0] === 'm' ? 'm' : 'y', o: o === 'last' ? -1 : o === 'this' ? 0 : 1, d: d ? 1 : undefined, e: e ? 1 : undefined })),
+  map(seq(istr('yesterday', 'today', 'tomorrow'), alt<any>(bracket(ws, istr('at'), ws), rws), timeexact, ws, opt(timezone)), v => {
+    const res: DateRel = { f: 'd', o: v[1] === 'yesterday' ? -1 : v[1] === 'today' ? 0 : 1, t: v[2] };
+    if (v[4] != null) res.t[4] = v[4];
+    return res;
+  }),
   map(seq(istr('yesterday', 'today', 'tomorrow', 'now'), dateend), ([v, e]) => (v === 'now' ? { f: 'n', o: 0 } : { f: 'd', o: v === 'yesterday' ? -1 : v === 'today' ? 0 : 1, e: e ? 1 : undefined })),
+  map(seq(istr('in'), rws, timespan), v => (typeof v[2] === 'number' ? { f: 'n', o: v[2] } : { f: 'n', o: v[2].d })),
   map(seq(timespan, rws, alt<string|any[]>('relative time anchor', istr('ago'), seq(istr('from'), rws, istr('now')))), ([span, , ref]) => {
     if (typeof span === 'number') {
       return { f: 'n', o: span * (ref === 'ago' ? -1 : 1) };
@@ -130,43 +176,25 @@ function setIndex<T, U = Array<T>>(array: U, index: number, value: T): U {
 export const dateexact: Parser<Date|DateRel> = map(seq(
   chars(4, digits),
   opt(seq(chars(1, '-/'), read1(digits),
-    opt(seq(chars(1, '-/'), read1(digits),
-      opt(seq(
-        chars(1, ' T'), read1(digits), opt(seq(str(':'), chars(2, digits),
-        opt(seq(
-          str(':'), chars(2, digits),
-            opt(seq(str('.'), chars(3, digits)))
-        )))),
-      )),
-    ))
+    opt(seq(chars(1, '-/'), read1(digits)))
   )),
-  opt(seq(ws, alt<string|[string, string, [string, string]]>('timezone',
-    str('Z'),
-    opt(seq(chars(1, '+-'), read1(digits),
-      opt(seq(str(':'), chars(2, digits)))
-    ))
-  ))),
+  opt(seq(
+    alt(bracket(rws, istr('at'), rws), istr('t'), rws), timeexact
+  )),
+  opt(timezone),
   dateend,
 ), v => {
   const y = v[0];
   const m = v[1] && v[1][1];
   const d = m && v[1][2] && v[1][2][1];
-  const h = d && v[1][2][2] && v[1][2][2][1];
-  const mm = h && v[1][2][2][2] && v[1][2][2][2][1];
-  const s = mm && v[1][2][2][2][2] && v[1][2][2][2][2][1];
-  const ms = s && v[1][2][2][2][2][2] && v[1][2][2][2][2][2][1];
-  const tz = v[2] && v[2][1] && (typeof v[2][1] === 'string' ? 0 : ((+v[2][1][1] * 60 + (+v[2][1][2] || 0)) * (v[2][1][0] === '+' ? -1 : 1)));
-  const e = v[3] ? 1 : undefined;
+  const time = v[2] && v[2][1];
+  const tz = v[3] && v[3][1];
+  const e = v[4] ? 1 : undefined;
   if (!m) return { f: setIndex([+y], 7, tz), e };
   else if (!d) return { f: setIndex([+y, +m - 1], 7, tz), e };
-  else if (!h) return { f: setIndex([+y, +m - 1, +d], 7, tz), e }
-  else if (!mm) return { f: setIndex([+y, +m - 1, +d, +h], 7, tz), e };
-  else if (tz != null) {
-    const dt = new Date(Date.UTC(+y, +m - 1, +d, +h, +mm, s && +s || 0, ms && +ms || 0));
-    if (tz) dt.setUTCHours(dt.getUTCHours() + Math.floor(tz / 60));
-    if (tz % 60) dt.setUTCMinutes(dt.getUTCMinutes() + (tz % 60));
-    return dt;
-  } else return new Date(+y, +m - 1, +d, +h, +mm, s && +s || 0, ms && +ms || 0);
+  else if (!time) return { f: setIndex([+y, +m - 1, +d], 7, tz), e }
+  else if (tz != null) return new Date(Date.UTC(+y, +m - 1, +d, time[0] + Math.floor(tz / 60), (time[1] || 0) % 60, time[2] || 0, time[3] || 0));
+  else return new Date(+y, +m - 1, +d, time[0] || 0, time[1] || 0, time[2] || 0, time[3] || 0);
 });
 
 export const date = bracket(str('#'), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), str('#'));
