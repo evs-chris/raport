@@ -1,6 +1,6 @@
 {
   "name": "raport",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Simple reports. No ragrets.",
   "main": "./lib/raport.umd.js",
   "types": "./lib/index.d.ts",
@@ -20,8 +20,8 @@
     "@types/qunit": "^2.9",
     "eslint": "^6",
     "qunit": "^2.9",
-    "ractive": "1.4.0-build-40",
-    "rollup": "^2.34",
+    "ractive": "1.4.0-build-53",
+    "rollup": "^2.42",
     "rollup-plugin-sourcemaps": "^0.4.2",
     "source-map-support": "^0.5",
     "sprunge": "^0.1.1",
@@ -32,7 +32,7 @@
     "build": "ENV=dev rollup -c rollup.config.js",
     "build:prod": "ENV=prod rollup -c rollup.config.js",
     "tsc:definitions": "tsc -p lib.tsconfig.json --emitDeclarationOnly",
-    "package": "rm -r lib &>/dev/null; rm -r design &>/dev/null; ENV=prod rollup -c rollup.config.js && tsc -p lib.tsconfig.json --emitDeclarationOnly && cp -r build/src/lib/* lib && cp -r build/src/design/* design",
+    "package": "rm -r lib &>/dev/null; rm -r design &>/dev/null; ENV=prod rollup -c rollup.config.js; tsc -p lib.tsconfig.json --emitDeclarationOnly && cp -r build/src/lib/* lib && cp -r build/src/design/* design",
     "dev": "ENV=dev rollup -c rollup.config.js -w",
     "clean": "rm -r build &>/dev/null; rm -r lib &>/dev/null",
     "test": "rollup -c test.rollup.config.js && qunit --require 'source-map-support/register' build/test.js"

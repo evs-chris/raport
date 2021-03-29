@@ -214,7 +214,7 @@ if (process.env.ENV === 'dev') {
       sourcemaps(),
       node(),
       terser(),
-    ]
+    ],
   });
 }
 
