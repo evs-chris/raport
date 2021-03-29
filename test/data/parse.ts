@@ -3,7 +3,7 @@ import { parse } from '../../src/lib/index';
 const q = QUnit;
 
 function parseErr(str: string): string {
-  const res = parse(str, { detailed: true });
+  const res = parse(str, { detailed: true, consumeAll: true });
   if (typeof res === 'object' && 'message' in res) return res.message;
   else return '<no error>';
 }
