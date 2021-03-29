@@ -70,6 +70,9 @@ registerOperator(
       return name === 'in' ? n : !n;
     } else if (!Array.isArray(r) && typeof r !== 'string') {
       return name === 'in' ? l == r : l != r;
+    } else if (Array.isArray(l) && Array.isArray(r)) {
+      const b = l.reduce((a, c) => a && ~r.indexOf(c), true);
+      return name === 'in' ? !!b : !b;
     }
     const res = !!~r.indexOf(l);
     return name === 'in' ? res : !res;
@@ -81,7 +84,12 @@ registerOperator(
       const d = isDateRel(r) ? dateRelToRange(r)[0] : new Date(r);
       const n = d >= range[0] && d <= range[1];
       return name === 'contains' ? n : !n;
-    } else if (!Array.isArray(l) && typeof l !== 'string') return false;
+    } else if (!Array.isArray(l) && typeof l !== 'string') {
+      return false;
+    } else if (Array.isArray(r) && Array.isArray(l)) {
+      const b = r.reduce((a, c) => a && ~l.indexOf(c), true);
+      return name === 'contains' ? !!b : !b;
+    }
     const res = !!~l.indexOf(r);
     return name === 'contains' ? res : !res;
   }),

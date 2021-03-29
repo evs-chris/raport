@@ -112,6 +112,8 @@ q.test('contains', t => {
   t.equal(evaluate('(contains (array 10 :test false) 10)'), true);
   t.equal(evaluate('(contains (array 10 :test false) :test)'), true);
   t.equal(evaluate('(contains (array 10 :test false) false)'), true);
+  t.equal(evaluate('(contains (array 10 :test false) (array 10 false))'), true);
+  t.equal(evaluate('(contains (array 10 :test false) (array 10 true))'), false);
 });
 
 q.test('count', t => {
@@ -128,6 +130,9 @@ q.test('does-not-contain', t => {
   t.equal(evaluate('(does-not-contain (array 10 :test false) 11)'), true);
   t.equal(evaluate('(does-not-contain (array 10 :test false) :tes)'), true);
   t.equal(evaluate('(does-not-contain (array 10 :test false) true)'), true);
+  t.equal(evaluate('(does-not-contain (array 10 :test false) (array true 20))'), true);
+  t.equal(evaluate('(does-not-contain (array 10 :test false) (array true 10))'), true);
+  t.equal(evaluate('(does-not-contain (array 10 :test false) (array false 10))'), false);
 });
 
 q.test('filter', t => {
@@ -183,6 +188,10 @@ q.test(`ilike`, t => {
 q.test('in', t => {
   t.ok(evaluate('(in :a (array 1 2 :a 3))'));
   t.notOk(evaluate('(in :a (array 1 2 3))'));
+  t.ok(evaluate('[1 2 3] in [3 2 1 0 :a]'));
+  t.notOk(evaluate('[1 2 3] in [1 2 :a :b]'));
+});
+
 });
 
 q.test(`is`, t => {
@@ -222,6 +231,8 @@ q.test(`not-ilike`, t => {
 q.test('not-in', t => {
   t.ok(evaluate('(not-in :b (array 1 2 3))'));
   t.notOk(evaluate('(not-in :b (array 1 2 :b 3))'));
+  t.equal(evaluate('[1 :a] not-in [:b :c]'), true);
+  t.equal(evaluate('[1 2 3] not-in [3 2 1 0]'), false);
 });
 
 q.test(`not-like`, t => {

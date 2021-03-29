@@ -205,11 +205,11 @@ There are a few operations built-in to the library to handle common expressions:
 | `ceil` | `number` | `number` | This will return the given number rounded up if there is a decimal. |
 | `coalesce` | `...any` | `any` | This will lazily return its first non-nullish argument. |
 | `coalesce-truth` | `...any` | `any` | This will lazily return its first truthy argument. |
-| `contains` | `array\|string, any` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf` |
+| `contains` | `array\|string, any\|array` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf`. If the value is an array, it will check for every value in the target array, returning `true` if all are found. |
 | `count` | aggregate | `number` | This will count the values in the given source. |
 | `date` | `string` | `date` | Creates a new `Date` with the given value. |
-| `does-not-contain` | `array\|string, any` | `boolean` | `contains`, but negated. |
-| `each` | `array|object, application, ...(condition: boolean, result: any)` | `string` | This will iterate over its source array or object and evaluate the body application once for each iteration. The results are then concatenated. Special references provided within the iteration context are `@index`, `@last` (the index of the last iteration), `@key`, `@last-key` (the key of the last iteration). For array values, `@key` and `@last-key` are the same as `@index` and `@last`, respectively. |
+| `does-not-contain` | `array\|string, any\|array` | `boolean` | `contains`, but negated. |
+| `each` | `array\|object, application, ...(condition: boolean, result: any)` | `string` | This will iterate over its source array or object and evaluate the body application once for each iteration. The results are then concatenated. Special references provided within the iteration context are `@index`, `@last` (the index of the last iteration), `@key`, `@last-key` (the key of the last iteration). For array values, `@key` and `@last-key` are the same as `@index` and `@last`, respectively. |
 | `filter` | `array, filter?, sort?, group?` | `array\|any` | Applies any supplied filter, sort, and group to the given array. This operator is an interface the function that powers report sources. |
 | `find` | `array, value` | `any` | Finds the first element in the given array that matches the second argument, where the second argument is a data value e.g. an operation, reference, or literal that evaluates to true when the element matches. |
 | `first` | aggregate | `any` | This will return the first application in the given source. |
@@ -220,7 +220,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `group` | `array, group` | `any` | Like `filter`, but can only apply groupings. |
 | `if` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is truthy, the second argument in the pair will be the final value of the operation. If none of pairs has a truthy condition and there is an odd last argument, the odd last argument will be returned. This roughly mirrors `icase` functions from some languages. |
 | `ilike` | `string\|array, string, 'free'` | `boolean` | `like`, but case insensitive. |
-| `in` | `any, array\|string\|DateRange\|any` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf`. If the target is a date range, it will check to see if the value as a date is in the range. If the target is anything else, it will check for equality. |
+| `in` | `any\|array, array\|string\|DateRange\|any` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf`. If the target is a date range, it will check to see if the value as a date is in the range. If the value is an array, it will check for every value in the source in the target array, returning `true` if all are found. If the target is anything else, it will check for equality. |
 | `is` | `any, any` | `boolean` | Returns true if the given values are equal (not strict). |
 | `is-not` | `any, any` | `boolean` | Returns true if the given values are not equal (not strict). |
 | `join` | aggregate `string` | `string` | This will join the values in the given source using the first non-local argument. |
@@ -232,7 +232,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `max` | aggregate | `number` | This will return the largets application in the given source. |
 | `min` | aggregate | `number` | This will return the smallest application in the given source. |
 | `not-ilike` | `string\|array, string, 'free'` | `boolean` | `not-like`, but case insensitive. |
-| `not-in` | `any, array\|string` | `boolean` | `in`, but negated. |
+| `not-in` | `any\|array, array\|string` | `boolean` | `in`, but negated. |
 | `not-like` | `string\|array, string, 'free'` | `boolean` | `like`, but negated. |
 | `nth` | aggregate `number` | This will return the nth application in the given source, using the 1-based index specified by the parameter. |
 | `object` | `...(key: string, value: any)` | `any` | Creates an object from the given values where the odd-numbered args are keys and their subsequent event-numbered args are values e.g. `(object 'foo' true 'bar' 3.14159)` is `{ foo: true, bar: 3.14159 }`. |
