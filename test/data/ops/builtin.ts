@@ -81,6 +81,12 @@ q.test('call', t => {
   t.equal(evaluate('(call 10 :toString 16)'), 'a');
 });
 
+q.test('clamp', t => {
+  t.equal(evaluate('(clamp 10 20 30)'), 20);
+  t.equal(evaluate('(clamp 10 0 30)'), 10);
+  t.equal(evaluate('(clamp 10 50 30)'), 30);
+});
+
 q.test('coalesce', t => {
   const op: Operator = { type: 'value', names: ['nope'], apply() { t.notOk('nope'); } };
   registerOperator(op);

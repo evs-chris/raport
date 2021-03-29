@@ -203,6 +203,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `avg` | aggregate | `number` | This will compute the average of the given application of source. |
 | `call` | `object, string, ...args` or `function, ...args` | `any` | This will call the given method or function with the remaining args returning the result. This operator should be avoided if possible becuase it is very much dependent on a JS runtime. |
 | `ceil` | `number` | `number` | This will return the given number rounded up if there is a decimal. |
+| `clamp` | `number, number, number` | `number` | This takes a minimum, a value, and a maximum, and returns the minimum if the value is less than the minimum, the maximum if the value is more than the maximum, or the value otherwise. |
 | `coalesce` | `...any` | `any` | This will lazily return its first non-nullish argument. |
 | `coalesce-truth` | `...any` | `any` | This will lazily return its first truthy argument. |
 | `contains` | `array\|string, any\|array` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf`. If the value is an array, it will check for every value in the target array, returning `true` if all are found. |

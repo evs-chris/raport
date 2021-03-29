@@ -93,6 +93,9 @@ registerOperator(
     const res = !!~l.indexOf(r);
     return name === 'contains' ? res : !res;
   }),
+  simple(['clamp'], (_name, [min, v, max]: any[]): any => {
+    return v < min ? min : v > max ? max : v;
+  }),
   simple(['get'], (_name: string, values: any[], ctx): any => {
     const [l, r] = values;
     const c = extend(ctx, { value: l });
