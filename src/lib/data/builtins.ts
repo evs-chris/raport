@@ -203,7 +203,21 @@ registerOperator(
       const fn = args.shift();
       return fn.apply(null, args);
     }
-  })
+  }),
+  simple(['intersect'], (_name, [left, right]: any[]): any => {
+    if (!Array.isArray(left) || !Array.isArray(right)) return [];
+    const res = [];
+    let el: any;
+    for (let i = 0; i < left.length; i++) {
+      el = left[i];
+      if (~right.indexOf(el) && !~res.indexOf(el)) res.push(el);
+    }
+    for (let i = 0; i < right.length; i++) {
+      el = right[i];
+      if (!~res.indexOf(el) && ~left.indexOf(el)) res.push(el);
+    }
+    return res;
+  }),
 );
 
 // math

@@ -198,6 +198,12 @@ q.test('in', t => {
   t.notOk(evaluate('[1 2 3] in [1 2 :a :b]'));
 });
 
+q.test('intersect', t => {
+  const arr = evaluate('intersect([1 1 2 3 4 5 5] [1 2 2 3 6 6])');
+  t.equal(arr.length, 3);
+  t.equal(arr[0], 1);
+  t.equal(arr[1], 2);
+  t.equal(arr[2], 3);
 });
 
 q.test(`is`, t => {
