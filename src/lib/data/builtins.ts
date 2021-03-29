@@ -53,12 +53,18 @@ registerOperator(
             false;
   }),
   simple(['like', 'not-like', 'ilike', 'not-ilike'], (name: string, values: any[]): boolean => {
-    const [l, r, arg] = values;
-    if (typeof r !== 'string') return false;
-    let res: boolean;
-    const re = new RegExp(`${arg === 'free' ? '' : '^'}${r.replace(/[\s\%\*]+/g, '.*').replace(/\?/g, '.')}${arg === 'free' ? '' : '$'}`, ~name.indexOf('ilike') ? 'i' : '');
-    if (Array.isArray(l)) res = !!l.find(v => re.test(v));
-    else res = re.test(l);
+    const [target, pattern, arg] = values;
+    let res: boolean = false;
+    const patterns = typeof pattern === 'string' ? [pattern] : pattern;
+    const free = arg === 'free' || (typeof arg === 'object' && arg.free);
+    if (!Array.isArray(patterns)) return false;
+    for (let i = 0; i < patterns.length && !res; i++) {
+      const r = patterns[i];
+      if (typeof r !== 'string') continue;
+      const re = new RegExp(`${free ? '' : '^'}${r.replace(/[\s\%\*]+/g, '.*').replace(/\?/g, '.')}${free ? '' : '$'}`, ~name.indexOf('ilike') ? 'i' : '');
+      if (Array.isArray(target)) res = !!target.find(v => re.test(v));
+      else res = re.test(target);
+    }
     return name === 'like' || name === 'ilike' ? res : !res;
   }),
   simple(['in', 'not-in'], (name: string, values: any[]): boolean => {

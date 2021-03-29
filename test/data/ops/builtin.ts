@@ -189,6 +189,10 @@ q.test(`ilike`, t => {
   t.equal(evaluate('(ilike :SomeThing :*fr*)'), false);
   t.equal(evaluate('(ilike (array :Or :SomeThing :Other) :*et*)'), true);
   t.equal(evaluate('(ilike (array :Or :SomeThing :Other) :*fr*)'), false);
+  t.equal(evaluate(':a ilike [:B :A]'), true);
+  t.equal(evaluate(':a ilike [:B :C]'), false);
+  t.equal(evaluate('[:a :b] ilike [:B :C]'), true);
+  t.equal(evaluate('[:a :b] ilike [:D :C]'), false);
 });
 
 q.test('in', t => {
@@ -226,6 +230,10 @@ q.test(`like`, t => {
   t.equal(evaluate('(like (array :Or :SomeThing :Other) :*et*)'), false);
   t.equal(evaluate('(like (array :Or :SomeThing :Other) :*eT*)'), true);
   t.equal(evaluate('(like (array :Or :SomeThing :Other) :*fr*)'), false);
+  t.equal(evaluate(':A like [:B :A]'), true);
+  t.equal(evaluate(':A like [:B :C]'), false);
+  t.equal(evaluate('[:A :B] like [:B :C]'), true);
+  t.equal(evaluate('[:A :B] like [:D :C]'), false);
 });
 
 // TODO: lower
@@ -238,6 +246,10 @@ q.test(`not-ilike`, t => {
   t.equal(evaluate('(not-ilike :SomeThing :*fr*)'), true);
   t.equal(evaluate('(not-ilike (array :Or :SomeThing :Other) :*et*)'), false);
   t.equal(evaluate('(not-ilike (array :Or :SomeThing :Other) :*fr*)'), true);
+  t.equal(evaluate(':a not-ilike [:B :A]'), false);
+  t.equal(evaluate(':a not-ilike [:B :C]'), true);
+  t.equal(evaluate('[:a :b] not-ilike [:B :C]'), false);
+  t.equal(evaluate('[:a :b] not-ilike [:D :C]'), true);
 });
 
 q.test('not-in', t => {
@@ -254,6 +266,10 @@ q.test(`not-like`, t => {
   t.equal(evaluate('(not-like (array :Or :SomeThing :Other) :*et*)'), true);
   t.equal(evaluate('(not-like (array :Or :SomeThing :Other) :*eT*)'), false);
   t.equal(evaluate('(not-like (array :Or :SomeThing :Other) :*fr*)'), true);
+  t.equal(evaluate(':A not-like [:B :A]'), false);
+  t.equal(evaluate(':A not-like [:B :C]'), true);
+  t.equal(evaluate('[:A :B] not-like [:B :C]'), false);
+  t.equal(evaluate('[:A :B] not-like [:D :C]'), true);
 });
 
 // TODO: nth

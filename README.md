@@ -110,12 +110,12 @@ Values are one of a reference, a literal, or an operation, which are composed of
 | Literal | Type | Example | Notes |
 | ------- | ---- | ------- | ----- |
 | `true` | `boolean` | `true` | |
-| `false`| `boolean` | `false` | |
+| `false` | `boolean` | `false` | |
 | `null` | any | `null` | |
 | `undefined` | any | `undefined` | |
 | number | `number` | `-3`, `10.420`, `1_723_636`, `-1.523e3` | Numbers follow the format `/[-+]?\d+[_\d]*(\.[_\d]*)?([eE][-+]?[_\d]+)?/`, which is a perfectly readable way to describe a number format. In actual words, that's an optional leading `+`/`-`, at least one digit, as many digits or underscore separators as you like, an optional decimal with as many digits and underscore spearators as you like, and an optional exponent (scientific notation) with as many digits and underscores as you like. |
 | symbol string | `string` | `:joe`, `:some.string` | Symbol strings are a shorthand that avoid quotes. They start with a leading `:` and run until a space, quote, or brace/bracket/paren. |
-| quoted string | `string`| `'a string'`, `"here're double quotes\nand an escape"` | Quoted strings are your typical strings with support for backslash escapes. They support the usual c-style single char escapes, 2-digit hex escapes, and 4 digit unicode escapes. Quotes supported are single, double, and backticks. |
+| quoted string | `string` | `'a string'`, `"here're double quotes\nand an escape"` | Quoted strings are your typical strings with support for backslash escapes. They support the usual c-style single char escapes, 2-digit hex escapes, and 4 digit unicode escapes. Quotes supported are single, double, and backticks. |
 | interpolated string | `string` | `'an ${interpolated} string'` | Interpolated strings are actually syntax sugar for a `+` operation in most cases. They are like regular quoted strings, except any `${ ... }` sequences are evaluated and injected into the string. These support everything a quoted string does, except being quoted with double quotes. |
 | date | `Date\|DateRel\|number` | `#2012-2-22#`, `#last week#`, `#2012-02-22 22:33#`, `#3 weeks 22 hours 7 seconds#` | Date literals allow you to refer to a date that is either exact (if it has a time down to the minute specified), as a millisecond interval (if it is just a timespan specified in a number of weeks, days, hours, minutes, seconds, and/or milliseconds), as a relative timespan if years or months are specified, or a range of times (if it is relative, like last week, today, 2012-2-22, or 2012). The exact form also accepts an optional timezone. Dates in the exact form that don't specify anything more precise than to the hour are automatically a range from the smallest possible value to the largest possible value e.g. 2012 is from 2012-01-01T00:00:00.000 to 2012-12-31T23:59:59.999. Converting a range to a date will default to the smaller value, but it can be set to use the larger value by including a `>` at the end of the literal e.g. `#2012>#` converts to the last millisecond of 2012. |
 
@@ -220,7 +220,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `get` | `any, string` | `any` | Safely retrieves the value at the path given by the `string` from the given value. |
 | `group` | `array, group` | `any` | Like `filter`, but can only apply groupings. |
 | `if` | `...(condition: boolean, result: any)` | `any` | This will lazily evaluate its arguments in pairs where if the first argument in the pair is truthy, the second argument in the pair will be the final value of the operation. If none of pairs has a truthy condition and there is an odd last argument, the odd last argument will be returned. This roughly mirrors `icase` functions from some languages. |
-| `ilike` | `string\|array, string, 'free'` | `boolean` | `like`, but case insensitive. |
+| `ilike` | `string\|array, string\|array, 'free'\|{free?:boolean}` | `boolean` | `like`, but case insensitive. |
 | `in` | `any\|array, array\|string\|DateRange\|any` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf`. If the target is a date range, it will check to see if the value as a date is in the range. If the value is an array, it will check for every value in the source in the target array, returning `true` if all are found. If the target is anything else, it will check for equality. |
 | `intersect` | `array, array` | `array` | Returns an intersection of the two given arrays with no duplicates. |
 | `is` | `any, any` | `boolean` | Returns true if the given values are equal (not strict). |
@@ -228,14 +228,14 @@ There are a few operations built-in to the library to handle common expressions:
 | `join` | aggregate `string` | `string` | This will join the values in the given source using the first non-local argument. |
 | `keys` | `object, boolean` | `array` | This returns the keys of the given object. If the second argument is `true`, then prototype keys will also be included. |
 | `last` | aggregate | This will return the last application in the given source. |
-| `like` | `string\|array, string, 'free'` | `boolean` | Returns true if the first string matches a regex created from the second string by replacing spaces, percent signs, and asterisks with `.*`, replacing question marks with `.`, and anchoring the pattern at the beginning and end. If the first argument is an array, this will check each element and return true if any match the pattern. If 'free' is passed as the last argument, the regular expression will not be anchored. |
+| `like` | `string\|array, string\|array, 'free'\|{free?:boolean}` | `boolean` | Returns true if the first string matches a regex created from the second string by replacing spaces, percent signs, and asterisks with `.*`, replacing question marks with `.`, and anchoring the pattern at the beginning and end. If the first argument is an array, this will check each element and return true if any match the pattern. If the second argument is an array, each element will be used as a pattern to check the first argument. If 'free' is passed as the last argument, the regular expression will not be anchored. |
 | `lower` | `string` | `string` | Lowercases the given string. |
 | `map` | aggregate | `array` | This will map the given source into a new array composed of the application for each value. |
 | `max` | aggregate | `number` | This will return the largets application in the given source. |
 | `min` | aggregate | `number` | This will return the smallest application in the given source. |
-| `not-ilike` | `string\|array, string, 'free'` | `boolean` | `not-like`, but case insensitive. |
+| `not-ilike` | `string\|array, string\|array, 'free'\|{free?:boolean}` | `boolean` | `not-like`, but case insensitive. |
 | `not-in` | `any\|array, array\|string` | `boolean` | `in`, but negated. |
-| `not-like` | `string\|array, string, 'free'` | `boolean` | `like`, but negated. |
+| `not-like` | `string\|array, string\|array, 'free'\|{free?:boolean}` | `boolean` | `like`, but negated. |
 | `nth` | aggregate `number` | This will return the nth application in the given source, using the 1-based index specified by the parameter. |
 | `object` | `...(key: string, value: any)` | `any` | Creates an object from the given values where the odd-numbered args are keys and their subsequent event-numbered args are values e.g. `(object 'foo' true 'bar' 3.14159)` is `{ foo: true, bar: 3.14159 }`. |
 | `or` | `...any` | `boolean` | This will lazily evaluate its arguments and return the first truthy value or `false` if there aren't any. |
