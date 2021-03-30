@@ -1,3 +1,31 @@
+## 0.5.0
+
+2021-03-30
+
+Most of the changes in 0.5.0 were unintentionally published as 0.4.1, but I'm going to pretend like that didn't happen. There should be no breaking changes.
+
+### Report
+
+* __BUG__: Percentage layouts will now limit decimal places to 4 to avoid bizarre floating point numbers being used as CSS values.
+
+### Parser
+
+* __BUG__: Exact timespans with hours now parse properly.
+* Most of the main parser nodes now provide parser names, so error messages can be a little less obscure.
+* Time ranges can now be specified relative to yesterday, today, and tomorrow e.g. `yesterday at 10`.
+
+### Data
+
+* There is now a `case` formatter that works with upper, lower, snake, kebab, pascal, camel, and proper cases.
+* The `in`, `not-in`, `contains`, and `does-not-contain` operators now support arrays on both sides, where the checked side must have all values appear in the source array in order for the affirmitive versions to return true.
+* There is now an `intersect` operator that provides a unique intersection of two arrays.
+* The `like`, `ilike`, `not-like`, and `not-ilike` operators now support arrays on both sides, where each element in the source will be checked against each pattern. If any pattern matches any source element, the affirmitive versions of this operator will return true.
+
+### Designer
+
+* The designer font sizes now more closely match the rendered output font sizes. There is still a bit of a difference between the preview and rendered output, but it's much less drastic.
+
+
 ## 0.4.0
 
 2020-12-08
