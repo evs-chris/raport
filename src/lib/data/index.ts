@@ -244,7 +244,7 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
       for (let i = 0; i < sortArr.length; i++) {
         const s = sortArr[i];
         const desc = dirs[i];
-        const by: ValueOrExpr = typeof s === 'string' ? s : 'by' in s ? s.by : s;
+        const by: ValueOrExpr = typeof s === 'string' ? s : s && (s as any).by ? (s as any).by : s;
         const l = evaluate(extend(context, { value: a }), by);
         const r = evaluate(extend(context, { value: b }), by);
         const cmp = l == null && r != null ? -1 
