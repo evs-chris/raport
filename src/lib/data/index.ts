@@ -53,9 +53,15 @@ export interface Operation {
 }
 
 export type Sort = ValueOrExpr|SortBy;
-export interface SortBy {
+export type SortBy = SortBySQL|SortByDir;
+export interface SortByBase {
   by: ValueOrExpr;
+}
+export interface SortBySQL extends SortByBase {
   desc?: ValueOrExpr|boolean;
+}
+export interface SortByDir extends SortByBase {
+  dir?: ValueOrExpr|'asc'|'desc';
 }
 
 export type Operator = AggregateOperator | ValueOperator | CheckedOperator;
@@ -233,8 +239,15 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
     const dirs: boolean[] = sortArr.map(s => {
       if (typeof s === 'object') {
         if ('by' in s) {
-          if (typeof s.desc === 'boolean') return s.desc;
-          return evaluate(context, s.desc);
+          if ('desc' in s) {
+            if (typeof s.desc === 'boolean') return s.desc;
+            return evaluate(context, s.desc);
+          } else if ('dir' in s) {
+            const lower = typeof s.dir === 'string' ? s.dir.toLowerCase() : s.dir;
+            const dir = lower === 'asc' || lower === 'desc' ? lower : evaluate(context, s.dir);
+            const val = typeof dir === 'string' ? dir.toLowerCase() : dir;
+            if (val === 'desc') return true;
+          }
         }
       }
       // default to asc
