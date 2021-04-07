@@ -237,7 +237,8 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
           return evaluate(context, s.desc);
         }
       }
-      return true;
+      // default to asc
+      return false;
     });
 
     values.sort((a, b) => {
