@@ -188,7 +188,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `&&` | `...any` | `boolean` | This is an alias for `and`. |
 | `*` | `...any` | `number` | Multiplies the given values starting with the first. |
 | `**` |  `...number` | `number` | Applies exponentiation to the given arguments with right associativity e.g. `(** 1 2 3)` is `1^(2^3)`. |
-| `+` | `...any` | `string\|number` | Adds the given values if they all pass `isNaN` or concatenates them as a string otherwise. |
+| `+` | `...any` | `string\|number` | Adds the given values if they all pass `isNaN` or concatenates them as a string otherwise. If there's only one argument, it is parsed as a number and returned. |
 | `-` | `...any` | `number` | Subtracts the given values starting with the first. |
 | `/` | `...any` | `number` | Divides the given values starting with the first. |
 | `/%` | `...any` | `number` | Divides the given values starting with the first using integer division. |

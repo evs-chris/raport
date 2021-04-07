@@ -232,6 +232,7 @@ registerOperator(
     if (Array.isArray(values[0])) return values[0].concat.apply(values[0], values.slice(1));
     else if (isDateRel(values[0]) && values.length > 1 && values.slice(1).reduce((a, c) => a && isTimespan(c), true)) return values.slice(1).reduce((a, c) => dateAndTimespan(a, c, 1), dateRelToDate(values[0])); 
     else if (typeof values[0] !== 'number' && values.length > 1 && isTimespan(values[0])) return values.slice(1).reduce((a, c) => addTimespan(a, c), values[0]);
+    if (values.length === 1) return parseFloat(values[0]);
     const num = values.reduce((a, c) => a && isNum(c), true);
     if (num) {
       return values.reduce((a, c) => a + +c, 0);
