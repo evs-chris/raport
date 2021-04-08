@@ -1,7 +1,7 @@
 export {
   run, applySource,
   Delimited, Displayed, Flow, Page,
-  Widget, Container, Label, Image, Span, Repeater,
+  Widget, Container, HTML, Label, Image, Span, Repeater,
   Borders, Dimension, Font, Margin, MeasureFont, PageOrientation, PageSize, PageSizes, PartSource, Placement, Report, ReportSource, ReportType, Style,
 } from './report';
 
