@@ -563,7 +563,7 @@ registerFormat('dollar', (n, [dec, sign]) => {
 });
 
 registerFormat('date', (n, [fmt]) => {
-  return date(n, fmt);
+  return date(isDateRel(n) ? dateRelToDate(n) : n, fmt);
 });
 
 registerFormat('integer', (n, []) => {

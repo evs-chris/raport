@@ -223,7 +223,10 @@ export const string = alt<Value>('string',
     map(JStringEscape, v => ({ v })),
   )), str('`')), stringInterp),
 );
-export const literal = map(alt('literal', JNum, keywords, date), v => ({ v }));
+export const literal = map(alt('literal', JNum, keywords, date), v => {
+  if (v instanceof Date || v == null || typeof v !== 'object') return { v };
+  else return v;
+});
 
 export const sexp = map(bracket(
   check(str('('), ws),

@@ -178,6 +178,7 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, val
   else if (e && 'v' in e) return e.v;
   else if (e && 'op' in e) return applyOperator(r, e);
   else if (e && 'a' in e) return l === nope ? e.a : evaluate(extend(r, { value: l }), e.a);
+  else if (e && isDateRel(e)) return e;
 }
 
 const opMap: { [key: string]: Operator } = {};
