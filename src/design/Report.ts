@@ -838,6 +838,13 @@ function tryJSON(str: string): any {
 const fontKeys = ['family', 'size', 'weight', 'color', 'align', 'line', 'right', 'pre', 'clamp'];
 function stripDefaults(json: any): any {
   if (typeof json !== 'object') return json;
+
+  if (Array.isArray(json)) {
+    const res = [];
+    json.forEach(v => res.push(stripDefaults(v)));
+    return res;
+  }
+
   const res: any = {};
   for (const k in json) {
     const v = json[k];
