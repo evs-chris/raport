@@ -466,7 +466,13 @@ export class Designer extends Ractive {
       this.set('report', report);
       this.set('params', report.defaultParams || {});
     } catch (e) {
-      console.error('Failed to load report', e);
+      try {
+        const report = evaluate(str, { PageSizes });
+        this.set('report', report);
+        this.set('params', report.defaultParams || {});
+      } catch (e) {
+        console.error('Failed to load report', e);
+      }
     }
   }
 
