@@ -186,7 +186,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `!=` | `...any` | `boolean` | This is an alias for `is-not`. |
 | `%` | `...any` | `number` | Returns the modulus of the given values starting with the first. |
 | `&&` | `...any` | `boolean` | This is an alias for `and`. |
-| `*` | `...any` | `number` | Multiplies the given values starting with the first. |
+| `*` | `...number`, `string, number` | `number`, `string` | Multiplies the given values starting with the first. If the first argument is a string and the second is a positive number, it will return the string copied that many times. |
 | `**` |  `...number` | `number` | Applies exponentiation to the given arguments with right associativity e.g. `(** 1 2 3)` is `1^(2^3)`. |
 | `+` | `...any` | `string\|number` | Adds the given values if they all pass `isNaN` or concatenates them as a string otherwise. If there's only one argument, it is parsed as a number and returned. |
 | `-` | `...any` | `number` | Subtracts the given values starting with the first. |

@@ -248,9 +248,16 @@ registerOperator(
     }
     return values.reduce((a, c) => a - (!isNum(c) ? 0 : +c), !isNum(first) ? 0 : +first);
   }),
-  simple(['*'], (_name: string, values: any[]): number => {
+  simple(['*'], (_name: string, values: any[]): number|string => {
     const first = values.shift();
-    if (!isNum(first)) return 0;
+    if (!isNum(first)) {
+      if (typeof first === 'string' && values.length === 1 && isNum(values[0]) && +values[0] > 0) {
+        let s = '';
+        for (let i = 0; i < values[0]; i++) s += first;
+        return s;
+      }
+      return 0;
+    }
     return values.reduce((a, c) => a * (!isNum(c) ? 0 : +c), +first);
   }),
   simple(['/', '/%'], (name: string, values: any[]): number => {
