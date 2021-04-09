@@ -6,7 +6,7 @@ import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, rend
 import { styleClass, style, styleFont } from './style';
 
 registerRenderer<Label>('label', (w, ctx, placement) => {
-  addStyle(ctx, 'label', `.label { position: absolute; box-sizing: border-box; }`);
+  addStyle(ctx, 'label', `.label {position:absolute;box-sizing:border-box;}`);
   const val = (Array.isArray(w.text) ? w.text : [w.text]).map(v => {
     let val = evaluate(ctx, typeof v === 'object' && 'text' in v ? v.text : v);
     if (w.id) {
@@ -27,7 +27,7 @@ registerRenderer<Label>('label', (w, ctx, placement) => {
 });
 
 registerRenderer<Container>('container', (w, ctx, placement, state) => {
-  addStyle(ctx, 'container', `.container { position: absolute; box-sizing: border-box; }`);
+  addStyle(ctx, 'container', `.container {position:absolute;box-sizing:border-box;}`);
   let h: number;
   if (!w.height) w.height = 'auto';
   else if (typeof w.height === 'number') h = getHeightWithMargin(w, placement, ctx);
@@ -44,7 +44,7 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
 
 type RepeatState = { part: 'group'|'header'|'body'|'footer'; group?: 'header'|'body'; src: Group|any[]; current: number; context?: RenderContext };
 registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) => {
-  addStyle(ctx, 'container', `.container { position: absolute; box-sizing: border-box; }`);
+  addStyle(ctx, 'container', `.container {position:absolute;box-sizing:border-box;}`);
   if (!w.height) w.height = 'auto';
   let availableY = placement.availableY;
   let availableX = placement.availableX;
@@ -162,7 +162,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 }, { container: true });
 
 registerRenderer<Image>('image', (w, ctx, placement) => {
-  addStyle(ctx, 'image', `.image { position: absolute; }`);
+  addStyle(ctx, 'image', `.image {position:absolute;}`);
   return `<img src="${evaluate(ctx, w.url)}"${styleClass(ctx, ['image'], style(w, placement, ctx))} />`;
 });
 
