@@ -263,7 +263,7 @@ function runDelimited(report: Delimited, context: Context): string {
 }
 
 function runPage(report: Page, context: Context, extras?: ReportExtras): string {
-  let size: PageSize = report.orientation === 'landscape' ? { width: report.size.height, height: report.size.width, margin: [report.size.margin[1], report.size.margin[0]] } : report.size;
+  let size: PageSize = report.orientation !== 'portrait' ? { width: report.size.height, height: report.size.width, margin: [report.size.margin[1], report.size.margin[0]] } : report.size;
 
   const ctx: RenderContext = { context, report, styles: {}, styleMap: { ids: {}, styles: {} } };
   context.special = context.special || {};
@@ -362,7 +362,7 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
   let width: number;
 
   if (report.width) width = report.width;
-  else if (report.size) width = report.orientation === 'landscape' ? report.size.height : report.size.width;
+  else if (report.size) width = report.orientation !== 'portrait' ? report.size.height : report.size.width;
 
   for (const w of report.widgets) {
     html += `<div${styleClass(ctx, [], [`position:absolute;right:0rem;left:0rem;${width ? `width:${width}rem;` : ''}`, ''], `top:${y}rem;`, 'p')}>\n`;
