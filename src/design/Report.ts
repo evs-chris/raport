@@ -313,7 +313,7 @@ export class Designer extends Ractive {
     const res = new Root({}, { parameters: this.get('params') });
     const report: Report = this.get('report');
     const avs: AvailableSource[] = this.get('sources');
-    for (const src of report.sources) {
+    for (const src of report.sources || []) {
       const av = avs.find(s => s.name === src.source);
       if (av) applySource(res, src, { [src.source]: av.data ? { value: tryJSON(av.data) } : await av.values(this.get('params')) });
       if (!((src.name || src.source) in res.value)) res.value[src.name || src.source] = (res.sources[src.name || src.source] || {}).value;
@@ -482,6 +482,12 @@ export class Designer extends Ractive {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  reportToString(compact: boolean) {
+    const json = this.get('report');
+    if (!compact) return JSON.stringify(json, null, 2);
+    else return JSON.stringify(stripDefaults(json));
   }
 
   loadReportFile() {
@@ -821,4 +827,51 @@ function tryJSON(str: string): any {
   } catch {
     return {};
   }
+}
+
+const fontKeys = ['family', 'size', 'weight', 'color', 'align', 'line', 'right', 'pre', 'clamp'];
+function stripDefaults(json: any): any {
+  if (typeof json !== 'object') return json;
+  const res: any = {};
+  for (const k in json) {
+    const v = json[k];
+    if (v === false) continue;
+    else if ((k === 'hide' || k === 'br') && !v) continue;
+    else if (k === 'height' && v === 'auto' && (json.type === 'container' || json.type === 'repeater')) continue;
+    else if (Array.isArray(v)) {
+      const a = [];
+      v.forEach(v => a.push(stripDefaults(v)));
+      res[k] = a;
+    } else if (typeof v === 'object') {
+      if (k === 'font') {
+        if (Object.values(v).find(v => v != null && v !== '') !== undefined) {
+          const font: any = {};
+          fontKeys.forEach(f => v[f] != null && v[f] !== '' && (font[f] = v[f]));
+          if (json.type === 'html' && Object.keys(font).length === 1 && font.line === 0) continue;
+          res.font = font;
+        } else continue;
+      } else if (!Object.keys(v).length) continue;
+      else if (Object.keys(v).length === 1 && 'x' in v && !v.x) continue;
+      else if (k === 'format' && !v.name) continue;
+      else res[k] = stripDefaults(v);
+    } else res[k] = v;
+  }
+  if (res.type === 'page' || res.type === 'flow' || res.type === 'delimited') {
+    if (res.context && !Object.keys(res.context).length) delete res.context;
+    if (res.defaultParams && !Object.keys(res.defaultParams).length) delete res.defaultParams;
+    if (res.sources && !res.sources.length) delete res.sources;
+    if (res.parameters && !res.parameters.length) delete res.parameters;
+    if (!res.orientation || res.orientation === 'landscape') delete res.orientation;
+    if (!res.name) delete res.name;
+    if (!res.header || !Object.keys(res.header).length || !Array.isArray(res.header.widgets) || !res.header.widgets.length) delete res.header;
+    if (!res.footer || !Object.keys(res.footer).length || !Array.isArray(res.footer.widgets) || !res.footer.widgets.length) delete res.footer;
+    if (!res.width) delete res.width;
+    if (!res.margin || !res.margin.length) delete res.margin;
+    if (!res.source) delete res.source;
+    if (!res.headers || !res.headers.length) delete res.headers;
+    if (!res.record) delete res.record;
+    if (!res.field) delete res.field;
+    if (!res.quote) delete res.quote;
+  }
+  return res;
 }
