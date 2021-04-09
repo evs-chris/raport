@@ -1,22 +1,26 @@
-<label><span>Width <button class-hide /><button class-ico on-click="@context.set('.width', typeof .width === 'number' || .width === undefined ? { percent: .width } : .width.percent)" title="{{typeof .width === 'number' || .width === undefined ? 'Change to percent' : 'Change to REM'}}">
-    {{#if typeof .width === 'number' || .width === undefined}}#{{else}}%{{/if}}
+<label><span>Width <button class-hide /><button class-ico on-click="@context.set('.width', typeof .width === 'number' || .width === undefined ? { percent: .width } : typeof .width === 'object' && 'percent' in .width ? { x: '' } : .width.percent)" title="{{typeof .width === 'number' || .width === undefined ? 'Change to percent' : typeof .width === 'object' && 'percent' in .width ? 'Change to Expression' : 'Change to REM'}}">
+    {{#if typeof .width === 'number' || .width === undefined}}#{{elseif typeof .width === 'object' && 'percent' in .width}}%{{else}}&#9998;{{/if}}
   </button></span>
   <span><div>
     {{#if typeof .width === 'number' || .width === undefined}}
       <input type="number" value="{{.width}}" style-width="calc(100% - 2rem)" /><span class-unit>rem</span>
-    {{else}}
+    {{elseif typeof .width === 'object' && 'percent' in .width}}
       <input type="number" value="{{.width.percent}}" style-width="calc(100% - 2rem)" /><span class-unit>%</span>
+    {{else}}
+      <textarea>{{.width.x}}</textarea>
     {{/if}}
   </div></span>
 </label>
-<label><span>Height <button class-hide /><button class-ico on-click="@context.set('.height', typeof .height === 'number' || .height  === undefined ? { percent: .height } : .height.percent)" title="{{typeof .height === 'number' || .height  === undefined ? 'Change to percent' : 'Change to REM'}}">
-    {{#if typeof .height === 'number' || .height === undefined}}#{{else}}%{{/if}}
+<label><span>Height <button class-hide /><button class-ico on-click="@context.set('.height', typeof .height === 'number' || .height  === undefined ? { percent: .height } : typeof .height === 'object' && 'percent' in .height ? { x: '' } : .height.percent)" title="{{typeof .height === 'number' || .height  === undefined ? 'Change to percent' : typeof .height === 'object' && 'percent' in .height ? 'Change to Expression' : 'Change to REM'}}">
+    {{#if typeof .height === 'number' || .height === undefined}}#{{elseif typeof .height === 'object' && 'percent' in .height}}%{{else}}&#9998;{{/if}}
   </button></span>
   <span><div>
     {{#if typeof .height === 'number' || .height === undefined}}
       <input type="number" value="{{.height}}" style-width="calc(100% - 2rem)" /><span class-unit>rem</span>
-    {{else}}
+    {{elseif typeof .height === 'object' && 'percent' in .height}}
       <input type="number" value="{{.height.percent}}" style-width="calc(100% - 2rem)" /><span class-unit>%</span>
+    {{else}}
+      <textarea>{{.height.x}}</textarea>
     {{/if}}
   </div></span>
 </label>
@@ -25,7 +29,15 @@
     <label><span>X</span><span><input type="number" value="{{.layout[@.lastKey(~/temp.widget)][0]}}" /></span></label>
     <label><span>Y</span><span><input type="number" value="{{.layout[@.lastKey(~/temp.widget)][1]}}" /></span></label>
   {{else}}
-    <label><span>Break?</span><span><input type=checkbox checked="{{^^/br}}" /></span></label>
+    <label><span>Break? <button class-ico on-click="@context.set('^^/br', typeof ^^/br === 'object' ? false : { x: ''})" title="{{typeof ^^/br === 'object' ? 'Change to Boolean' : 'Change to Expression'}}">
+    {{#if typeof ^^/br !== 'object'}}#{{else}}&#9998;{{/if}}
+  </button></span><span>
+      {{#if typeof ^^/br !== 'object'}}
+        <input type=checkbox checked="{{^^/br}}" />
+      {{elseif typeof ^^/br === 'object'}}
+        <textarea>{{^^/br.x}}</textarea>
+      {{/if}}
+    </span></label>
   {{/if}}
 {{/with}}
 <label><span>Hidden <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')">&#9998;</button></span><span><textarea>{{.hide}}</textarea></span></label>
@@ -34,7 +46,8 @@
     <span class-toggle class-active="typeof .margin === 'undefined'" {{#if typeof .margin !== 'undefined'}}on-click="@context.set('.margin', undefined)"{{/if}}>None</span>
     <span class-toggle class-active="typeof .margin === 'number'" {{#if typeof .margin !== 'number'}}on-click="@context.set('.margin', 1)"{{/if}}>All</span>
     <span class-toggle class-active=".margin.length === 2" {{#if .margin.length !== 2}}on-click="@context.set('.margin', [1, 1])"{{/if}}>Paired</span>
-    <span class-toggle class-active=".margin.length === 4" {{#if .margin.length !== 2}}on-click="@context.set('.margin', [1, 1, 1, 1])"{{/if}}>Individual</span>
+    <span class-toggle class-active=".margin.length === 4" {{#if .margin.length !== 4}}on-click="@context.set('.margin', [1, 1, 1, 1])"{{/if}}>Individual</span>
+    <span class-toggle class-active="typeof .margin === 'object' && 'x' in .margin" {{#if !.margin || .margin.x === undefined}}on-click="@context.set('.margin', { x: '' })"{{/if}}>Expression</span>
   </div>
   {{#if typeof .margin === 'number'}}
     <input type=number value="{{.margin}}" />
@@ -50,6 +63,8 @@
       <input type=number value="{{.margin[3]}}" /><div class=square /><input type=number value="{{.margin[1]}}" />
       <span /><input type=number value="{{.margin[2]}}" /><span />
     </div>
+  {{elseif .margin.x !== undefined}}
+    <textarea>{{.margin.x}}</textarea>
   {{/if}}
 </span></label>
 <label><span>Border {{#if typeof .border === 'string'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.border')">&#9998;</button>{{/if}}</span><span>

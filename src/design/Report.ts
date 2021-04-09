@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { InitOpts, ContextHelper } from 'ractive';
-import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate } from 'raport/index';
+import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 let sourceTm: any;
@@ -96,21 +96,22 @@ export class Designer extends Ractive {
 
   calcHeight(w: Widget): string {
     if (typeof w.height === 'number') return `${w.height}rem`;
-    else if (typeof w.height === 'object' && w.height.percent) return `${w.height.percent}%`;
+    else if (typeof w.height === 'object' && 'percent' in w.height && w.height.percent) return `${w.height.percent}%`;
     else if (w.type !== 'container' && w.type !== 'repeater') return '1rem';
     else return 'min-content';
   }
 
   calcHeightWithMargin(w: Widget): string {
     const h = this.calcHeight(w);
-    if (!w.margin) return h;
+    if (!w.margin || isComputed(w.margin)) return h;
     if (typeof w.margin === 'number') return `calc(${h} + ${2 * w.margin}rem)`;
     else if (w.margin.length === 2) return `calc(${h} + ${2 * w.margin[0]}rem)`;
     else if (w.margin.length === 4) return `calc(${h} + ${w.margin[0] + w.margin[2]}rem)`;
+    return h;
   }
 
   calcWidth(w: Widget): string {
-    if (!w.width) return '100%';
+    if (!w.width || isComputed(w.width)) return '100%';
     else if (typeof w.width === 'object' && w.width.percent) return `${w.width.percent}%`;
     if (typeof w.width === 'number') return `${w.width}rem`;
     else return `${w.width.percent}%`;
@@ -119,7 +120,7 @@ export class Designer extends Ractive {
   calcWidthWithMargin(w: Widget, path: string): string {
     if (/^report\.widgets\.\d+$/.test(path)) return '100%';
     const width = this.calcWidth(w);
-    if (!w.margin) return width;
+    if (!w.margin || isComputed(w.margin)) return width;
     if (typeof w.margin === 'number') return `calc(${width} + ${2 * w.margin}rem)`;
     else if (w.margin.length === 2) return `calc(${width} + ${2 * w.margin[1]}rem)`;
     else if (w.margin.length === 4) return `calc(${width} + ${w.margin[1] + w.margin[3]}rem)`;
@@ -127,7 +128,7 @@ export class Designer extends Ractive {
 
   calcMargin(w: Widget): string {
     const m = w.margin;
-    if (!m) return '';
+    if (!m || isComputed(m)) return '';
     if (typeof m === 'number') return `padding: ${m}rem;`;
     else if (m.length === 2) return `padding: ${m[0]}rem ${m[1]}rem;`;
     else if (m.length === 4) return `padding: ${m[0]}rem ${m[1]}rem ${m[2]}rem ${m[3]}rem;`;

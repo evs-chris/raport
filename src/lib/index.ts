@@ -22,5 +22,5 @@ export { stringify } from './data/parse/stringify';
 export { parse as parseTemplate } from './data/parse/template';
 
 export {
-  registerLayout, registerRenderer,
+  registerLayout, registerRenderer, isComputed,
 } from './render/index';

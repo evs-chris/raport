@@ -1,5 +1,5 @@
-import { Displayed, Layout, Placement, Widget, Margin, MeasureFont } from '../report';
-import { extend as extendContext, Context, ExtendOptions as ContextExtendOptions, evaluate } from '../data/index';
+import { Displayed, Layout, Placement, Widget, Margin, MeasureFont, Computed } from '../report';
+import { extend as extendContext, Context, ExtendOptions as ContextExtendOptions, evaluate, isValueOrExpr } from '../data/index';
 
 export interface RenderContext {
   report: Displayed;
@@ -19,6 +19,10 @@ interface StyleMap {
 
 export function addStyle(context: RenderContext, id: string, style: string) {
   if (!context.styles[id]) context.styles[id] = style;
+}
+
+export function isComputed(v: any): v is Computed {
+  return typeof v === 'object' && isValueOrExpr(v.x);
 }
 
 export interface ExtendOptions extends ContextExtendOptions {}
@@ -111,7 +115,7 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   if (!renderer || (w.hide && evaluate(context, w.hide))) return { output: '' };
 
   if (!('height' in w) && renderer.container) w.height = 'auto'; 
-  const h = getHeightWithMargin(w, placement);
+  const h = getHeightWithMargin(w, placement, context);
 
   if (placement.maxY && !isNaN(h) && h > placement.maxY) {
     addStyle(context, 'error', `.error { position: absolute; box-sizing: border-box; color: red; border: 1px dotted; width: 100%; height: 2rem; padding: 0.5rem; }`);
@@ -123,7 +127,7 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   let extraHeight = 0;
 
   if (w.margin) {
-    const m = expandMargin(w);
+    const m = expandMargin(w, context);
     extraHeight += m[0] + m[2];
     if (placement.availableX) {
       placement.availableX -= m[1] + m[3];
@@ -134,7 +138,7 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   }
 
   const r = renderer.render(w, context, placement, state);
-  if (typeof r === 'string') return { output: r, height: h, width: getWidthWithMargin(w, placement) };
+  if (typeof r === 'string') return { output: r, height: h, width: getWidthWithMargin(w, placement, context) };
   
   if (placement.maxY && r.height > placement.maxY) {
     addStyle(context, 'error', `.error { position: absolute; box-sizing: border-box; color: red; border: 1px dotted; width: 100%; height: 2rem; padding: 0.5rem; }`);
@@ -147,20 +151,21 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   return r;
 }
 
-const layouts: { [name: string]: (widget: Widget, offset: number, margin: [number, number, number, number], placement: Placement, placements: Array<[number, number, number, number]>) => Placement } = {};
+const layouts: { [name: string]: (widget: Widget, offset: number, margin: [number, number, number, number], placement: Placement, placements: Array<[number, number, number, number]>, context: RenderContext) => Placement } = {};
 
-export function registerLayout(name: string, layout: (widget: Widget, offset: number, margin: [number, number, number, number], placement: Placement, placements: Array<[number, number, number, number]>) => Placement) {
+export function registerLayout(name: string, layout: (widget: Widget, offset: number, margin: [number, number, number, number], placement: Placement, placements: Array<[number, number, number, number]>, context: RenderContext) => Placement) {
   layouts[name] = layout;
 }
 
-registerLayout('row', (w, o, m, p, ps) => {
+registerLayout('row', (w, o, m, p, ps, context) => {
   let n: Placement;
-  const nw = getWidthWithMargin(w, p);
-  if (w.br || (p.availableX && ps[0][0] + ps[0][2] + nw > p.availableX)) {
-    n = { x: m[3], y: maxYOffset(ps), availableX: p.availableX && (p.availableX - m[3]), maxX: p.maxX };
+  const nw = getWidthWithMargin(w, p, context);
+  const br = isComputed(w.br) ? evaluate(context, w.br.x) : w.br;
+  if (p.availableX && ps[0][0] + ps[0][2] + nw > p.availableX) {
+    n = { x: m[3], y: maxYOffset(ps), availableX: br ? 0 : p.availableX && (p.availableX - m[3]), maxX: p.maxX };
   } else {
     n = { x: ps[0][0] + ps[0][2], y: ps[0][1], maxX: p.maxX };
-    if (p.availableX) n.availableX = p.availableX - (ps[0][0] + ps[0][2]) - nw;
+    if (p.availableX) n.availableX = br ? 0 : p.availableX - (ps[0][0] + ps[0][2]) - nw;
   }
 
   n.y -= o;
@@ -177,7 +182,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
     const offset = (state || { offset: 0 }).offset;
     const ps: Array<[number, number, number, number]> = [[0, offset, 0, 0]];
 
-    const m = expandMargin(widget);
+    const m = expandMargin(widget, context);
     ps[0][0] += m[3];
     ps[0][1] += m[0];
 
@@ -186,7 +191,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
       if (w.hide && evaluate(context, w.hide)) continue;
 
       // allow widgets that are taller than max height to be dropped
-      let h = placement && getHeightWithMargin(w, placement);
+      let h = placement && getHeightWithMargin(w, placement, context);
       if (h > placement.maxY) h = 1;
 
       if (placement && placement.availableY && h > placement.availableY) {
@@ -199,7 +204,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
 
         if (!layout || typeof layout === 'string') {
           const l = layout ? layouts[layout as string] || layouts.row : layouts.row;
-          p = l(w, offset, m, placement, ps);
+          p = l(w, offset, m, placement, ps, context);
         }
 
         p.maxX = p.maxX || placement.maxX;
@@ -213,11 +218,11 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
 
         if (typeof r === 'string') {
           s += r;
-          ps.unshift([x, y, getWidthWithMargin(w, placement), getHeightWithMargin(w, placement)]);
+          ps.unshift([x, y, getWidthWithMargin(w, placement, context), getHeightWithMargin(w, placement, context)]);
         } else {
           if (r.cancel && !ps.length) return { output: '', cancel: true };
           s += r.output;
-          ps.unshift([x, y, r.width || getWidthWithMargin(w, placement), r.height || getHeightWithMargin(w, placement)]);
+          ps.unshift([x, y, r.width || getWidthWithMargin(w, placement, context), r.height || getHeightWithMargin(w, placement, context)]);
           if (r.continue) {
             state = state || { offset: 0 };
             state.child = r.continue;
@@ -226,25 +231,27 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
             return { output: s, continue: state, height: maxYOffset(ps), width: maxXOffset(ps) };
           }
         }
+
+        if (p.availableX === 0) ps[0][2] = p.maxX;
       }
     }
 
-    return { output: s, height: getHeightWithMargin(widget, placement) || maxYOffset(ps) - m[0], width: getWidthWithMargin(widget, placement) || maxXOffset(ps) - m[3] };
+    return { output: s, height: getHeightWithMargin(widget, placement, context) || maxYOffset(ps) - m[0], width: getWidthWithMargin(widget, placement, context) || maxXOffset(ps) - m[3] };
   }
   return { output: '' };
 }
 
-export function getWidth(w: Widget, placement: Placement): number {
-  const width = w.width;
+export function getWidth(w: Widget, placement: Placement, context: RenderContext): number {
+  let width = isComputed(w.width) ? evaluate(context, w.width.x) : w.width;
   if (!width) return placement.maxX || 51;
   else if (typeof width === 'number') return width;
   else return +((width.percent / 100) * (placement.maxX || 51)).toFixed(4);
 }
 
-export function getWidthWithMargin(w: Widget, placement: Placement): number {
-  let r = getWidth(w, placement);
+export function getWidthWithMargin(w: Widget, placement: Placement, context: RenderContext): number {
+  let r = getWidth(w, placement, context);
   if (w.margin) {
-    const m = expandMargin(w);
+    const m = expandMargin(w, context);
     r += m[1] + m[3];
   } else if (w.font && w.font.right) {
     r += w.font.right;
@@ -252,18 +259,19 @@ export function getWidthWithMargin(w: Widget, placement: Placement): number {
   return r;
 }
 
-export function getHeight(w: Widget, placement: Placement, computed?: number): number {
+export function getHeight(w: Widget, placement: Placement, context: RenderContext, computed?: number): number {
   let r = 1;
-  if (typeof w.height === 'number') r = w.height;
-  else if (typeof w.height === 'object' && w.height.percent && placement.availableY) r = +(placement.availableY * (w.height.percent / 100)).toFixed(4);
-  else if (w.height === 'auto' || (computed && !w.height)) return computed || NaN;
+  let h = isComputed(w.height) ? evaluate(context, w.height.x) : w.height;
+  if (typeof h === 'number') r = h;
+  else if (typeof h === 'object' && 'percent' in h && h.percent && placement.availableY) r = +(placement.availableY * (h.percent / 100)).toFixed(4);
+  else if (h === 'auto' || (computed && !h)) return computed || NaN;
   return r;
 }
 
-export function getHeightWithMargin(w: Widget, placement: Placement, computed?: number): number {
-  let h = getHeight(w, placement, computed);
+export function getHeightWithMargin(w: Widget, placement: Placement, context: RenderContext, computed?: number): number {
+  let h = getHeight(w, placement, context, computed);
   if (w.margin) {
-    const m = expandMargin(w);
+    const m = expandMargin(w, context);
     h += m[0] + m[2];
   }
   return h;
@@ -277,9 +285,9 @@ function maxXOffset(points: Array<[number, number, number, number]>): number {
   return points.reduce((a, c) => a > c[0] + c[2] ? a : c[0] + c[2], 0);
 }
 
-export function expandMargin(w: { margin?: Margin }): [number, number, number, number] {
+export function expandMargin(w: { margin?: Margin|Computed }, context: RenderContext): [number, number, number, number] {
   if (w.margin) {
-    const m = w.margin;
+    const m = isComputed(w.margin) ? evaluate(context, w.margin.x) : w.margin;
     if (Array.isArray(m)) {
       if (m.length === 4) return m.map(e => +e) as [number, number, number, number];
       else if (m.length === 2) return [+m[0], +m[1], +m[0], +m[1]];

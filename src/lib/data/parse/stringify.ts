@@ -1,4 +1,4 @@
-import { Value } from '../index';
+import { ValueOrExpr } from '../index';
 import { endRef } from '../parse';
 
 const checkIdent = new RegExp(`[${endRef.split('').map(v => `\\${v}`).join('')}]`);
@@ -10,7 +10,7 @@ export interface StringifyOpts {
 let _noSym: boolean = false;
 let _key: boolean = false;
 
-export function stringify(value: Value, opts?: StringifyOpts): string {
+export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
   opts = opts || {};
   _noSym = opts.noSymbols;
   _key = false;
@@ -25,7 +25,8 @@ function fill(char: string, len: number): string {
 
 
 // TODO: output non-s-exps for known ops and conditionals?
-function _stringify(value: Value): string {
+function _stringify(value: ValueOrExpr): string {
+  if (typeof value === 'string') return value;
   if ('r' in value) {
     if (typeof value.r === 'string') return /^[0-9]/.test(value.r) ? `.${value.r}` : value.r;
     else {
@@ -35,7 +36,7 @@ function _stringify(value: Value): string {
   } else if ('op' in value) {
     if (value.op === 'array') {
       return `[${value.args ? value.args.map(a => _stringify(a)).join(' ') : ''}]`;
-    } else if (value.op === 'object' && value.args && !value.args.find((a, i) => i % 2 === 0 && (!('v' in a) || typeof a.v !== 'string'))) {
+    } else if (value.op === 'object' && value.args && !value.args.find((a, i) => i % 2 === 0 && (typeof a === 'string' || !('v' in a) || typeof a.v !== 'string'))) {
       let res = '{';
       if (value.args) {
         for (let i = 0; i < value.args.length; i += 2) {
@@ -45,7 +46,7 @@ function _stringify(value: Value): string {
       res += '}';
       return res;
     } else if (value.op === '+' && value.args && value.args.length > 0 && typeof value.args[0] === 'object' && typeof (value.args[0] as any).v === 'string') {
-      return `'${value.args.map(a => 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `\$\{${_stringify(a)}}`).join('')}'`
+      return `'${value.args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `\$\{${_stringify(a)}}`).join('')}'`
     } else {
       return `(${value.op}${value.args && value.args.length ? ` ${value.args.map(v => _stringify(v)).join(' ')}`: ''})`;
     }

@@ -41,7 +41,7 @@
       style="margin-left: {{(^^/layout[@index] || [])[0] || 0}}rem; margin-top: {{(^^/layout[@index] || [])[1] || 0}}rem; margin-right: calc(-{{(^^/layout[@index] || [])[0] || 0}}rem - {{widthMargin}})"
       {{#if ~/temp.widget === @keypath}}as-moveable{{/if}}
     {{else}}
-      style="{{#if .br}}break-after: always;{{/if}}"
+      style="{{#if .br === true}}break-after: always;{{/if}}"
     {{/if}}
     {{#if .margin}}style="{{@.calcMargin(.)}}"{{/if}}
     {{#if .border}}style="{{@.calcBorder(.)}}"{{/if}}

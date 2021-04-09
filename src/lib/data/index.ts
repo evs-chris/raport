@@ -49,7 +49,7 @@ export interface Field {
 
 export interface Operation {
   op: string;
-  args?: Value[];
+  args?: ValueOrExpr[];
 }
 
 export type Sort = ValueOrExpr|SortBy;

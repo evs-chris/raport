@@ -1,5 +1,5 @@
 import { Container, Label, Repeater, Image, MeasuredLabel, HTML } from '../report';
-import { evaluate, filter, Group, isValueOrExpr } from '../data/index';
+import { evaluate, filter, Group, ValueOrExpr, isValueOrExpr } from '../data/index';
 import { parse as parseTemplate } from '../data/parse/template';
 
 import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin } from './index';
@@ -16,7 +16,10 @@ registerRenderer<Label>('label', (w, ctx, placement) => {
         c = c.parent;
       }
     }
-    if (w.format && w.format.name) val = evaluate(ctx, { op: 'format', args: [val, `'${w.format.name}'`].concat(w.format.args || []) });
+    if (w.format && w.format.name) {
+      const args: ValueOrExpr[] = [{ v: val }, { v: w.format.name }];
+      val = evaluate(ctx, { op: 'format', args: args.concat(w.format.args || []) });
+    }
     if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font), ''])}>${val}</span>`;
     else return val;
   }).join('');
@@ -27,9 +30,9 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
   addStyle(ctx, 'container', `.container { position: absolute; box-sizing: border-box; }`);
   let h: number;
   if (!w.height) w.height = 'auto';
-  else if (typeof w.height === 'number') h = getHeightWithMargin(w, placement);
+  else if (typeof w.height === 'number') h = getHeightWithMargin(w, placement, ctx);
   const wctx = w.context ? extend(ctx, { value: evaluate(ctx, w.context) }) : ctx;
-  const cw = getWidth(w, placement) || placement.availableX;
+  const cw = getWidth(w, placement, ctx) || placement.availableX;
   const r = renderWidgets(w, wctx, { x: 0, y: 0, availableX: cw, availableY: h || placement.availableY, maxX: cw, maxY: placement.maxY }, state, w.layout);
   if (!r.cancel) {
     r.output = `<div${styleClass(ctx, ['container'], style(w, placement, ctx, { computedHeight: h || r.height, container: true }))}>${r.output}</div>`;
@@ -49,7 +52,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   let r: RenderContinuation;
   let html = '';
   let commit = false;
-  const m = expandMargin(w);
+  const m = expandMargin(w, ctx);
   let y = !state || !state.state || state.state.part === 'header' ? m[0] : 0;
   availableY -= y;
   let group: Group;
@@ -165,7 +168,7 @@ registerRenderer<Image>('image', (w, ctx, placement) => {
 
 registerRenderer<MeasuredLabel>('measured', (w, ctx, placement, state) => {
   const text = evaluate(ctx, w.text);
-  const height = measure(text, getWidth(w, placement) || placement.availableX, w.font);
+  const height = measure(text, getWidth(w, placement, ctx) || placement.availableX, w.font);
   
   if (!state && height > placement.availableY) {
     return { output: '', height: 0, continue: { state: {}, offset: 0 } };

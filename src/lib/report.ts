@@ -146,15 +146,19 @@ export interface Style {
 
 export type Margin = number|[number, number]|[number, number, number, number];
 
+export interface Computed {
+  x: ValueOrExpr;
+}
+
 // Widgets
 export interface Widget extends Style {
   type: string;
   [key: string]: any;
-  width?: Dimension; // default 100%
-  height?: Dimension|'auto'; // optional, defaulting to 1
-  margin?: Margin;
+  width?: Dimension|Computed; // default 100%
+  height?: Dimension|'auto'|Computed; // optional, defaulting to 1
+  margin?: Margin|Computed;
   hide?: ValueOrExpr;
-  br?: boolean;
+  br?: boolean|Computed;
 }
 
 export interface Container extends Widget {
@@ -341,11 +345,11 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
     @media print {
       body { margin: 0; padding: 0; ${size ? `width:${size.width}rem;` : ''}background-color: none; display: block; height: ${pages.length * size.height}rem }
       .page-back { position: absolute; box-shadow: none; background-color: none; margin: 0; padding: 0; left: 0rem; }
-      ${pages.map((p, i) => `.pb${i} { top: ${i * size.height}rem; }`).join('')}
+      ${pages.map((_p, i) => `.pb${i} { top: ${i * size.height}rem; }`).join('')}
     }
     @page {
       size: ${size.width}em ${size.height}em;
-    }${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}
+    }${Object.entries(ctx.styles).map(([_k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}
   </style>${extras && extras.head || ''}</head><body>\n${pages.reduce((a, c) => a + c, '')}${extras && extras.foot || ''}</body></html>`;
 }
 
@@ -381,7 +385,7 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
     html += `</div>\n`;
   }
 
-  const margin = report.size && report.size.margin ? expandMargin(report.size) : [1.5, 1.5, 1.5, 1.5];
+  const margin = report.size && report.size.margin ? expandMargin(report.size, ctx) : [1.5, 1.5, 1.5, 1.5];
 
   return `<html><head><style>
     html { font-size: 100%; margin: 0; padding: 0; }
@@ -390,6 +394,6 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
     @media screen {
       body { margin: 1rem; background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem ${margin[2]}rem ${margin[3]}rem; }
       html { background-color: #999; }
-    }${Object.entries(ctx.styles).map(([k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}
+    }${Object.entries(ctx.styles).map(([_k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}
   </style>${extras && extras.head || ''}</head><body>\n<div id=wrapper>${html}</div>${extras && extras.foot || ''}</body></html>`;
 }
