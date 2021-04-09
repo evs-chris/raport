@@ -105,6 +105,7 @@
   </select>
 </span></label>
 <label><span>Significant Space?</span><span><input type=checkbox twoway=false checked="{{.font.pre}}" on-change="@context.set('.font.pre', @node.checked ? true : undefined)" /></span></label>
+<label><span>Prevent Overflow?</span><span><input type=checkbox twoway=false checked="{{.font.clamp}}" on-change="@context.set('.font.clamp', @node.checked ? true : undefined)" /></span></label>
 <label><span>Text Size</span><span><input type=number value="{{.font.size}}" /></span></label>
 <label><span>Line Height</span><span><input type=number value="{{.font.line}}" /></span></label>
 <label><span>Font</span><span><input value="{{.font.family}}" /></span></label>
