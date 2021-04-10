@@ -372,6 +372,8 @@ export interface DateRelSpanMS {
   f: 'n';
   /** Offset in ms */
   o: number;
+  /** Timezone offset */
+  z?: number;
 }
 /** A timespan specified in individual units years, months, days, hours, minutes, seconds, and/or milliseconds */
 export interface DateRelSpanFull {
@@ -381,6 +383,8 @@ export interface DateRelSpanFull {
   o: [number?, number?, number?, number?, number?, number?, number?];
   /** Offset direction is before starting point */
   d?: -1;
+  /** Timezone offset */
+  z?: number;
 }
 export type DateRelSpan = DateRelSpanMS | DateRelSpanFull;
 
@@ -392,6 +396,8 @@ export interface DateRelRange {
   o: -1|0|1;
   /** Anchor to the end for non-range usage */
   e?: 1;
+  /** Timezone offset */
+  z?: number;
 }
 /** A date span by time relative to yesterday, today, or tomorrow */
 export interface DateRelTimeRange {
@@ -414,6 +420,8 @@ export interface DateRelToDate {
   d: 1;
   /** Anchor to the end for non-range usage */
   e?: 1;
+  /** Timezone offset */
+  z?: number;
 }
 /** A date range covering a specific range in time at most a year, optionally more specific by scoping farther
  * down with a month, date, hour, minute, second, and millisecond. It may also specify a timezone. */
@@ -526,33 +534,24 @@ export function unregisterFormat(name: string) {
 }
 
 export function dateRelToRange(rel: DateRel): [Date, Date] {
-  const range: [Date, Date] = [null, null];
+  if (rel instanceof Date) return [rel, rel];
+
   let from = new Date();
   let to: Date = 'd' in rel && rel.d ? new Date() : undefined;
   from.setHours(0, 0, 0, 0);
+  let tz: number = 'z' in rel && rel.z != null ? rel.z : null;
 
-  if (rel instanceof Date) return [rel, rel];
   if (rel.f === 'n') {
     from = typeof rel.o === 'number' ? new Date(+new Date() + rel.o) : dateAndTimespan(new Date(), { d: rel.o }, 1);
-    return [from, from];
+    to = from;
   } else if (rel.f === 'd') {
     from.setDate(from.getDate() + rel.o);
     if (!to) to = new Date(from);
     if ('t' in rel) {
       const t = rel.t;
-      if (t[4] != null) {
-        const h = Math.floor(t[4] / 60);
-        const m = t[4] % 60;
-        from.setUTCHours(t[0] + h, (t[1] || 0) + m, t[2] || 0, t[3] || 0);
-        to.setUTCHours(t[0] + h, (t[1] || 59) + m, t[2] || 59, t[3] || 999);
-      } else {
-        from.setHours(t[0], t[1] || 0, t[2] || 0, t[3] || 0);
-        to.setHours(t[0], t[1] == null ? 59 : t[1], t[2] == null ? 59 : t[2], t[3] == null ? 999 : t[3]);
-      }
-
-      range[0] = from;
-      range[1] = to;
-      return range;
+      from.setHours(t[0], t[1] || 0, t[2] || 0, t[3] || 0);
+      to.setHours(t[0], t[1] == null ? 59 : t[1], t[2] == null ? 59 : t[2], t[3] == null ? 999 : t[3]);
+      if (t[4] != null) tz = t[4];
     }
   } else if (rel.f === 'w') {
     from.setDate(from.getDate() - (from.getDay() + (rel.o === -1 ? 7 : rel.o === 1 ? -7 : 0)));
@@ -560,6 +559,7 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
       to = new Date(from);
       to.setDate(from.getDate() + 6);
     }
+    if ('z' in rel && rel.z != null) tz = rel.z;
   } else if (rel.f === 'm') {
     from.setDate(1);
     from.setMonth(from.getMonth() + rel.o);
@@ -577,32 +577,30 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
       to.setFullYear(from.getFullYear() + 1);
       to.setDate(0);
     }
-  }
-
-  if (Array.isArray(rel.f)) {
+  } else if (Array.isArray(rel.f)) {
     const v = rel.f.slice();
-    if (v[7] != null) {
-      from = new Date(Date.UTC(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0));
-      if (v[7]) from.setUTCHours(from.getUTCHours() + Math.floor(v[7] / 60));
-      if (v[7] % 60) from.setUTCMinutes(from.getUTCMinutes() + v[7] % 60);
-    } else from = new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
+    from = new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
     for (let i = 1; i < 7; i++) {
       if (v[i] == null) {
         v[i - 1]++;
         break;
       }
     }
-    if (v[7] != null) {
-      to = new Date(Date.UTC(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0));
-      if (v[7]) to.setUTCHours(to.getUTCHours() + Math.floor(v[7] / 60));
-      if (v[7] % 60) to.setUTCMinutes(to.getUTCMinutes() + v[7] % 60);
-    } else to = new Date(v[0], v[1] || 0, v[2] || 1, v[3] == null ? 23 : v[3], v[4] == null ? 59 : v[4], v[5] == null ? 59 : v[5], v[6] == null ? 999 : v[6]);
-    to.setMilliseconds(-1);
-  } else if (!('d' in rel) || !rel.d) to.setHours(23, 59, 59, 999);
+    if (v[6] != null) v[6]++;
+    to = new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
+    to.setMilliseconds(to.getMilliseconds() - 1);
+    if (v[7] != null) tz = v[7];
+  }
 
-  range[0] = from;
-  range[1] = to;
-  return range;
+  if (rel.f === 'd' || rel.f === 'w' || rel.f === 'm' || rel.f === 'y') to.setHours(23, 59, 59, 999);
+
+  if (tz != null) {
+    const offset = tz + from.getTimezoneOffset();
+    from.setMinutes(from.getMinutes() + offset);
+    if (from !== to) to.setMinutes(to.getMinutes() + offset);
+  }
+
+  return [from, to];
 }
 
 export function isDateRel(v: any): v is DateRel {

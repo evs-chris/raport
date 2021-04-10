@@ -1,6 +1,6 @@
 import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
-import { Value, DateRel, Literal, Keypath, TimeSpan } from './index';
+import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan } from './index';
 
 export const timespans = {
   y: 0,
@@ -151,20 +151,36 @@ export const timeexact = alt<[number, number?, number?, number?]>(
 
 const dateend = opt(seq(ws, str('>')));
 const daterel = alt<DateRel>('date',
-  map(seq(istr('last', 'this', 'next'), rws, istr('week', 'month', 'year'), opt(seq(rws, istr('to'), rws, istr('date'))), dateend), ([o, , f, d, e]) => ({ f: f[0] === 'w' ? 'w' : f[0] === 'm' ? 'm' : 'y', o: o === 'last' ? -1 : o === 'this' ? 0 : 1, d: d ? 1 : undefined, e: e ? 1 : undefined })),
+  map(seq(opt(istr('last', 'this', 'next')), rws, istr('week', 'month', 'year'), opt(timezone), dateend), ([o, , f, tz, e]) => {
+    const val: DateRelRange = { f: f[0] === 'w' ? 'w' : f[0] === 'm' ? 'm' : 'y', o: o === 'last' ? -1 : o === 'next' ? 1 : 0, e: e ? 1 : undefined };
+    if (tz != null) val.z = tz;
+    return val;
+  }),
+  map(seq(istr('week', 'month', 'year'), seq(rws, istr('to'), rws, istr('date')), opt(timezone), dateend), ([f, , tz, e]) => {
+    const val: DateRelToDate = { f: f[0] === 'w' ? 'w' : f[0] === 'm' ? 'm' : 'y', o: 0, d: 1, e: e ? 1 : undefined };
+    if (tz != null) val.z = tz;
+    return val;
+  }),
   map(seq(istr('yesterday', 'today', 'tomorrow'), alt<any>(bracket(ws, istr('at'), ws), rws), timeexact, ws, opt(timezone)), v => {
     const res: DateRel = { f: 'd', o: v[1] === 'yesterday' ? -1 : v[1] === 'today' ? 0 : 1, t: v[2] };
     if (v[4] != null) res.t[4] = v[4];
     return res;
   }),
-  map(seq(istr('yesterday', 'today', 'tomorrow', 'now'), dateend), ([v, e]) => (v === 'now' ? { f: 'n', o: 0 } : { f: 'd', o: v === 'yesterday' ? -1 : v === 'today' ? 0 : 1, e: e ? 1 : undefined })),
+  map(seq(istr('yesterday', 'today', 'tomorrow', 'now'), opt(timezone), dateend), ([v, tz, e]) => {
+    const val: DateRel = (v === 'now' ? { f: 'n', o: 0 } : { f: 'd', o: v === 'yesterday' ? -1 : v === 'today' ? 0 : 1, e: e ? 1 : undefined });
+    if (tz != null) val.z = tz;
+    return val;
+  }),
   map(seq(istr('in'), rws, timespan), v => (typeof v[2] === 'number' ? { f: 'n', o: v[2] } : { f: 'n', o: v[2].d })),
-  map(seq(timespan, rws, alt<string|any[]>('relative time anchor', istr('ago'), seq(istr('from'), rws, istr('now')))), ([span, , ref]) => {
+  map(seq(timespan, rws, alt<string|any[]>('relative time anchor', istr('ago'), seq(istr('from'), rws, istr('now'))), opt(timezone)), ([span, , ref, tz]) => {
+    let val: DateRelSpan;
     if (typeof span === 'number') {
-      return { f: 'n', o: span * (ref === 'ago' ? -1 : 1) };
+      val = { f: 'n', o: span * (ref === 'ago' ? -1 : 1) };
     } else {
-      return { f: 'n', o: span.d, d: ref === 'ago' ? -1 : undefined };
+      val = { f: 'n', o: span.d, d: ref === 'ago' ? -1 : undefined };
     }
+    if (tz != null) val.z = tz;
+    return val;
   }),
 );
 
@@ -188,13 +204,19 @@ export const dateexact: Parser<Date|DateRel> = map(seq(
   const m = v[1] && v[1][1];
   const d = m && v[1][2] && v[1][2][1];
   const time = v[2] && v[2][1];
-  const tz = v[3] && v[3][1];
+  const tz = v[3];
   const e = v[4] ? 1 : undefined;
   if (!m) return { f: setIndex([+y], 7, tz), e };
   else if (!d) return { f: setIndex([+y, +m - 1], 7, tz), e };
   else if (!time) return { f: setIndex([+y, +m - 1, +d], 7, tz), e }
-  else if (tz != null) return new Date(Date.UTC(+y, +m - 1, +d, time[0] + Math.floor(tz / 60), (time[1] || 0) % 60, time[2] || 0, time[3] || 0));
-  else return new Date(+y, +m - 1, +d, time[0] || 0, time[1] || 0, time[2] || 0, time[3] || 0);
+  else {
+    const res: DateExactRange = { f: [+y, +m - 1, +d], e };
+    for (let i = 0; i < time.length; i++) {
+      if (time[i] != null) res.f[i + 3] = time[i];
+    }
+    if (tz != null) res.f[7] = tz;
+    return res;
+  }
 });
 
 export const date = bracket(str('#'), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), str('#'));
