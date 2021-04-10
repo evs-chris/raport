@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { InitOpts, ContextHelper } from 'ractive';
-import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed } from 'raport/index';
+import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 let sourceTm: any;
@@ -888,3 +888,11 @@ function stripDefaults(json: any): any {
   }
   return res;
 }
+
+registerOperator({
+  type: 'value',
+  names: ['parse', 'unparse'],
+  apply(name, [str, opts]) {
+    return name === 'parse' ? parse(str) : stringify(str, opts);
+  }
+});
