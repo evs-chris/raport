@@ -30,7 +30,7 @@ export function phone(v: string|number): string {
   else return v;
 }
 
-const dateRE = /y+|M+|d+|E+|H+|m+|s+|k+|h+|a+/g;
+const dateRE = /y+|M+|d+|E+|H+|m+|s+|k+|h+|a+|S+/g;
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 let dateDefault: string;
@@ -64,6 +64,9 @@ export function date(d: string|Date, fmt: string): string {
       return m.length === 1 ? `${v.getMinutes()}` : v.getMinutes() <= 9 ? `0${v.getMinutes()}` : `${v.getMinutes()}`;
     } else if (m[0] === 's') {
       return m.length === 1 ? `${v.getSeconds()}` : v.getSeconds() <= 9 ? `0${v.getSeconds()}` : `${v.getSeconds()}`;
+    } else if (m[0] === 'S') {
+      const ms = v.getMilliseconds();
+      return ms < 10 ? `00${ms}` : ms < 100 ? `0${ms}` : `${ms}`;
     } else if (m[0] === 'k' || m[0] === 'h') {
       let r = `${v.getHours() % 12}`;
       if (r === '0') r = '12';
