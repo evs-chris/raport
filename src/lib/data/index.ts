@@ -542,7 +542,7 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
   let tz: number = 'z' in rel && rel.z != null ? rel.z : null;
 
   if (rel.f === 'n') {
-    from = typeof rel.o === 'number' ? new Date(+new Date() + rel.o) : dateAndTimespan(new Date(), { d: rel.o }, 1);
+    from = typeof rel.o === 'number' ? new Date(+new Date() + rel.o) : dateAndTimespan(new Date(), { d: rel.o }, 'd' in rel ? rel.d : 1);
     to = from;
   } else if (rel.f === 'd') {
     from.setDate(from.getDate() + rel.o);

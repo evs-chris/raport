@@ -162,7 +162,7 @@ const daterel = alt<DateRel>('date',
     return val;
   }),
   map(seq(istr('yesterday', 'today', 'tomorrow'), alt<any>(bracket(ws, istr('at'), ws), rws), timeexact, ws, opt(timezone)), v => {
-    const res: DateRel = { f: 'd', o: v[1] === 'yesterday' ? -1 : v[1] === 'today' ? 0 : 1, t: v[2] };
+    const res: DateRel = { f: 'd', o: v[0] === 'yesterday' ? -1 : v[0] === 'today' ? 0 : 1, t: v[2] };
     if (v[4] != null) res.t[4] = v[4];
     return res;
   }),
