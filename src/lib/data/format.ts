@@ -54,7 +54,9 @@ export function date(d: string|Date, fmt: string): string {
       else if (m.length === 3) return months[v.getMonth()].substr(0, 3);
       else return months[v.getMonth()];
     } else if (m[0] === 'd') {
-      return m.length === 1 ? `${v.getDate()}` : v.getDate() <= 9 ? `0${v.getDate()}` : `${v.getDate()}`;
+      if (m.length === 1) return `${v.getDate()}`;
+      else if (m.length === 2) return v.getDate() <= 9 ? `0${v.getDate()}` : `${v.getDate()}`;
+      else return ordinal(v.getDate());
     } else if (m[0] === 'E') {
       if (m.length === 1) return `${v.getDay() + 1}`;
       else if (m.length === 2) return days[v.getDay()].substr(0, 3);
