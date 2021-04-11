@@ -86,8 +86,11 @@ function _stringify(value: ValueOrExpr): string {
 
 function stringifyBinopArg(op: string, arg: ValueOrExpr, pos: 1|2): string {
   if (op === '**' && pos === 1 && typeof arg !== 'string' && 'op' in arg && arg.op === '**') return `(${_stringify(arg)})`;
-  if (typeof arg !== 'string' && 'op' in arg && binops.includes(arg.op) && precedence[arg.op] < precedence[op]) return `(${_stringify(arg)})`;
-  else return _stringify(arg);
+  if (typeof arg !== 'string' && 'op' in arg) {
+    if (binops.includes(arg.op) && precedence[arg.op] < precedence[op]) return `(${_stringify(arg)})`;
+    if (arg.op === 'if' || arg.op === 'unless') return `(${_stringify(arg)})`;
+  }
+  return _stringify(arg);
 }
 
 function stringifyOp(value: Operation): string {
@@ -104,6 +107,8 @@ function stringifyOp(value: Operation): string {
     return res;
   } else if (_sexprops) {
     return `(${value.op}${value.args && value.args.length ? ` ${value.args.map(v => _stringify(v)).join(_listcommas ? ', ' : ' ')}`: ''})`;
+  } else if (value.op === 'if' || value.op === 'unless' && value.args && value.args.length > 2) {
+    return stringifyIf(value);
   } else if (value.op === '+' && value.args && value.args.length > 0 && typeof value.args[0] === 'object' && typeof (value.args[0] as any).v === 'string') {
     return `'${value.args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `\$\{${_stringify(a)}}`).join('')}'`
   } else if (value.op === 'fmt' && value.args && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'string') {
@@ -235,5 +240,16 @@ function stringifyDate(value: DateRel): string {
     return `#${str}${offsetToTimezone(-1, v.z)}${v.e ? '>' : ''}#`;
   }
 
+  return str;
+}
+
+function stringifyIf(op: Operation): string {
+  if (!op.args || op.args.length < 2) return 'false';
+  let str = `${op.op} ${_stringify(op.args[0])} then ${_stringify(op.args[1])}`;
+  const last = op.args.length - 1;
+  for (let i = 2; i <= last; i += 2) {
+    if (i === last) str += ` else ${_stringify(op.args[i])}`;
+    else str += ` elif ${_stringify(op.args[i])} then ${_stringify(op.args[i + 1])}`;
+  }
   return str;
 }
