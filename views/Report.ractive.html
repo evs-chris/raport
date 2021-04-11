@@ -300,11 +300,19 @@
     cursor: move;
   }
 
+  div.widgets {
+    background-color: #fff;
+  }
+  div.widget:hover {
+    z-index: 1000;
+  }
+
   div.active-widget {
     border-color: #4596ff;
     border-style: solid;
     background-color: #4596ff20;
     user-select: none;
+    z-index: 999;
   }
 
   div.hover-widget {
