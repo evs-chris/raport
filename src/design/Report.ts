@@ -492,7 +492,7 @@ export class Designer extends Ractive {
       this.set('params', report.defaultParams || {});
     } catch (e) {
       try {
-        const report = evaluate(str, { PageSizes });
+        const report = evaluate({ PageSizes }, str);
         this.set('report', report);
         this.set('params', report.defaultParams || {});
       } catch (e) {
