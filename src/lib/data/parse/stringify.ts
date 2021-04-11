@@ -93,6 +93,29 @@ function stringifyBinopArg(op: string, arg: ValueOrExpr, pos: 1|2): string {
   return _stringify(arg);
 }
 
+function findNestedStringOpL(op: string, value: Operation): boolean {
+  if (value.args && value.args.find(a => typeof a === 'object' && typeof (a as any).v === 'string')) return true;
+  if (!value.args || !value.args.length) return false;
+  const left = value.args[0];
+  if (typeof left === 'object' && 'op' in left && left.op === op) return findNestedStringOpL(op, left);
+  return false;
+}
+
+function flattenNestedBinopsL(op: string, value: Operation, agg: ValueOrExpr[] = []): ValueOrExpr[] {
+  if (value.args && value.args.length) {
+    let i = 0;
+    for (; i < value.args.length; i++) {
+      if (typeof value.args[i] === 'object' && typeof (value.args[i] as any).v === 'string') agg.push(value.args[i]);
+      else break;
+    }
+    const left = value.args[i];
+    if (typeof left === 'object' && 'op' in left && left.op === op) flattenNestedBinopsL(op, left, agg);
+    else agg.push(left);
+    agg.push.apply(agg, value.args.slice(i + 1));
+  }
+  return agg;
+}
+
 function stringifyOp(value: Operation): string {
   if (!_noarr && value.op === 'array') {
     return `[${value.args ? value.args.map(a => _stringify(a)).join(_listcommas ? ', ' : ' ') : ''}]`;
@@ -109,9 +132,10 @@ function stringifyOp(value: Operation): string {
     return `(${value.op}${value.args && value.args.length ? ` ${value.args.map(v => _stringify(v)).join(_listcommas ? ', ' : ' ')}`: ''})`;
   } else if (value.op === 'if' || value.op === 'unless' && value.args && value.args.length > 2) {
     return stringifyIf(value);
-  } else if (value.op === '+' && value.args && value.args.length > 0 && typeof value.args[0] === 'object' && typeof (value.args[0] as any).v === 'string') {
-    return `'${value.args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `\$\{${_stringify(a)}}`).join('')}'`
-  } else if (value.op === 'fmt' && value.args && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'string') {
+  } else if (value.op === '+' && value.args && value.args.length > 0 && findNestedStringOpL(value.op, value)) {
+    const args = flattenNestedBinopsL(value.op, value);
+    return `'${args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `\$\{${_stringify(a)}}`).join('')}'`
+  } else if ((value.op === 'fmt' || value.op === 'format') && value.args && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'string') {
     const val = value.args[0];
     let vs = _stringify(val);
     if (typeof val !== 'string' && 'op' in val && (binops.includes(val.op) || unops.includes(val.op))) vs = `(${vs})`;
