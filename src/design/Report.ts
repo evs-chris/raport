@@ -949,7 +949,7 @@ function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>): Computed|ValueO
         }
       } else if ('text' in e && typeof e.text === 'string') {
         try {
-          return stringify(parse(e.text, fmtOpts));
+          return Object.assign({}, e, { text: stringify(parse(e.text, fmtOpts)) });
         } catch {
           return e;
         }
