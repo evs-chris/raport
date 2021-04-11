@@ -1,5 +1,5 @@
 import { filter, safeGet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan } from './index';
-import { date, dollar, number, phone } from './format';
+import { date, dollar, ordinal, number, phone } from './format';
 import { timespans } from './parse';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
@@ -582,6 +582,10 @@ registerFormat('number', (n, [dec]) => {
 });
 registerFormat('num', (n, [dec]) => {
   return number(n, dec);
+});
+
+registerFormat('ordinal', (n, [group]) => {
+  return ordinal(n, group == null ? ',' : group);
 });
 
 registerFormat('phone', n => {

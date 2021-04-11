@@ -2,17 +2,18 @@ const decRE = /(\d)(?=(\d{3})+\.)/g;
 const intRE = /(\d)(?=(\d{3})+$)/g;
 const isNumRE = /^[-0-9\\.,]+$/;
 
-export function number(v: string|number, dec: number = 2): string {
+export function number(v: string|number, dec: number = 2, group: string = ','): string {
   v = typeof v !== 'number' ? parseFloat(v || '') : v;
   if (isNaN(v)) return '';
   v = v.toFixed(dec);
   if (dec === 0) v = v.replace(/\..*/, '');
-  return v.replace(v.indexOf('.') === -1 ? intRE : decRE, '$1,');
+  if (group) return v.replace(v.indexOf('.') === -1 ? intRE : decRE, `$1${group}`);
+  else return v;
 }
 
-export function dollar(v: string, alt: string, dec: number = 2, sign = '$'): string {
+export function dollar(v: string, alt: string, dec: number = 2, group: string = ',', sign: string = '$'): string {
   if (v && isNumRE.test(v)) {
-    if (+v > 0) return `${sign}${number(v, dec)}`;
+    if (+v > 0) return `${sign}${number(v, dec, group)}`;
     else return alt !== undefined ? alt : v;
   } else {
     return alt !== undefined ? alt : v;
@@ -81,7 +82,8 @@ date.setDefault = function(format?: string) {
   dateDefault = format;
 }
 
-export function ordinal(num: number|string): string {
+export function ordinal(num: number|string, group?: string): string {
+  num = number(num, 0, group);
   let n = `${num}`;
   n = n.substr(-2, 2);
   if (n.length > 1 && n[0] === '1') return `${num}th`;
