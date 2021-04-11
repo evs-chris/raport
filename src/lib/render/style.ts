@@ -66,6 +66,8 @@ export function styleFont(f: Font): string {
   if (f.family) s += `font-family:${f.family};`;
   if (f.color) s += `color:${f.color};`;
   if (f.align) s += `text-align:${f.align};`;
+  if (f.line) s += `line-height:${f.line}rem;`;
+  else if (f.size) s += `line-height:${f.size}rem;`;
   if (f.size) s += `font-size:${f.size}rem;`;
   if (f.weight) s += `font-weight:${f.weight};`;
   if (f.pre) s += `white-space:pre-wrap;`;
