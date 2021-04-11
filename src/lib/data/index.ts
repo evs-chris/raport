@@ -348,7 +348,7 @@ function applyOperator(root: Context, operation: Operation): any {
       else if (typeof src === 'object' && 'value' in src && Array.isArray(src.value)) arr = src.values;
       else arr = [];
     }
-    return op.apply(operation.op, arr, args, root);
+    return op.apply(operation.op, Array.isArray(arr) ? arr : [], args, root);
   }
 }
 
