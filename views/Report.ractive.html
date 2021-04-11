@@ -63,6 +63,34 @@
     margin: 0;
   }
 
+  button.plain {
+    text-decoration: none;
+    text-align: center;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    user-select: none;
+    border: none;
+    border-radius: 0.2em;
+    padding: 0 1.25rem;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+      0 1px 5px 0 rgba(0, 0, 0, 0.12),
+      0 3px 1px -2px rgba(0, 0, 0, 0.2);
+    transition: 0.2s ease-in-out;
+    transition-property: box-shadow, opacity, background-color;
+    font-size: 1em;
+    line-height: 1.5em;
+    background-color: #07e;
+    color: #fff;
+    vertical-align: middle;
+    min-height: 2.25em;
+    outline: 0;
+    margin: 0.25em;
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    font-family: inherit;
+  }
+
   button.ico {
     border: none;
     background-color: transparent;
@@ -160,6 +188,10 @@
   .designer {
     display: flex;
     flex-direction: column;
+  }
+
+  .spacer {
+    margin-right: 3em;
   }
 
   .layout .actions {

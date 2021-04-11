@@ -4,7 +4,7 @@
   {{#if ~/temp.bottom.param}}<span class-tab class-active="~/temp.bottom.tab === 'param'" on-click="@.set('temp.bottom.tab', 'param'), @.set('temp.bottom.pop', true)">Parameter</span>{{/if}}
   {{#if ~/temp.bottom.source}}<span class-tab class-active="~/temp.bottom.tab === 'source'" on-click="@.set('temp.bottom.tab', 'source'), @.set('temp.bottom.pop', true)">Source</span>{{/if}}
   <span class-which>
-    {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button class-ico class-large on-click="@.unlink('expr'), @.set('temp.expr.path', undefined), @.set('temp.expr.str', ''), @.set('temp.expr.html', false), @.set('temp.expr.tab', 'text')">&times;</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
+    {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button class-ico class-large on-click="@.unlink('expr'), @.set('temp.expr.path', undefined), @.set('temp.expr.str', ''), @.set('temp.expr.html', false), @.set('temp.expr.tab', 'text'), @.set('temp.expr.label', false)">&times;</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
     {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button class-ico class-large on-click="@.unlink('param'), @.set('temp.bottom.param', undefined), @.set('temp.bottom.tab', 'expr')">&times;</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
     {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button class-ico class-large on-click="@.unlink('source'), @.set('temp.bottom.source', undefined), @.set('temp.bottom.tab', 'expr')">&times;</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
   </span>
@@ -37,11 +37,61 @@
         </div>
       </div>-->
       <div class-tab class-text class-active-tab="!~/temp.expr.tab || ~/temp.expr.tab === 'text'">
-        <div class-scrolled-wrapper style-flex-grow=1>
-          <div as-scrolled>
-            <textarea lazy="500" on-input="@.autosize(@node)" class-expr-text>{{~/temp.expr.str}}</textarea>
-          </div>
-        </div>
+        {{#with ~/temp.expr}}
+          {{#if .label}}
+            {{#if Array.isArray(.str)}}
+              <div style="display: flex; justify-content: space-between;">
+                <button class-plain style-font-size="0.7rem" on-click="@context.set('.str', '')">Convert to Text</button>
+                <button class-ico class-large on-click="@context.push('.str', '')" title="Add part">+</button>
+              </div>
+              <div class-scrolled-wrapper style-flex-grow=1>
+                <div as-scrolled>
+                  {{#each .str}}
+                    <div class-label-part>
+                      <button class-ico class-large class-spacer on-click="@context.splice('../', @index, 1)" title="Remove part">&times;</button>
+                      <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context)" title="Move up">&#9650;</button>
+                      <button class-ico class-spacer disabled="{{@index === @last}}" on-click="@.moveDown(@context)" title="Move down">&#9660;</button>
+                      {{#if typeof . === 'string'}}
+                        <button class-ico on-click="@context.set('.', { text: . })" title="Format part">F</button>
+                        <textarea lazy="500" class-expr-text>{{.}}</textarea>
+                      {{else}}
+                        <button class-ico on-click="@context.set('.', .text)" title="Plain part">T</button>
+                        <textarea title="Part expression" lazy="500" class-expr-text>{{.text}}</textarea>
+                        <input title="Font Family" placeholder="Font Family" value="{{.font.family}}" />
+                        <input title="Color" placeholder="Color" value="{{.font.color}}" />
+                        <input title="Size" placeholder="Size (1)" value="{{.font.size}}" type="number" />
+                        <input title="Line Height" placeholder="Line Height ({{.font.size == null ? 1 : .font.size}})" value="{{.font.line}}" type="number" />
+                        <select title="Font Weight" value="{{.font.weight}}">
+                          <option value="{{undefined}}">Font Weight</option>
+                          <option value="400">light</option>
+                          <option value="500">normal</option>
+                          <option value="600">bold</option>
+                          <option value="700">bolder</option>
+                        </select>
+                        <label><input type="checkbox" checked="{{.font.pre}}" /> Significant whitespec?</label>
+                      {{/if}}
+                    </div>
+                  {{/each}}
+                </div>
+              </div>
+            {{else}}
+              <div>
+                <button class-plain style-font-size="0.7rem" on-click="@context.set('.str', [.str])">Convert to Parts</button>
+              </div>
+              <div class-scrolled-wrapper style-flex-grow=1>
+                <div as-scrolled>
+                  <textarea lazy="500" on-input="@.autosize(@node)" class-expr-text>{{.str}}</textarea>
+                </div>
+              </div>
+            {{/if}}
+          {{else}}
+            <div class-scrolled-wrapper style-flex-grow=1>
+              <div as-scrolled>
+                <textarea lazy="500" on-input="@.autosize(@node)" class-expr-text>{{.str}}</textarea>
+              </div>
+            </div>
+          {{/if}}
+        {{/with}}
       </div>
       <div class-tab class-html class-active-tab="~/temp.expr.tab === 'html'">
         <div class-editor-buttons>
@@ -535,5 +585,31 @@
 
   .expr-operator {
     padding: 0 0.5em;
+  }
+
+  .label-part {
+    padding: 0.25em;
+    margin: 0.25em;
+    border: 1px solid;
+    border-radius: 0.2em;
+  }
+
+  .label-part textarea {
+    background-color: #f5f5f5;
+  }
+
+  .label-part input, .label-part label, .label-part select {
+    font-size: 0.8rem;
+    padding: 0.25em;
+    border-radius: 0.2rem;
+    margin: 0.25em;
+    vertical-align: middle;
+    border: 1px solid #eee;
+  }
+  .label-part input[type=number] {
+    width: 8rem;
+  }
+  .label-part label {
+    white-space: nowrap;
   }
 </style>

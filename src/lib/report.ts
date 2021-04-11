@@ -174,13 +174,14 @@ export interface Image extends Widget {
 export interface Span {
   text: ValueOrExpr;
   font?: Font;
+  id?: string;
 }
 export interface LabelFormat {
   name: string;
   args?: ValueOrExpr[];
 }
 export interface Label extends Widget {
-  text: ValueOrExpr|Span|Array<ValueOrExpr|Span>;
+  text: ValueOrExpr|Array<ValueOrExpr|Span>;
   format?: LabelFormat;
   id?: string;
 }

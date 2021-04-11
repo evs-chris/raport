@@ -8,6 +8,7 @@ let sourceTm: any;
 
 export interface ExprOptions {
   html?: boolean;
+  label?: boolean;
 }
 
 export interface AvailableSource {
@@ -191,11 +192,17 @@ export class Designer extends Ractive {
   }
 
   async eval() {
-    const str: string = this.get('temp.expr.str');
+    const str: string|any[] = this.get('temp.expr.str');
     let v: string = this.get('temp.expr.path');
     if (v && v.startsWith('widget.')) v = v.replace('widget', this.get('temp.widget'));
     const ctx = await this.buildLocalContext(v);
-    const res = evaluate(ctx, this.get('temp.expr.html') ? parseTemplate(str) : str);
+    const res = Array.isArray(str) ?
+      str.map(p => {
+        if (typeof p === 'string') return evaluate(ctx, p);
+        else if (p && typeof p === 'object' && typeof p.text === 'string') return evaluate(ctx, p.text);
+        return '';
+      }).join('') :
+      evaluate(ctx, this.get('temp.expr.html') ? parseTemplate(str) : str);
     this.set('temp.expr.result', res);
     this.set('temp.expr.tab', 'result');
   }
@@ -225,6 +232,7 @@ export class Designer extends Ractive {
     const html = options && options.html;
     const tab = this.get('temp.expr.tab');
     this.set('temp.expr.html', html);
+    this.set('temp.expr.label', options && options.label);
     this.set('temp.expr.tab', html ? 'html' : tab === 'ast' || tab === 'text' ? tab : 'text');
     this.set('temp.bottom.tab', 'expr');
 
@@ -616,22 +624,28 @@ Ractive.extendWith(Designer, {
       if (!this.evalLock) {
         this.evalLock = true;
         try {
-          const parsed = (html ? parseTemplate : parse)(v, { detailed: true, contextLines: 3 });
-          const msg = ('marked' in parsed ? 
-            `${'latest' in parsed ? `${parsed.latest.message || '(no message)'} on line ${parsed.latest.line} at column ${parsed.latest.column}\n\n${parsed.latest.marked}\n\n` : ''}${parsed.message || '(no message)'} on line ${parsed.line} at column ${parsed.column}\n\n${parsed.marked}\n\n` : '') + JSON.stringify(parsed, null, '  ');
+          const arr = Array.isArray(v) ? v : [v];
+          for (let i = 0; i < arr.length; i++) {
+            const v = typeof arr[i] === 'string' ? arr[i] : 'text' in arr[i] && typeof arr[i].text === 'string' ? arr[i].text : arr[i];
+            const parsed = (html ? parseTemplate : parse)(v, { detailed: true, contextLines: 3 });
+            const msg = ('marked' in parsed ? 
+              `${'latest' in parsed ? `${parsed.latest.message || '(no message)'} on line ${parsed.latest.line} at column ${parsed.latest.column}\n\n${parsed.latest.marked}\n\n` : ''}${parsed.message || '(no message)'} on line ${parsed.line} at column ${parsed.column}\n\n${parsed.marked}\n\n` : '') + JSON.stringify(parsed, null, '  ');
 
-          this.set('temp.expr.parsed', msg);
+            this.set('temp.expr.parsed', msg);
 
-          if ('message' in parsed) {
-            this.set('temp.expr.error', parsed)
-            this.set('temp.expr.ast', undefined);
-          } else {
-            this.set('temp.expr.ast', parsed);
-            this.set('temp.expr.error', undefined);
+            if ('message' in parsed) {
+              this.set('temp.expr.error', parsed)
+              this.set('temp.expr.ast', undefined);
+            } else {
+              this.set('temp.expr.ast', parsed);
+              this.set('temp.expr.error', undefined);
+            }
+
+            if (html) this.set('temp.expr.htmlstr', v);
+            else this.set('temp.expr.htmlstr', '');
+
+            if ('message' in parsed) break;
           }
-
-          if (html) this.set('temp.expr.htmlstr', v);
-          else this.set('temp.expr.htmlstr', '');
         } catch {}
         this.evalLock = false;
       }
