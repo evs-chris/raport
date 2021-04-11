@@ -122,7 +122,7 @@ function stringifyOp(value: Operation): string {
   } else if (unops.includes(value.op) && value.args && value.args.length === 1) {
     const arg = value.args[0];
     if (typeof arg !== 'string' && 'op' in arg && (binops.includes(arg.op) || unops.includes(arg.op))) return `${value.op}(${_stringify(arg)})`;
-    else return `${value.op}${_stringify(arg)}`;
+    else return `${value.op}${call_op.test(value.op) ? ' ' : ''}${_stringify(arg)}`;
   } else if (call_op.test(value.op)) {
     return `${value.op}(${value.args && value.args.map(a => _stringify(a)).join(_listcommas ? ', ' : ' ') || ''})`;
   } else {
