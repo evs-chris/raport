@@ -14,7 +14,7 @@
     {{/if}}
     <button class-ico on-click="@.treeScrollToActive()">A</button>
   </div>
-  <div class="shrinky scrolled-wrapper" style-max-height="20%">
+  <div class="shrinky scrolled-wrapper">
     <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
       <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="@.selectWidget('report')"><span class-line style-height=1.8rem on-mouseover="@.set('temp.hover', 'report'), false">Report</span>
         {{#if report.type === 'delimited'}}
