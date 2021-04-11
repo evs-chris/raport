@@ -1,4 +1,4 @@
-<label><span>Width <button class-hide /><button class-ico on-click="@context.set('.width', typeof .width === 'number' || .width === undefined ? { percent: .width } : typeof .width === 'object' && 'percent' in .width ? { x: '' } : .width.percent)" title="{{typeof .width === 'number' || .width === undefined ? 'Change to percent' : typeof .width === 'object' && 'percent' in .width ? 'Change to Expression' : 'Change to REM'}}">
+<label><span title="Width of the {{.type}} in rem, if a number, a percentage of the parent, or an expression, defaulting to 100%">Width <button class-hide /><button class-ico on-click="@context.set('.width', typeof .width === 'number' || .width === undefined ? { percent: .width } : typeof .width === 'object' && 'percent' in .width ? { x: '' } : .width.percent)" title="{{typeof .width === 'number' || .width === undefined ? 'Change to percent' : typeof .width === 'object' && 'percent' in .width ? 'Change to Expression' : 'Change to REM'}}">
     {{#if typeof .width === 'number' || .width === undefined}}#{{elseif typeof .width === 'object' && 'percent' in .width}}%{{else}}&#9998;{{/if}}
   </button></span>
   <span><div>
@@ -11,7 +11,7 @@
     {{/if}}
   </div></span>
 </label>
-<label><span>Height <button class-hide /><button class-ico on-click="@context.set('.height', typeof .height === 'number' || .height  === undefined ? { percent: .height } : typeof .height === 'object' && 'percent' in .height ? { x: '' } : .height.percent)" title="{{typeof .height === 'number' || .height  === undefined ? 'Change to percent' : typeof .height === 'object' && 'percent' in .height ? 'Change to Expression' : 'Change to REM'}}">
+<label><span title="Height of the {{.type}} in rem, if a number, a percentage of the parent, or an expression, default to{{#if type === 'label'}}the largest font size or{{/if}} 1">Height <button class-hide /><button class-ico on-click="@context.set('.height', typeof .height === 'number' || .height  === undefined ? { percent: .height } : typeof .height === 'object' && 'percent' in .height ? { x: '' } : .height.percent)" title="{{typeof .height === 'number' || .height  === undefined ? 'Change to percent' : typeof .height === 'object' && 'percent' in .height ? 'Change to Expression' : 'Change to REM'}}">
     {{#if typeof .height === 'number' || .height === undefined}}#{{elseif typeof .height === 'object' && 'percent' in .height}}%{{else}}&#9998;{{/if}}
   </button></span>
   <span><div>
@@ -29,7 +29,7 @@
     <label><span>X</span><span><input type="number" value="{{.layout[@.lastKey(~/temp.widget)][0]}}" /></span></label>
     <label><span>Y</span><span><input type="number" value="{{.layout[@.lastKey(~/temp.widget)][1]}}" /></span></label>
   {{else}}
-    <label><span>Break? <button class-ico on-click="@context.set('^^/br', typeof ^^/br === 'object' ? false : { x: ''})" title="{{typeof ^^/br === 'object' ? 'Change to Boolean' : 'Change to Expression'}}">
+    <label><span title="Cause the next widget to start on the next line in an automatic layout">Break? <button class-ico on-click="@context.set('^^/br', typeof ^^/br === 'object' ? false : { x: ''})" title="{{typeof ^^/br === 'object' ? 'Change to Boolean' : 'Change to Expression'}}">
     {{#if typeof ^^/br !== 'object'}}#{{else}}&#9998;{{/if}}
   </button></span><span>
       {{#if typeof ^^/br !== 'object'}}
@@ -40,7 +40,7 @@
     </span></label>
   {{/if}}
 {{/with}}
-<label><span>Hidden <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')">&#9998;</button></span><span><textarea>{{.hide}}</textarea></span></label>
+<label><span title="If this evaluates to true, the widget will be hidden and not affect automatic layouts">Hidden <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')">&#9998;</button></span><span><textarea>{{.hide}}</textarea></span></label>
 <label><span>Margin</span><span>
   <div class=toggles>
     <span class-toggle class-active="typeof .margin === 'undefined'" {{#if typeof .margin !== 'undefined'}}on-click="@context.set('.margin', undefined)"{{/if}}>None</span>
@@ -104,7 +104,7 @@
     <option>right</option>
   </select>
 </span></label>
-<label><span>Significant Space?</span><span><input type=checkbox twoway=false checked="{{.font.pre}}" on-change="@context.set('.font.pre', @node.checked ? true : undefined)" /></span></label>
+<label><span title="Display all whitespace, including newlines, within the content of the {{.type}}?">Significant Space?</span><span><input type=checkbox twoway=false checked="{{.font.pre}}" on-change="@context.set('.font.pre', @node.checked ? true : undefined)" /></span></label>
 <label><span>Prevent Overflow?</span><span><input type=checkbox twoway=false checked="{{.font.clamp}}" on-change="@context.set('.font.clamp', @node.checked ? true : undefined)" /></span></label>
 <label><span>Text Size</span><span><input type=number value="{{.font.size}}" /></span></label>
 <label><span>Line Height</span><span><input type=number value="{{.font.line}}" /></span></label>
@@ -119,7 +119,7 @@
     <option value="700">bolder</option>
   </select>
 </span></label>
-<label><span>Right Pad</span><span><input type=number value="{{.font.right}}" /></span></label>
+<label><span title="Padding to add to the right side of the {{.type}}, which is useful for right-aligned text">Right Pad</span><span><input type=number value="{{.font.right}}" /></span></label>
 
 <template id="page-props">
 </template>

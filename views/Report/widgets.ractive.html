@@ -3,9 +3,9 @@
     {{#each .group}}
       <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.selectWidget(@keypath), false">
         <span class-line on-mouseover="@.set('temp.hover', @keypath), false"><span>group {{@index + 1}}</span>
-          <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context), @.moveUp(@context, '^^/groupEnds'), false">&#9650;</button>
-          <button class-ico disabled="{{@index === @last}}" on-click="@.moveDown(@context), @.moveDown(@context, '^^/groupEnds'), false">&#9660;</button>
-          <button class-ico class-large on-click="@context.splice('../', @index, 1), @context.splice('^^/groupsEnds', @index, 1), false">&times;</button>
+          <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context), @.moveUp(@context, '^^/groupEnds'), false" title="Move up">&#9650;</button>
+          <button class-ico disabled="{{@index === @last}}" on-click="@.moveDown(@context), @.moveDown(@context, '^^/groupEnds'), false" title="Move down">&#9660;</button>
+          <button class-ico class-large on-click="@context.splice('../', @index, 1), @context.splice('^^/groupsEnds', @index, 1), false" title="Remove">&times;</button>
         </span>
         {{>widget-tree}}
       </div>
