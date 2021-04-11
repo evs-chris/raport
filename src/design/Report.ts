@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { InitOpts, ContextHelper } from 'ractive';
-import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator } from 'raport/index';
+import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 let sourceTm: any;
@@ -554,6 +554,16 @@ export class Designer extends Ractive {
     if ('message' in r) return r;
     else return nodeForPosition(r, pos, name);
   }
+
+  fmt() {
+    const str = this.get('temp.expr.str');
+    this.set('temp.expr.str', fmt(str));
+  }
+
+  fmtAll() {
+    const json = this.get('report');
+    this.set('report', fmtAll(json));
+  }
 }
 
 Ractive.extendWith(Designer, {
@@ -847,11 +857,7 @@ const fontKeys = ['family', 'size', 'weight', 'color', 'align', 'line', 'right',
 function stripDefaults(json: any): any {
   if (typeof json !== 'object') return json;
 
-  if (Array.isArray(json)) {
-    const res = [];
-    json.forEach(v => res.push(stripDefaults(v)));
-    return res;
-  }
+  if (Array.isArray(json)) return json.map(stripDefaults);
 
   const res: any = {};
   for (const k in json) {
@@ -865,9 +871,9 @@ function stripDefaults(json: any): any {
       res[k] = a;
     } else if (typeof v === 'object') {
       if (k === 'font') {
-        if (Object.values(v).find(v => v != null && v !== '') !== undefined) {
+        if (Object.values(v).find(v => v != null && v !== '' && v !== false) !== undefined) {
           const font: any = {};
-          fontKeys.forEach(f => v[f] != null && v[f] !== '' && (font[f] = v[f]));
+          fontKeys.forEach(f => v[f] != null && v[f] !== '' && v[f] !== false && (font[f] = v[f]));
           if (json.type === 'html' && Object.keys(font).length === 1 && font.line === 0) continue;
           res.font = font;
         } else continue;
@@ -894,6 +900,59 @@ function stripDefaults(json: any): any {
     if (!res.field) delete res.field;
     if (!res.quote) delete res.quote;
   }
+  return res;
+}
+
+const fmtOpts = { throw: true, consumeAll: true };
+function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>): Computed|ValueOrExpr|Array<ValueOrExpr|Span> {
+  if (typeof str !== 'string' && typeof str !== 'object') return str;
+  if (typeof str === 'string') {
+    try {
+      return stringify(parse(str, fmtOpts));
+    } catch {
+      return str;
+    }
+  } else if (Array.isArray(str)) {
+    return str.map(e => {
+      if (typeof e === 'string') {
+        try {
+          return stringify(parse(e, fmtOpts));
+        } catch {
+          return e;
+        }
+      } else if ('text' in e && typeof e.text === 'string') {
+        try {
+          return stringify(parse(e.text, fmtOpts));
+        } catch {
+          return e;
+        }
+      } else {
+        return e;
+      }
+    });
+  } else if ('x' in str && typeof str.x === 'string') {
+    try {
+      return { x: stringify(parse(str.x, fmtOpts)) };
+    } catch {
+      return str;
+    }
+  }
+  return str;
+}
+
+function fmtAll(json: any): any {
+  if (typeof json !== 'object') return json;
+
+  if (Array.isArray(json)) return json.map(fmtAll);
+
+  const res = {};
+
+  for (const k in json) {
+    const v = json[k];
+    if (k === 'text' || k === 'html' || k === 'width' || k === 'height' || k === 'hide' || k === 'br') res[k] = fmt(v);
+    else res[k] = fmtAll(v);
+  }
+
   return res;
 }
 

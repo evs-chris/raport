@@ -3,6 +3,7 @@ export {
   Delimited, Displayed, Flow, Page,
   Widget, Container, HTML, Label, Image, Span, Repeater,
   Borders, Dimension, Font, Margin, MeasureFont, PageOrientation, PageSize, PageSizes, PartSource, Placement, Report, ReportSource, ReportType, Style,
+  Computed,
 } from './report';
 
 import './render/builtins';
@@ -14,7 +15,7 @@ export {
   DataSet, DataSource, Field, Group, Schema, Sort, SourceMap,
   Operator, AggregateOperator, CheckedOperator, ValueOperator,
   Operation,
-  Type, ArrayType, ValueType, Value, Literal, Reference,
+  Type, ArrayType, ValueType, Value, Literal, Reference, ValueOrExpr,
 } from './data/index';
 export { inspect } from './data/schema';
 export { parse } from './data/parse';

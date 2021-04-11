@@ -3,8 +3,9 @@
   <div class-definition>
     <div class-actions>
       <button class-ico on-click="@.loadReportFile()" title="Load report definition from a file">Load</button>
-      <button class-ico on-click="@.download((~/report.name || 'report') + '.json', @.reportToString(true))" title="Save report definition to a file">Save</button>
-      <label><input type="checkbox" checked="{{compact}}" /> Compact?</label>
+      <button class-ico class-spacer on-click="@.download((~/report.name || 'report') + '.json', @.reportToString(true))" title="Save report definition to a file">Save</button>
+      <label class-spacer><input type="checkbox" checked="{{compact}}" style="vertical-align: middle;" /> Compact?</label>
+      <button class-ico on-click="@.fmtAll()" title="Reformat all expressions">Format All</button>
     </div>
     <div class-json>
       <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate="@.autosize(@node)" twoway=false value="{{@.reportToString(~/compact)}}" on-change="@.loadReportString(@node.value), @.update('temp')" /></div></div>

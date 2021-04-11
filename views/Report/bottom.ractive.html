@@ -17,6 +17,7 @@
         <button disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>&#9655;</button>
         <!--<button class-tab class-active="!~/temp.expr.tab || ~/temp.expr.tab === 'ast'" class-error="~/temp.expr.error" on-click="@.set('temp.expr.tab', 'ast')">AST</button>-->
         <button class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">Text</button>
+        {{#if ~/temp.expr.tab === 'text'}}<button class-ico on-click="@.fmt()">Format</button>{{/if}}
         <button class-tab style-display="{{~/temp.expr.html ? '' : 'none'}}" class-active="~/temp.expr.tab === 'html'" on-click="@.set('temp.expr.tab', 'html')">HTML</button>
         <div style-flex-grow=2 />
         <button class-tab class-active="~/temp.expr.tab === 'result'" on-click="@.set('temp.expr.tab', 'result')">Result</button>
