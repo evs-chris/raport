@@ -231,6 +231,7 @@ registerOperator(
   simple(['+'], (_name: string, values: any[]): number|string => {
     if (values.length === 1) {
       if (isDateRel(values[0])) return +dateRelToDate(values[0]);
+      else if (!values[0]) return 0;
       return parseFloat(values[0]);
     }
     if (Array.isArray(values[0])) return values[0].concat.apply(values[0], values.slice(1));
