@@ -12,6 +12,7 @@
       </select>
       <button on-click="@.addWidget(~/add)" class=add>+</button>
     {{/if}}
+    <button class-ico on-click="@.treeScrollToActive()">A</button>
   </div>
   <div class="shrinky scrolled-wrapper" style-max-height="20%">
     <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">

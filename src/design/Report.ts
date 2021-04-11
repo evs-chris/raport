@@ -180,6 +180,14 @@ export class Designer extends Ractive {
     this.link(path, 'widget');
     this.set('temp.name', (path === 'report' ? 'Report' : (this.get(path + '.type') || '')) + ' ');
     this.set('temp.widget', path);
+    this.treeScrollToActive();
+  }
+
+  treeScrollToActive() {
+    setTimeout(() => {
+      const el = document.querySelector('.tree .node.active > .line');
+      if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
   }
 
   async eval() {
