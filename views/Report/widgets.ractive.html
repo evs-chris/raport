@@ -72,7 +72,7 @@
 </template>
 
 <template id="label">
-  <span class-content on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false" on-click="@.editExpr(@context.resolve('.text'), { label: true }), @.selectWidget(@keypath)" title="{{.text}}">
+  <span class-content on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false" on-click="@.selectWidget(@keypath)" title="{{.text}}">
     {{#if Array.isArray(.text)}}
       {{#each .text}}{{#if typeof . === 'string'}}{{.}}{{else}}<span {{#if .font}}style="{{@.calcFont(.)}}"{{/if}}>{{.text}}</span>{{/if}}{{/each}}
     {{else}}
@@ -82,7 +82,7 @@
 </template>
 
 <template id="measured">
-  <span class-content on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false" on-click="@.editExpr(@context.resolve('.text')), @.selectWidget(@keypath)" title="{{.text}}">{{.text}}</span>
+  <span class-content on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false" on-click="@.selectWidget(@keypath)" title="{{.text}}">{{.text}}</span>
 </template>
 
 <template id="image">

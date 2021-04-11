@@ -190,6 +190,10 @@ export class Designer extends Ractive {
     this.link(path, 'widget');
     this.set('temp.name', (path === 'report' ? 'Report' : (this.get(path + '.type') || '')) + ' ');
     this.set('temp.widget', path);
+    const w: Widget = this.get('widget');
+    if (w.type === 'html') this.editExpr(`${path}.html`, { html: true });
+    else if (w.type === 'label' || w.type === 'measured') this.editExpr(`${path}.text`, { label: true });
+    else if (w.type === 'image') this.editExpr(`${path}.url`);
     this.treeScrollToActive();
   }
 

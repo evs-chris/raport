@@ -127,7 +127,7 @@
 <template id="sure" src="./test.ractive.html" />
 
 <template id="label-props">
-  <label><span>Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text', { label: true })">&#9998;</button></span><span>{{#if Array.isArray(.text)}}<button class-plain on-click="@context.set('.text', '')">Convert to Text</button>{{else}}<textarea>{{.text}}</textarea>{{/if}}</span></label>
+  <label><span>Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text', { label: true })">&#9998;</button></span><span>{{#if Array.isArray(.text)}}<button class-plain style-font-size="0.7rem" on-click="@context.set('.text', '')">Convert to Text</button>{{else}}<textarea>{{.text}}</textarea>{{/if}}</span></label>
   {{#if @.inRepeater(~/temp.widget)}}
     <label><span>ID {{#if .id != null}}
         <button class-ico class-large title="Remove aggregate id" on-click="@context.set('.id', undefined)">&times;</button>
