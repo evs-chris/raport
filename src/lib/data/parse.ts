@@ -310,12 +310,19 @@ export const binop_and = map(seq(binop_eq, rep(seq(rws, name(str('and', '&&'), '
 export const binop_or = map(seq(binop_and, rep(seq(rws, name(str('or', '||'), 'or op'), rws, binop_and))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'binop');
 binop.parser = binop_or;
 
-if_op.parser = map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(seq(rws, str('else if', 'elseif', 'elsif', 'elif'), rws, value, rws, str('then'), rws, value)), opt(seq(rws, str('else'), rws, value))), ([,, cond1,,,, val1, elifs, el]) => {
-  const op = { op: 'if', args: [cond1, val1] };
-  for (const [,,, cond,,,, val] of elifs) op.args.push(cond, val);
-  if (el) op.args.push(el[3]);
-  return op;
-}, 'if');
+if_op.parser = alt(
+  map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(seq(rws, str('else if', 'elseif', 'elsif', 'elif'), rws, value, rws, str('then'), rws, value)), opt(seq(rws, str('else'), rws, value))), ([,, cond1,,,, val1, elifs, el]) => {
+    const op = { op: 'if', args: [cond1, val1] };
+    for (const [,,, cond,,,, val] of elifs) op.args.push(cond, val);
+    if (el) op.args.push(el[3]);
+    return op;
+  }, 'if'),
+  map(seq(str('unless'), rws, value, rws, str('then'), rws, value, opt(seq(rws, str('else'), rws, value))), ([, , cond, , , , hit, miss]) => {
+    const op = { op: 'unless', args: [cond, hit] };
+    if (miss) op.args.push(miss[3]);
+    return op;
+  }),
+);
 
 function postfix_path(parser: Parser<Value>): Parser<Value> {
   return map(seq(parser, rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([v, k]) => {
