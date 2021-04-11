@@ -19,7 +19,7 @@
               </div>
               <div class-children class-fields>
                 {{#each report.headers}}
-                  <div class="field" on-click="@.editExpr(@context)" class-active-expr="~/temp.expr.path === @keypath" as-expr><span>{{.}}</span><button class-ico class-large on-click="@context.splice('../', @index, 1), @.splice('~/report.fields', @index, 1), @.checkExpr(), false">&times;</button></div>
+                  <div class="field" on-click="@.editExpr(@context)" class-active-expr="~/temp.expr.path === @keypath" as-expr><span>{{.}}</span><button class-ico class-large on-click="@.removeWidget(@context), false">&times;</button></div>
                 {{/each}}
               </div>
             </div>
@@ -31,7 +31,7 @@
             </div>
             <div class-children class-fields>
               {{#each report.fields}}
-                <div class="field" on-click="@.editExpr(@context)" class-active-expr="~/temp.expr.path === @keypath" as-expr><span>{{.}}</span><button class-ico class-large on-click="@context.splice('../', @index, 1), ~/report.header && @.splice('~/report.headers', @index, 1), @.checkExpr(), false">&times;</button></div>
+                <div class="field" on-click="@.editExpr(@context)" class-active-expr="~/temp.expr.path === @keypath" as-expr><span>{{.}}</span><button class-ico class-large on-click="@.removeWidget(@context), false">&times;</button></div>
               {{/each}}
             </div>
           </div>
@@ -79,6 +79,7 @@
 
   .delimited .children.fields {
     display: flex;
+    flex-wrap: wrap;
   }
 
   .field {

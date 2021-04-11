@@ -5,7 +5,7 @@
         <span class-line on-mouseover="@.set('temp.hover', @keypath), false"><span>group {{@index + 1}}</span>
           <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context), @.moveUp(@context, '^^/groupEnds'), false" title="Move up">&#9650;</button>
           <button class-ico disabled="{{@index === @last}}" on-click="@.moveDown(@context), @.moveDown(@context, '^^/groupEnds'), false" title="Move down">&#9660;</button>
-          <button class-ico class-large on-click="@context.splice('../', @index, 1), @context.splice('^^/groupsEnds', @index, 1), false" title="Remove">&times;</button>
+          <button class-ico class-large on-click="@.removeWidget(@context), false" title="Remove">&times;</button>
         </span>
         {{>widget-tree}}
       </div>
@@ -16,7 +16,7 @@
       <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
         <span class-line>
           <span>{{@key}}</span>
-          {{#if @key !== 'row' || ../type !== 'repeater'}}<button class-ico class-large on-click="@context.set('^^/' + @key, undefined), false">&times;</button>{{/if}}
+          {{#if @key !== 'row' || ../type !== 'repeater'}}<button class-ico class-large on-click="@.removeWidget(@context), false">&times;</button>{{/if}}
         </span>
         {{>widget-tree}}
       </div>
@@ -27,7 +27,7 @@
       <span class-line><span>{{.type}}</span>
         <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context), Array.isArray(^^/layout) ? @.moveUp(@context, '^^/layout') : false, false">&#9650;</button>
         <button class-ico disabled="{{@index === @last}}" on-click="@.moveDown(@context), Array.isArray(^^/layout) ? @.moveDown(@context, '^^/groupEnds') : false, false">&#9660;</button>
-        <button class-ico class-large on-click="@context.splice('../', @index, 1), Array.isArray(^^/layout) ? @context.splice('^^/layout', @index, 1) : false, false">&times;</button>
+        <button class-ico class-large on-click="@.removeWidget(@context), false">&times;</button>
         </span>
         {{>widget-tree}}
     </div>
@@ -47,7 +47,7 @@
     {{#if .border}}style="{{@.calcBorder(.)}}"{{/if}}
     {{#if .font}}style="{{@.calcFont(.)}}"{{/if}}
   >
-    {{#if Array.isArray(../)}}<span class="remove btn" title="Remove {{.type}}" on-click="@context.splice('../', @index, 1), @.unlink('widget'), @.set('temp.widget', undefined), false">&times;</span>{{/if}}
+    {{#if Array.isArray(../)}}<span class="remove btn" title="Remove {{.type}}" on-click="@.removeWidget(@context, false)">&times;</span>{{/if}}
     {{>.type}}
   </div>
   {{/with}}

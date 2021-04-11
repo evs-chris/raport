@@ -82,7 +82,7 @@
               {{>types}}
             </select></div>
             <div class-param-require><input type=checkbox checked="{{.required}}" /></div>
-            <div class-param-btn><button class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button></div>
+            <div class-param-btn><button class-ico class-large on-click="@.checkLink('param', @keypath), @context.splice('../', @index, 1)">&times;</button></div>
           </div>
         {{/each}}
       </div></div>
@@ -103,11 +103,15 @@
               <div class-src-btn>
                 <button class-ico title="Import data..." on-click="@context.link(@keypath, '~/data'), @.set('tab', 'import')">&#9650;</button>
                 <button class-ico class-large title="Log data to console..." on-click="@.logData(.)">&#9744;</button>
-                <button class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button>
+                <button class-ico class-large on-click="@.checkLink('import', @keypath), @context.splice('../', @index, 1)">&times;</button>
               </div>
             </div>
           {{/each}}
         </div></div>
+      {{else}}
+        <div class="header" style-justify-content=center>
+          <button class-plain on-click="@.push('sources', {})" title="Create a new source of data to reference from a report source">Provide Source</button>
+        </div>
       {{/if}}
       <div class=header>
         <h3>Source{{#if report.type !== 'delimited'}}s{{/if}}</h3>
@@ -124,7 +128,7 @@
             <div class-rsrc-name><input value="{{.name}}" /></div>
             <div class-rsrc-src><select value="{{.source}}">{{#each ~/sources}}<option>{{.name}}</option>{{/each}}</select></div>
             <div class-rsrc-btn>
-              <button class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button>
+              <button class-ico class-large on-click="@.checkLink('source', @keypath), @context.splice('../', @index, 1)">&times;</button>
             </div>
           </div>
         {{/each}}
@@ -151,7 +155,7 @@
         <span class-line on-mouseover="@.set('temp.expr.hover', @keypath), false" on-mouseout="@.set('temp.expr.hover', ''), false"><span>{{@index}}. {{.}}</span>
           <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context, '../', @index), ~/report.header && @.moveUp(@context, '~/report.header', @index), false">&#9650;</button>
           <button class-ico disabled="{{@index === @last}}" on-click="@.moveDown(@context, '../', @index), ~/report.header && @.moveDown(@context, '~/report.header', @index), false">&#9660;</button>
-          <button class-ico class-large on-click="@context.splice('../', @index, 1), ~/report.header && @context.splice('~/report.header', @index, 1), @.checkExpr(), false">&times;</button>
+          <button class-ico class-large on-click="@.checkLink('expr', @keypath), @context.splice('../', @index, 1), ~/report.header && @context.splice('~/report.header', @index, 1), @.checkExpr(), false">&times;</button>
         </span>
     {{/each}}
   </div>

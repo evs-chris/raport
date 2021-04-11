@@ -4,9 +4,9 @@
   {{#if ~/temp.bottom.param}}<span class-tab class-active="~/temp.bottom.tab === 'param'" on-click="@.set('temp.bottom.tab', 'param'), @.set('temp.bottom.pop', true)">Parameter</span>{{/if}}
   {{#if ~/temp.bottom.source}}<span class-tab class-active="~/temp.bottom.tab === 'source'" on-click="@.set('temp.bottom.tab', 'source'), @.set('temp.bottom.pop', true)">Source</span>{{/if}}
   <span class-which>
-    {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button class-ico class-large on-click="@.unlink('expr'), @.set('temp.expr.path', undefined), @.set('temp.expr.str', ''), @.set('temp.expr.html', false), @.set('temp.expr.tab', 'text'), @.set('temp.expr.label', false)">&times;</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
-    {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button class-ico class-large on-click="@.unlink('param'), @.set('temp.bottom.param', undefined), @.set('temp.bottom.tab', 'expr')">&times;</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
-    {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button class-ico class-large on-click="@.unlink('source'), @.set('temp.bottom.source', undefined), @.set('temp.bottom.tab', 'expr')">&times;</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
+    {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button class-ico class-large on-click="@.checkLink('expr')">&times;</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
+    {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button class-ico class-large on-click="@.checkLink('param')">&times;</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
+    {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button class-ico class-large on-click="@.checkLink('source')">&times;</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
   </span>
   <button on-click="@.toggle('temp.bottom.pop')" class-ico style-height="2.5rem">{{#if ~/temp.bottom.pop}}&#9660;{{else}}&#9650;{{/if}}</button>
 </div>
@@ -41,7 +41,7 @@
           {{#if .label}}
             {{#if Array.isArray(.str)}}
               <div style="display: flex; justify-content: space-between;">
-                <button class-plain style-font-size="0.7rem" on-click="@context.set('.str', '')">Convert to Text</button>
+                <button class-plain on-click="@context.set('.str', '')">Convert to Text</button>
                 <button class-ico class-large on-click="@context.push('.str', '')" title="Add part">+</button>
               </div>
               <div class-scrolled-wrapper style-flex-grow=1>
@@ -77,7 +77,7 @@
               </div>
             {{else}}
               <div>
-                <button class-plain style-font-size="0.7rem" on-click="@context.set('.str', [.str])">Convert to Parts</button>
+                <button class-plain on-click="@context.set('.str', [.str])">Convert to Parts</button>
               </div>
               <div class-scrolled-wrapper style-flex-grow=1>
                 <div as-scrolled>

@@ -327,13 +327,6 @@ export class Designer extends Ractive {
     }, 500);
   }
 
-  checkExpr() {
-    if (this.get('expr') !== this.get('temp.expr.str')) {
-      this.unlink('expr');
-      this.set('temp.expr', {});
-    }
-  }
-
   exprToggle(path: string) {
     this.toggle('exprExpand.' + Ractive.escapeKey(path));
   }
@@ -412,7 +405,7 @@ export class Designer extends Ractive {
         else prefix += '^';
 
         t = inspect(c.value);
-        t.fields.forEach(f => (f.name = `${prefix}${f.name}`, pl.fields.push(f)));
+        (t.fields || []).forEach(f => (f.name = `${prefix}${f.name}`, pl.fields.push(f)));
 
         if (c === c.root) break;
       }
@@ -584,6 +577,57 @@ export class Designer extends Ractive {
   fmtAll() {
     const json = this.get('report');
     this.set('report', fmtAll(json));
+  }
+
+  removeWidget(ctx: ContextHelper) {
+    if (this.get('temp.widget') === ctx.resolve()) this.set('temp.widget', undefined);
+    this.checkLink('expr', ctx.resolve());
+    if (ctx.get('^^/groupEnds')) ctx.splice('^^/groupEnds', ctx.get('^^/groupEnds') - 1 - ctx.get('@index'), 1);
+    if (ctx.get('../type') === 'repeater') ctx.set('^^/' + ctx.get('@key'), undefined); 
+    else {
+      if (Array.isArray(ctx.get('^^/layout'))) ctx.splice('^^/layout', ctx.get('@index'), 1);
+      const path = ctx.resolve();
+      const idx: number = ctx.get('@index');
+      ctx.splice('../', idx, 1);
+      if (path.startsWith('report.fields') && ctx.get('../headers')) ctx.splice('../headers', idx, 1);
+      else if (path.startsWith('report.headers')) ctx.splice('../fields', idx, 1);
+    }
+  }
+
+  checkLink(type: 'expr'|'import'|'source'|'param'|'field', path?: string) {
+    if (path === undefined) {
+      if (type === 'import') path = this.readLink('data').keypath;
+      else if (type === 'expr') path = this.get('temp.expr.path');
+      else if (type === 'param') path = this.readLink('param').keypath;
+      else if (type === 'source') path = this.readLink('source').keypath;
+    }
+
+    if (type === 'import' && path === this.readLink('data').keypath) {
+      this.unlink('data');
+      this.set('tab', 'definition')
+    } else if ((type === 'expr' || type === 'field') && (this.get('temp.expr.path') || '').startsWith(path)) {
+      this.unlink('expr');
+      this.set('temp.expr', {
+        path: undefined,
+        str: '',
+        html: false,
+        tab: 'text',
+        label: false,
+      }, { deep: true });
+    } else if (type === 'param' && path === this.readLink('param').keypath) {
+      this.unlink('param');
+      this.set('temp.bottom.param', undefined);
+      this.set('temp.bottom.tab', 'expr');
+    } else if (type === 'source' && path === this.readLink('source').keypath) {
+      this.unlink('source');
+      this.set('temp.bottom.source', undefined);
+      this.set('temp.bottom.tab', 'expr');
+    }
+
+    if (type !== 'field') {
+      if (path.startsWith('report.fields')) this.checkLink('field', path.replace('fields', 'headers'));
+      if (path.startsWith('report.headers')) this.checkLink('field', path.replace('headers', 'fields'));
+    }
   }
 }
 
