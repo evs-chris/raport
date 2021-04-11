@@ -259,17 +259,29 @@ export function getWidthWithMargin(w: Widget, placement: Placement, context: Ren
   return r;
 }
 
-export function getHeight(w: Widget, placement: Placement, context: RenderContext, computed?: number): number {
+function maxFontSize(w: Widget) {
+  let n = w.height || 1;
+  if (w.font && w.font.size > n) n = w.font.size;
+  if ('text' in w && Array.isArray(w.text)) {
+    for (let i = 0; i < w.text.length; i++) {
+      if (typeof w.text[i] === 'object' && w.text[i].font && w.text[i].font.size > n) n = w.text[i].font.size;
+    }
+  }
+  return n;
+}
+
+export function getHeight(w: Widget, placement: Placement, context: RenderContext, computed?: number, linesize?: boolean): number {
   let r = 1;
   let h = isComputed(w.height) ? evaluate(context, w.height.x) : w.height;
+  if (h == null && linesize) h = maxFontSize(w);
   if (typeof h === 'number') r = h;
   else if (typeof h === 'object' && 'percent' in h && h.percent && placement.availableY) r = +(placement.availableY * (h.percent / 100)).toFixed(4);
   else if (h === 'auto' || (computed && !h)) return computed || NaN;
   return r;
 }
 
-export function getHeightWithMargin(w: Widget, placement: Placement, context: RenderContext, computed?: number): number {
-  let h = getHeight(w, placement, context, computed);
+export function getHeightWithMargin(w: Widget, placement: Placement, context: RenderContext, computed?: number, linesize?: boolean): number {
+  let h = getHeight(w, placement, context, computed, linesize);
   if (w.margin) {
     const m = expandMargin(w, context);
     h += m[0] + m[2];

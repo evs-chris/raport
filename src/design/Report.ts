@@ -98,7 +98,16 @@ export class Designer extends Ractive {
   calcHeight(w: Widget): string {
     if (typeof w.height === 'number') return `${w.height}rem`;
     else if (typeof w.height === 'object' && 'percent' in w.height && w.height.percent) return `${w.height.percent}%`;
-    else if (w.type !== 'container' && w.type !== 'repeater') return '1rem';
+    else if (w.type === 'label') {
+      let n = 1;
+      if (w.font && w.font.size > n) n = w.font.size;
+      if (Array.isArray(w.text)) {
+        for (let i = 0; i < w.text.length; i++) {
+          if (typeof w.text[0] === 'object' && w.text[0].font && w.text[0].font.size > n) n = w.text[0].font.size;
+        }
+      }
+      return `${n}rem`;
+    } else if (w.type !== 'container' && w.type !== 'repeater') return '1rem';
     else return 'min-content';
   }
 

@@ -5,7 +5,9 @@ import { evaluate, ValueOrExpr } from '../data/index';
 export interface StyleOptions {
   computedHeight?: number;
   container?: boolean;
+  lineSize?: boolean;
   font?: Font;
+
 }
 
 export function nextStyleId(ctx: RenderContext, prefix: string): number {
@@ -41,16 +43,16 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   else if (typeof w.width !== 'number' && 'percent' in w.width) s += `width:${w.width.percent}%;`;
   else s += `width:${getWidthWithMargin(w, placement, context)}rem;`
 
-  const h = getHeightWithMargin(w, placement, context, opts && opts.computedHeight) || 1;
+  const h = getHeightWithMargin(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize) || 1;
   if (opts && opts.container && opts.computedHeight) i = `height:${h}rem;`;
   else s += `height:${h}rem;`;
 
-  if (w.font && w.font.line === 0) s += `line-height: initial;`
-  else s += `${!opts || !opts.container || (w.font && w.font.line) ? `line-height:${(w.font && w.font.line) || getHeight(w, placement, context, opts && opts.computedHeight)}rem;` : ''}`;
+  if (w.font && w.font.line === 0) s += `line-height:initial;`
+  else s += `${!opts || !opts.container || (w.font && w.font.line) ? `line-height:${(w.font && w.font.line || w.font && w.font.size) || getHeight(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize)}rem;` : ''}`;
 
   if (w.margin) {
     const m = expandMargin(w, context);
-    if (m[0] || m[1] || m[2] || m[3]) s += `padding: ${m[0]}rem ${m[1]}rem ${m[2]}rem ${m[3]}rem;`;
+    if (m[0] || m[1] || m[2] || m[3]) s += `padding:${m[0]}rem ${m[1]}rem ${m[2]}rem ${m[3]}rem;`;
   } else if (w.font && w.font.right) {
     s += `padding-right:${w.font.right}rem;`;
   }

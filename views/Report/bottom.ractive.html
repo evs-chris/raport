@@ -55,7 +55,8 @@
                         <button class-ico on-click="@context.set('.', { text: . })" title="Format part">F</button>
                         <textarea lazy="500" class-expr-text>{{.}}</textarea>
                       {{else}}
-                        <button class-ico on-click="@context.set('.', .text)" title="Plain part">T</button>
+                        <button class-ico class-spacer on-click="@context.set('.', .text)" title="Plain part">T</button>
+                        <input value="{{.id}}" placeholder="Tracking ID" title="Track this value by assigning it a unique ID" />
                         <textarea title="Part expression" lazy="500" class-expr-text>{{.text}}</textarea>
                         <input title="Font Family" placeholder="Font Family" value="{{.font.family}}" />
                         <input title="Color" placeholder="Color" value="{{.font.color}}" />
