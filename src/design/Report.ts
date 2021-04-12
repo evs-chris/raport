@@ -252,6 +252,9 @@ export class Designer extends Ractive {
     this.link(path, 'expr');
     this.set('temp.expr.str', this.get(path));
     this.set('temp.bottom.pop', true);
+
+    const el = document.getElementById(`expr-${html ? 'html' : 'text'}`);
+    if (el) el.focus();
   }
 
   editParam(ctx: ContextHelper) {
