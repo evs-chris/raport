@@ -9,6 +9,7 @@ let sourceTm: any;
 export interface ExprOptions {
   html?: boolean;
   label?: boolean;
+  template?: boolean;
 }
 
 export interface AvailableSource {
@@ -215,7 +216,7 @@ export class Designer extends Ractive {
         else if (p && typeof p === 'object' && typeof p.text === 'string') return evaluate(ctx, p.text);
         return '';
       }).join('') :
-      evaluate(ctx, this.get('temp.expr.html') ? parseTemplate(str) : str);
+      evaluate(ctx, this.get('temp.expr.html') || this.get('temp.expr.template') ? parseTemplate(str) : str);
     this.set('temp.expr.result', res);
     this.set('temp.expr.tab', 'result');
   }
@@ -255,6 +256,7 @@ export class Designer extends Ractive {
     const tab = this.get('temp.expr.tab');
     this.set('temp.expr.html', html);
     this.set('temp.expr.label', options && options.label);
+    this.set('temp.expr.template', options && options.template);
     this.set('temp.expr.tab', html ? 'html' : tab === 'ast' || tab === 'text' ? tab : 'text');
     this.set('temp.bottom.tab', 'expr');
 
@@ -454,7 +456,7 @@ export class Designer extends Ractive {
     }
     if (ps[0][0] === '*' && ps[1] === 'value' && ps.length > 2) ps[1] = '0';
     let ref = Ractive.joinKeys.apply(Ractive, ps);
-    if (this.get('temp.expr.html')) ref = `{{${ref}}}`;
+    if (this.get('temp.expr.html') || this.get('temp.expr.template')) ref = `{{${ref}}}`;
 
     if (tab === 'text') {
       const node: HTMLTextAreaElement = this.find('textarea.expr-text') as any;
@@ -479,7 +481,7 @@ export class Designer extends Ractive {
     const tab = this.get('temp.expr.tab') || 'text';
 
     let op = `${name}()`;
-    if (this.get('temp.expr.html')) op = `{{${op}}}`;
+    if (this.get('temp.expr.html') || this.get('temp.expr.template')) op = `{{${op}}}`;
 
     if (tab === 'text') {
       const node: HTMLTextAreaElement = this.find('textarea.expr-text') as any;
@@ -592,7 +594,7 @@ export class Designer extends Ractive {
 
   nodeForPosition(pos: number, name?: true): ParseError|ParseNode[] {
     const str = this.get('temp.expr.str');
-    const r = (this.get('temp.expr.html') ? parseTemplate : parse)(str, { tree: true });
+    const r = (this.get('temp.expr.html') || this.get('temp.expr.template') ? parseTemplate : parse)(str, { tree: true });
     if ('message' in r) return r;
     else return nodeForPosition(r, pos, name);
   }
@@ -641,6 +643,7 @@ export class Designer extends Ractive {
         html: false,
         tab: 'text',
         label: false,
+        template: false,
       }, { deep: true });
     } else if (type === 'param' && path === this.readLink('param').keypath) {
       this.unlink('param');
@@ -685,7 +688,7 @@ Ractive.extendWith(Designer, {
   computed: {
     operators() {
       const map = getOperatorMap();
-      const keys = Object.keys(map).sort();
+      const keys = Object.keys(map).filter(k => !~k.indexOf('parse')).sort();
       return keys.reduce((a, c) => (a[c] = map[c], a), {} as typeof map);
     }
   },
@@ -710,7 +713,7 @@ Ractive.extendWith(Designer, {
       }
 
       const path = this.get('temp.expr.path');
-      const html = this.get('temp.expr.html');
+      const html = this.get('temp.expr.html') || this.get('temp.expr.template');
       if (path) this.set(path, v);
       if (!this.evalLock) {
         this.evalLock = true;

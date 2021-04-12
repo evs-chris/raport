@@ -8,7 +8,7 @@
     {{#if data.type === 'fetch'}}
       <div class-fetch>
         {{#with data}}
-          <label class-input>URL <button class-ico on-click="@.editExpr(@keypath + '.url'), false">&#9998;</button><input value="{{.url}}" /></label>
+          <label class-input>URL <button class-ico on-click="@.editExpr(@keypath + '.url', { template: true }), false">&#9998;</button><input value="{{.url}}" /></label>
           <label class-input>Method<select value="{{.method}}">
             <option>GET</option>
             <option>POST</option>
@@ -22,7 +22,7 @@
               <div class-fetch-header>
                 <button class-ico class-large title="Remove header" on-click="@context.splice('../', @index, 1)">&times;</button>
                 <label class-input>Header<input value="{{.[0]}}" /></label>
-                <label class-input>Value <button class-ico on-click="@.editExpr(@keypath + '.1'), false">&#9998;</button><input value="{{.[1]}}" /></label>
+                <label class-input>Value <button class-ico on-click="@.editExpr(@keypath + '.1', { template: true }), false">&#9998;</button><input value="{{.[1]}}" /></label>
               </div>
             {{/each}}
           {{/if}}
