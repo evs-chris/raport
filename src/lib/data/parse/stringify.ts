@@ -87,8 +87,8 @@ function _stringify(value: ValueOrExpr): string {
 function stringifyBinopArg(op: string, arg: ValueOrExpr, pos: 1|2): string {
   if (op === '**' && pos === 1 && typeof arg !== 'string' && 'op' in arg && arg.op === '**') return `(${_stringify(arg)})`;
   if (typeof arg !== 'string' && 'op' in arg) {
-    if (binops.includes(arg.op) && precedence[arg.op] < precedence[op]) return `(${_stringify(arg)})`;
-    if (arg.op === 'if' || arg.op === 'unless') return `(${_stringify(arg)})`;
+    if (binops.includes(arg.op) && precedence[arg.op] > precedence[op]) return `(${_stringify(arg)})`;
+    if (arg.op === 'if' || arg.op === 'unless' || arg.op === 'fmt' || arg.op === 'format') return `(${_stringify(arg)})`;
   }
   return _stringify(arg);
 }
