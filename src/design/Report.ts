@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { InitOpts, ContextHelper } from 'ractive';
-import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed } from 'raport/index';
+import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 let sourceTm: any;
@@ -241,6 +241,14 @@ export class Designer extends Ractive {
   editExpr(path: string, options?: ExprOptions) {
     if ((this as any).event) path = this.getContext((this as any).event.node).resolve(path);
     if (path.startsWith('widget.')) path = path.replace('widget', this.get('temp.widget'));
+
+    let val = this.get(path);
+    if (Array.isArray(val)) {
+      val.forEach((v, i) => {
+        if (typeof v === 'object' && !('text' in v)) val[i] = stringify(v);
+      });
+    } else if (typeof val !== 'string') val = stringify(val);
+
     this.set('temp.expr.path', path);
 
     const html = options && options.html;
@@ -251,7 +259,7 @@ export class Designer extends Ractive {
     this.set('temp.bottom.tab', 'expr');
 
     this.link(path, 'expr');
-    this.set('temp.expr.str', this.get(path));
+    this.set('temp.expr.str', val);
     this.set('temp.bottom.pop', true);
 
     const el = document.getElementById(`expr-${html ? 'html' : 'text'}`);
@@ -1023,6 +1031,8 @@ function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>): Computed|ValueO
         } catch {
           return e;
         }
+      } else if (isValueOrExpr(e)) {
+        return stringify(e);
       } else {
         return e;
       }
@@ -1033,6 +1043,8 @@ function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>): Computed|ValueO
     } catch {
       return str;
     }
+  } else if (isValueOrExpr(str)) {
+    return stringify(str);
   }
   return str;
 }
