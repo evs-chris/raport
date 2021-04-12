@@ -220,8 +220,9 @@ export class Designer extends Ractive {
     this.set('temp.expr.tab', 'result');
   }
 
-  evalExpr(expr: string, template?: boolean): string {
-    return evaluate(template ? parse(expr) : parseTemplate(expr));
+  evalExpr(expr: string, template?: boolean, ctx?: Context): string {
+    if (ctx) return evaluate(ctx, template ? parseTemplate(expr) : parse(expr));
+    return evaluate(template ? parseTemplate(expr) : parse(expr));
   }
 
   autosizeHtml(ctx: ContextHelper) {
@@ -340,7 +341,7 @@ export class Designer extends Ractive {
     const avs: AvailableSource[] = this.get('sources');
     for (const src of report.sources || []) {
       const av = avs.find(s => s.name === src.source);
-      if (av) applySource(res, src, { [src.source]: av.data ? { value: tryJSON(av.data) } : await av.values(this.get('params')) });
+      if (av) applySource(res, src, { [src.source]: av.data ? { value: tryJSON(av.data) } : typeof av.values === 'function' ? await av.values(this.get('params')) : [] });
       if (!((src.name || src.source) in res.value)) res.value[src.name || src.source] = (res.sources[src.name || src.source] || {}).value;
     }
     return res;
@@ -383,6 +384,22 @@ export class Designer extends Ractive {
     }
 
     return ctx;
+  }
+
+  async fetchData() {
+    const data = this.get('data');
+    const ctx = await this.buildLocalContext();
+    const url = this.evalExpr(data.url, true, ctx);
+    const headers: { [key: string]: string } = {};
+    if (Array.isArray(data.headers)) {
+      for (let i = 0; i < data.headers.length; i++) headers[data.headers[i][0]] = this.evalExpr(data.headers[i][1], true, ctx);
+    }
+    try {
+      const res = await fetch(url, {
+        headers, method: data.method
+      });
+      this.set('data.data', await res.text());
+    }  catch {}
   }
 
   getSchema(ctx: Context) {

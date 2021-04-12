@@ -2,10 +2,35 @@
   <input type="file" style="display: none;" id="import-file" accept="application/json" />
   <div class-definition>
     <div class-actions>
-      <button class-ico on-click="@.loadImportFile()" title="Import data from a file">Load</button>
+      <button class-ico class-spacer on-click="@.loadImportFile()" title="Import data from a file">Load</button>
+      <label><input type="checkbox" style="vertical-align: middle;" checked="{{data.type === 'fetch'}}" twoway=false on-change="@.set('data.type', @node.checked ? 'fetch' : undefined)" /> Fetch request?</label>
     </div>
+    {{#if data.type === 'fetch'}}
+      <div class-fetch>
+        {{#with data}}
+          <label class-input>URL <button class-ico on-click="@.editExpr(@keypath + '.url'), false">&#9998;</button><input value="{{.url}}" /></label>
+          <label class-input>Method<select value="{{.method}}">
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+          </select></label>
+          <button class-plain on-click="@context.push('.headers', [])">Add Header</button>
+          <button class-plain on-click="@.fetchData()">Fetch Now</button>
+          {{#if .headers}}
+            <h3>Headers</h3>
+            {{#each .headers}}
+              <div class-fetch-header>
+                <button class-ico class-large title="Remove header" on-click="@context.splice('../', @index, 1)">&times;</button>
+                <label class-input>Header<input value="{{.[0]}}" /></label>
+                <label class-input>Value <button class-ico on-click="@.editExpr(@keypath + '.1'), false">&#9998;</button><input value="{{.[1]}}" /></label>
+              </div>
+            {{/each}}
+          {{/if}}
+        {{/with}}
+      </div>
+    {{/if}}
     <div class-json>
-      <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate="@.autosize(@node)">{{data.data}}</textarea></div></div>
+      <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate="@.autosize(@node), @.set('data.data', @node.value)"></textarea></div></div>
     </div>
   </div>
 </div>
@@ -25,5 +50,30 @@
   .import .definition {
     display: flex;
     flex-direction: column;
+  }
+
+  .import .fetch {
+    margin: 1em 0 2em;
+  }
+
+  label.input, label.check {
+    padding: 0.25rem;
+    display: inline-block;
+  }
+  label.check {
+    padding-top: 1.625rem;
+  }
+  label.input input, label.input select {
+    display: block;
+    height: 2.5rem;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    margin: 0;
+    border: 1px solid #ddd;
+    border-radius: 0;
+  }
+  label.check input {
+    height: 2rem;
+    vertical-align: middle;
   }
 </style>
