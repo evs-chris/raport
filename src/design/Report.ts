@@ -678,6 +678,12 @@ Ractive.extendWith(Designer, {
       } catch {}
     },
     'temp.expr.str'(v) {
+      if (!v) {
+        this.set('temp.expr.error', undefined);
+        this.set('temp.expr.ast', undefined);
+        return;
+      }
+
       const path = this.get('temp.expr.path');
       const html = this.get('temp.expr.html');
       if (path) this.set(path, v);
@@ -687,7 +693,7 @@ Ractive.extendWith(Designer, {
           const arr = Array.isArray(v) ? v : [v];
           for (let i = 0; i < arr.length; i++) {
             const v = typeof arr[i] === 'string' ? arr[i] : 'text' in arr[i] && typeof arr[i].text === 'string' ? arr[i].text : arr[i];
-            const parsed = (html ? parseTemplate : parse)(v, { detailed: true, contextLines: 3 });
+            const parsed = (html ? parseTemplate : parse)(v, { detailed: true, contextLines: 3, consumeAll: true });
             const msg = ('marked' in parsed ? 
               `${'latest' in parsed ? `${parsed.latest.message || '(no message)'} on line ${parsed.latest.line} at column ${parsed.latest.column}\n\n${parsed.latest.marked}\n\n` : ''}${parsed.message || '(no message)'} on line ${parsed.line} at column ${parsed.column}\n\n${parsed.marked}\n\n` : '') + JSON.stringify(parsed, null, '  ');
 
