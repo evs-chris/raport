@@ -6,9 +6,10 @@
       <label><input type="checkbox" style="vertical-align: middle;" checked="{{data.type === 'fetch'}}" twoway=false on-change="@.set('data.type', @node.checked ? 'fetch' : undefined)" /> Fetch request?</label>
     </div>
     {{#if data.type === 'fetch'}}
-      <div class-fetch>
+      <div class-fetch class-scrolled-wrapper>
+        <div as-scrolled>
         {{#with data}}
-          <label class-input>URL <button class-ico on-click="@.editExpr(@keypath + '.url', { template: true }), false">&#9998;</button><input value="{{.url}}" /></label>
+          <label class-input style-width=26rem>URL <button class-ico on-click="@.editExpr(@keypath + '.url', { template: true }), false">&#9998;</button><input value="{{.url}}" /></label>
           <label class-input>Method<select value="{{.method}}">
             <option>GET</option>
             <option>POST</option>
@@ -26,7 +27,11 @@
               </div>
             {{/each}}
           {{/if}}
+          {{#if .method !== 'GET'}}
+            <label class-area>Body <button class-ico on-click="@.editExpr(@keypath + '.body', { template: true }), false">&#9998;</button><textarea>{{.body}}</textarea></label>
+          {{/if}}
         {{/with}}
+        </div>
       </div>
     {{/if}}
     <div class-json>
@@ -45,15 +50,20 @@
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    max-height: calc(100% - 2em);
   }
 
   .import .definition {
     display: flex;
     flex-direction: column;
+    max-height: 100%;
   }
 
   .import .fetch {
     margin: 1em 0 2em;
+    max-height: 40%;
+    flex-grow: 0;
+    flex-shrink: 1;
   }
 
   label.input, label.check {
@@ -66,10 +76,25 @@
   label.input input, label.input select {
     display: block;
     height: 2.5rem;
+    width: 100%;
     padding: 0.5rem;
     box-sizing: border-box;
     margin: 0;
     border: 1px solid #ddd;
+    border-radius: 0;
+  }
+  label.area {
+    display: block;
+    padding: 0.25rem;
+  }
+  label.area textarea {
+    display: block;
+    min-height: 11rem;
+    width: 100%;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    margin: 0;
     border-radius: 0;
   }
   label.check input {
