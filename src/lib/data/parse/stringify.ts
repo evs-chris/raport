@@ -8,6 +8,7 @@ export interface BaseStringifyOpts {
   noSymbols?: boolean;
   SExprOps?: boolean;
   listCommas?: boolean;
+  template?: boolean;
 }
 export interface SimpleStringifyOpts extends BaseStringifyOpts {
   SExprOps?: false;
@@ -24,6 +25,7 @@ let _sexprops: boolean = false;
 let _listcommas: boolean = false;
 let _noarr: boolean = false;
 let _noobj: boolean = false;
+let _tpl: boolean = false;
 
 const binops = ['**', '*', '/%', '/', '%', '+', '-', '>=', '>', '<=', '<', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'and', '&&', 'or', '||'];
 const unops = ['+', 'not'];
@@ -47,6 +49,7 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
   _noarr = opts.SExprOps && opts.noArrayLiterals;
   _noobj = opts.SExprOps && opts.noObjectLiterals;
   _key = false;
+  _tpl = opts.template;
   return _stringify(value);
 }
 
@@ -67,7 +70,26 @@ function fill(char: string, len: number): string {
 function _stringify(value: ValueOrExpr): string {
   if (value == null) return '';
   if (typeof value === 'string') return value;
-  if ('r' in value) {
+  if (_tpl && ('op' in value || 'r' in value)) {
+    if ('op' in value) {
+      if (value.op === 'if' || value.op === 'with' || value.op === 'unless' || value.op === 'each') {
+        return stringifyTemplateBlock(value);
+      } else if (value.op) {
+        if (value.op === '+') return value.args.map(a => _stringify(a)).join('');
+        else {
+          _tpl = false;
+          const res = `{{${_stringify(value.op === 'string' ? value.args[0] : value)}}}`;
+          _tpl = true;
+          return res;
+        }
+      }
+    } else {
+      _tpl = false;
+      const res = `{{${_stringify(value)}}}`;
+      _tpl = true;
+      return res;
+    }
+  } else if ('r' in value) {
     if (typeof value.r === 'string') return /^[0-9]/.test(value.r) ? `.${value.r}` : value.r;
     else {
       const r = value.r;
@@ -134,7 +156,7 @@ function stringifyOp(value: Operation): string {
     return stringifyIf(value);
   } else if (value.op === '+' && value.args && value.args.length > 0 && findNestedStringOpL(value.op, value)) {
     const args = flattenNestedBinopsL(value.op, value);
-    return `'${args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `\$\{${_stringify(a)}}`).join('')}'`
+    return `'${args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `{${_stringify(a)}}`).join('')}'`
   } else if ((value.op === 'fmt' || value.op === 'format') && value.args && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'string') {
     const val = value.args[0];
     let vs = _stringify(val);
@@ -157,6 +179,7 @@ function stringifyOp(value: Operation): string {
 
 function stringifyLiteral(value: Literal): string {
   if (typeof value.v === 'string') {
+    if (_tpl) return value.v;
     if ((_key || !_noSym) && !checkIdent.test(value.v) && value.v.length) return `${_key ? '' : ':'}${value.v}`;
     else if (!~value.v.indexOf("'")) return `'${value.v.replace(/[\$']/g, v => `\\${v}`)}'`;
     else if (!~value.v.indexOf('`')) return `\`${value.v.replace(/[\$`]/g, v => `\\${v}`)}\``;
@@ -277,4 +300,27 @@ function stringifyIf(op: Operation): string {
     else str += ` elif ${_stringify(op.args[i])} then ${_stringify(op.args[i + 1])}`;
   }
   return str;
+}
+
+function stringifyTemplateBlock(op: Operation): string {
+  _tpl = false;
+  const cond = _stringify(op.args[0]);
+  _tpl = true;
+  const first = _stringify(op.args[1]);
+  let res = `{{${op.op} ${cond}}}${op.op === 'with' || op.op === 'each' ? first.slice(2) : first}`;
+  if (op.op === 'unless') return `${res}{{/}}`;
+  for (let i = 2; i < op.args.length; i++) {
+    if (i + 1 >= op.args.length) {
+      const arg = op.args[i];
+      if (typeof arg === 'object' && 'v' in arg && arg.v === '') continue;
+      else res += `{{else}}${_stringify(arg)}`;
+    } else {
+      _tpl = false;
+      res += `{{elseif ${_stringify(op.args[i++])}}}`;
+      _tpl = true;
+      res += _stringify(op.args[i]);
+    }
+  }
+  res += '{{/}}';
+  return res;
 }
