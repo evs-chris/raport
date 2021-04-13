@@ -405,9 +405,9 @@ export class Designer extends Ractive {
       for (let i = 0; i < data.headers.length; i++) headers[data.headers[i][0]] = this.evalExpr(data.headers[i][1], true, ctx);
     }
     try {
-      const res = await fetch(url, {
-        headers, method: data.method
-      });
+      const req: RequestInit = { headers, method: data.method };
+      if (req.method === 'POST' || req.method === 'PUT') req.body = this.evalExpr(data.body, true, ctx);
+      const res = await fetch(url, req);
       this.set('data.data', await res.text());
     }  catch {}
   }
@@ -1012,11 +1012,13 @@ function stripDefaults(json: any): any {
 }
 
 const fmtOpts = { throw: true, consumeAll: true };
-function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>): Computed|ValueOrExpr|Array<ValueOrExpr|Span> {
+function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>, template?: boolean): Computed|ValueOrExpr|Array<ValueOrExpr|Span> {
   if (typeof str !== 'string' && typeof str !== 'object') return str;
+  const parser = template ? parseTemplate : parse;
+  const opts = Object.assign(fmtOpts, { template });
   if (typeof str === 'string') {
     try {
-      return stringify(parse(str, fmtOpts));
+      return stringify(parser(str, opts),  { template });
     } catch {
       return str;
     }
@@ -1024,30 +1026,30 @@ function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>): Computed|ValueO
     return str.map(e => {
       if (typeof e === 'string') {
         try {
-          return stringify(parse(e, fmtOpts));
+          return stringify(parser(e, opts), { template });
         } catch {
           return e;
         }
       } else if ('text' in e && typeof e.text === 'string') {
         try {
-          return Object.assign({}, e, { text: stringify(parse(e.text, fmtOpts)) });
+          return Object.assign({}, e, { text: stringify(parser(e.text, opts), { template }) });
         } catch {
           return e;
         }
       } else if (isValueOrExpr(e)) {
-        return stringify(e);
+        return stringify(e, { template });
       } else {
         return e;
       }
     });
   } else if ('x' in str && typeof str.x === 'string') {
     try {
-      return { x: stringify(parse(str.x, fmtOpts)) };
+      return { x: stringify(parser(str.x, opts), { template }) };
     } catch {
       return str;
     }
   } else if (isValueOrExpr(str)) {
-    return stringify(str);
+    return stringify(str, { template });
   }
   return str;
 }
@@ -1062,6 +1064,7 @@ function fmtAll(json: any): any {
   for (const k in json) {
     const v = json[k];
     if (k === 'text' || k === 'html' || k === 'width' || k === 'height' || k === 'hide' || k === 'br') res[k] = fmt(v);
+    else if (k === 'name') res[k] = fmt(v, true);
     else res[k] = fmtAll(v);
   }
 
@@ -1072,6 +1075,6 @@ registerOperator({
   type: 'value',
   names: ['parse', 'unparse'],
   apply(name, [str, opts]) {
-    return name === 'parse' ? parse(str) : stringify(str, opts);
+    return name === 'parse' ? (opts && opts.template ? parseTemplate : parse)(str) : stringify(str, opts);
   }
 });

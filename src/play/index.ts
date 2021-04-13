@@ -1,4 +1,4 @@
-import { Delimited, Page, DataSet, PageSizes, } from 'raport/index';
+import { Delimited, Page, DataSet, PageSizes, parse, parseTemplate, stringify } from 'raport/index';
 import { ReportDesigner, } from 'design/index';
 import Ractive, { InitOpts, ContextHelper } from 'ractive';
 
@@ -37,6 +37,9 @@ Ractive.extendWith(App, {
 const app = globalThis.app = new App({
   target: 'body',
 });
+(app as any).parse = parse;
+(app as any).parseTemplate = parseTemplate;
+(app as any).stringify = stringify;
 
 // simple debug helper
 let el: any;
