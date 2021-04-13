@@ -64,6 +64,7 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
 }
 
 export function styleFont(f: Font): string {
+  if (!f) return '';
   let s = '';
   if (f.family) s += `font-family:${f.family};`;
   if (f.color) s += `color:${f.color};`;
