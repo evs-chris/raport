@@ -238,7 +238,7 @@ function stringifyDate(value: DateRel): string {
   } else if (Array.isArray(value.f)) { // precise date
     const a = value.f;
     str = `${a[0]}`;
-    if (a[1] != null) str += `-${padl(a[1], '0', 2)}`;
+    if (a[1] != null) str += `-${padl(a[1] + 1, '0', 2)}`;
     if (a[2] != null) str += `-${padl(a[2], '0', 2)}`;
     if (a[3] != null) str += ` ${padl(a[3], '0', 2)}`;
     if (a[4] != null) str += `:${padl(a[4], '0', 2)}`;
