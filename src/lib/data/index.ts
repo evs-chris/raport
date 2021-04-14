@@ -71,18 +71,20 @@ export interface BaseOperator {
 }
 export interface ValueOperator extends BaseOperator {
   type: 'value';
-  apply(name: string, values: any[], context?: Context): any;
+  apply(name: string, values: any[], context: Context): any;
 }
 
 export interface CheckedOperator extends BaseOperator {
   type: 'checked';
-  apply(name: string, values: any[], context?: Context): any;
-  checkArg: (name: string, num: number, last: number, value: any, context?: Context) => CheckResult;
+  apply(name: string, values: any[], context: Context): any;
+  checkArg: (name: string, num: number, last: number, value: any, context: Context, expr: ValueOrExpr) => CheckResult;
+  extend?: true;
 }
 
 export interface AggregateOperator extends BaseOperator {
   type: 'aggregate';
-  apply(name: string, values: any[], args?: ValueOrExpr[], context?: Context): any;
+  apply(name: string, values: any[], args: ValueOrExpr[], context: Context): any;
+  extend?: true;
 }
 
 export type CheckResult = 'continue'|{ result: any }|{ skip: number, value?: any };
@@ -316,10 +318,11 @@ function applyOperator(root: Context, operation: Operation): any {
   if (op.type === 'checked') {
     args = [];
     const flts = operation.args || [];
+    const ctx = op.extend ? extend(root, {}) : root;
     for (let i = 0; i < flts.length; i++) {
       const a = flts[i];
-      const arg = evaluate(root, a);
-      const res = op.checkArg(operation.op, i, flts.length - 1, arg, root);
+      const arg = evaluate(ctx, a);
+      const res = op.checkArg(operation.op, i, flts.length - 1, arg, ctx, a);
       if (res === 'continue') args.push(arg);
       else if ('skip' in res) {
         i += res.skip;
@@ -327,14 +330,15 @@ function applyOperator(root: Context, operation: Operation): any {
       } else if ('result' in res) return res.result;
     }
 
-    return op.apply(operation.op, args, root);
+    return op.apply(operation.op, args, ctx);
   } else if (op.type === 'value') {
     args = (operation.args || []).map(a => evaluate(root, a));
     return op.apply(operation.op, args, root);
   } else {
     let arr: any[];
+    const ctx = op.extend ? extend(root, {}) : root;
     const args = (operation.args || []).slice();
-    const arg = evaluate(root, args[0]);
+    const arg = evaluate(ctx, args[0]);
     if (Array.isArray(arg)) {
       args.shift();
       arr = arg;
@@ -343,12 +347,12 @@ function applyOperator(root: Context, operation: Operation): any {
       arr = arg.value;
     }
     if (!arr) {
-      const src = evaluate(root, { r: '@source' });
+      const src = evaluate(ctx, { r: '@source' });
       if (Array.isArray(src)) arr = src;
       else if (typeof src === 'object' && 'value' in src && Array.isArray(src.value)) arr = src.values;
       else arr = [];
     }
-    return op.apply(operation.op, Array.isArray(arr) ? arr : [], args, root);
+    return op.apply(operation.op, Array.isArray(arr) ? arr : [], args, ctx);
   }
 }
 
@@ -442,12 +446,16 @@ export type ValueOrExpr = string|Value;
 export type Value = Reference | Literal | Operation | Application | ParseError;
 
 export function isValueOrExpr(o: any): o is ValueOrExpr {
-  return typeof o === 'string' || (typeof o === 'object' && o && (
+  return typeof o === 'string' || isValue(o);
+}
+
+export function isValue(o: any): o is Value {
+  return typeof o === 'object' && o && (
     ('r' in o && typeof o.r === 'string') ||
     ('op' in o && typeof o.op === 'string') ||
     ('v' in o) ||
     ('a' in o)
-  ) );
+  );
 }
 
 export type Parameter<T = any> = ParameterBase & T;

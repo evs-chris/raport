@@ -1,6 +1,6 @@
-import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name } from 'sprunge/lib';
+import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name, not } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
-import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan } from './index';
+import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation } from './index';
 
 export const timespans = {
   y: 0,
@@ -274,6 +274,7 @@ function bracket_op<T>(parser: Parser<T>): Parser<T> {
 
 export const binop: Parser<Value> = {};
 export const if_op: Parser<Value> = {};
+export const case_op: Parser<Value> = {};
 
 const call_op = map(seq(name(read1('abcdefghifghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_$0123456789'), 'op'), bracket_op(args)), ([op, args]) => {
   const res: Value = { op };
@@ -281,7 +282,7 @@ const call_op = map(seq(name(read1('abcdefghifghijklmnopqrstuvwxyzABCDEFGHIJKLMN
   return res;
 }, 'call');
 
-export const operand: Parser<Value> = fmt_op(postfix_path(alt('operand', bracket_op(if_op), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`), sexp, values)));
+export const operand: Parser<Value> = fmt_op(postfix_path(alt('operand', bracket_op(if_op), bracket_op(case_op), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`), sexp, values)));
 export const unop = map(seq(str('not ', '+'), operand), ([op, arg]) => ({ op: op === '+' ? op : 'not', args: [arg] }), 'unary');
 
 function leftassoc(left: Value, [, op, , right]: [string, string, string, Value]) {
@@ -311,9 +312,9 @@ export const binop_or = map(seq(binop_and, rep(seq(rws, name(str('or', '||'), 'o
 binop.parser = binop_or;
 
 if_op.parser = alt(
-  map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(seq(rws, str('else if', 'elseif', 'elsif', 'elif'), rws, value, rws, str('then'), rws, value)), opt(seq(rws, str('else'), rws, value))), ([,, cond1,,,, val1, elifs, el]) => {
+  map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(seq(rws, not(str('end', 'fi')), str('else if', 'elseif', 'elsif', 'elif'), rws, value, rws, str('then'), rws, value)), opt(seq(rws, str('else'), rws, value)), opt(seq(rws, str('end', 'fi')))), ([,, cond1,,,, val1, elifs, el]) => {
     const op = { op: 'if', args: [cond1, val1] };
-    for (const [,,, cond,,,, val] of elifs) op.args.push(cond, val);
+    for (const [,,,, cond,,,, val] of elifs) op.args.push(cond, val);
     if (el) op.args.push(el[3]);
     return op;
   }, 'if'),
@@ -324,6 +325,39 @@ if_op.parser = alt(
   }),
 );
 
+export function replaceCase(op: Operation): boolean {
+  if (!op.args || !op.args.length) return false;
+  let found = false;
+  for (let i = 0; i < op.args.length; i++) {
+    const arg = op.args[i] as Value;
+    if ('r' in arg && (arg.r === '_' || (typeof arg.r === 'object' && arg.r.k[0] === '_'))) {
+      arg.r = { k: ['case'].concat(((arg.r as any).k || []).slice(1)), p: '@' };
+      found = true;
+    } else if ('r' in arg && typeof arg.r === 'object' && arg.r.p === '@' && arg.r.k[0] === 'case') {
+      found = true;
+    } else if ('op' in arg) found = found || replaceCase(arg);
+  }
+  return found;
+}
+
+export const case_branch = alt<[undefined|Value, Value]>(
+  map(seq(rws, not(str('end', 'esac')), str('when'), rws, value, rws, str('then'), rws, value), ([,,,, cond,,,, hit]) => [cond, hit], 'when branch'),
+  map(seq(rws, not(str('end', 'esac')), str('else'), rws, value), ([,,,, hit]) => [undefined, hit], 'else branch'),
+);
+case_op.parser = map(seq(str('case'), rws, value, rep(case_branch), opt(seq(rws, str('end', 'esac')))), ([,, val, branches]) => {
+  const op = { op: 'case', args: [val] };
+  for (let i = 0; i < branches.length; i++) {
+    if (branches[i][0] === undefined) op.args.push(branches[i][1]);
+    else {
+      let arg: Value = branches[i][0];
+      if ('op' in arg) replaceCase(arg);
+      op.args.push(arg);
+      op.args.push(branches[i][1]);
+    }
+  }
+  return op;
+}, 'case');
+
 function postfix_path(parser: Parser<Value>): Parser<Value> {
   return map(seq(parser, rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([v, k]) => {
     if (k.length) return { op: 'get', args: [v, { v: { k } }] };
@@ -331,7 +365,7 @@ function postfix_path(parser: Parser<Value>): Parser<Value> {
   });
 }
 
-export const operation = alt<Value>('expression', if_op, binop);
+export const operation = alt<Value>('expression', if_op, case_op, binop);
 
 const pair: Parser<[Value, Value]> = map(seq(alt('key', string, map(ident, v => ({ v }))), ws, str(':'), ws, value), t => [t[0], t[4]], 'pair');
 

@@ -77,6 +77,7 @@ In addition to containers, the basic widgets supplied in this library are the `L
 | `color` | `string` | Sets the CSS `color`. |
 | `align` | `string` | Sets the CSS `text-align`. |
 | `size` | `number` | Set the CSS `font-size` in `rem`. |
+| `line` | `number` | Set the CSS `line-height` in `rem`. |
 | `weight` | `number \| string` | Sets the CSS `font-weight`. |
 | `pre` | `boolean` | If `true`, sets CSS `white-space` to `pre-wrap`. |
 | `clamp` | `boolean` | If `true`, set CSS `white-space` to `nowrap` and `overflow` to `hidden`. |
@@ -91,7 +92,7 @@ A flowed report may optionally have a width, but it never has a height. As such,
 
 A paged report requires a page size in order to render, and an orientation can optionally be supplied too, where the runner will handle flipping the dimensions and margins around to handle the orientation.
 
-Since a paged report has height constraints on any given piece of the report, rendering of widgets can be optionally interrupted and resumed on a new page. Whether or not a widget supports interruption is up to the individual widget, but by default most containers require that their entire content fit in the available space in order to render.
+Since a paged report has height constraints on any given piece of the report, rendering of widgets can be optionally interrupted and resumed on a new page. Whether or not a widget supports interruption is up to the individual widget, but by default most containers require that their entire content fit in the available space in order to render. If a widget can't fit on the page by itself, it will render as an error placeholder.
 
 Paged reports can optionally include page headers and footers that are rendered at the top and bottom of each page if supplied. The context for headers and footers contain additional special variables `@page` and `@pages` the contain the current page number and total number of pages, respectively. Page headers and footers are always expected to be the same size.
 
@@ -146,6 +147,7 @@ There are a number of special references that are context-specific:
 | `@level` | repeater | The nearest group level, if any. |
 | `@source` | repeater | The nearest repeater source, if any. |
 | `@values` | repeater | An object with keys pointing to an array of values collected from labels in the repeater ids mapping to keys. |
+| `@case` | case | The value that is being checked against the conditional branches. |
 
 #### Operations
 
@@ -163,9 +165,12 @@ Arguments may also be specified in a named form, which will result in them being
 | array | `[1, 2, 3]`, `[first middle last]` | Array expressions are surrounded by square brackets and contain any number of space and/or comma separated expressions. If all of the expressions are literals, the result will be a literal. If not, the result will be an array operation e.g. `{ op: 'array', args: [{ r: 'first' }, { r: 'middle' }, { r: 'last' }] }`. |
 | object | `{ "foo": 2, "bar": "baz" }`, `{ foo:2 bar:[1 2 3] }` | Object expressions are surrounded by curly braces and contain any number of key-value pairs. The keys are optionally quoted strings, followed by a `:`. The values are any expression, and pairs are separated by space and/or commas. Like array expressions, objects containing only literals evaluate to a literal, and are otherwise an `object` operation. |
 | application | `=>_ like :%a%` | Application expressions evaluate to their expression's definition form. This is used in many operations, and just about all aggregate operations, to apply an expression to an internal context e.g. `find(*people =>name is :Susan)`, where the find operator iterates over its source, in this case the data source named `people`, and evaluates its second argument, an application, with the current iteration as the context. |
-| postfix reference | `op-name(arg1).path[ref]` | Postfix references allow an operation's result to be further paired down using a `get` operation. The example is equivalent to `(get (op-name arg1) =>path[ref])`. |
+| postfix reference | `op-name(arg1).path[ref]` | Postfix references allow an operation's result to be further pared down using a `get` operation. The example is equivalent to `(get (op-name arg1) =>path[ref])`. |
 | postfix format | `person.birthdate#date`, `(amount * rate)#number,4` | Postfix format expressions apply a format operation to their expression. The name of the formatter follows the `#`, and it can be passed any number or optional arguments by following the name with a comma with no extra space. Further arguments are also separated by commas with no extra space. The second example is equivalent to `(format (* amount rate) :number 4)`. |
-| if | `if foo then bar else baz`, `if not true then 42`, `if birthdate in #this week# then 0.10 else if lower(name[0]) == :a then 0.2 else 0` | If expressions allow you to set up one or more conditional branches, where the first starts with `if`, followed by a condition expression, followed by `then`, followed by the result expression that is returned if the condition expression is truthy, followed by 0 or more conditional branches, followed by an optional final case with no condition. The conditional branches start with `else if`, `elseif`, `elsif`, or `elif`; followed by the condition expression, followed by `then`, followed by the result expression that is returne if the conditional expression is truthy. The final case with no condition starts with `else` followed by the result expression. These convert to an `if` operation in the form of `(if cond1 res1 cond2 res2 alt)` |
+| if | `if foo then bar else baz`, `if not true then 42`, `if birthdate in #this week# then 0.10 else if lower(name[0]) == :a then 0.2 else 0` | If expressions allow you to set up one or more conditional branches, where the first starts with `if`, followed by a condition expression, followed by `then`, followed by the result expression that is returned if the condition expression is truthy, followed by 0 or more conditional branches, followed by an optional final case with no condition. The conditional branches start with `else if`, `elseif`, `elsif`, or `elif`; followed by the condition expression, followed by `then`, followed by the result expression that is returne if the conditional expression is truthy. The final case with no condition starts with `else` followed by the result expression. If the if is nested within another block-like operator, it can be terminated with `end` or `fi` to avoid parser confusion on where a trailing `else` should be applied. These convert to an `if` operation in the form of `(if cond1 res1 cond2 res2 alt)` |
+| case | `case foo when 1 then bar when _ > 10 then :larg else :nope` | Case expressions are similar to if expressions, but they evaluate their first argument and place it in scope for each of the branches. Branches can also compare by value or as a boolean. The `case` operator introduces a new scope and exposes the target value as `@case`, and it also translates `_` references to `@case` within the condition operations, unless the they are applications. Branches are specified with `when` followed by a condition. If the case is nested within another block-like operator, it can be terminated with `end` or `esac` to avoid parser confusion on where a trailing `else` should be applied. These convert to a `case` operation in the form of `(case value cond1 res1 cond2 res2 cond3 res3 alt)` |
+
+The complement to the parser, the stringifier, also works as a `fmt` in that it spits out source in the preferred format by default, though there are a few options that can be toggled.
 
 ### Filtering, sorting, and grouping
 
@@ -202,6 +207,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `array` | `...any` | `array` | Returns the given values in an array. |
 | `avg` | aggregate | `number` | This will compute the average of the given application of source. |
 | `call` | `object, string, ...args` or `function, ...args` | `any` | This will call the given method or function with the remaining args returning the result. This operator should be avoided if possible becuase it is very much dependent on a JS runtime. |
+| `case` | `any, ...(match: value|boolean applicative, result: any)` | `any` | This will match the first value against the given conditional branches. If the condition of the branch is an applicative, the branch checks for a true value, otherwise it will compare the first value to the condition value for equality. Like `if`, this also lazily evaluates. It also supplies the special variable `@case` to the context of all of its branch conditions. |
 | `ceil` | `number` | `number` | This will return the given number rounded up if there is a decimal. |
 | `clamp` | `number, number, number` | `number` | This takes a minimum, a value, and a maximum, and returns the minimum if the value is less than the minimum, the maximum if the value is more than the maximum, or the value otherwise. |
 | `coalesce` | `...any` | `any` | This will lazily return its first non-nullish argument. |
@@ -306,7 +312,8 @@ There is a second mode available for the raport parser that reads templates simi
 | Thing | Expression? | Content |
 | ----- | ----------- | ------- |
 | text | no | Just plain old text. This is the stuff outside of the interpolators. |
-| `{{if [expression]}}` | yes | Branches (see below) are evaluated and the first true condition or the final default will have its body rendered. |
+| `{{if [expression]}}` | yes | Branches (see below, `else if` and `else`) are evaluated and the first true condition or the final default will have its body rendered. |
+| `{{case [expression] when [expression]` | yes | Branches (see below, `when` and `else`) are evaluated and the first matching branch or the final default will have its body rendered. |
 | `{{unless [expression]}}` | yes | If the value is true the body is rendered. Alternate branches are not supported. |
 | `{{with [expression]}}` | yes | The `with` interpolator sets its value as the context for its body and renders the body. If the value is falsey, the body will not be rendered. |
 | `{{each [expression]}}` | yes | The `each` interpolator will iterate over its value and render the body once for each iteration. This supports alternate branches if the value is not iterable (an object or array). |
@@ -316,7 +323,8 @@ There is a second mode available for the raport parser that reads templates simi
 | `@last` | no | A special reference provided for the index of the last iteration. |
 | `@last-key` | no | A special reference provided for the key of the last iteration. |
 | `{{else if [expression]}}`, `{{elseif [expression]}}`, `{{elsif [expression]}}`, `{{elif [expression]}}` | yes | An alternate branch that may appear within and `if` body or an `each` body. |
-| `{{else}}` | no | A default branch that may appear within an `if`, `each`, or `with` body. |
+| `{{else}}` | no | A default branch that may appear within an `if`, `case`, `each`, or `with` body. |
+| `{{when [expression]}}` | yes | A `case` branch that may follow the first that is required in the opening block. |
 
 ## Designer
 
@@ -345,7 +353,7 @@ The definition tab of the main pane can be used to load and save report definiti
 
 Raport is written in typescript and bundled with rollup using npm scripts.
 
-To build raport, you'll need a posix-ish environment. There is a sort of a playground page in the `play` directory, and the script that runs in it is located at `src/play/index.ts`.
+To build raport, you'll need a posix-ish environment. There is a sort of a playground page in the `play` directory, and the script that runs in it is located at `src/play/index.ts`. It currently builds the designer and bootstraps it with a sample data source.
 
 Running `npm run build` will compile the typescript to `build`, roll the play script and a UMD version of raport up to `build`, and finally copy the modules and UMD build to `lib` and the play script to `play`.
 
@@ -376,8 +384,4 @@ npm run package
 
 ## Designer
 
-There is a basic report designer, which is built as a [Ractive.js](https://ractive.js.org/) component, with an environment to design reports in paged, flowed, or delimited formats. It also has a expression evaluation engine that takes into account context in most cases.
-
-## Notes
-
-Note that the print function in the playground only seems to reliably work with Chrome, as Firefox has issues from the second page on for... uh... reasons?
+There is a basic report designer, which is built as a [Ractive.js](https://ractive.js.org/) component, with an environment to design reports in paged, flowed, or delimited formats. It also has a expression evaluation engine that takes into account context in most cases and can `fmt` your expressions.

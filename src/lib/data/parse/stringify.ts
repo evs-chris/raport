@@ -9,6 +9,7 @@ export interface BaseStringifyOpts {
   SExprOps?: boolean;
   listCommas?: boolean;
   template?: boolean;
+  noIndent?: boolean;
 }
 export interface SimpleStringifyOpts extends BaseStringifyOpts {
   SExprOps?: false;
@@ -26,6 +27,9 @@ let _listcommas: boolean = false;
 let _noarr: boolean = false;
 let _noobj: boolean = false;
 let _tpl: boolean = false;
+let _noindent: boolean = false;
+
+let _level = 0;
 
 const binops = ['**', '*', '/%', '/', '%', '+', '-', '>=', '>', '<=', '<', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'and', '&&', 'or', '||'];
 const unops = ['+', 'not'];
@@ -50,11 +54,14 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
   _noobj = opts.SExprOps && opts.noObjectLiterals;
   _key = false;
   _tpl = opts.template;
+  _noindent = opts.noIndent;
+  _level = 0;
   return _stringify(value);
 }
 
 function padl(v: any, pad: string, len: number): string {
   v = `${v}`;
+  if (!pad) return v;
   for (let i = v.length; i < len; i++) {
     v = pad + v;
   }
@@ -74,6 +81,8 @@ function _stringify(value: ValueOrExpr): string {
     if ('op' in value) {
       if (value.op === 'if' || value.op === 'with' || value.op === 'unless' || value.op === 'each') {
         return stringifyTemplateBlock(value);
+      } else if (value.op === 'case') {
+        return stringifyTemplateCase(value);
       } else if (value.op) {
         if (value.op === '+') return value.args.map(a => _stringify(a)).join('');
         else {
@@ -154,6 +163,8 @@ function stringifyOp(value: Operation): string {
     return `(${value.op}${value.args && value.args.length ? ` ${value.args.map(v => _stringify(v)).join(_listcommas ? ', ' : ' ')}`: ''})`;
   } else if (value.op === 'if' || value.op === 'unless' && value.args && value.args.length > 2) {
     return stringifyIf(value);
+  } else if (value.op === 'case' && value.args && value.args.length > 2) {
+    return stringifyCase(value);
   } else if (value.op === '+' && value.args && value.args.length > 0 && findNestedStringOpL(value.op, value)) {
     const args = flattenNestedBinopsL(value.op, value);
     return `'${args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `{${_stringify(a)}}`).join('')}'`
@@ -291,14 +302,59 @@ function stringifyDate(value: DateRel): string {
   return str;
 }
 
+const leadingSpace = /^\s+/;
+function dedent(target: string, str: string): string {
+  if (target) return str.replace(leadingSpace, '');
+  else return str;
+}
+
 function stringifyIf(op: Operation): string {
   if (!op.args || op.args.length < 2) return 'false';
-  let str = `${op.op} ${_stringify(op.args[0])} then ${_stringify(op.args[1])}`;
-  const last = op.args.length - 1;
-  for (let i = 2; i <= last; i += 2) {
-    if (i === last) str += ` else ${_stringify(op.args[i])}`;
-    else str += ` elif ${_stringify(op.args[i])} then ${_stringify(op.args[i + 1])}`;
+
+  let str = '';
+
+  _level++;
+  const parts = op.args.map(a => _stringify(a));
+  _level--;
+
+  const long = parts.find(p => p.length > 30 || ~p.indexOf('\n')) || '';
+  let split = _noindent ? '' : parts.length > 3 || long ? `\n${padl('', '  ', _level)}` : '';
+  const cindent = long && `${split}  ` || ' ';
+  split = split || ' ';
+  const last = parts.length - 1;
+  for (let i = 0; i <= last; i++) {
+    if (i === 0) str += `${split && _level > 0 ? split : ''}if ${parts[i++]} then${cindent}${dedent(cindent, parts[i])}`
+    else if (i === last) str += `${split}else${cindent}${dedent(cindent, parts[i])}`
+    else str += `${split}elif ${parts[i++]} then${cindent}${dedent(cindent, parts[i])}`;
   }
+  if (_level) str += `${split}end`;
+
+  return str;
+}
+
+const caseRE = /@case\b/g;
+function stringifyCase(op: Operation): string {
+  if (!op.args || op.args.length < 2) return 'false';
+
+  let str = '';
+
+  _level++;
+  const parts = op.args.map(a => typeof a === 'object' && 'op' in a ? _stringify(a).replace(caseRE, '_') : _stringify(a));
+  _level--;
+
+  const long = parts.find(p => p.length > 30 || ~p.indexOf('\n')) || '';
+  let split = _noindent ? '' : parts.length > 3 || long ? `\n${padl('', '  ', _level)}` : '';
+  const wsplit = split ? `${split}  ` : ' ';
+  const cindent = long && `${wsplit}  ` || ' ';
+  split = split || ' ';
+  const last = parts.length - 1;
+  for (let i = 0; i <= last; i++) {
+    if (i === 0) str += `${split && _level > 0 ? split : ''}case ${parts[i]}`
+    else if (i === last) str += `${wsplit}else${cindent}${dedent(cindent, parts[i])}`
+    else str += `${wsplit}when ${parts[i++]} then${cindent}${dedent(cindent, parts[i])}`;
+  }
+  if (_level) str += `${split}end`;
+
   return str;
 }
 
@@ -320,6 +376,25 @@ function stringifyTemplateBlock(op: Operation): string {
       _tpl = true;
       res += _stringify(op.args[i]);
     }
+  }
+  res += '{{/}}';
+  return res;
+}
+
+function stringifyTemplateCase(op: Operation): string {
+  const last = op.args.length - 1;
+  const parts = op.args.map((a, i) => {
+    _tpl = true;
+    if (i === 0 || i % 2 === 1) _tpl = false;
+    if (i === last) _tpl = true;
+    return typeof a === 'object' && 'op' in a ? _stringify(a).replace(caseRE, '_') : _stringify(a);
+  });
+  _tpl = true;
+  let res = `{{${op.op} ${parts[0]} when ${parts[1]}}}`;
+  for (let i = 2; i <= last; i++) {
+    if (i === last) res += `{{else}}${parts[i]}`;
+    else if (i % 2 === 1) res += `{{when ${parts[i]}}}`;
+    else res += parts[i];
   }
   res += '{{/}}';
   return res;

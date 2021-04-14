@@ -1,4 +1,4 @@
-import { filter, safeGet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan } from './index';
+import { filter, safeGet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans } from './parse';
 
@@ -17,11 +17,15 @@ function num(v: any): number {
   return +v;
 }
 
+function equals(l: any, r: any): boolean {
+  return l == r; // eslint-disable-line eqeqeq
+}
+
 // basic ops
 registerOperator(
   simple(['is', 'is-not', '==', '!='], (name: string, values: any[]): boolean => {
     const [l, r] = values;
-    const res = l == r; // eslint-disable-line eqeqeq
+    const res = equals(l, r);
     return name === 'is' || name === '==' ? res : !res;
   }),
   simple(['not'], (_name: string, values: any[]) => !values[0]),
@@ -421,6 +425,27 @@ registerOperator({
     else return { result: value }; // odd branch that wasn't skipped means previous condition matched
   },
   apply() {}
+}, {
+  type: 'checked',
+  names: ['case', 'switch'],
+  checkArg(_name: string, i: number, last: number, value: any, ctx: Context, ast): CheckResult {
+    if (i === 0) { // set the value and move to the next
+      (ctx.special || (ctx.special = {})).case = value;
+      return 'continue';
+    } else if (i % 2 === 1) {
+      if (i === last) return { result: value }; // default case
+      if (equals(value, ctx.special.case)) return 'continue';
+      if (isValue(ast) && 'op' in ast && value === true) return 'continue'; // operators can also check for true
+      if (isValue(value)) {
+        const v = evaluate(ctx, value);
+        if (equals(v, ctx.special.case)) return 'continue';
+        if (v === true) return 'continue';
+      }
+      return { skip: 1 };
+    } else return { result: value }; // odd branch
+  },
+  apply() {},
+  extend: true,
 }, {
   type: 'checked',
   names: ['each'],

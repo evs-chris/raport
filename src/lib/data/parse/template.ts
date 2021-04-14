@@ -1,5 +1,5 @@
 import { Value } from '../index';
-import { value, rws } from '../parse';
+import { value, rws, replaceCase } from '../parse';
 import { Parser, parser as makeParser, rep, rep1, seq, alt, map, read1To, chars, str, readTo, check, andNot, name } from 'sprunge';
 import { ws } from 'sprunge/lib/json';
 
@@ -10,6 +10,10 @@ const text = map(rep1(alt(read1To(endTxt, true), txtEsc, andNot(str('{'), str('{
 
 function tag_value(names: string[]): Parser<[string, Value]> {
   return map(seq(str('{{'), ws, str(...names), rws, value, ws, str('}}')), arr => [arr[2], arr[4]], 'tag');
+}
+
+function case_value(names: string[]): Parser<[string, Value, Value]> {
+  return map(seq(str('{{'), ws, str(...names), rws, value, rws, str('when'), rws, value, str('}}')), arr => [arr[2], arr[4], arr[8]], 'tag');
 }
 
 const tag_end = name(check(seq(str('{{/'), readTo('}'), str('}}'))), 'tag end');
@@ -39,10 +43,18 @@ const each_op = map(seq(tag_value(['each']), min_one(rep(alt<Content>(branch_tag
 const if_op = map(seq(tag_value(['if']), min_one(rep(alt<Content>(branch_tag, else_tag, content))), tag_end), ([tag, content]) => ({ op: 'if', args: [tag[1]].concat(cond_branches(content)) }));
 const with_op = map(seq(tag_value(['with']), min_one(rep(alt<Content>(else_tag, content))), tag_end), ([tag, content]) => ({ op: 'with', args: [tag[1]].concat(apply_first(cond_branches(content))) }));
 const unless_op = map(seq(tag_value(['unless']), min_one(rep(content)), tag_end), ([tag, content]) => ({ op: 'unless', args: [tag[1]].concat(concat(content)) }));
+const case_op = map(seq(case_value(['case']), min_one(rep(alt<Content>(branch(['when'], true), else_tag, content))), tag_end), ([tag, content]) => {
+  const op = { op: 'case', args: tag.slice(1).concat(cond_branches(content)) };
+  for (let i = 1; i < op.args.length; i += 2) {
+    const arg = op.args[i];
+    if (typeof arg === 'object' && 'op' in arg) replaceCase(arg);
+  }
+  return op;
+});
 
 const interpolator = map(seq(str('{{'), ws, value, ws, str('}}')), ([, , value]) => ({ op: 'string', args: [value] }), 'interpolator');
 
-content.parser = alt<Value>('content', text, each_op, if_op, with_op, unless_op, interpolator);
+content.parser = alt<Value>('content', text, each_op, if_op, with_op, case_op, unless_op, interpolator);
 
 function apply_first(content: Value[]): Value[] {
   if (content.length) content[0] = { a: content[0] };
