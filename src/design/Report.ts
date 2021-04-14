@@ -918,7 +918,8 @@ Ractive.extendWith(Designer, {
         cx = cy = 0;
         x = ev.clientX;
         y = ev.clientY;
-        sz = node.offsetHeight / (ctx.get('.height') || 1)
+        const sizer = document.getElementById('sizer');
+        sz = sizer ? sizer.offsetHeight : 12;
         document.body.addEventListener('mousemove', move);
         document.body.addEventListener('mouseup', up);
       });
@@ -926,9 +927,9 @@ Ractive.extendWith(Designer, {
         cx = ev.clientX - x;
         cy = ev.clientY - y;
         if (!ev.ctrlKey) {
-          ctx.set({ [`^^/layout.${idx}.0`]: Math.round(sx + (cx / sz)), [`^^/layout[${idx}][1]`]: Math.round(sy + (cy / sz)) });
+          ctx.set({ [`^^/layout.${idx}.0`]: Math.round(sx + (cx / sz)), [`^^/layout.${idx}.1`]: Math.round(sy + (cy / sz)) });
         } else {
-          ctx.set({ [`^^/layout.${idx}.0`]: sx + (cx / sz), [`^^/layout[${idx}][1]`]: sy + (cy / sz) });
+          ctx.set({ [`^^/layout.${idx}.0`]: sx + (cx / sz), [`^^/layout.${idx}.1`]: sy + (cy / sz) });
         }
       }
       function up() {

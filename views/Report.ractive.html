@@ -32,6 +32,7 @@
       {{>bottom}}
     </div>
   </div>
+  <div style="position: absolute; left: -1000px; width: 1rem; height: 1rem;" id="sizer" />
 </div>
 
 <template id="left" src="./Report/left.ractive.html" />
@@ -279,6 +280,7 @@
     border-bottom: 1px solid;
     box-sizing: border-box;
     padding: 0 0.25rem;
+    user-select: none;
   }
 
   .bar * {
@@ -310,6 +312,9 @@
     height: min-content;
     width: calc(100% + 2px);
     left: -1px;
+    background-image: radial-gradient(circle, rgb(204, 204, 204) 1px, transparent 1px);
+    background-position: 1.5rem 1.5rem;
+    background-size: 1rem 1rem;
   }
 
   div.widgets.manual {
