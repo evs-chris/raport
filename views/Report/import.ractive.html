@@ -6,6 +6,10 @@
       <label><input type="checkbox" style="vertical-align: middle;" checked="{{data.type === 'fetch'}}" twoway=false on-change="@.set('data.type', @node.checked ? 'fetch' : undefined)" /> Fetch request?</label>
     </div>
     {{#if data.type === 'fetch'}}
+      <div>
+        <label><input type="radio" style="vertical-align: middle;" name="{{data.eval}}" value="{{undefined}}" /> JSON</label>
+        <label><input type="radio" style="vertical-align: middle;" name="{{data.eval}}" value="txt" /> Plain text</label>
+      </div>
       <div class-fetch class-scrolled-wrapper>
         <div as-scrolled>
         {{#with data}}
@@ -15,6 +19,7 @@
             <option>POST</option>
             <option>PUT</option>
           </select></label>
+          <label class="check" title="Check if this source should be fetched before each run or leave unchecked if cached data can be used"><input type=checkbox checked="{{.fetch}}" /> Fetch on each run?</label>
           <button class-plain on-click="@context.push('.headers', [])">Add Header</button>
           <button class-plain on-click="@.fetchData()">Fetch Now</button>
           {{#if .headers}}

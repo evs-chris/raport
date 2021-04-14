@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { InitOpts, ContextHelper } from 'ractive';
-import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr } from 'raport/index';
+import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 let sourceTm: any;
@@ -44,11 +44,12 @@ export class Designer extends Ractive {
 
   async run() {
     const report: Report = this.get('report');
-    const ctx = await this.buildRoot();
+    const ctx = new Root({}, { parameters: this.get('params') });
+    const srcs = await this.buildSources();
     let text: string;
     this.fire('running');
     try {
-      text = run(report, ctx.sources, ctx, {
+      text = run(report, srcs, ctx, {
         foot: this.frameExtra()
       });
     } catch {}
@@ -348,11 +349,36 @@ export class Designer extends Ractive {
   async buildRoot(): Promise<Root> {
     const res = new Root({}, { parameters: this.get('params') });
     const report: Report = this.get('report');
+    const srcs = await this.buildSources();
+    for (const src of report.sources || []) {
+      const av = srcs[src.source];
+      if (av) applySource(res, src, { [src.source]: av });
+      if (!((src.name || src.source) in res.value)) res.value[src.name || src.source] = (res.sources[src.name || src.source] || {}).value;
+    }
+    return res;
+  }
+
+  async buildSources(): Promise<SourceMap> {
+    const report: Report = this.get('report');
     const avs: AvailableSource[] = this.get('sources');
+    const res: SourceMap = {};
     for (const src of report.sources || []) {
       const av = avs.find(s => s.name === src.source);
-      if (av) applySource(res, src, { [src.source]: av.data ? { value: tryJSON(av.data) } : typeof av.values === 'function' ? await av.values(this.get('params')) : [] });
-      if (!((src.name || src.source) in res.value)) res.value[src.name || src.source] = (res.sources[src.name || src.source] || {}).value;
+      if (av) {
+        let d: any;
+        const vv: any = av;
+        if (vv.type === 'fetch' && (vv.fetch || !vv.data)) {
+          d = await this.fetchData(vv);
+          if (!vv.eval) d = { value: tryJSON(d) };
+          if (!vv.fetch) vv.data = d;
+        } else if (av.data) {
+          if (!vv.eval && typeof av.data === 'string') d = { value: tryJSON(av.data) };
+          else d = av.data;
+        } else if (typeof av.values === 'function') {
+          d = await av.values(this.get('params') || []);
+        }
+        res[av.name] = d;
+      }
     }
     return res;
   }
@@ -396,9 +422,10 @@ export class Designer extends Ractive {
     return ctx;
   }
 
-  async fetchData() {
-    const data = this.get('data');
-    const ctx = await this.buildLocalContext();
+  async fetchData(data?: any) {
+    const set = !data;
+    data = data || this.get('data');
+    const ctx = new Root({}, { parameters: this.get('params') });
     const url = this.evalExpr(data.url, true, ctx);
     const headers: { [key: string]: string } = {};
     if (Array.isArray(data.headers)) {
@@ -408,7 +435,8 @@ export class Designer extends Ractive {
       const req: RequestInit = { headers, method: data.method };
       if (req.method === 'POST' || req.method === 'PUT') req.body = this.evalExpr(data.body, true, ctx);
       const res = await fetch(url, req);
-      this.set('data.data', await res.text());
+      if (set) this.set('data.data', await res.text());
+      else return res.text();
     }  catch {}
   }
 
