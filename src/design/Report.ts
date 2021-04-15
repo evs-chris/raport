@@ -600,12 +600,22 @@ export class Designer extends Ractive {
       if (input.files.length) {
         const file = input.files[0];
         const reader = new FileReader();
-        reader.onload = txt => this.set('data.data', txt.target.result as string);
+        reader.onload = txt => this.tryImport(txt.target.result as string);
         reader.readAsText(file);
       }
     }
     input.addEventListener('change', load);
     input.click();
+  }
+
+  tryImport(str: string) {
+    if (!str || !this.readLink('data')) return;
+    const json = tryJSON(str);
+    if (json) {
+      if (typeof json === 'object' && 'type' in json && json.type === 'fetch') this.set('data', json);
+    } else {
+      this.set('data.data', str);
+    }
   }
 
   setHTMLFontSize() {
