@@ -57,11 +57,10 @@ const avgs = {
 export function measureEstimate(text: string, width: number, font?: MeasureFont): number {
   const family = (font && font.family) || 'sans';
   const size = (font && font.size) || 0.83;
-  const line = (font && font.line) || 1;
-  const avg = ((family === 'mono' || /fixed|mono/i.test(family) ? avgs.mono :
+  const avg = ((font.metric || ((family === 'mono' || /fixed|mono/i.test(family) ? avgs.mono :
     family === 'narrow' || /narrow|condensed/i.test(family) ? avgs.narrow :
-      family === 'sans' || /sans/i.test(family) ? avgs.sans :
-        avgs.serif) * size) / 16;
+      family === 'sans' || /sans|arial|helvetica/i.test(family) ? avgs.sans :
+        avgs.serif))) * size) / 16;
   
   const lines = text.split(/\r?\n/g);
   return lines.reduce((a, c) => {
@@ -76,7 +75,7 @@ export function measureEstimate(text: string, width: number, font?: MeasureFont)
       return a;
     }, [0, 0]);
     return a + ((lines + (word > 0 ? 1 : 0)) || 1);
-  }, 0) * line;
+  }, 0) * size;
 }
 
 /** Text height measurement function for the given text, font, available width in rem, and line height in rem.

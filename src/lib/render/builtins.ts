@@ -178,6 +178,7 @@ registerRenderer<Image>('image', (w, ctx, placement) => {
 });
 
 registerRenderer<MeasuredLabel>('measured', (w, ctx, placement, state) => {
+  addStyle(ctx, 'measured', `.measured {position:absolute;box-sizing:border-box;white-space:pre-wrap;font-family:serif;font-size:0.83rem}`);
   const text = evaluate(ctx, w.text);
   const height = measure(text, getWidth(w, placement, ctx) || placement.availableX, w.font);
   
@@ -185,9 +186,9 @@ registerRenderer<MeasuredLabel>('measured', (w, ctx, placement, state) => {
     return { output: '', height: 0, continue: { state: {}, offset: 0 } };
   } else {
     let s = style(w, placement, ctx, { computedHeight: height, container: true });
-    s[0] = `display:inline-block;white-space:pre-wrap;line-height:${(w.font && w.font.line) || (w.font && w.font.size) || 1}rem;` + s[0];
+    s[0] = `line-height:1em;` + s[0];
     return {
-      height, output: `<span${styleClass(ctx, ['label'], s)}>${escapeHTML(text)}</span>`
+      height, output: `<span class="measured"${styleClass(ctx, ['label'], s)}>${escapeHTML(text)}</span>`
     };
   }
 });

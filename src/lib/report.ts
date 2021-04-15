@@ -207,11 +207,14 @@ export interface MeasureFont {
   size?: number;
   /** The line-height of the rendered font in rem */
   line?: number;
+  /** Average width in px at font-size 16px. If this is supplied, it won't be guessed based on the font name. */
+  metric?: number;
 }
 
 export interface MeasuredLabel extends Widget {
   font?: MeasureFont;
   text: ValueOrExpr;
+  metric?: number;
 }
 
 // execution

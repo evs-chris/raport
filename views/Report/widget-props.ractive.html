@@ -104,10 +104,14 @@
     <option>right</option>
   </select>
 </span></label>
+{{#unless .type === 'measured'}}
 <label><span title="Display all whitespace, including newlines, within the content of the {{.type}}?">Significant Space?</span><span><input type=checkbox twoway=false checked="{{.font.pre}}" on-change="@context.set('.font.pre', @node.checked ? true : undefined)" /></span></label>
+{{/unless}}
 <label><span>Prevent Overflow?</span><span><input type=checkbox twoway=false checked="{{.font.clamp}}" on-change="@context.set('.font.clamp', @node.checked ? true : undefined)" /></span></label>
 <label><span>Text Size</span><span><input type=number value="{{.font.size}}" /></span></label>
+{{#unless .type === 'measured'}}
 <label><span>Line Height</span><span><input type=number value="{{.font.line}}" /></span></label>
+{{/unless}}
 <label><span>Font</span><span><input value="{{.font.family}}" /></span></label>
 <label><span>Color</span><span><input value="{{.font.color}}" /></span></label>
 <label><span>Weight</span><span>
@@ -170,6 +174,7 @@
 
 <template id="measured-props">
   <label><span>Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text')">&#9998;</button></span><span><textarea>{{.text}}</textarea></span></label>
+  <label><span title="">Metric</span><span><input type="number" value="{{.font.metric}}" /></span></label>
 </template>
 
 <template id="repeater-props">
