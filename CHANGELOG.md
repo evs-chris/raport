@@ -1,3 +1,53 @@
+## 0.6.0
+
+2021-04-14
+
+### Report
+
+* __BUG__: Widgets that support breaking after in row/auto layout will once again actually break.
+* __BUG__: Labels with an external format (not in the text expression) now evaluate their args correctly.
+* __BUG__: An undefined `font` property on a span will no longer throw.
+* `height`, `width`, and `br` can now be expressions.
+* Definitions with no orientation properly default to landscape.
+* Measured labels have more accurate default styles and can have a custom metric supplied.
+
+### Parser
+
+* The stringification library now outputs binary ops, format ops, and has more options for output.
+  * It supports all the various date literals.
+  * It can also be used as a standardizing printer (fmt) for expressions and templates.
+  * It supports templates.
+* There is now a `case` operator sugar e.g. `case some + expr when :foo then another(expression) when 22 then :sure else :none`.
+  * It also has a template form as `{{case some + expr when :foo}}{{another(expression)}}{{when 22}}sure{{else}}none{{/}}`.
+  * The expression form will automatically stringify on multiple lines when approriate.
+  * `when` conditions that are expressions (not application) will substitute `_` refs with `@case`.
+* The `$` in string interpolation is now optional e.g. `'foo {bar} baz'` is equivalent to `'foo ${bar} baz'` and the former is the default for stringification.
+
+### Data
+
+* __BUG__: Non-string primitives will no longer cause sorting to throw.
+* __BUG__: Relative date at time literals e.g. `#yesterday at 11:35#` now parse and evaluate correctly.
+* `+` as a unary will now parse its argument as a number and properly handle dates.
+* Sorting now defaults to ascending to match generally expected behavior.
+* Sort objects now support specifying a `dir` instead of a `desc` e.g. `{ by: =>some.expr, dir: :asc }`. `dir` may also be an expression where the result is case-insensitively compared to `'desc'` to determine the sort direction.
+* Multiplication `*` now supports multiplying a string by a number to duplicate the string.
+* The `date` format now supports milliseconds in output as `S`.
+* All date literals now support a timezone.
+* There is now a `case` operator that checks the first argument against subsequent conditions e.g. `case(value cond1 res1 cond2 res2 cond3 res3 default)`. If the condition references `@case` in an expression, it will match if it is `true` or equal to the `value`. If the condition is an application, it will match if it evaluates to `true` or a value equal to `value`.
+
+### Designer
+
+* __BUG__: The overflow control (clamp) on widgets is now exposed.
+* __BUG__: Data sources are now passed to the report runner correctly.
+* __BUG__: Containers can now be manually positioned.
+* Changing the selected widget will now scroll it into view in the widget tree.
+* Loading a definition tries `JSON.parse` first and then the raport parser for more realxed definitions.
+* Report definition output now does basic minification i.e. removes keys that have no effect on the definition.
+* The designer now exposes `parse` and `unparse` operators for seeing how an expression breaks down.
+* The designer now supports `fetch` data sources that can be built with templates. The definitions can also be loaded from the import tab.
+* Measured widgets expose metric and hide properties that don't apply.
+
+
 ## 0.5.0
 
 2021-03-30
