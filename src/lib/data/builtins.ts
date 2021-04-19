@@ -308,24 +308,27 @@ registerOperator(
 );
 
 // string
+function pad(left: boolean, str: string, count: number, pad: string): string {
+  if (typeof str !== 'string') str = '' + str;
+  if (!isNum(count)) return str;
+  if (!pad) pad = ' ';
+  if (typeof pad !== 'string') pad = '' + pad;
+  if (pad.length < 1) pad = ' ';
+
+  for (let i = str.length; i < count; i = str.length) {
+    if (left) str = pad + str;
+    else str += pad;
+  }
+
+  return str;
+}
 const triml = /^\s*/;
 const trimr = /\s*$/;
 const escapeRe = /([\.\[\]\{\}\(\)\^\$\*\+\-])/g;
 registerOperator(
   simple(['padl', 'padr'], (name: string, args: any[]): string => {
-    let [str, count, pad] = args;
-    if (typeof str !== 'string') str = '' + str;
-    if (!isNum(count)) return str;
-    if (!pad) pad = ' ';
-    if (typeof pad !== 'string') pad = '' + pad;
-    if (pad.length < 1) pad = ' ';
-
-    for (let i = str.length; i < count; i = str.length) {
-      if (name === 'padl') str = pad + str;
-      else str += pad;
-    }
-
-    return str;
+    let [str, count, val] = args;
+    return pad(name === 'padl', str, count, val);
   }),
   simple(['trim', 'triml', 'trimr'], (name: string, args: any[]): string => {
     let [str] = args;
@@ -615,6 +618,23 @@ registerFormat('ordinal', (n, [group]) => {
 
 registerFormat('phone', n => {
   return phone(n);
+});
+
+registerFormat('or', (n, [v]) => {
+  return n || v;
+});
+
+registerFormat('padl', (n, [count, val]) => {
+  return pad(true, n, count, val || '0');
+});
+
+registerFormat('padr', (n, [count, val]) => {
+  return pad(false, n, count, val || ' ');
+});
+
+registerFormat('trim', n => {
+  if (!n) return n;
+  else return `${n}`.trim();
 });
 
 {
