@@ -598,11 +598,11 @@ registerFormat('date', (n, [fmt]) => {
   return date(isDateRel(n) ? dateRelToDate(n) : n, fmt);
 });
 
-registerFormat('integer', (n, []) => {
-  return number(n, 0);
+registerFormat('integer', (n, [group]) => {
+  return number(n, 0, group);
 });
-registerFormat('int', (n, []) => {
-  return number(n, 0);
+registerFormat('int', (n, [group]) => {
+  return number(n, 0, group);
 });
 
 registerFormat('number', (n, [dec, group]) => {
