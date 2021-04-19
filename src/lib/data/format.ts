@@ -69,6 +69,7 @@ export function date(d: string|Date, fmt: string): string {
       return m.length === 1 ? `${v.getSeconds()}` : v.getSeconds() <= 9 ? `0${v.getSeconds()}` : `${v.getSeconds()}`;
     } else if (m[0] === 'S') {
       const ms = v.getMilliseconds();
+      if (m.length === 1) return `${ms}`;
       return ms < 10 ? `00${ms}` : ms < 100 ? `0${ms}` : `${ms}`;
     } else if (m[0] === 'k' || m[0] === 'h') {
       let r = `${v.getHours() % 12}`;
