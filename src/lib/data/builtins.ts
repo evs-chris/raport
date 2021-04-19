@@ -605,11 +605,11 @@ registerFormat('int', (n, []) => {
   return number(n, 0);
 });
 
-registerFormat('number', (n, [dec]) => {
-  return number(n, dec);
+registerFormat('number', (n, [dec, group]) => {
+  return number(n, dec, group);
 });
-registerFormat('num', (n, [dec]) => {
-  return number(n, dec);
+registerFormat('num', (n, [dec, group]) => {
+  return number(n, dec, group);
 });
 
 registerFormat('ordinal', (n, [group]) => {
