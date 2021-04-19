@@ -135,7 +135,7 @@ export function safeGet(root: Context, path: string|Keypath): any {
       const part = parts[i];
       if (typeof part !== 'object') o = o && o[part];
       else {
-        const v = evaluate(ctx, part);
+        const v = evaluate(root, part);
         o = o && o[v];
       }
       if (o === null || o === undefined) return;
