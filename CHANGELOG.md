@@ -1,3 +1,16 @@
+## 0.6.1
+
+2021-04-19
+
+### Data
+
+* __BUG__: `sort` and `group` operators no longer return a data set, they just return the resulting array like `filter`.
+* __BUG__: Getting a path with expression members e.g. `^foo.bar[:baz + 21]` will now evaluate the expression in the initial context rather than the first value context.
+* There are now `or`, `padl`, `padr`, and `trim` formatters.
+* The numeric formatters now accept an alternate grouping string.
+* The date format now supports non-padded milliseconds.
+
+
 ## 0.6.0
 
 2021-04-14

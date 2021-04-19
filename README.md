@@ -277,9 +277,14 @@ There are a few operations built-in to the library to handle common expressions:
 | ---- | --------- | ----------- |
 | `dollar` | | Returns the number with grouped whole number, two decimals, and a leadng dollar sign. |
 | `date` | `string` | Return the date formatted using the given string. See below for the breakdown of the format string. |
-| `integer` | | Returns the number with grouped whole number and no decimals. |
-| `number` | `number` | Returns the number with grouped whole number and the specified number of decimals. |
+| `integer` | `string? = ','` | Returns the number with grouped whole number and no decimals. The argument can specify the group string. This is also aliased as `int`. |
+| `number` | `number, string? = ','` | Returns the number with grouped whole number and the specified number of decimals. The second argument can specify the group string. This is also aliased as `num`. |
+| `or` | `any` | Returns the given argument if the value is falsey e.g. `false#or,:N/A` results in `N/A`. |
+| `ordinal` | `string? = ','` | Returns the number as an ordinal e.g. `1` becomes `1st` and `5280` becomes `5,280th`. The argument can specify the group string. |
+| `padl` | `number, string` | Returns the value padded to `number` places using `string` in a prefix position e.g. `23#padl,3,:0` results in `023`. |
+| `padr` | `number, string` | Returns the value padded to `number` places using `string` in a suffix position e.g. `23#padr,3,:0` results in `230`. |
 | `phone` | | Returns the given number formatted as 7-, 10-, or 11-digit number e.g. `555-5555`, `(555) 555-5555`, `1-555-555-5555`. |
+| `trim` | | Returns the given value with whitespace removed from the ends e.g. `'\r\n foo\nbar '#trim` results in `'foo\nbar'`. |
 
 ##### Date format
 
@@ -292,7 +297,8 @@ There are a few operations built-in to the library to handle common expressions:
 | `MMM` | 3 | 3-char month name |
 | `MMMM` | 4+ | full month name |
 | `d` | 1 | non-padded date integer |
-| `dd` | 2+ | zero-padded date integer |
+| `dd` | 2 | zero-padded date integer |
+| `ddd` | 3+ | ordinal date integer |
 | `E` | 1 | day of week as ingeter |
 | `EE` | 2 | 3-char day of week |
 | `EEE` | 3+ | full day of week name |
@@ -302,6 +308,8 @@ There are a few operations built-in to the library to handle common expressions:
 | `mm` | 2+ | zero-padded minute integer |
 | `s` | 1 | non-padded second integer |
 | `ss` | 2+ | zero-padded second integer |
+| `S` | 1 | millisecond integer |
+| `SSS` | 2+ | zero-padded millisecond integer |
 | `k` or `h` | 1+ | non-padded hour integer (12 hour) |
 | `a` | 1+ | AM or PM |
 
