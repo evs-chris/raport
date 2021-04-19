@@ -85,14 +85,17 @@ export class Designer extends Ractive {
   }
 
   paperSize(): string {
-    const width: number = this.get('report.width');
-    if (width) return `width: ${width}rem;`;
+    const type = this.get('report.type');
+    if (type === 'flow') {
+      const width: number = this.get('report.width');
+      if (width) return `width: ${width}rem;`;
+    }
     const size: PageSize = this.get('report.size');
     const orientation: PageOrientation = this.get('report.orientation') || 'landscape';
     if (size) {
       const w = orientation === 'landscape' ? size.height : size.width;
       const margin: [number, number] = [((size.margin || [])[0] || 0), ((size.margin || [])[1]) || 0];
-      return `width: ${w - margin[1] - margin[1]}rem; margin: 1rem auto; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem; min-height: ${orientation === 'landscape' ? size.width : size.height}rem; background-size: 1rem 1rem; background-position: ${10.5 - margin[0]}rem ${10.5 - margin[1]}rem; background-image: radial-gradient(circle, #ccc 1px, transparent 1px);`;
+      return `width: ${w}rem; box-sizing: border-box; margin: 1rem auto; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem; min-height: ${orientation === 'landscape' ? size.width : size.height}rem; background-size: 1rem 1rem; background-position: ${10.5 - margin[0]}rem ${10.5 - margin[1]}rem; background-image: radial-gradient(circle, #ccc 1px, transparent 1px);`;
     }
     return '';
   }
