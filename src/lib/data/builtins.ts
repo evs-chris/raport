@@ -145,7 +145,7 @@ registerOperator(
       if (arr && Array.isArray(arr.value)) arr = arr.value;
       else return {};
     }
-    return filter({ value: arr }, null, null, groups, ctx);
+    return filter({ value: arr }, null, null, groups, ctx).value;
   }),
   simple(['sort'], (_name: string, values: any[], ctx?: Context): any => {
     ctx = ctx || new Root({});
@@ -154,7 +154,7 @@ registerOperator(
       if (arr && Array.isArray(arr.value)) arr =arr.value;
       else return {};
     }
-    return filter({ value: arr }, null, sort, null, ctx);
+    return filter({ value: arr }, null, sort, null, ctx).value;
   }),
   simple(['time-span', 'time-span-ms'], (_name: string, args: any[]): any => {
     let ms = args[0];
