@@ -1,0 +1,59 @@
+<div class="delimited paper project">
+  <div class-project-pane>
+    <input type="file" style="display: none;" id="project-file" accept="application/json" />
+    {{#if ~/project != null}}
+      <label class-input style-width=20rem>Project Name<input value="{{~/project.name}}" /></label>
+      <button class-plain on-click="@.saveProjects()">Save Projects</button>
+      <button class-plain on-click="@.download(~/project.name + '.json', @.stringifyProject())">Export Project</button>
+      <button class-plain on-click="@.cloneProject()">Clone Project</button>
+      <button class-plain on-click="@.importProject()">Import Project</button>
+      <button class-plain on-click="@.makeProject(true)">New Project</button>
+      <br /><br />
+      <button class-plain style-background=darkred on-click="@.removeProject()">Delete Project</button>
+      <br /><br />
+      <button class-plain on-click="@.set('projectText', @.stringifyProject())">Refresh Text</button>
+      <label class-area>Project Definition<textarea twoway=false on-change="@.importProject(@node.value)">{{projectText}}</textarea></label>
+    {{else}}
+      <button class-plain on-click="@.makeProject()">Make Project</button>
+    {{/if}}
+  </div>
+  <div class-project-pane-right>
+    Projects
+    <div class-project-list>
+      {{#each ~/projects}}
+        <div class-project-item class-active-project=". === ~/project" on-click="@.linkProject(@keypath)">{{.name}}</div>
+      {{/each}}
+    </div>
+  </div>
+</div>
+
+<style>
+  .project {
+    display: flex;
+    flex-grow: 1;
+  }
+
+  .project-pane {
+    flex-grow: 1;
+    padding-right: 1rem;
+  }
+
+  .project-pane-right {
+    width: 15rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .project-list {
+    flex-grow: 1;
+    border: 1px solid #ddd;
+  }
+
+  .project-item {
+    padding: 0.25rem 0.5rem;
+  }
+
+  .active-project {
+    background-color: #eee;
+  }
+</style>

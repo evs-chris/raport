@@ -3,7 +3,7 @@
   <div class=layout>
     <div class-actions>
       <button disabled="{{report.type === 'delimited' && report.sources.length !== 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>&#9655;</button>
-      <button on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'definition' && tab !== 'import'">Designer</button>
+      <button on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">Designer</button>
       <button on-click="@.set('tab', 'definition')" class-tab class-active="tab === 'definition'">Definition</button>
       {{#if data && @.readLink('data')}}
         <button on-click="@.set('tab', 'import')" class-tab class-active="tab === 'import'">Import Data</button>
@@ -15,8 +15,9 @@
       {{#if data && tab === 'import'}}
         <span class-which><button class-ico class-large on-click="@.checkLink('import')">&times;</button> Close Import</span>
       {{/if}}
+      <button on-click="@.set('tab', 'project')" class-tab class-right class-active="tab === 'project'">Project</button>
     </div>
-    <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'definition' && tab !== 'import'">
+    <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">
       {{>design}}
     </div>
     <div class-tab class-report-definition class-active-tab="tab === 'definition'">
@@ -27,6 +28,9 @@
     </div>
     <div class-result class-tab class-active-tab="tab === 'result'">
       <iframe id=result srcdoc="{{~/report.type === 'delimited' ? '<style>pre { margin: 1rem; background-color: #fff; padding: 0.5rem; }</style><code><pre>' + result + '</pre></code>' + @.frameExtra() : result}}"></iframe>
+    </div>
+    <div class-project class-tab class-active-tab="tab === 'project'">
+      {{>project}}
     </div>
     <div class-bottom-pane class-active="~/temp.bottom.pop">
       {{>bottom}}
@@ -39,6 +43,7 @@
 <template id="design" src="./Report/design.ractive.html" />
 <template id="definition" src="./Report/definition.ractive.html" />
 <template id="data-import" src="./Report/import.ractive.html" />
+<template id="project" src="./Report/project.ractive.html" />
 <template id="bottom" src="./Report/bottom.ractive.html" />
 
 <template id="types">
@@ -215,6 +220,10 @@
   }
   .layout .actions .tab:first-of-type {
     margin-left: 0;
+  }
+
+  .layout .actions .tab.right {
+    margin-left: auto;
   }
 
   .layout .actions .tab.active {

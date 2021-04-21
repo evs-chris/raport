@@ -1,6 +1,6 @@
 import { css, template } from 'views/Report';
 
-import Ractive, { InitOpts, ContextHelper } from 'ractive';
+import Ractive, { InitOpts, ContextHelper, ReadLinkResult } from 'ractive';
 import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
@@ -12,7 +12,19 @@ export interface ExprOptions {
   template?: boolean;
 }
 
-export interface AvailableSource {
+export type AvailableSource = PlainSource | JSONFetchSource;
+
+export interface JSONFetchSource {
+  name: string;
+  type: 'fetch';
+  url: string;
+  method: 'GET'|'POST'|'PUT';
+  fetch: boolean;
+  body?: string;
+  headers?: Array<[string, string]>;
+}
+
+export interface PlainSource {
   name: string;
   values(params?: object): Promise<any>;
   data?: any;
@@ -240,7 +252,11 @@ export class Designer extends Ractive {
   }
 
   async logData(source: AvailableSource) {
-    console.log(source.data ? source.data : await source.values());
+    if ('type' in source && source.type === 'fetch') {
+      console.log(await this.fetchData(source));
+    } else if ('data' in source || 'values' in source) {
+      console.log(source.data ? source.data : await source.values());
+    }
   }
 
   editExpr(path: string, options?: ExprOptions) {
@@ -374,10 +390,10 @@ export class Designer extends Ractive {
           d = await this.fetchData(vv);
           if (!vv.eval) d = { value: tryJSON(d) };
           if (!vv.fetch) vv.data = d;
-        } else if (av.data) {
+        } else if ('data' in av && av.data) {
           if (!vv.eval && typeof av.data === 'string') d = { value: tryJSON(av.data) };
           else d = av.data;
-        } else if (typeof av.values === 'function') {
+        } else if ('values' in av && typeof av.values === 'function') {
           d = await av.values(this.get('params') || []);
         }
         res[av.name] = d;
@@ -666,14 +682,17 @@ export class Designer extends Ractive {
   }
 
   checkLink(type: 'expr'|'import'|'source'|'param'|'field', path?: string) {
+    let link: ReadLinkResult;
+    if (type === 'import') link = this.readLink('data');
+    else if (type === 'param') link = this.readLink('param');
+    else if (type === 'source') link = this.readLink('source');
+
     if (path === undefined) {
-      if (type === 'import') path = this.readLink('data').keypath;
-      else if (type === 'expr') path = this.get('temp.expr.path');
-      else if (type === 'param') path = this.readLink('param').keypath;
-      else if (type === 'source') path = this.readLink('source').keypath;
+      if (type === 'expr') path = this.get('temp.expr.path');
+      if (link) path = link.keypath;
     }
 
-    if (type === 'import' && path === this.readLink('data').keypath) {
+    if (type === 'import' && link && path === link.keypath) {
       this.unlink('data');
       this.set('tab', 'definition')
     } else if ((type === 'expr' || type === 'field') && (this.get('temp.expr.path') || '').startsWith(path)) {
@@ -686,20 +705,140 @@ export class Designer extends Ractive {
         label: false,
         template: false,
       }, { deep: true });
-    } else if (type === 'param' && path === this.readLink('param').keypath) {
+    } else if (type === 'param' && link && path === link.keypath) {
       this.unlink('param');
       this.set('temp.bottom.param', undefined);
       this.set('temp.bottom.tab', 'expr');
-    } else if (type === 'source' && path === this.readLink('source').keypath) {
+    } else if (type === 'source' && link && path === link.keypath) {
       this.unlink('source');
       this.set('temp.bottom.source', undefined);
       this.set('temp.bottom.tab', 'expr');
     }
 
-    if (type !== 'field') {
+    if (type !== 'field' && path) {
       if (path.startsWith('report.fields')) this.checkLink('field', path.replace('fields', 'headers'));
       if (path.startsWith('report.headers')) this.checkLink('field', path.replace('headers', 'fields'));
     }
+  }
+
+  checkLinks() {
+    this.checkLink('expr');
+    this.checkLink('import');
+    this.checkLink('source');
+    this.checkLink('param');
+    this.checkLink('field');
+  }
+
+  saveProjects() {
+    const projects: AvailableSource[] = this.get('projects') || [];
+    for (const p of projects) {
+      if ('type' in p && p.type === 'fetch') delete (p as any).data;
+    }
+    window.localStorage.setItem('projects', JSON.stringify(this.get('projects') || []));
+  }
+
+  loadProjects() {
+    this.set('projects', JSON.parse(window.localStorage.getItem('projects') || '[]'));
+  }
+
+  makeProject(clean?: true) {
+    const project = clean ? { name: 'Project', report: {}, sources: [] } : { name: 'Project', report: this.get('report') || {}, sources: this.get('sources') || [] };
+    this.unlink('report');
+    this.unlink('sources');
+    this.unlink('project');
+    this.checkLinks();
+    this.push('projects', project);
+    this.link('projects.' + (this.get('projects').length - 1), 'project');
+    this.link('project.report', 'report');
+    this.link('project.sources', 'sources');
+    this.set('projectText', '');
+  }
+
+  stringifyProject(project?: any) {
+    if (!project) project = this.get('project');
+    const sources = (this.get<AvailableSource[]>('project.sources') || this.get('sources') || []).map(s => {
+      if ('type' in s && s.type === 'fetch') {
+        return Object.assign({}, s, { data: undefined });
+      } else {
+        return Object.assign({}, s);
+      }
+    });
+    return JSON.stringify(Object.assign({}, project, { sources, report: this.get('project.report') || this.get('report') || {} }));
+  }
+
+  removeProject() {
+    if (window.confirm('Do you want to delete this project? This cannot be undone.')) {
+      const project = this.get('project');
+      const projects = this.get('projects') || [];
+      projects.splice(projects.indexOf(project), 1);
+      this.unlink('report');
+      this.unlink('sources');
+      this.unlink('project');
+      this.set('project', undefined);
+      this.checkLinks();
+      this.saveProjects();
+    }
+  }
+
+  importProject(str?: string) {
+    const cb = (txt: string) => {
+      const res = JSON.parse(txt);
+      if (Array.isArray(res) && res.length > 0 && 'name' in res[0]) {
+        this.set('projects', res);
+        this.checkLinks();
+      } else if (typeof res === 'object' && 'name' in res) {
+        const proj = this.get('project');
+        const projects = this.get('projects');
+        this.set('project', res);
+        this.link('project.report', 'report');
+        this.link('project.sources', 'sources');
+        if (~projects.indexOf(proj)) projects.splice(projects.indexOf(proj), 1, res);
+        this.checkLinks();
+      }
+    };
+
+    this.set('projectText', '');
+
+    if (str) {
+      cb(str);
+    } else {
+      const input: HTMLInputElement = this.find('#project-file') as any;
+      let load: () => void;
+      load = () => {
+        input.removeEventListener('change', load);
+        if (input.files.length) {
+          const file = input.files[0];
+          const reader = new FileReader();
+          reader.onload = fr => cb(fr.target.result as string);
+          reader.readAsText(file);
+        }
+      }
+      input.addEventListener('change', load);
+      input.click();
+    }
+  }
+
+  cloneProject() {
+    this.set('projectText', '');
+    const project = this.get('project');
+    this.unlink('report');
+    this.unlink('sources');
+    this.unlink('project');
+    this.push('projects', JSON.parse(JSON.stringify(project)));
+    this.link('projects.' + (this.get('projects').length - 1), 'project');
+    this.link('project.report', 'report');
+    this.link('project.sources', 'sources');
+  }
+
+  linkProject(path: string) {
+    this.set('projectText', '');
+    this.unlink('report');
+    this.unlink('sources');
+    this.unlink('project');
+    this.checkLinks();
+    this.link(path, 'project');
+    this.link('project.report', 'report');
+    this.link('project.sources', 'sources');
   }
 }
 
@@ -834,10 +973,14 @@ Ractive.extendWith(Designer, {
     'temp.bottom.pop'() {
       setTimeout(() => this.resetScrollers());
     },
+    'report.defaultParams'(v) {
+      this.set('params', Object.assign({}, v));
+    }
   },
   on: {
     init() {
       this.command('styleWithCSS', false, 'true');
+      this.loadProjects();
     },
     expr(ctx, path?: string) {
       const p = path || ctx.resolve();
