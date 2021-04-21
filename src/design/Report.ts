@@ -461,6 +461,7 @@ export class Designer extends Ractive {
 
   getSchema(ctx: Context) {
     const base = inspect(ctx.value);
+    let last = ctx.value;
     let pl = base;
     pl.fields = pl.fields || [];
     let c = ctx;
@@ -480,9 +481,11 @@ export class Designer extends Ractive {
         c = c.parent;
         if (c === c.root) prefix = '#';
         else prefix += '^';
+        if (last === c.value) continue;
 
-        t = inspect(c.value);
+        t = inspect(c.value, true);
         (t.fields || []).forEach(f => (f.name = `${prefix}${f.name}`, pl.fields.push(f)));
+        last = c.value;
 
         if (c === c.root) break;
       }

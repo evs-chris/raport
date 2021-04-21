@@ -2,22 +2,30 @@ import { Schema, Field, Type } from './index';
 
 const date = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 
-export function inspect(base: any): Schema {
+export function inspect(base: any, flat?: true): Schema {
   const root = getType(base);
-  let first: object = Array.isArray(base) ? (base[0] || {}) : base;
-  if (Array.isArray(first) || typeof first === 'object') {
+  if (Array.isArray(base)) {
     const fields: Field[] = [];
-    for (const k in first) {
-      fields.push(getField(k, first[k]));
+    fields.push({ type: 'number', name: 'length' });
+    if (!flat && base.length > 0) {
+      const val = inspect(base[0]);
+      if (val.fields) fields.push({ type: val.root, fields: val.fields, name: '0' });
+      else fields.push({ type: val.root, name: '0' });
+    }
+    return { root, fields };
+  } else if (typeof base === 'object') {
+    const fields: Field[] = [];
+    for (const k in base) {
+      fields.push(getField(k, base[k], flat));
     }
     return { root, fields };
   }
   return { root };
 }
 
-function getField(name: string, v: any): Field {
+function getField(name: string, v: any, flat?: true): Field {
   const type = getType(v);
-  if (~type.indexOf('object') || type === 'array') {
+  if (!flat && (~type.indexOf('object') || type === 'array')) {
     const cs = inspect(v);
     if (cs.fields) return { type, fields: cs.fields, name };
     else return { type, name };
