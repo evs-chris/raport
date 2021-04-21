@@ -360,11 +360,17 @@
     user-select: none;
     z-index: 999;
   }
+  div.active-widget > .widgets {
+    background-image: linear-gradient(to top, #4596ff20, #4596ff20), radial-gradient(circle, #999 1px, transparent 1px);
+  }
 
   div.hover-widget {
     border-color: #26bf10;
     border-style: solid;
     background-color: #26bf1017;
+  }
+  div.hover-widget > .widgets {
+    background-image: linear-gradient(to top, #26bf1017, #26bf1017), radial-gradient(circle, #999 1px, transparent 1px);
   }
 
   .active-widget > .bar, .bar.active {
