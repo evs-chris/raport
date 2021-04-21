@@ -802,8 +802,8 @@ export class Designer extends Ractive {
 
     this.set('projectText', '');
 
-    if (str) {
-      cb(str);
+    if (typeof str === 'string') {
+      if (str) cb(str);
     } else {
       const input: HTMLInputElement = this.find('#project-file') as any;
       let load: () => void;
