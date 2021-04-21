@@ -92,6 +92,11 @@
     display: block;
     padding: 0.25rem;
   }
+  label.area.grow {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
   label.area textarea {
     display: block;
     min-height: 11rem;
@@ -101,6 +106,9 @@
     border: 1px solid #ddd;
     margin: 0;
     border-radius: 0;
+  }
+  label.area.grow textarea {
+    flex-grow: 1;
   }
   label.check input {
     height: 2rem;

@@ -1,27 +1,31 @@
 <div class="delimited paper project">
   <div class-project-pane>
-    <input type="file" style="display: none;" id="project-file" accept="application/json" />
     {{#if ~/project != null}}
-      <label class-input style-width=20rem>Project Name<input value="{{~/project.name}}" /></label>
-      <button class-plain on-click="@.saveProjects()">Save Projects</button>
-      <button class-plain on-click="@.download(~/project.name + '.json', @.stringifyProject())">Export Project</button>
-      <button class-plain on-click="@.cloneProject()">Clone Project</button>
-      <button class-plain on-click="@.importProject()">Import Project</button>
-      <button class-plain on-click="@.makeProject(true)">New Project</button>
-      <br /><br />
-      <button class-plain style-background=darkred on-click="@.removeProject()">Delete Project</button>
-      <br /><br />
-      <button class-plain on-click="@.set('projectText', @.stringifyProject())">Refresh Text</button>
-      <label class-area>Project Definition<textarea twoway=false on-change="@.importProject(@node.value)">{{projectText}}</textarea></label>
+      <div>
+        <input type="file" style="display: none;" id="project-file" accept="application/json" />
+        <label class-input style-width=20rem>Project Name<input value="{{~/project.name}}" /></label>
+        <button class-plain title="Save all projects to browser storage" on-click="@.saveProjects()">Save Projects</button>
+        <button class-plain title="Export this project to a file" on-click="@.download(~/project.name + '.json', @.stringifyProject())">Export Project</button>
+        <button class-plain title="Create a copy of this project" on-click="@.cloneProject()">Clone Project</button>
+        <button class-plain title="Import this project definition from a file" on-click="@.importProject()">Import Project</button>
+        <button class-plain title="Create a new empty project" on-click="@.makeProject(true)">New Project</button>
+        <br /><br />
+        <button class-plain title="Delete this project from browser storage" style-background=darkred on-click="@.removeProject()">Delete Project</button>
+        <br /><br />
+        <button class-plain title="Export this project as text to the below text field" on-click="@.set('projectText', @.stringifyProject())">Refresh Text</button>
+      </div>
+      <label class-grow class-area>Project Definition<textarea twoway=false on-change="@.importProject(@node.value)">{{projectText}}</textarea></label>
     {{else}}
-      <button class-plain on-click="@.makeProject()">Make Project</button>
+      <div>
+        <button class-plain title="Convert the current definition to a project" on-click="@.makeProject()">Make Project</button>
+      </div>
     {{/if}}
   </div>
   <div class-project-pane-right>
     Projects
     <div class-project-list>
       {{#each ~/projects}}
-        <div class-project-item class-active-project=". === ~/project" on-click="@.linkProject(@keypath)">{{.name}}</div>
+        <div class-project-item title="Load {{.name}}, discarding any unsaved changes in the current project or definitions" class-active-project=". === ~/project" on-click="@.linkProject(@keypath)">{{.name}}</div>
       {{/each}}
     </div>
   </div>
@@ -36,6 +40,8 @@
   .project-pane {
     flex-grow: 1;
     padding-right: 1rem;
+    display: flex;
+    flex-direction: column;
   }
 
   .project-pane-right {
@@ -47,10 +53,13 @@
   .project-list {
     flex-grow: 1;
     border: 1px solid #ddd;
+    overflow-y: auto;
   }
 
   .project-item {
     padding: 0.25rem 0.5rem;
+    min-height: 1.5rem;
+    cursor: pointer;
   }
 
   .active-project {
