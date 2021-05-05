@@ -496,6 +496,7 @@ export class Root implements RootContext {
   special: ParameterMap = {};
   parent: undefined;
   exprs = {};
+  parser?: (txt: string) => Value;
   path: '' = '';
 
   constructor(root: any = {}, opts?: ExtendOptions & { parameters?: ParameterMap }) {
@@ -503,6 +504,7 @@ export class Root implements RootContext {
     if (opts) {
       Object.assign(this.parameters, opts.parameters);
       Object.assign(this.special, opts.special);
+      if (opts.parser) this.parser = opts.parser;
     }
   }
 }
