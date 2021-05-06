@@ -1,4 +1,4 @@
-import { parse, parsePath } from './parse';
+import { parse, parsePath, parseLetPath } from './parse';
 import { ParseError } from 'sprunge/lib';
 
 // Data
@@ -85,6 +85,7 @@ export interface AggregateOperator extends BaseOperator {
   type: 'aggregate';
   apply(name: string, values: any[], args: ValueOrExpr[], context: Context): any;
   extend?: true;
+  value?: true;
 }
 
 export type CheckResult = 'continue'|{ result: any }|{ skip: number, value?: any };
@@ -131,16 +132,13 @@ export function safeGet(root: Context, path: string|Keypath): any {
       }
     } else {
       const first = parts[0];
-      if (first === '_') {
-        parts = parts.slice();
-        parts.shift();
-      } else if (typeof first === 'string') {
+      if (first === '_') idx++;
+      else if (typeof first === 'string') {
         let lctx = ctx;
         while (lctx && (!lctx.locals || !(first in lctx.locals))) lctx = lctx.parent;
         if (lctx && first in lctx.locals) {
           o = lctx.locals[first];
-          parts = parts.slice();
-          parts.shift();
+          idx++;
         }
       }
     }
@@ -156,6 +154,51 @@ export function safeGet(root: Context, path: string|Keypath): any {
     }
 
     return o;
+  }
+}
+
+export function safeSet(root: Context, path: string|Keypath, value: any, islet?: boolean) {
+  if (!path) return;
+  const p = typeof path === 'string' ? (islet ? parseLetPath(path) : parsePath(path)) : path;
+
+  if ('error' in p) return;
+  else if ('k' in p) {
+    let parts = p.k;
+    const prefix = p.p;
+    let ctx = root;
+    let o: any = root.value;
+
+    for (let i = 0; i < p.u; i++) ctx && (ctx = ctx.parent);
+    o = ctx ? ctx.value : undefined;
+
+    const keys = parts.map(p => typeof p !== 'object' ? p : evalValue(root, p));
+
+    if (islet) {
+      o = root.locals || (root.locals = {});
+    } else if (prefix) {
+      if (prefix === '~') o = root.root.value;
+      else return;
+    }
+
+    if (!islet) {
+      const first = keys[0];
+      while (ctx) {
+        if (ctx.locals && first in ctx.locals) break;
+        ctx = ctx.parent;
+      }
+      if (ctx) o = ctx.locals;
+    }
+
+    const last = keys.length - 1;
+    for (let i = 0; i < last; i++) {
+      if (typeof o !== 'object' && typeof o !== 'function' || !o) return;
+      const key = keys[i];
+      const next = keys[i + 1];
+      if (!(key in o) || o[key] == null) o[key] = typeof next === 'number' ? [] : {};
+      o = o[key];
+    }
+    
+    if (o) o[keys[last]] = value;
   }
 }
 
@@ -365,19 +408,22 @@ function applyOperator(root: Context, operation: Operation): any {
     let arr: any[];
     const ctx = op.extend ? extend(root, {}) : root;
     const args = (operation.args || []).slice();
-    const arg = evalParse(ctx, args[0]);
-    if (Array.isArray(arg)) {
-      args.shift();
-      arr = arg;
-    } else if (typeof arg === 'object' && 'value' in arg && Array.isArray(arg.value)) {
-      args.shift();
-      arr = arg.value;
-    }
-    if (!arr) {
-      const src = evalValue(ctx, { r: '@source' });
-      if (Array.isArray(src)) arr = src;
-      else if (typeof src === 'object' && 'value' in src && Array.isArray(src.value)) arr = src.values;
-      else arr = [];
+    let arg: any;
+    if (!op.value) {
+      arg = evalParse(ctx, args[0]);
+      if (Array.isArray(arg)) {
+        args.shift();
+        arr = arg;
+      } else if (typeof arg === 'object' && 'value' in arg && Array.isArray(arg.value)) {
+        args.shift();
+        arr = arg.value;
+      }
+      if (!arr) {
+        const src = evalValue(ctx, { r: '@source' });
+        if (Array.isArray(src)) arr = src;
+        else if (typeof src === 'object' && 'value' in src && Array.isArray(src.value)) arr = src.values;
+        else arr = [];
+      }
     }
     return op.apply(operation.op, Array.isArray(arr) ? arr : [], args, ctx);
   }

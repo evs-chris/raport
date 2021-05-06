@@ -182,6 +182,20 @@ function stringifyOp(value: Operation): string {
     const arg = value.args[0];
     if (typeof arg !== 'string' && 'op' in arg && (binops.includes(arg.op) || unops.includes(arg.op))) return `${value.op}(${_stringify(arg)})`;
     else return `${value.op}${call_op.test(value.op) ? ' ' : ''}${_stringify(arg)}`;
+  } else if (value.op === 'block') {
+    _level++;
+    const parts = value.args.map(a => _stringify(a));
+    let split = _noindent ? '' : `\n${padl('', '  ', _level)}`;
+    _level--;
+    return `{${split}${parts.join(split)}\n${padl('', '  ', _level)}}`;
+  } else if ((value.op === 'let' || value.op === 'set') && value.args && value.args.length === 2) {
+    let path: string;
+    let arg = value.args[0];
+    if (typeof arg === 'string') path = arg;
+    else if ('v' in arg && typeof arg.v === 'string') path = arg.v;
+    else if ('v' in arg && typeof arg.v === 'object' && 'k' in arg.v) path = _stringify({ r: arg.v });
+    else path = _stringify(arg);
+    return `${value.op} ${path} = ${_stringify(value.args[1])}`;
   } else if (call_op.test(value.op)) {
     return `${value.op}(${value.args && value.args.map(a => _stringify(a)).join(_listcommas ? ', ' : ' ') || ''})`;
   } else {

@@ -1,4 +1,4 @@
-import { filter, safeGet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApplication, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApplication, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans } from './parse';
 
@@ -227,6 +227,12 @@ registerOperator(
       if (!~res.indexOf(el) && ~left.indexOf(el)) res.push(el);
     }
     return res;
+  }),
+  simple(['let'], (_name, [name, value]: any[], ctx): any => {
+    safeSet(ctx, name, value, true);
+  }),
+  simple(['set'], (_name, [name, value]: any[], ctx): any => {
+    safeSet(ctx, name, value);
   }),
 );
 
@@ -594,6 +600,17 @@ registerOperator({
       return arr.find(e => e == v);
     }
   }
+}, {
+  type: 'aggregate',
+  names: ['block'],
+  apply(_name: string, _arr: any[], args: ValueOrExpr[], ctx: Context) {
+    const last = args.length - 1;
+    if (last < 0) return;
+    const c = extend(ctx, { locals: {} });
+    for (let i = 0; i < last; i++) evalParse(c, args[i]);
+    return evalParse(c, args[last]);
+  },
+  value: true,
 });
 
 // basic formats

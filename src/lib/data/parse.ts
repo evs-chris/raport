@@ -35,6 +35,7 @@ export const ident = read1To(endRef, true);
 
 export const args: Parser<Value[]> = {};
 export const array: Parser<Value> = {};
+export const block: Parser<Value> = {};
 export const object: Parser<Value> = {};
 export const value: Parser<Value> = {};
 export const values: Parser<Value> = {};
@@ -55,8 +56,14 @@ export const keypath = map(seq(alt<'!'|'~'|'*'|[string,string]>('ref sigil', str
   }
   return res;
 }, 'keypath');
+export const localpath = map(seq(read('^'), pathident, rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([prefix, init, parts]) => {
+  const res: Keypath = { k: ([init] as Array<string|Value>).concat(parts).map(p => typeof p === 'object' && 'v' in p && (typeof p.v === 'string' || typeof p.v === 'number') ? p.v : p) };
+  if (prefix) res.u = prefix.length;
+  return res;
+}, 'localpath');
 
 export const parsePath = makeParser(keypath);
+export const parseLetPath = makeParser(localpath);
 
 export const ref = map(keypath, r => ({ r }), 'reference');
 
@@ -388,6 +395,12 @@ object.parser = map(bracket(
   check(ws, str('}')),
 ), objectOp, 'object');
 
+block.parser = map(bracket(
+  check(ws, str('{'), ws),
+  rep1sep(value, read1(space + ';'), 'allow'),
+  check(ws, str('}')),
+), args => ({ op: 'block', args }), 'block');
+
 value.parser = operation;
 
 const namedArg: Parser<[Value, Value]> = map(seq(ident, str(':'), ws, value), ([k, , , v]) => [{ v: k }, v], 'named arg');
@@ -398,6 +411,8 @@ args.parser = map(repsep(alt<[Value, Value] | Value>('argument', namedArg, value
   return plain;
 }, 'application');
 
-values.parser = alt('expression', array, object, literal, string, application, unop, call_op, ref);
+const letter = map(seq(str('let'), rws, localpath, ws, str('='), ws, value), ([, , k, , , , v]) => ({ op: 'let', args: [{ v: k }, v] }));
+const setter = map(seq(str('set'), rws, keypath, ws, str('='), ws, value), ([, , k, , , , v]) => ({ op: 'set', args: [{ v: k }, v] }));
+values.parser = alt('expression', array, object, literal, string, application, unop, call_op, letter, setter, ref, block);
 
 export const parse = makeParser(value, { trim: true });
