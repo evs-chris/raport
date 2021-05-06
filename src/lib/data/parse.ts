@@ -261,7 +261,7 @@ export const sexp = map(bracket(
 }, 'sexp');
 
 function fmt_op(parser: Parser<Value>): Parser<Value> {
-  return map(seq(parser, opt(seq(str('#'), ident, opt(seq(str(','), rep1sep(value, str(','))))))), ([value, fmt]) => {
+  return map(seq(parser, opt(seq(str('#'), ident, opt(seq(str(','), rep1sep(value, str(','), 'allow')))))), ([value, fmt]) => {
     if (!fmt) return value;
     if (fmt[2]) return { op: 'fmt', args: [value, { v: fmt[1] }, ...fmt[2][1]] };
     else return { op: 'fmt', args: [value, { v: fmt[1] }] };
