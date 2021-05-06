@@ -261,7 +261,7 @@ export function evalValue(ctx: Context, expr: Value): any {
   if (expr && 'r' in expr) return safeGet(ctx, expr.r);
   else if (expr && 'v' in expr) return expr.v;
   else if (expr && 'op' in expr) return applyOperator(ctx, expr);
-  else if (expr && 'a' in expr) return expr.a;
+  else if (expr && 'a' in expr) return expr;
   else if (expr && isDateRel(expr)) return expr;
 }
 
@@ -344,8 +344,8 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
         const s = sortArr[i];
         const desc = dirs[i];
         const by: ValueOrExpr = typeof s === 'string' ? s : s && (s as any).by ? (s as any).by : s;
-        const l = evalParse(extend(context, { value: a }), by);
-        const r = evalParse(extend(context, { value: b }), by);
+        const l = evalApplication(context, by, [a]);
+        const r = evalApplication(context, by, [b]);
         const cmp = l == null && r != null ? -1 
           : l != null && r == null ? 1
           : (l < r) === (r < l) ? 0

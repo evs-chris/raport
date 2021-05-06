@@ -202,7 +202,7 @@ registerOperator(
     if (res.slice(0, 7) === '[object') return JSON.stringify(value);
     return res;
   }),
-  simple(['call'], (_name: string, args: any[]): any => {
+  simple(['call'], (_name: string, args: any[], ctx): any => {
     if (args[0] != null && typeof args[1] === 'string' && typeof args[0][args[1]] === 'function') {
       const obj = args.shift();
       const name = args.shift();
@@ -212,6 +212,10 @@ registerOperator(
     if (typeof args[0] === 'function') {
       const fn = args.shift();
       return fn.apply(null, args);
+    }
+
+    if (isValue(args[0])) {
+      return evalApplication(ctx, args[0], args.slice(1));
     }
   }),
   simple(['intersect'], (_name, [left, right]: any[]): any => {
