@@ -247,7 +247,9 @@ export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[]): any 
       return evalValue(extend(ctx, { value: locals[0] }), value.a);
     }
   } else {
-    return evalParse(extend(ctx, { value: locals[0] }), value);
+    const v = evalParse(ctx, value);
+    if (typeof v === 'object' && 'a' in v) return evalApply(ctx, v, locals);
+    else return v;
   }
 }
 
