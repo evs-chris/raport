@@ -149,7 +149,7 @@ export function safeGet(root: Context, path: string|Keypath): any {
       const part = parts[i];
       if (typeof part !== 'object') o = o && o[part];
       else {
-        const v = evaluate(root, part);
+        const v = evalValue(root, part);
         o = o && o[v];
       }
       if (o === null || o === undefined) return;
@@ -159,47 +159,55 @@ export function safeGet(root: Context, path: string|Keypath): any {
   }
 }
 
-const nope = [];
-export function evaluate(value: ValueOrExpr, locals?: any[]): any;
-export function evaluate(root: Context|{ context: Context }|any, value: ValueOrExpr, locals?: any[]): any;
-export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, value?: ValueOrExpr|any[], locals?: any[]): any {
+export function evaluate(value: ValueOrExpr): any;
+export function evaluate(root: Context|{ context: Context }|any, value: ValueOrExpr): any;
+export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, value?: ValueOrExpr): any {
   let r: Context;
   let e: ValueOrExpr;
-  let l: any[] = nope;
   if (isValueOrExpr(root)) {
     r = new Root();
     e = root;
-    arguments.length > 1 && Array.isArray(value) && (l = value);
   } else if (isContext(root)) {
     r = root;
     !Array.isArray(value) && (e = value);
-    arguments.length > 2 && (l = locals);
   } else if (root && 'context' in root && isContext(root.context)) {
     r = root.context;
     !Array.isArray(value) && (e = value);
-    arguments.length > 2 && (l = locals);
   } else if (isValueOrExpr(value)) {
     r = new Root(root);
     e = value;
-    arguments.length > 2 && (l = locals);
   } else {
     r = new Root();
     e = root;
-    arguments.length > 1 && (l = locals);
   }
+  return evalParse(r, e);
+}
 
-  if (typeof e === 'string') e = r.root.exprs[e] || (r.root.exprs[e] = (r.parser || parse)(e));
-  if (typeof e !== 'object') e = { v: e };
-  if (e && 'r' in e) return safeGet(r, e.r);
-  else if (e && 'v' in e) return e.v;
-  else if (e && 'op' in e) return applyOperator(r, e);
-  else if (e && 'a' in e) {
-    if (l === nope) return e.a;
-    else {
-      if (e.n) return evaluate(extend(r, { value: l[0], locals: e.n.reduce((a, c, i) => (a[c] = l[i], a), {} as ParameterMap) }), e.a);
-      else return evaluate(extend(r, { value: l[0] }), e.a);
+export function evalApplication(ctx: Context, value: ValueOrExpr, locals: any[]): any {
+  if (typeof value === 'object' && 'a' in value) {
+    if ('n' in value) {
+      const map = value.n.reduce((a, c, i) => (a[c] = locals[i], a), {} as ParameterMap);
+      return evalValue(extend(ctx, { value: locals[0], locals: map }), value.a);
+    } else {
+      return evalValue(extend(ctx, { value: locals[0] }), value.a);
     }
-  } else if (e && isDateRel(e)) return e;
+  } else {
+    return evalParse(extend(ctx, { value: locals[0] }), value);
+  }
+}
+
+export function evalParse(ctx: Context, expr: ValueOrExpr): any {
+  if (typeof expr === 'string') expr = ctx.root.exprs[expr] || (ctx.root.exprs[expr] = (ctx.parser || parse)(expr));
+  if (typeof expr !== 'object') expr = { v: expr };
+  return evalValue(ctx, expr);
+}
+
+export function evalValue(ctx: Context, expr: Value): any {
+  if (expr && 'r' in expr) return safeGet(ctx, expr.r);
+  else if (expr && 'v' in expr) return expr.v;
+  else if (expr && 'op' in expr) return applyOperator(ctx, expr);
+  else if (expr && 'a' in expr) return expr.a;
+  else if (expr && isDateRel(expr)) return expr;
 }
 
 const opMap: { [key: string]: Operator } = {};
@@ -223,7 +231,7 @@ function mungeSort(context: Context, sorts: Sort[]|ValueOrExpr): Sort[] {
   if (Array.isArray(sorts)) {
     sortArr = sorts;
   } else {
-    const s = evaluate(context, sorts);
+    const s = evalParse(context, sorts);
     if (Array.isArray(s)) sortArr = s;
     else if (typeof s === 'string') sortArr = [{ v: s }];
   }
@@ -251,7 +259,7 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
     let flt: Value = typeof filter === 'string' ? parse(filter) : filter;
     if ('m' in flt) flt = { v: true };
     ds.value.forEach((row, index) => {
-      if (!!evaluate(extend(context, { value: row, special: { value: row, index } }), flt)) values.push(row);
+      if (!!evalParse(extend(context, { value: row, special: { value: row, index } }), flt)) values.push(row);
     });
   }
 
@@ -263,10 +271,10 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
         if ('by' in s) {
           if ('desc' in s) {
             if (typeof s.desc === 'boolean') return s.desc;
-            return evaluate(context, s.desc);
+            return evalParse(context, s.desc);
           } else if ('dir' in s) {
             const lower = typeof s.dir === 'string' ? s.dir.toLowerCase() : s.dir;
-            const dir = lower === 'asc' || lower === 'desc' ? lower : evaluate(context, s.dir);
+            const dir = lower === 'asc' || lower === 'desc' ? lower : evalParse(context, s.dir);
             const val = typeof dir === 'string' ? dir.toLowerCase() : dir;
             if (val === 'desc') return true;
           }
@@ -281,8 +289,8 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
         const s = sortArr[i];
         const desc = dirs[i];
         const by: ValueOrExpr = typeof s === 'string' ? s : s && (s as any).by ? (s as any).by : s;
-        const l = evaluate(extend(context, { value: a }), by);
-        const r = evaluate(extend(context, { value: b }), by);
+        const l = evalParse(extend(context, { value: a }), by);
+        const r = evalParse(extend(context, { value: b }), by);
         const cmp = l == null && r != null ? -1 
           : l != null && r == null ? 1
           : (l < r) === (r < l) ? 0
@@ -295,7 +303,7 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
     });
   }
 
-  if (!Array.isArray(groups)) groups = evaluate(context, groups);
+  if (!Array.isArray(groups)) groups = evalParse(context, groups);
 
   if (Array.isArray(groups) && groups.length) {
     return { value: { schema: ds.schema, grouped: groups.length, level: 0, value: group(values, groups, context, 1), all: values } };
@@ -313,7 +321,7 @@ function group(arr: any[], groups: Array<ValueOrExpr>, ctx: Context, level: numb
   const res: Group[] = [];
   const order: string[] = [];
   for (const e of arr) {
-    const g = `${evaluate(extend(ctx, { value: e }), groups[0])}`;
+    const g = `${evalParse(extend(ctx, { value: e }), groups[0])}`;
     if (!cache[g]) {
       order.push(g);
       cache[g] = [];
@@ -340,7 +348,7 @@ function applyOperator(root: Context, operation: Operation): any {
     const ctx = op.extend ? extend(root, {}) : root;
     for (let i = 0; i < flts.length; i++) {
       const a = flts[i];
-      const arg = evaluate(ctx, a);
+      const arg = evalParse(ctx, a);
       const res = op.checkArg(operation.op, i, flts.length - 1, arg, ctx, a);
       if (res === 'continue') args.push(arg);
       else if ('skip' in res) {
@@ -351,13 +359,13 @@ function applyOperator(root: Context, operation: Operation): any {
 
     return op.apply(operation.op, args, ctx);
   } else if (op.type === 'value') {
-    args = (operation.args || []).map(a => evaluate(root, a));
+    args = (operation.args || []).map(a => evalParse(root, a));
     return op.apply(operation.op, args, root);
   } else {
     let arr: any[];
     const ctx = op.extend ? extend(root, {}) : root;
     const args = (operation.args || []).slice();
-    const arg = evaluate(ctx, args[0]);
+    const arg = evalParse(ctx, args[0]);
     if (Array.isArray(arg)) {
       args.shift();
       arr = arg;
@@ -366,7 +374,7 @@ function applyOperator(root: Context, operation: Operation): any {
       arr = arg.value;
     }
     if (!arr) {
-      const src = evaluate(ctx, { r: '@source' });
+      const src = evalValue(ctx, { r: '@source' });
       if (Array.isArray(src)) arr = src;
       else if (typeof src === 'object' && 'value' in src && Array.isArray(src.value)) arr = src.values;
       else arr = [];

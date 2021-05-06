@@ -10,7 +10,8 @@ import './render/builtins';
 import './data/builtins';
 
 export {
-  evaluate, extend, filter, isValueOrExpr, join, safeGet, registerFormat, unregisterFormat, getOperatorMap, registerOperator, unregisterOperator,
+  evaluate, evalParse, evalValue, evalApplication, extend,
+  filter, isValueOrExpr, join, safeGet, registerFormat, unregisterFormat, getOperatorMap, registerOperator, unregisterOperator,
   Context, Root, Parameter,
   DataSet, DataSource, Field, Group, Schema, Sort, SourceMap,
   Operator, AggregateOperator, CheckedOperator, ValueOperator,
