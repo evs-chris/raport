@@ -122,7 +122,19 @@ export function safeGet(root: Context, path: string|Keypath): any {
         if (o && idx < parts.length + 1 && parts[idx] !== 'value') o = o.value;
       } else if (prefix === '@') {
         const which = parts[idx++] as string;
-        if (which !== 'value') {
+        if (which === 'locals' || which === 'specials') {
+          const key = which === 'locals' ? which : 'special';
+          while (ctx) {
+            if (ctx[key]) break;
+            ctx = ctx.parent;
+          }
+          if (ctx) o = ctx[key];
+        } else if (which === 'local' || which === 'special') {
+          const key = which === 'local' ? 'locals' : which;
+          o = ctx[key] || (ctx[key] = {});
+        } else if (which === 'parameters' || which === 'sources') {
+          o = root.root[which];
+        } else if (which !== 'value') {
           while (ctx && (!ctx.special || !(which in ctx.special))) ctx = ctx.parent;
           o = ctx && ctx.special[which];
 
