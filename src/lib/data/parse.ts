@@ -276,7 +276,8 @@ export const binop: Parser<Value> = {};
 export const if_op: Parser<Value> = {};
 export const case_op: Parser<Value> = {};
 
-const call_op = map(seq(name(read1('abcdefghifghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_$0123456789'), 'op'), bracket_op(args)), ([op, args]) => {
+const opName = read1('abcdefghifghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_$0123456789');
+const call_op = map(seq(name(opName, 'op'), bracket_op(args)), ([op, args]) => {
   const res: Value = { op };
   if (args && args.length) res.args = args;
   return res;
@@ -390,7 +391,7 @@ object.parser = map(bracket(
 value.parser = operation;
 
 const namedArg: Parser<[Value, Value]> = map(seq(ident, str(':'), ws, value), ([k, , , v]) => [{ v: k }, v], 'named arg');
-const application = map(seq(str('=>'), ws, value), ([, , value]) => ({ a: value }));
+const application = map(seq(opt(bracket(str('|'), rep1sep(opName, read1(space + ','), 'allow'), str('|'))), ws, str('=>'), ws, value), ([names, , , , value]) => (names ? { a: value, n: names } : { a: value }));
 args.parser = map(repsep(alt<[Value, Value] | Value>('argument', namedArg, value), read1(space + ','), 'allow'), (args) => {
   const [plain, obj] = args.reduce((a, c) => ((Array.isArray(c) ? a[1].push(c) : a[0].push(c)), a), [[], []] as [Array<Value>, Array<[Value, Value]>]);
   if (obj.length) plain.push(objectOp(obj));

@@ -104,7 +104,7 @@ export function safeGet(root: Context, path: string|Keypath): any {
 
   if ('error' in p) return;
   else if ('k' in p) {
-    const parts = p.k;
+    let parts = p.k;
     const prefix = p.p;
     let idx = 0;
     let ctx = root;
@@ -129,7 +129,21 @@ export function safeGet(root: Context, path: string|Keypath): any {
           if (!o && which === 'date') o = root.root.special.date = new Date();
         }
       }
-    } else if (parts[0] === '_') parts.shift();
+    } else {
+      const first = parts[0];
+      if (first === '_') {
+        parts = parts.slice();
+        parts.shift();
+      } else if (typeof first === 'string') {
+        let lctx = ctx;
+        while (lctx && (!lctx.locals || !(first in lctx.locals))) lctx = lctx.parent;
+        if (lctx && first in lctx.locals) {
+          o = lctx.locals[first];
+          parts = parts.slice();
+          parts.shift();
+        }
+      }
+    }
 
     for (let i = idx; i < parts.length; i++) {
       const part = parts[i];
@@ -145,33 +159,33 @@ export function safeGet(root: Context, path: string|Keypath): any {
   }
 }
 
-const nope = {};
-export function evaluate(value: ValueOrExpr, local?: any): any;
-export function evaluate(root: Context|{ context: Context }|any, value: ValueOrExpr, local?: any): any;
-export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, value?: ValueOrExpr|any, local?: any): any {
+const nope = [];
+export function evaluate(value: ValueOrExpr, locals?: any[]): any;
+export function evaluate(root: Context|{ context: Context }|any, value: ValueOrExpr, locals?: any[]): any;
+export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, value?: ValueOrExpr|any[], locals?: any[]): any {
   let r: Context;
   let e: ValueOrExpr;
-  let l: any = nope;
+  let l: any[] = nope;
   if (isValueOrExpr(root)) {
     r = new Root();
     e = root;
-    arguments.length > 1 && (l = value);
+    arguments.length > 1 && Array.isArray(value) && (l = value);
   } else if (isContext(root)) {
     r = root;
-    e = value;
-    arguments.length > 2 && (l = local);
+    !Array.isArray(value) && (e = value);
+    arguments.length > 2 && (l = locals);
   } else if (root && 'context' in root && isContext(root.context)) {
     r = root.context;
-    e = value;
-    arguments.length > 2 && (l = local);
+    !Array.isArray(value) && (e = value);
+    arguments.length > 2 && (l = locals);
   } else if (isValueOrExpr(value)) {
     r = new Root(root);
     e = value;
-    arguments.length > 2 && (l = local);
+    arguments.length > 2 && (l = locals);
   } else {
     r = new Root();
     e = root;
-    arguments.length > 1 && (l = local);
+    arguments.length > 1 && (l = locals);
   }
 
   if (typeof e === 'string') e = r.root.exprs[e] || (r.root.exprs[e] = (r.parser || parse)(e));
@@ -179,8 +193,13 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, val
   if (e && 'r' in e) return safeGet(r, e.r);
   else if (e && 'v' in e) return e.v;
   else if (e && 'op' in e) return applyOperator(r, e);
-  else if (e && 'a' in e) return l === nope ? e.a : evaluate(extend(r, { value: l }), e.a);
-  else if (e && isDateRel(e)) return e;
+  else if (e && 'a' in e) {
+    if (l === nope) return e.a;
+    else {
+      if (e.n) return evaluate(extend(r, { value: l[0], locals: e.n.reduce((a, c, i) => (a[c] = l[i], a), {} as ParameterMap) }), e.a);
+      else return evaluate(extend(r, { value: l[0] }), e.a);
+    }
+  } else if (e && isDateRel(e)) return e;
 }
 
 const opMap: { [key: string]: Operator } = {};
@@ -367,7 +386,7 @@ export function isKeypath(v: any): v is string|Keypath {
 }
 
 export interface Reference { r: string|Keypath };
-export interface Application { a: Value };
+export interface Application { a: Value; n?: string[]; };
 export interface Literal { v: any };
 
 /** A timespan specified in milliseconds */
@@ -477,6 +496,7 @@ export interface Context {
   root: RootContext;
   parent?: Context;
   special?: ParameterMap;
+  locals?: ParameterMap;
   value: any;
   parser?: (txt: string) => Value;
 }
@@ -521,6 +541,7 @@ export function join(context: Context, path: string): Context {
 export interface ExtendOptions {
   value?: any;
   special?: any;
+  locals?: ParameterMap,
   parser?: (txt: string) => Value;
 }
 
@@ -532,6 +553,7 @@ export function extend(context: Context, opts: ExtendOptions): Context {
     value: 'value' in opts ? opts.value : context.value,
     special: opts.special || {},
     parser: opts.parser,
+    locals: opts.locals,
   };
 }
 
