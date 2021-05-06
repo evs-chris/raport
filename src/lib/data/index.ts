@@ -238,7 +238,7 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, val
   return evalParse(r, e);
 }
 
-export function evalApplication(ctx: Context, value: ValueOrExpr, locals: any[]): any {
+export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[]): any {
   if (typeof value === 'object' && 'a' in value) {
     if ('n' in value) {
       const map = value.n.reduce((a, c, i) => (a[c] = locals[i], a), {} as ParameterMap);
@@ -344,8 +344,8 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
         const s = sortArr[i];
         const desc = dirs[i];
         const by: ValueOrExpr = typeof s === 'string' ? s : s && (s as any).by ? (s as any).by : s;
-        const l = evalApplication(context, by, [a]);
-        const r = evalApplication(context, by, [b]);
+        const l = evalApply(context, by, [a]);
+        const r = evalApply(context, by, [b]);
         const cmp = l == null && r != null ? -1 
           : l != null && r == null ? 1
           : (l < r) === (r < l) ? 0

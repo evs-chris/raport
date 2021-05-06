@@ -1,4 +1,4 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApplication, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans } from './parse';
 
@@ -215,7 +215,7 @@ registerOperator(
     }
 
     if (isValue(args[0])) {
-      return evalApplication(ctx, args[0], args.slice(1));
+      return evalApply(ctx, args[0], args.slice(1));
     }
   }),
   simple(['intersect'], (_name, [left, right]: any[]): any => {
@@ -477,12 +477,12 @@ registerOperator({
     ctx = ctx || new Root();
     if (Array.isArray(value)) {
       const last = value.length - 1;
-      return value.map((v, i) => evalApplication(extend(ctx, { value: v, special: { last, index: i, key: i, 'last-key': last } }), body, [v, i])).join('');
+      return value.map((v, i) => evalApply(extend(ctx, { value: v, special: { last, index: i, key: i, 'last-key': last } }), body, [v, i])).join('');
     } else {
       const entries = Object.entries(value);
       const lastKey = entries[entries.length - 1][0];
       const last = entries.length - 1;
-      return Object.entries(value).map(([k, v], i) => evalApplication(extend(ctx, { value: v, special: { last, 'last-key': lastKey, index: i, key: k } }), body, [v, k])).join('');
+      return Object.entries(value).map(([k, v], i) => evalApply(extend(ctx, { value: v, special: { last, 'last-key': lastKey, index: i, key: k } }), body, [v, k])).join('');
     }
   }
 }, {
@@ -499,7 +499,7 @@ registerOperator({
   },
   apply(_name: string, [value, body]: [any, ValueOrExpr], ctx?: Context) {
     ctx = ctx || new Root();
-    return evalApplication(extend(ctx, { value }), body, [value]);
+    return evalApply(extend(ctx, { value }), body, [value]);
   }
 }, {
   type: 'checked',
@@ -517,26 +517,26 @@ registerOperator({
   type: 'aggregate',
   names: ['avg'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
-    return arr.reduce((a, c) => a + num(args[0] ? evalApplication(ctx, args[0], [c]) : c), 0) / arr.length;
+    return arr.reduce((a, c) => a + num(args[0] ? evalApply(ctx, args[0], [c]) : c), 0) / arr.length;
   },
 }, {
   type: 'aggregate',
   names: ['sum'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
-    return arr.reduce((a, c) => a + num(args[0] ? evalApplication(ctx, args[0], [c]) : c), 0);
+    return arr.reduce((a, c) => a + num(args[0] ? evalApply(ctx, args[0], [c]) : c), 0);
   }
 }, {
   type: 'aggregate',
   names: ['count'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
-    if (args.length) return arr.filter((e, i) => evalApplication(ctx, args[0], [e, i])).length;
+    if (args.length) return arr.filter((e, i) => evalApply(ctx, args[0], [e, i])).length;
     else return arr.length;
   }
 }, {
   type: 'aggregate',
   names: ['min', 'max'],
   apply(name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
-    if (args[0]) arr = arr.map(e => evalApplication(ctx, args[0], [e]));
+    if (args[0]) arr = arr.map(e => evalApply(ctx, args[0], [e]));
     return Math[name].apply(Math, arr);
   }
 }, {
@@ -562,14 +562,14 @@ registerOperator({
   names: ['map'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
     if (!args[0]) return arr;
-    return arr.map((e, i) => evalApplication(ctx, args[0], [e, i]));
+    return arr.map((e, i) => evalApply(ctx, args[0], [e, i]));
   }
 }, {
   type: 'aggregate',
   names: ['reduce'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
     if (!args[0]) return arr;
-    return arr.reduce((a, c, i) => evalApplication(ctx, args[0], [a, c, i]), evalParse(ctx, args[1]));
+    return arr.reduce((a, c, i) => evalApply(ctx, args[0], [a, c, i]), evalParse(ctx, args[1]));
   }
 }, {
   type: 'aggregate',
@@ -578,7 +578,7 @@ registerOperator({
     const seen = [];
     const res = [];
     for (const e of arr) {
-      const f = args[0] ? evalApplication(ctx, args[0], [e]) : e;
+      const f = args[0] ? evalApply(ctx, args[0], [e]) : e;
       if (!~seen.indexOf(f)) {
         seen.push(f);
         res.push(e);
@@ -590,7 +590,7 @@ registerOperator({
   type: 'aggregate',
   names: ['join'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
-    if (args.length > 1) return arr.map(e => evalApplication(ctx, args[0], [e])).join(evalParse(ctx, args[1]));
+    if (args.length > 1) return arr.map(e => evalApply(ctx, args[0], [e])).join(evalParse(ctx, args[1]));
     return arr.join(evalParse(ctx, args[0]));
   }
 }, {
@@ -598,7 +598,7 @@ registerOperator({
   names: ['find'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
     if (!args[0]) return;
-    if (typeof args[0] === 'object' && 'a' in args[0]) return arr.find((e, i) => evalApplication(ctx, args[0], [e, i]));
+    if (typeof args[0] === 'object' && 'a' in args[0]) return arr.find((e, i) => evalApply(ctx, args[0], [e, i]));
     else {
       const v = evalParse(ctx, args[0]);
       return arr.find(e => e == v);

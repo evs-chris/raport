@@ -10,7 +10,7 @@ import './render/builtins';
 import './data/builtins';
 
 export {
-  evaluate, evalParse, evalValue, evalApplication, extend,
+  evaluate, evalParse, evalValue, evalApply, extend,
   filter, isValueOrExpr, join, safeGet, registerFormat, unregisterFormat, getOperatorMap, registerOperator, unregisterOperator,
   Context, Root, Parameter,
   DataSet, DataSource, Field, Group, Schema, Sort, SourceMap,
