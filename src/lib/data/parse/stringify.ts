@@ -184,10 +184,13 @@ function stringifyOp(value: Operation): string {
     if (typeof arg !== 'string' && 'op' in arg && (binops.includes(arg.op) || unops.includes(arg.op))) return `${value.op}(${_stringify(arg)})`;
     else return `${value.op}${call_op.test(value.op) ? ' ' : ''}${_stringify(arg)}`;
   } else if (value.op === 'block') {
+    if (!value.args || !value.args.length) return '';
+
     _level++;
     const parts = value.args.map(a => _stringify(a));
     let split = _noindent ? '' : `\n${padl('', '  ', _level)}`;
     _level--;
+    if (parts.length === 1 && !~parts[0].indexOf('\n')) return `{ ${parts[0]} }`;
     return `{${split}${parts.join(split)}\n${padl('', '  ', _level)}}`;
   } else if ((value.op === 'let' || value.op === 'set') && value.args && value.args.length === 2) {
     let path: string;
@@ -329,26 +332,45 @@ function dedent(target: string, str: string): string {
   else return str;
 }
 
+const allLeadingSpace = /^\s+/gm;
+function outdentAll(amount: string, str: string): string {
+  if (amount) return str.replace(allLeadingSpace, s => s.substr(amount.length));
+  else return str;
+}
+
+function isBlock(v: any): boolean {
+  return typeof v === 'object' && 'op' in v && v.op === 'block';
+}
+
 function stringifyIf(op: Operation): string {
   if (!op.args || op.args.length < 2) return 'false';
 
   let str = '';
 
+  const last = op.args.length - 1;
+  const block = !!op.args.find((p, i) => (i % 2 === 1 || i === last) && isBlock(p));
+
   _level++;
-  const parts = op.args.map(a => _stringify(a));
+  const parts = op.args.map((a, i) => _stringify(block && (i % 2 === 1 || i === last) && !isBlock(a) ? { op: 'block', args: [a] } : a));
   _level--;
 
   const long = parts.find(p => p.length > 30 || ~p.indexOf('\n')) || '';
   let split = _noindent ? '' : parts.length > 3 || long ? `\n${padl('', '  ', _level)}` : '';
   const cindent = long && `${split}  ` || ' ';
   split = split || ' ';
-  const last = parts.length - 1;
   for (let i = 0; i <= last; i++) {
-    if (i === 0) str += `${split && _level > 0 ? split : ''}if ${parts[i++]} then${cindent}${dedent(cindent, parts[i])}`
-    else if (i === last) str += `${split}else${cindent}${dedent(cindent, parts[i])}`
-    else str += `${split}elif ${parts[i++]} then${cindent}${dedent(cindent, parts[i])}`;
+    if (i === 0) {
+      if (block) str += `if ${parts[i++]} ${outdentAll('  ', parts[i]).trimLeft()}`;
+      else str += `${split && _level > 0 ? split : ''}if ${parts[i++]} then${cindent}${dedent(cindent, parts[i])}`
+    } else if (i === last) {
+      if (block) str = str.trimRight() + ` else ${outdentAll('  ', parts[i]).trimLeft()}`;
+      else str += `${split}else${cindent}${dedent(cindent, parts[i])}`;
+    } else {
+      if (block) str = str.trimRight() + ` elif ${parts[i++]} ${outdentAll('  ', parts[i]).trimLeft()}`;
+      else str += `${split}elif ${parts[i++]} then${cindent}${dedent(cindent, parts[i])}`;
+    }
   }
-  if (_level) str += `${split}end`;
+  if (!block && _level) str += `${split}end`;
 
   return str;
 }
@@ -359,8 +381,19 @@ function stringifyCase(op: Operation): string {
 
   let str = '';
 
+  const last = op.args.length - 1;
+  const block = !!op.args.find((p, i) => ((i > 1 && i % 2 === 0) || i === last) && isBlock(p));
+
   _level++;
-  const parts = op.args.map(a => typeof a === 'object' && 'op' in a ? _stringify(a).replace(caseRE, '_') : _stringify(a));
+  const parts = op.args.map((a, i) => {
+    if (block && (i > 1 && i % 2 === 0 || i === last)) {
+      _level++;
+      const res = _stringify(isBlock(a) ? a : { op: 'block', args: [a] });
+      _level--;
+      return res;
+    }
+    return typeof a === 'object' && 'op' in a ? _stringify(a).replace(caseRE, '_') : _stringify(a);
+  });
   _level--;
 
   const long = parts.find(p => p.length > 30 || ~p.indexOf('\n')) || '';
@@ -368,13 +401,19 @@ function stringifyCase(op: Operation): string {
   const wsplit = split ? `${split}  ` : ' ';
   const cindent = long && `${wsplit}  ` || ' ';
   split = split || ' ';
-  const last = parts.length - 1;
   for (let i = 0; i <= last; i++) {
-    if (i === 0) str += `${split && _level > 0 ? split : ''}case ${parts[i]}`
-    else if (i === last) str += `${wsplit}else${cindent}${dedent(cindent, parts[i])}`
-    else str += `${wsplit}when ${parts[i++]} then${cindent}${dedent(cindent, parts[i])}`;
+    if (i === 0) {
+      if (block) str += `case ${parts[i]}`;
+      else str += `${split && _level > 0 ? split : ''}case ${parts[i]}`
+    } else if (i === last) {
+      if (block) str = str.trimRight() + wsplit + `else ${outdentAll('  ', parts[i]).trimLeft()}`;
+      else str += `${wsplit}else${cindent}${dedent(cindent, parts[i])}`
+    } else {
+      if (block) str = str.trimRight() + wsplit + `when ${parts[i++]} ${outdentAll('  ', parts[i]).trimLeft()}`;
+      else str += `${wsplit}when ${parts[i++]} then${cindent}${dedent(cindent, parts[i])}`;
+    }
   }
-  if (_level) str += `${split}end`;
+  if (!block && _level) str += `${split}end`;
 
   return str;
 }

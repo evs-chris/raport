@@ -320,6 +320,12 @@ export const binop_or = map(seq(binop_and, rep(seq(rws, name(str('or', '||'), 'o
 binop.parser = binop_or;
 
 if_op.parser = alt(
+  map(seq(str('if'), rws, value, rws, block, rep(seq(ws, str('else if', 'elseif', 'elsif', 'elif'), rws, value, rws, block)), opt(seq(ws, str('else'), rws, block))), ([,, cond1,, block1, elifs, el]) => {
+    const op =  { op: 'if', args: [cond1, block1] };
+    for (const [,,, cond,, block] of elifs) op.args.push(cond, block);
+    if (el) op.args.push(el[3]);
+    return op;
+  }, 'if block'),
   map(seq(str('if'), rws, value, rws, str('then'), rws, value, rep(seq(rws, not(str('end', 'fi')), str('else if', 'elseif', 'elsif', 'elif'), rws, value, rws, str('then'), rws, value)), opt(seq(rws, str('else'), rws, value)), opt(seq(rws, str('end', 'fi')))), ([,, cond1,,,, val1, elifs, el]) => {
     const op = { op: 'if', args: [cond1, val1] };
     for (const [,,,, cond,,,, val] of elifs) op.args.push(cond, val);
@@ -352,19 +358,30 @@ export const case_branch = alt<[undefined|Value, Value]>(
   map(seq(rws, not(str('end', 'esac')), str('when'), rws, value, rws, str('then'), rws, value), ([,,,, cond,,,, hit]) => [cond, hit], 'when branch'),
   map(seq(rws, not(str('end', 'esac')), str('else'), rws, value), ([,,,, hit]) => [undefined, hit], 'else branch'),
 );
-case_op.parser = map(seq(str('case'), rws, value, rep(case_branch), opt(seq(rws, str('end', 'esac')))), ([,, val, branches]) => {
-  const op = { op: 'case', args: [val] };
-  for (let i = 0; i < branches.length; i++) {
-    if (branches[i][0] === undefined) op.args.push(branches[i][1]);
-    else {
-      let arg: Value = branches[i][0];
-      if ('op' in arg) replaceCase(arg);
-      op.args.push(arg);
-      op.args.push(branches[i][1]);
+case_op.parser = alt(
+  map(seq(str('case'), rws, value, rep(seq(rws, str('when'), rws, value, rws, block)), opt(seq(rws, str('else'), rws, block))), ([,, val, cases, el]) => {
+    const op = { op: 'case', args: [val] };
+    for (const [,,, v,, b] of cases) {
+      if ('op' in v) replaceCase(v);
+      op.args.push(v, b);
     }
-  }
-  return op;
-}, 'case');
+    if (el) op.args.push(el[3]);
+    return op;
+  }, 'case block'),
+  map(seq(str('case'), rws, value, rep(case_branch), opt(seq(rws, str('end', 'esac')))), ([,, val, branches]) => {
+    const op = { op: 'case', args: [val] };
+    for (let i = 0; i < branches.length; i++) {
+      if (branches[i][0] === undefined) op.args.push(branches[i][1]);
+      else {
+        let arg: Value = branches[i][0];
+        if ('op' in arg) replaceCase(arg);
+        op.args.push(arg);
+        op.args.push(branches[i][1]);
+      }
+    }
+    return op;
+  }, 'case'),
+);
 
 function postfix_path(parser: Parser<Value>): Parser<Value> {
   return map(seq(parser, rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([v, k]) => {
