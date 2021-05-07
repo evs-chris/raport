@@ -1,3 +1,34 @@
+## 0.7.0
+
+2021-05-08
+
+### Data
+
+* Schema inspection handles arrays much more accurately.
+* Root contexts now support setting a root parser in their type signatures.
+* __BREAKING__: Application is now handled more explicitly within operators (again... ish). Application will no longer automatically evaluate in the current context.
+* Locals are now handled in the context rather than in the evaluation call.
+* Applications can now have named arguments specified, and are handled as locals during evaluation e.g. `|a c| => a + c` can be used with `reduce` to sum values.
+* There is now a `reduce` operator that folds a value throuh an array using an application e.g. `reduce([1 2 3] |a c|=>a+c 0)`.
+* There is now a `block` operator that evaluates all of its arguments in a new context with an empty set of locals.
+* There is now a `let` operator that allows defining a local variable in the current context. The variable can be any path expression except prefixes other than `^`. Any missing intermediate levels will be filled in based on the type of the key.
+* There is now a `set` operator that allows setting values in an local scope up the context hierarchy if any match or in the current context data otherwise. Like `let` the variable can be any path expression.
+* There are a few new special refs that allow access to immediate scope specials and locals (`@special`, `@local`), nearest set specials and locals (`@specials`, `@locals`), root sources `@sources`, and parameters (`@parameters`).
+
+### Parser
+
+* Format args allow a trailing comma to allow eliminating ambiguity without requiring brackets .e.g `some.thing#or,10, + 20` is a binary operation rather than a format with a binary operation as its argument.
+* Blocks can be parsed from `{expr1 expr2; expr3}` syntax, where the expression separators can be any whitespace and/or a `;`.
+* There is now a parser that parses in an implicit block scope, allowing multiple expressions. The final expression determines the result of evaluation. This is now the default parser.
+* There are now block forms of `if` and `case` that allow reducing a bit of boilerplate if you need multiple expressions within a branch body e.g. `if foo { bar; baz } elif bat { bip: boop }` and `case foo when bar { baz } when bat { bop } else { sure }`. The stringifier handles preferred formatting for the new forms.
+
+### Designer
+
+* The designer now supports projects, which include the report design, provided sources, and saved set of parameters. Projects are saved in `localStorage` and can be imported/exported with files.
+* There are various UI adjustments to make different areas more consistent and avoid small layout issues.
+* There is now a `log` operator available in the designer to make debugging expressions easier.
+
+
 ## 0.6.1
 
 2021-04-19

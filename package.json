@@ -1,6 +1,6 @@
 {
   "name": "raport",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Simple reports. No ragrets.",
   "main": "./lib/raport.umd.js",
   "types": "./lib/index.d.ts",
