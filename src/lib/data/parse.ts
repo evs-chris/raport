@@ -415,4 +415,7 @@ const letter = map(seq(str('let'), rws, localpath, ws, str('='), ws, value), ([,
 const setter = map(seq(str('set'), rws, keypath, ws, str('='), ws, value), ([, , k, , , , v]) => ({ op: 'set', args: [{ v: k }, v] }));
 values.parser = alt('expression', array, object, literal, string, application, unop, call_op, letter, setter, ref, block);
 
-export const parse = makeParser(value, { trim: true });
+export const parseBlock = makeParser<Value>(map(rep1sep(value, read1(space + ';'), 'allow'), args => ({ op: 'block', args })), { trim: true });
+export const parseExpr = makeParser(value, { trim: true });
+export const parse = parseBlock;
+export default parse;

@@ -56,7 +56,8 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
   _tpl = opts.template;
   _noindent = opts.noIndent;
   _level = 0;
-  return _stringify(value);
+  if (!_sexprops && typeof value === 'object' && 'op' in value && value.op === 'block') return stringifyRootBlock(value);
+  else return _stringify(value);
 }
 
 function padl(v: any, pad: string, len: number): string {
@@ -201,6 +202,11 @@ function stringifyOp(value: Operation): string {
   } else {
     return `(${value.op}${value.args && value.args.length ? ` ${value.args.map(v => _stringify(v)).join(_listcommas ? ', ' : ' ')}`: ''})`;
   }
+}
+
+function stringifyRootBlock(block: Operation): string {
+  if (!block.args || !block.args.length) return '';
+  return block.args.map(a => _stringify(a)).join('\n');
 }
 
 function stringifyLiteral(value: Literal): string {
