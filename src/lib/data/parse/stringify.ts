@@ -108,7 +108,7 @@ function _stringify(value: ValueOrExpr): string {
   } else if ('op' in value) {
     return stringifyOp(value);
   } else if ('a' in value) {
-    if ('n' in value) return `|${value.n.join(' ')}| => ${_stringify(value.a)}`;
+    if ('n' in value) return `|${value.n.join(_listcommas ? ', ' : ' ')}| => ${_stringify(value.a)}`;
     else return `=>${_stringify(value.a)}`;
   } else if ('v' in value) {
     return stringifyLiteral(value);
