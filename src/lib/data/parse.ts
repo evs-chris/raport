@@ -17,8 +17,8 @@ timespans.y = Math.floor(timespans.d * 365.25);
 timespans.m = Math.floor(timespans.d * 30.45);
 
 const space = ' \r\n\t';
-const endSym = space + '():{}[]';
-export const endRef = endSym + ',"\'`\\;&#.';
+const endSym = space + '():{}[]<>,"\'`\\;&#';
+export const endRef = endSym + '.+/*|^%=!?';
 
 export const rws = skip1(space);
 
@@ -229,7 +229,7 @@ export const dateexact: Parser<Date|DateRel> = map(seq(
 export const date = bracket(str('#'), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), str('#'));
 
 export const string = alt<Value>('string',
-  map(seq(str(':'), read1To(endRef.replace('.', ''), true)), v => ({ v: v[1]})),
+  map(seq(str(':'), read1To(endSym, true)), v => ({ v: v[1]})),
   map(bracket(str('"'), rep(alt<string>('string part',
     read1To('\\"'), JStringEscape, JStringUnicode, JStringHex
   )), str('"')), a => ({ v: ''.concat(...a) })), 
