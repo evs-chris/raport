@@ -316,7 +316,7 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
     let flt: Value = typeof filter === 'string' ? parse(filter) : filter;
     if ('m' in flt) flt = { v: true };
     ds.value.forEach((row, index) => {
-      if (!!evalParse(extend(context, { value: row, special: { value: row, index } }), flt)) values.push(row);
+      if (!!evalApply(extend(context, { value: row, special: { value: row, index } }), flt, [row, index])) values.push(row);
     });
   }
 
