@@ -421,7 +421,7 @@ block.parser = map(bracket(
 value.parser = operation;
 
 const namedArg: Parser<[Value, Value]> = map(seq(ident, str(':'), ws, value), ([k, , , v]) => [{ v: k }, v], 'named arg');
-const application = map(seq(opt(bracket(str('|'), rep1sep(opName, read1(space + ','), 'allow'), str('|'))), ws, str('=>'), ws, value), ([names, , , , value]) => (names ? { a: value, n: names } : { a: value }));
+const application = map(seq(opt(bracket(check(str('|'), ws), rep1sep(opName, read1(space + ','), 'allow'), str('|'))), ws, str('=>'), ws, value), ([names, , , , value]) => (names ? { a: value, n: names } : { a: value }));
 args.parser = map(repsep(alt<[Value, Value] | Value>('argument', namedArg, value), read1(space + ','), 'allow'), (args) => {
   const [plain, obj] = args.reduce((a, c) => ((Array.isArray(c) ? a[1].push(c) : a[0].push(c)), a), [[], []] as [Array<Value>, Array<[Value, Value]>]);
   if (obj.length) plain.push(objectOp(obj));
