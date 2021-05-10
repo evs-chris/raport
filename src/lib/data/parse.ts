@@ -361,17 +361,9 @@ export function replaceCase(op: Operation): boolean {
 export const case_branch = alt<[undefined|Value, Value]>(
   map(seq(rws, not(str('end', 'esac')), str('when'), rws, value, rws, str('then'), rws, value), ([,,,, cond,,,, hit]) => [cond, hit], 'when branch'),
   map(seq(rws, not(str('end', 'esac')), str('else'), rws, value), ([,,,, hit]) => [undefined, hit], 'else branch'),
+  map(seq(rws, not(str('end', 'esac')), str('when'), rws, value, rws, block), ([,,,, cond,, hit]) => [cond, hit], 'when block'),
 );
 case_op.parser = alt(
-  map(seq(str('case'), rws, value, rep(seq(rws, str('when'), rws, value, rws, block)), opt(seq(rws, str('else'), rws, block))), ([,, val, cases, el]) => {
-    const op = { op: 'case', args: [val] };
-    for (const [,,, v,, b] of cases) {
-      if ('op' in v) replaceCase(v);
-      op.args.push(v, b);
-    }
-    if (el) op.args.push(el[3]);
-    return op;
-  }, 'case block'),
   map(seq(str('case'), rws, value, rep(case_branch), opt(seq(rws, str('end', 'esac')))), ([,, val, branches]) => {
     const op = { op: 'case', args: [val] };
     for (let i = 0; i < branches.length; i++) {
