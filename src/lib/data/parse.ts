@@ -65,7 +65,11 @@ export const localpath = map(seq(read('^'), pathident, rep(alt<string|Value>('ke
 export const parsePath = makeParser(keypath);
 export const parseLetPath = makeParser(localpath);
 
-export const ref = map(keypath, r => ({ r }), 'reference');
+const illegalRefs = ['if', 'else', 'elif', 'elseif', 'elsif', 'unless', 'then', 'case', 'when'];
+export const ref = map(keypath, (r, err) => {
+  if (r.k.length === 1 && !r.p && !r.u && illegalRefs.includes(r.k[0] as string)) err(`invalid reference name '${r.k[0] as string}'`);
+  return { r };
+}, 'reference');
 
 function stringInterp(parts: Value[]): Value {
   const res = parts.reduce((a, c) => {
