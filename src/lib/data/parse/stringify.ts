@@ -457,9 +457,10 @@ function stringifyCase(op: Operation): string {
     if (block && (i > 1 && i % 2 === 0 || i === last)) {
       res = _stringify(isBlock(a) ? a : { op: 'block', args: [a] });
     } else if (i % 2 === 0 || i === last) {
+      res = _stringify(a);
+    } else {
       res = typeof a === 'object' && 'op' in a ? _stringify(a).replace(caseRE, '_') : _stringify(a);
     }
-    res = typeof a === 'object' && 'op' in a ? _stringify(a).replace(caseRE, '_') : _stringify(a);
 
     if (i !== 0)_level--;
 
