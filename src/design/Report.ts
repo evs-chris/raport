@@ -635,6 +635,10 @@ export class Designer extends Ractive {
     const json = tryJSON(str);
     if (json) {
       if (typeof json === 'object' && 'type' in json && json.type === 'fetch') this.set('data', json);
+      else {
+        if (Array.isArray(json) || !Array.isArray(json.value)) this.set('data.data', { value: json });
+        else this.set('data.data', json);
+      }
     } else {
       this.set('data.data', str);
     }
