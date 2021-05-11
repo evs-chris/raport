@@ -32,6 +32,7 @@ export const keywords = map<string, any>(str('null', 'true', 'false', 'undefined
 });
 
 export const ident = read1To(endRef, true);
+export const sexprop = read1To(' \r\n\t():{}[],"\'\\;&#@', true);
 
 export const args: Parser<Value[]> = {};
 export const array: Parser<Value> = {};
@@ -263,7 +264,7 @@ export const literal = map(alt('literal', JNum, keywords, date), v => {
 
 export const sexp = map(bracket(
   check(str('('), ws),
-  seq(ident, ws, args),
+  seq(sexprop, ws, args),
   check(ws, str(')')),
 ), ([op, , args]) => {
   const res: Value = { op };
