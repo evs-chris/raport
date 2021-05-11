@@ -1,3 +1,21 @@
+## 0.7.1
+
+2021-05-10
+
+### Data
+
+* __BUG_: Filters once again correctly evaluate applications.
+
+### Parser
+
+* Application arguments will now stringify with comma separators if `listCommas` is set.
+* The application arguments opening pipe can now be followed by whitespace.
+* __BREAKING?__: References can no longer include some operator characters, like `+`.
+* `if`, `unless`, `case`, and friends will no longer parse as references to avoid some incorrect syntax looking correct and parsing to something nonsensical.
+* __BUG__: Non-block cases will once again parse and can also be mixed with block cases.
+* Stringify can now split long lists of arguments (array, call, object, etc) across multiple lines, and will default to limiting list lengths to 60 chars per line.
+
+
 ## 0.7.0
 
 2021-05-08
