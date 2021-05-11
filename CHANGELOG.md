@@ -1,3 +1,16 @@
+## 0.7.2
+
+2021-05-11
+
+### Parser
+
+* __BUG__: S-expression operators can once again be symbolic.
+
+### Designer
+
+* __BUG__: Plain JSON data sources can once again be provided.
+
+
 ## 0.7.1
 
 2021-05-10
