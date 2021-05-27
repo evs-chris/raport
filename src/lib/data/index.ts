@@ -751,6 +751,66 @@ export function subtractTimespan(l: TimeSpan, r: TimeSpan): TimeSpan {
   }
 }
 
+export function datesDiff(l: Date, r: Date): FullTimeSpan {
+  if (isNaN(+l) || isNaN(+r)) return { d: [] };
+  const a = new Date(l < r ? l : r);
+  const b = l < r ? r : l;
+  const res: FullTimeSpan = { d: [0, 0, 0, 0, 0, 0, 0] };
+  let num = b.getFullYear() - a.getFullYear() - 1;
+  if (num > 0) {
+    res.d[0] += num;
+    a.setFullYear(b.getFullYear() - 1);
+  }
+  a.setFullYear(a.getFullYear() + 1);
+  if (a > b) a.setFullYear(a.getFullYear() - 1);
+  else res.d[0]++;
+
+  while (true) {
+    a.setMonth(a.getMonth() + 1);
+    if (a > b) {
+      a.setMonth(a.getMonth() - 1);
+      break;
+    } else res.d[1]++;
+  }
+
+  while (true) {
+    a.setDate(a.getDate() + 1);
+    if (a > b) {
+      a.setDate(a.getDate() - 1);
+      break;
+    } else res.d[2]++;
+  }
+
+  while (true) {
+    a.setHours(a.getHours() + 1);
+    if (a > b) {
+      a.setHours(a.getHours() - 1);
+      break;
+    } else res.d[3]++;
+  }
+
+  while (true) {
+    a.setMinutes(a.getMinutes() + 1);
+    if (a > b) {
+      a.setMinutes(a.getMinutes() - 1);
+      break;
+    } else res.d[4]++;
+  }
+
+  while (true) {
+    a.setSeconds(a.getSeconds() + 1);
+    if (a > b) {
+      a.setSeconds(a.getSeconds() - 1);
+      break;
+    } else res.d[5]++;
+  }
+
+  if (a.getMilliseconds() <= b.getMilliseconds()) res.d[6] = b.getMilliseconds() - a.getMilliseconds();
+  else res.d[6] = (1000 - a.getMilliseconds()) + b.getMilliseconds();
+
+  return res;
+}
+
 export function dateAndTimespan(l: Date, r: TimeSpan, m: 1|-1): Date {
   if (typeof r === 'number') return new Date(+l + r * m);
   else {
