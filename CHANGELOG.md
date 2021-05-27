@@ -1,3 +1,17 @@
+## 0.7.3
+
+2021-05027
+
+### Data
+
+* __BUG__: Timespans are now correctly treated as literals during evaluation.
+* The `time-span` function can now handle producing exact spans from date to date when passed two dates as the first arguments.
+
+### Parser
+
+* Named args or objects in the final argument position are now rendered as named args during stringification.
+
+
 ## 0.7.2
 
 2021-05-11
