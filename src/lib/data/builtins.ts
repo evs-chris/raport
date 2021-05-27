@@ -1,4 +1,4 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue, datesDiff, FullTimeSpan } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans } from './parse';
 
@@ -20,6 +20,11 @@ function num(v: any): number {
 function equals(l: any, r: any): boolean {
   return l == r; // eslint-disable-line eqeqeq
 }
+
+const spans = {
+  exact: ['year', 'month', 'day', 'hour', 'minute', 'second', 'millisecond'],
+  ms: ['week', 'day', 'hour', 'minute', 'second', 'millisecond'],
+};
 
 // basic ops
 registerOperator(
@@ -157,42 +162,56 @@ registerOperator(
     return filter({ value: arr }, null, sort, null, ctx).value;
   }),
   simple(['time-span', 'time-span-ms'], (_name: string, args: any[]): any => {
-    let ms = args[0];
-    let unit = typeof args[args.length - 1] === 'object' ? args[args.length - 1].unit : null;
-    if (typeof unit !== 'string') unit = null;
-    unit = unit && (unit[0] === 'y' ? 'y' : unit[0] === 'w' ? 'w' : unit[0] === 'd' ? 'd' : unit[0] === 'h' ? 'h' : unit[0] === 's' ? 's' : (unit === 'm' || unit.substr(0, 2) === 'mo') ? 'm' : (unit === 'mm' || unit.substr(0, 3) === 'min') ? 'mm' : (unit === 'ms' || unit.substr(0, 3) === 'mil') ? 'ms' : null);
-    const precision = typeof args[1] === 'number' ? args[1] : unit ? 0 : 1;
-    if (unit) {
-      if (precision) return (ms / timespans[unit]).toFixed(precision);
-      else return Math.floor(ms / timespans[unit]);
-    } else {
-      const res = [0, 0, 0, 0, 0, 0];
-      check: if (ms !== '' && !isNaN(ms)) {
-        ms = Math.abs(+ms);
-        res[0] = Math.floor(ms / timespans.w);
-        if (precision < res.filter(x => x).length) break check;
-        ms = ms % timespans.w;
-        res[1] = Math.floor(ms / timespans.d);
-        if (precision < res.filter(x => x).length) break check;
-        ms = ms % timespans.d;
-        res[2] = Math.floor(ms / timespans.h);
-        if (precision < res.filter(x => x).length) break check;
-        ms = ms % timespans.h;
-        res[3] = Math.floor(ms / timespans.mm);
-        if (precision < res.filter(x => x).length) break check;
-        ms = ms % timespans.mm;
-        res[4] = Math.floor(ms / timespans.s);
-        if (precision < res.filter(x => x).length) break check;
-        res[5] = ms % timespans.s;
-      } else return '';
+    const dts = isDateRel(args[0]) && isDateRel(args[1]);
+    const sp = typeof args[0] === 'object' && Array.isArray(args[0].d);
+    if (dts || sp) {
+      const span: FullTimeSpan = dts ? datesDiff(dateRelToDate(args[0]), dateRelToDate(args[1])) : args[0];
+      let array = typeof args[args.length - 1] === 'object' ? args[args.length - 1].array : false;
+      if (array) return span.d;
+      const precision = typeof args[2] === 'number' ? args[2] : 0;
       let str = '';
-      if (res[0]) str += `${res[0]} week${res[0] > 1 ? 's' : ''}`;
-      if (res[1]) str += `${str.length ? ' ' : ''}${res[1]} day${res[1] > 1 ? 's' : ''}`;
-      if (res[2]) str += `${str.length ? ' ' : ''}${res[2]} hour${res[2] > 1 ? 's' : ''}`;
-      if (res[3]) str += `${str.length ? ' ' : ''}${res[3]} minute${res[3] > 1 ? 's' : ''}`;
-      if (res[4]) str += `${str.length ? ' ' : ''}${res[4]} second${res[4] > 1 ? 's' : ''}`;
-      if (res[5]) str += `${str.length ? ' ' : ''}${res[5]} millisecond${res[5] > 1 ? 's' : ''}`;
+      for (let i = 0; i < span.d.length; i++) {
+        if (precision && i >= precision) break;
+        if (span.d[i]) str += `${str.length ? ' ' : ''}${span.d[i]} ${spans.exact[i]}${span.d[i] > 1 ? 's' : ''}`;
+      }
       return str;
+    } else {
+      let ms = args[0];
+      let unit = typeof args[args.length - 1] === 'object' ? args[args.length - 1].unit : null;
+      let array = typeof args[args.length - 1] === 'object' ? args[args.length - 1].array : false;
+      if (typeof unit !== 'string') unit = null;
+      unit = unit && (unit[0] === 'y' ? 'y' : unit[0] === 'w' ? 'w' : unit[0] === 'd' ? 'd' : unit[0] === 'h' ? 'h' : unit[0] === 's' ? 's' : (unit === 'm' || unit.substr(0, 2) === 'mo') ? 'm' : (unit === 'mm' || unit.substr(0, 3) === 'min') ? 'mm' : (unit === 'ms' || unit.substr(0, 3) === 'mil') ? 'ms' : null);
+      const precision = typeof args[1] === 'number' ? args[1] : unit ? 0 : 1;
+      if (unit) {
+        if (precision) return (ms / timespans[unit]).toFixed(precision);
+        else return Math.floor(ms / timespans[unit]);
+      } else {
+        const res = [0, 0, 0, 0, 0, 0];
+        check: if (ms !== '' && !isNaN(ms)) {
+          ms = Math.abs(+ms);
+          res[0] = Math.floor(ms / timespans.w);
+          if (precision < res.filter(x => x).length) break check;
+          ms = ms % timespans.w;
+          res[1] = Math.floor(ms / timespans.d);
+          if (precision < res.filter(x => x).length) break check;
+          ms = ms % timespans.d;
+          res[2] = Math.floor(ms / timespans.h);
+          if (precision < res.filter(x => x).length) break check;
+          ms = ms % timespans.h;
+          res[3] = Math.floor(ms / timespans.mm);
+          if (precision < res.filter(x => x).length) break check;
+          ms = ms % timespans.mm;
+          res[4] = Math.floor(ms / timespans.s);
+          if (precision < res.filter(x => x).length) break check;
+          res[5] = ms % timespans.s;
+        } else return '';
+        if (array) return res;
+        let str = '';
+        for (let i = 0; i < res.length; i++) {
+          if (res[i]) str += `${str.length ? ' ' : ''}${res[i]} ${spans.ms[i]}${res[i] > 1 ? 's' : ''}`;
+        }
+        return str;
+      }
     }
   }),
   simple(['string'], (_name: string, [value]: any[]): string => {
