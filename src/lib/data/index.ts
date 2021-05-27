@@ -260,11 +260,12 @@ export function evalParse(ctx: Context, expr: ValueOrExpr): any {
 }
 
 export function evalValue(ctx: Context, expr: Value): any {
-  if (expr && 'r' in expr) return safeGet(ctx, expr.r);
-  else if (expr && 'v' in expr) return expr.v;
-  else if (expr && 'op' in expr) return applyOperator(ctx, expr);
-  else if (expr && 'a' in expr) return expr;
-  else if (expr && isDateRel(expr)) return expr;
+  if (!expr) return expr;
+  if ('r' in expr) return safeGet(ctx, expr.r);
+  else if ('v' in expr) return expr.v;
+  else if ('op' in expr) return applyOperator(ctx, expr);
+  else if ('a' in expr) return expr;
+  else if (isDateRel(expr) || isTimespan(expr)) return expr;
 }
 
 const opMap: { [key: string]: Operator } = {};
