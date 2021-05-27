@@ -17,6 +17,8 @@ export interface BaseStringifyOpts {
   template?: boolean;
   /** Output unindented single line expressions. */
   noIndent?: boolean;
+  /** Output named args as an object literal */
+  noNamedArgs?: boolean;
 }
 export interface SimpleStringifyOpts extends BaseStringifyOpts {
   /** Render all operations as s-expressions rather than sugary raport expressions. */
@@ -40,6 +42,8 @@ let _noobj: boolean = false;
 let _tpl: boolean = false;
 let _noindent: boolean = false;
 let _listwrap: number = 60;
+let _lastarg: boolean = false;
+let _noname: boolean = false;
 
 let _level = 0;
 
@@ -69,6 +73,7 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
   _noindent = opts.noIndent;
   _level = 0;
   _listwrap = 'listWrap' in opts ? (!opts.listWrap ? 0 : opts.listWrap === true ? 1 : opts.listWrap) : 60;
+  _noname = opts.noNamedArgs;
   if (!_sexprops && typeof value === 'object' && 'op' in value && value.op === 'block') return stringifyRootBlock(value);
   else return _stringify(value);
 }
@@ -167,10 +172,11 @@ function stringifyOp(value: Operation): string {
     return wrapArgs('[', value.args, ']');
   } else if (!_noobj && value.op === 'object' && value.args && !value.args.find((a, i) => i % 2 === 0 && (typeof a === 'string' || !('v' in a) || typeof a.v !== 'string'))) {
     if (!value.args || !value.args.length) return '{}';
-    return wrapArgs('{', value.args, '}', 2);
+    if (!_noname && _lastarg) return wrapArgs('', value.args, '', 2);
+    else return wrapArgs('{', value.args, '}', 2);
   } else if (_sexprops) {
     if (!value.args || !value.args.length) return `(${value.op})`;
-    return wrapArgs(`(${value.op} `, value.args, ')');
+    return wrapArgs(`(${value.op} `, value.args, ')', 0, true);
   } else if (value.op === 'if' || value.op === 'unless' && value.args && value.args.length > 2) {
     return stringifyIf(value);
   } else if (value.op === 'case' && value.args && value.args.length > 2) {
@@ -209,10 +215,10 @@ function stringifyOp(value: Operation): string {
     else path = _stringify(arg);
     return `${value.op} ${path} = ${_stringify(value.args[1])}`;
   } else if (call_op.test(value.op)) {
-    return wrapArgs(`${value.op}(`, value.args || [], ')');
+    return wrapArgs(`${value.op}(`, value.args || [], ')', 0, true);
   } else {
     if (!value.args || !value.args.length) return `(${value.op})`;
-    return wrapArgs(`(${value.op} `, value.args, ')');
+    return wrapArgs(`(${value.op} `, value.args, ')', 0, true);
   }
 }
 
@@ -243,7 +249,11 @@ function stringifyLiteral(value: Literal): string {
       return stringifyDate(value.v);
     } else {
       const keys = Object.keys(value.v);
-      return `{${keys.map(k => `${_key = true, _stringify({ v: k })}:${_key = false, _stringify({ v: value.v[k] })}`).join(_listcommas ? ', ' : ' ')}}`;
+      let res = '';
+      if (_noname || !_lastarg) res += '{';
+      res += `${keys.map(k => `${_key = true, _stringify({ v: k })}:${_key = false, _stringify({ v: value.v[k] })}`).join(_listcommas ? ', ' : ' ')}`;
+      if (_noname || !_lastarg) res += '}';
+      return res;
     }
   }
 }
@@ -306,7 +316,7 @@ function stringifyDate(value: DateRel): string {
         if (t) str += `${t}${k}`;
       });
       if (rem) str += `${rem}ms`;
-      return `#${str}${value.o < 0 ? ' ago' : ' from now'}${offsetToTimezone(-1, value.z)}#`;
+      return `#${str}${value.o < 0 ? ' ago' : value.o > 0 ? ' from now' : ''}${offsetToTimezone(-1, value.z)}#`;
     }
   } else if ('d' in value && value.d === 1 && value.o === 0) { // span to date
     str = `#${value.f === 'w' ? 'week' : value.f === 'm' ? 'month' : 'year'} to date${offsetToTimezone(-1, value.z)}${value.e && '>' || ''}#`;
@@ -342,7 +352,7 @@ function outdentAll(amount: string, str: string): string {
   else return str;
 }
 
-function wrapArgs(open: string, args: ValueOrExpr[], close: string, keyMod?: number): string {
+function wrapArgs(open: string, args: ValueOrExpr[], close: string, keyMod?: number, call?: boolean): string {
   if (!args || !args.length) return `${open}${close}`;
   _level++;
   let parts: string[];
@@ -362,7 +372,13 @@ function wrapArgs(open: string, args: ValueOrExpr[], close: string, keyMod?: num
       }
     }
   } else {
-    parts = args.map(a => _stringify(a));
+    const last = args.length - 1;
+    const _la = _lastarg;
+    parts = args.map((a, i) => {
+      if (call && i === last) _lastarg = true;
+      return _stringify(a);
+    });
+    _lastarg = _la;
   }
   _level--;
 
