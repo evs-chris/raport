@@ -1,6 +1,26 @@
+## 0.7.4
+
+2021-06-23
+
+### Report
+
+* `classifyStyles` is now the default. To disable style classification, set it to `false`.
+
+### Parser
+
+* __BUG__: Escapes are now properly handled in template strings.
+* There are now non-escape-entity versions of comparison operators (`<`, `<=`, `>`, `>=`) for use with templates, and these are now used by default when stringifying a template.
+* There is also a non-escape-entity version of application (`=\`) for use with templates, and it is also used by default when stringifying templates.
+* There is a new stringify option, `htmlSafe`, that controls whether or not HTML-safe syntax is output. It defaults to on for templates and off for non-template expression.
+
+### Designer
+
+* Sources are now more effectively compacted.
+
+
 ## 0.7.3
 
-2021-05027
+2021-05-27
 
 ### Data
 
