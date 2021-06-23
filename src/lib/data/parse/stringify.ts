@@ -19,6 +19,8 @@ export interface BaseStringifyOpts {
   noIndent?: boolean;
   /** Output named args as an object literal */
   noNamedArgs?: boolean;
+  /** Output HTML-friendly syntax */
+  htmlSafe?: boolean;
 }
 export interface SimpleStringifyOpts extends BaseStringifyOpts {
   /** Render all operations as s-expressions rather than sugary raport expressions. */
@@ -45,6 +47,7 @@ let _noindent: boolean = false;
 let _listwrap: number = 60;
 let _lastarg: boolean = false;
 let _noname: boolean = false;
+let _html: boolean = false;
 
 let _level = 0;
 
@@ -75,6 +78,7 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
   _level = 0;
   _listwrap = 'listWrap' in opts ? (!opts.listWrap ? 0 : opts.listWrap === true ? 1 : opts.listWrap) : 60;
   _noname = opts.noNamedArgs;
+  _html = opts.htmlSafe;
   if (!_sexprops && typeof value === 'object' && 'op' in value && value.op === 'block') return stringifyRootBlock(value);
   else return _stringify(value);
 }
@@ -127,7 +131,7 @@ function _stringify(value: ValueOrExpr): string {
   } else if ('op' in value) {
     return stringifyOp(value);
   } else if ('a' in value) {
-    const arrow = _tplmode ? '\\' : '>';
+    const arrow = ((_tplmode && _html !== false) || _html) ? '\\' : '>';
     if ('n' in value) return `|${value.n.join(_listcommas ? ', ' : ' ')}| =${arrow} ${_stringify(value.a)}`;
     else return `=${arrow}${_stringify(value.a)}`;
   } else if ('v' in value) {
@@ -171,7 +175,7 @@ function flattenNestedBinopsL(op: string, value: Operation, agg: ValueOrExpr[] =
 
 function stringifyOp(value: Operation): string {
   let op = value.op;
-  if (_tplmode) {
+  if ((_tplmode && _html !== false) || _html) {
     if (op === '>') op = 'gt';
     else if (op === '>=') op = 'gte';
     else if (op === '<') op = 'lt';
