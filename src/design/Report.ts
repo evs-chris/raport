@@ -665,7 +665,7 @@ export class Designer extends Ractive {
 
   fmt() {
     const str = this.get('temp.expr.str');
-    this.set('temp.expr.str', fmt(str));
+    this.set('temp.expr.str', fmt(str, this.get('temp.expr.html')));
   }
 
   fmtAll() {
@@ -1255,8 +1255,8 @@ function fmtAll(json: any): any {
 
   for (const k in json) {
     const v = json[k];
-    if (k === 'text' || k === 'html' || k === 'width' || k === 'height' || k === 'hide' || k === 'br') res[k] = fmt(v);
-    else if (k === 'name') res[k] = fmt(v, true);
+    if (k === 'text' || k === 'width' || k === 'height' || k === 'hide' || k === 'br') res[k] = fmt(v);
+    else if (k === 'name' || k === 'html') res[k] = fmt(v, true);
     else res[k] = fmtAll(v);
   }
 

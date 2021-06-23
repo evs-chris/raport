@@ -318,7 +318,7 @@ function rightassoc(left: Value, more: Array<[string, string, string, Value]>) {
 export const binop_e = map(seq(operand, rep(seq(rws, name(str('**'), 'exp op'), rws, operand))), ([arg1, more]) => more.length ? rightassoc(arg1, more) : arg1, 'exp op');
 export const binop_md = map(seq(binop_e, rep(seq(rws, name(str('*', '/%', '/', '%'), 'muldiv op'), rws, binop_e))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'muldiv op');
 export const binop_as = map(seq(binop_md, rep(seq(rws, name(str('+', '-'), 'addsub op'), rws, binop_md))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'addsub op');
-export const binop_cmp = map(seq(binop_as, rep(seq(rws, name(str('>=', '>', '<=', '<', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain'), 'cmp op'), rws, binop_as))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'cmp op');
+export const binop_cmp = map(seq(binop_as, rep(seq(rws, name(str('>=', '>', '<=', '<', 'gt', 'gte', 'lt', 'lte', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain'), 'cmp op'), rws, binop_as))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'cmp op');
 export const binop_eq = map(seq(binop_cmp, rep(seq(rws, name(str('is', 'is-not', '==', '!='), 'eq op'), rws, binop_cmp))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'eq op');
 export const binop_and = map(seq(binop_eq, rep(seq(rws, name(str('and', '&&'), 'and op'), rws, binop_eq))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'and op');
 export const binop_or = map(seq(binop_and, rep(seq(rws, name(str('or', '||'), 'or op'), rws, binop_and))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'or op');
@@ -418,7 +418,7 @@ block.parser = map(bracket(
 value.parser = operation;
 
 const namedArg: Parser<[Value, Value]> = map(seq(ident, str(':'), ws, value), ([k, , , v]) => [{ v: k }, v], 'named arg');
-const application = map(seq(opt(bracket(check(str('|'), ws), rep1sep(opName, read1(space + ','), 'allow'), str('|'))), ws, str('=>'), ws, value), ([names, , , , value]) => (names ? { a: value, n: names } : { a: value }));
+const application = map(seq(opt(bracket(check(str('|'), ws), rep1sep(opName, read1(space + ','), 'allow'), str('|'))), ws, str('=>', '=\\'), ws, value), ([names, , , , value]) => (names ? { a: value, n: names } : { a: value }));
 args.parser = map(repsep(alt<[Value, Value] | Value>('argument', namedArg, value), read1(space + ','), 'allow'), (args) => {
   const [plain, obj] = args.reduce((a, c) => ((Array.isArray(c) ? a[1].push(c) : a[0].push(c)), a), [[], []] as [Array<Value>, Array<[Value, Value]>]);
   if (obj.length) plain.push(objectOp(obj));

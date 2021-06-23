@@ -34,7 +34,11 @@ registerOperator(
     return name === 'is' || name === '==' ? res : !res;
   }),
   simple(['not'], (_name: string, values: any[]) => !values[0]),
-  simple(['<', '>', '<=', '>='], (name: string, values: any[]): boolean => {
+  simple(['<', '>', '<=', '>=', 'gt', 'gte', 'lt', 'lte'], (name: string, values: any[]): boolean => {
+    if (name === 'gt') name = '>';
+    else if (name === 'lt') name = '<';
+    else if (name === 'gte') name = '>=';
+    else if (name === 'lte') name = '<=';
     let [l, r] = values;
     if (l instanceof Date || r instanceof Date) {
       if (typeof l === 'number' || typeof r === 'number') {

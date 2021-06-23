@@ -40,6 +40,7 @@ let _listcommas: boolean = false;
 let _noarr: boolean = false;
 let _noobj: boolean = false;
 let _tpl: boolean = false;
+let _tplmode: boolean = false;
 let _noindent: boolean = false;
 let _listwrap: number = 60;
 let _lastarg: boolean = false;
@@ -47,13 +48,13 @@ let _noname: boolean = false;
 
 let _level = 0;
 
-const binops = ['**', '*', '/%', '/', '%', '+', '-', '>=', '>', '<=', '<', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'and', '&&', 'or', '||'];
+const binops = ['**', '*', '/%', '/', '%', '+', '-', '>=', 'gte', '>', 'gt', '<=', 'lte', '<', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'and', '&&', 'or', '||'];
 const unops = ['+', 'not'];
 const precedence = {
   '**': 1,
   '*': 2, '/%': 2, '/': 2, '%': 2,
   '+': 3, '-': 3,
-  '>=': 4, '>': 4, '<=': 4, '<': 4, in: 4, like: 4, ilike: 4, 'not-in': 4, 'not-like': 4, 'not-ilike': 4, 'contains': 4, 'does-not-contain': 4,
+  '>=': 4, '>': 4, '<=': 4, '<': 4, in: 4, like: 4, ilike: 4, 'not-in': 4, 'not-like': 4, 'not-ilike': 4, 'contains': 4, 'does-not-contain': 4, gt: 4, gte: 4, lt: 4, lte: 4,
   'is': 5, 'is-not': 5, '==': 5, '!=': 5,
   'and': 6, '&&': 6,
   'or': 7, '||': 7,
@@ -69,7 +70,7 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
   _noarr = opts.SExprOps && opts.noArrayLiterals;
   _noobj = opts.SExprOps && opts.noObjectLiterals;
   _key = false;
-  _tpl = opts.template;
+  _tpl = _tplmode = opts.template;
   _noindent = opts.noIndent;
   _level = 0;
   _listwrap = 'listWrap' in opts ? (!opts.listWrap ? 0 : opts.listWrap === true ? 1 : opts.listWrap) : 60;
@@ -126,8 +127,9 @@ function _stringify(value: ValueOrExpr): string {
   } else if ('op' in value) {
     return stringifyOp(value);
   } else if ('a' in value) {
-    if ('n' in value) return `|${value.n.join(_listcommas ? ', ' : ' ')}| => ${_stringify(value.a)}`;
-    else return `=>${_stringify(value.a)}`;
+    const arrow = _tplmode ? '\\' : '>';
+    if ('n' in value) return `|${value.n.join(_listcommas ? ', ' : ' ')}| =${arrow} ${_stringify(value.a)}`;
+    else return `=${arrow}${_stringify(value.a)}`;
   } else if ('v' in value) {
     return stringifyLiteral(value);
   } else if (isDateRel(value)) {
@@ -168,36 +170,44 @@ function flattenNestedBinopsL(op: string, value: Operation, agg: ValueOrExpr[] =
 }
 
 function stringifyOp(value: Operation): string {
-  if (!_noarr && value.op === 'array') {
+  let op = value.op;
+  if (_tplmode) {
+    if (op === '>') op = 'gt';
+    else if (op === '>=') op = 'gte';
+    else if (op === '<') op = 'lt';
+    else if (op === '<=') op = 'lte';
+    else if (op === '&&') op = 'and';
+  }
+  if (!_noarr && op === 'array') {
     return wrapArgs('[', value.args, ']');
-  } else if (!_noobj && value.op === 'object' && value.args && !value.args.find((a, i) => i % 2 === 0 && (typeof a === 'string' || !('v' in a) || typeof a.v !== 'string'))) {
+  } else if (!_noobj && op === 'object' && value.args && !value.args.find((a, i) => i % 2 === 0 && (typeof a === 'string' || !('v' in a) || typeof a.v !== 'string'))) {
     if (!value.args || !value.args.length) return '{}';
     if (!_noname && _lastarg) return wrapArgs('', value.args, '', 2);
     else return wrapArgs('{', value.args, '}', 2);
   } else if (_sexprops) {
-    if (!value.args || !value.args.length) return `(${value.op})`;
-    return wrapArgs(`(${value.op} `, value.args, ')', 0, true);
-  } else if (value.op === 'if' || value.op === 'unless' && value.args && value.args.length > 2) {
+    if (!value.args || !value.args.length) return `(${op})`;
+    return wrapArgs(`(${op} `, value.args, ')', 0, true);
+  } else if (op === 'if' || op === 'unless' && value.args && value.args.length > 2) {
     return stringifyIf(value);
-  } else if (value.op === 'case' && value.args && value.args.length > 2) {
+  } else if (op === 'case' && value.args && value.args.length > 2) {
     return stringifyCase(value);
-  } else if (value.op === '+' && value.args && value.args.length > 0 && findNestedStringOpL(value.op, value)) {
-    const args = flattenNestedBinopsL(value.op, value);
+  } else if (op === '+' && value.args && value.args.length > 0 && findNestedStringOpL(op, value)) {
+    const args = flattenNestedBinopsL(op, value);
     return `'${args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `{${_stringify(a)}}`).join('')}'`
-  } else if ((value.op === 'fmt' || value.op === 'format') && value.args && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'string') {
+  } else if ((op === 'fmt' || op === 'format') && value.args && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'string') {
     const val = value.args[0];
     let vs = _stringify(val);
     if (typeof val !== 'string' && 'op' in val && (binops.includes(val.op) || unops.includes(val.op))) vs = `(${vs})`;
     return `${vs}#${[value.args[1].v].concat(value.args.slice(2).map(a => _stringify(a))).join(',')}`;
-  } else if (binops.includes(value.op) && value.args && value.args.length > 1) {
+  } else if (binops.includes(op) && value.args && value.args.length > 1) {
     const arg1 = value.args[0];
     const others = value.args.slice(1);
-    return `${stringifyBinopArg(value.op, arg1, 1)} ${value.op} ${others.map(arg2 => stringifyBinopArg(value.op, arg2, 2)).join(` ${value.op} `)}`;
-  } else if (unops.includes(value.op) && value.args && value.args.length === 1) {
+    return `${stringifyBinopArg(op, arg1, 1)} ${op} ${others.map(arg2 => stringifyBinopArg(op, arg2, 2)).join(` ${op} `)}`;
+  } else if (unops.includes(op) && value.args && value.args.length === 1) {
     const arg = value.args[0];
-    if (typeof arg !== 'string' && 'op' in arg && (binops.includes(arg.op) || unops.includes(arg.op))) return `${value.op}(${_stringify(arg)})`;
-    else return `${value.op}${call_op.test(value.op) ? ' ' : ''}${_stringify(arg)}`;
-  } else if (value.op === 'block') {
+    if (typeof arg !== 'string' && 'op' in arg && (binops.includes(arg.op) || unops.includes(arg.op))) return `${op}(${_stringify(arg)})`;
+    else return `${op}${call_op.test(op) ? ' ' : ''}${_stringify(arg)}`;
+  } else if (op === 'block') {
     if (!value.args || !value.args.length) return '';
 
     _level++;
@@ -206,19 +216,19 @@ function stringifyOp(value: Operation): string {
     _level--;
     if (parts.length === 1 && !~parts[0].indexOf('\n')) return `{ ${parts[0]} }`;
     return `{${split}${parts.join(split)}\n${padl('', '  ', _level)}}`;
-  } else if ((value.op === 'let' || value.op === 'set') && value.args && value.args.length === 2) {
+  } else if ((op === 'let' || op === 'set') && value.args && value.args.length === 2) {
     let path: string;
     let arg = value.args[0];
     if (typeof arg === 'string') path = arg;
     else if ('v' in arg && typeof arg.v === 'string') path = arg.v;
     else if ('v' in arg && typeof arg.v === 'object' && 'k' in arg.v) path = _stringify({ r: arg.v });
     else path = _stringify(arg);
-    return `${value.op} ${path} = ${_stringify(value.args[1])}`;
-  } else if (call_op.test(value.op)) {
-    return wrapArgs(`${value.op}(`, value.args || [], ')', 0, true);
+    return `${op} ${path} = ${_stringify(value.args[1])}`;
+  } else if (call_op.test(op)) {
+    return wrapArgs(`${op}(`, value.args || [], ')', 0, true);
   } else {
-    if (!value.args || !value.args.length) return `(${value.op})`;
-    return wrapArgs(`(${value.op} `, value.args, ')', 0, true);
+    if (!value.args || !value.args.length) return `(${op})`;
+    return wrapArgs(`(${op} `, value.args, ')', 0, true);
   }
 }
 
@@ -229,7 +239,7 @@ function stringifyRootBlock(block: Operation): string {
 
 function stringifyLiteral(value: Literal): string {
   if (typeof value.v === 'string') {
-    if (_tpl) return value.v;
+    if (_tpl) return value.v.replace(/\\(.)/g, '\\\\$1').replace(/{{/g, '\\{{');
     if ((_key || !_noSym) && !checkIdent.test(value.v) && value.v.length) return `${_key ? '' : ':'}${value.v}`;
     else if (!~value.v.indexOf("'")) return `'${value.v.replace(/[\$']/g, v => `\\${v}`)}'`;
     else if (!~value.v.indexOf('`')) return `\`${value.v.replace(/[\$`]/g, v => `\\${v}`)}\``;
