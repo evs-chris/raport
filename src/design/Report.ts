@@ -1200,6 +1200,13 @@ function stripDefaults(json: any): any {
     if (!res.field) delete res.field;
     if (!res.quote) delete res.quote;
   }
+  if (res.source) {
+    if (!res.filter) delete res.filter;
+    if (!res.sort) delete res.sort;
+    if (!res.base) delete res.base;
+    if (!res.parameters || Object.keys(res.parameters).length === 0) delete res.parameters;
+  }
+  if (res.classifyStyles || res.classifyStyles == null) delete res.classifyStyles;
   return res;
 }
 

@@ -24,7 +24,7 @@ export function mapStyle(ctx: RenderContext, style: string, prefix: string): str
 }
 
 export function styleClass(ctx: RenderContext, cls: string[], [style, inline]: [string, string], inlineStyle?: string, classPrefix?: string): string {
-  if (ctx.report.classifyStyles) {
+  if (ctx.report.classifyStyles !== false) {
     const cs = [];
     if (inline) cs.push(mapStyle(ctx, inline, 'h'));
     cs.push(mapStyle(ctx, style, classPrefix || 's'));
