@@ -1,3 +1,22 @@
+## 0.7.5
+
+2021-07-20
+
+### Report
+
+* __BUG__: Having a measured field without specified font settings will no longer throw.
+* __BUG__: Repeaters that get to the body without saved state will no longer throw on suspend.
+
+## Data
+
+* __BREAKING__: `time-span` has been rewritten to be more useful. The old behavior is still achievable with slightly different arguments.
+* Full timespans now include a date anchor by default to make them convertable to an exact number of milliseconds.
+
+## Library
+
+* The main library now exports `parsePath` to parse reference paths.
+
+
 ## 0.7.4
 
 2021-06-23
