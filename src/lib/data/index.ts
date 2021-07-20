@@ -527,6 +527,7 @@ export type DateRel = Date | DateRelSpan | DateRelRange | DateRelTimeRange | Dat
 
 export type TimeSpan = number|FullTimeSpan;
 export interface FullTimeSpan {
+  s?: number;
   d: [number?, number?, number?, number?, number?, number?, number?];
 }
 
@@ -755,7 +756,7 @@ export function datesDiff(l: Date, r: Date): FullTimeSpan {
   if (isNaN(+l) || isNaN(+r)) return { d: [] };
   const a = new Date(l < r ? l : r);
   const b = l < r ? r : l;
-  const res: FullTimeSpan = { d: [0, 0, 0, 0, 0, 0, 0] };
+  const res: FullTimeSpan = { d: [0, 0, 0, 0, 0, 0, 0], s: +a };
   let num = b.getFullYear() - a.getFullYear() - 1;
   if (num > 0) {
     res.d[0] += num;

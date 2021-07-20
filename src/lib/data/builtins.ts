@@ -166,56 +166,111 @@ registerOperator(
     return filter({ value: arr }, null, sort, null, ctx).value;
   }),
   simple(['time-span', 'time-span-ms'], (_name: string, args: any[]): any => {
-    const dts = isDateRel(args[0]) && isDateRel(args[1]);
-    const sp = typeof args[0] === 'object' && Array.isArray(args[0].d);
-    if (dts || sp) {
-      const span: FullTimeSpan = dts ? datesDiff(dateRelToDate(args[0]), dateRelToDate(args[1])) : args[0];
-      let array = typeof args[args.length - 1] === 'object' ? args[args.length - 1].array : false;
-      if (array) return span.d;
-      const precision = typeof args[2] === 'number' ? args[2] : 0;
-      let str = '';
-      for (let i = 0; i < span.d.length; i++) {
-        if (precision && i >= precision) break;
-        if (span.d[i]) str += `${str.length ? ' ' : ''}${span.d[i]} ${spans.exact[i]}${span.d[i] > 1 ? 's' : ''}`;
+    const namedArgs = Object.prototype.toString.call(args[args.length - 1]) === '[object Object]' ? args[args.length - 1] : {};
+    const span = isDateRel(args[0]) && isDateRel(args[1]) ? datesDiff(dateRelToDate(args[0]), dateRelToDate(args[1])) : isTimespan(args[0]) ? args[0] : 0;
+
+    // if a unit is specified, break the span up
+    if (namedArgs.unit) {
+      const u = ((Array.isArray(namedArgs.unit) ? namedArgs.unit : [namedArgs.unit]) as string[]).map(u => {
+        if (u[0] === 'y') return 'y'
+        else if (u[0] === 'M' || (u[0] === 'm' && u[1] !== 'i' && u[1] !== 'm')) return 'M';
+        else if (u[0] === 'w') return 'w';
+        else if (u[0] === 'd') return 'd';
+        else if (u[0] === 'h') return 'h';
+        else if (u[0] === 'm' && (!u[1] || u[1] === 'i' || u[1] === 'm')) return 'm';
+        else if (u[0] === 's') return 's'
+        else if (u[0] === 'm' && u[1] === 's') return 'l';
+        return '';
+      }).filter(u => !!u);
+
+      // fraction tracks what would be left for rounding
+      let fraction: number;
+      let res: number[];
+
+      // special case for full spans
+      if (typeof span !== 'number' && u.length < 3 && u[0] === 'y' && (!u[1] || u[1] === 'M') && (!u[2] || u[2] === 'd')) {
+        res = u.map(u => {
+          if (u === 'y') {
+            fraction = span.d[1] / 12;
+            return span.d[0];
+          } else if (u === 'M') {
+            fraction = span.d[2] / 30;
+            return span.d[1];
+          } else {
+            fraction = span.d[3] / 24;
+            return span.d[2];
+          }
+        });
       }
-      return str;
-    } else {
-      let ms = args[0];
-      let unit = typeof args[args.length - 1] === 'object' ? args[args.length - 1].unit : null;
-      let array = typeof args[args.length - 1] === 'object' ? args[args.length - 1].array : false;
-      if (typeof unit !== 'string') unit = null;
-      unit = unit && (unit[0] === 'y' ? 'y' : unit[0] === 'w' ? 'w' : unit[0] === 'd' ? 'd' : unit[0] === 'h' ? 'h' : unit[0] === 's' ? 's' : (unit === 'm' || unit.substr(0, 2) === 'mo') ? 'm' : (unit === 'mm' || unit.substr(0, 3) === 'min') ? 'mm' : (unit === 'ms' || unit.substr(0, 3) === 'mil') ? 'ms' : null);
-      const precision = typeof args[1] === 'number' ? args[1] : unit ? 0 : 1;
-      if (unit) {
-        if (precision) return (ms / timespans[unit]).toFixed(precision);
-        else return Math.floor(ms / timespans[unit]);
-      } else {
-        const res = [0, 0, 0, 0, 0, 0];
-        check: if (ms !== '' && !isNaN(ms)) {
-          ms = Math.abs(+ms);
-          res[0] = Math.floor(ms / timespans.w);
-          if (precision < res.filter(x => x).length) break check;
-          ms = ms % timespans.w;
-          res[1] = Math.floor(ms / timespans.d);
-          if (precision < res.filter(x => x).length) break check;
-          ms = ms % timespans.d;
-          res[2] = Math.floor(ms / timespans.h);
-          if (precision < res.filter(x => x).length) break check;
-          ms = ms % timespans.h;
-          res[3] = Math.floor(ms / timespans.mm);
-          if (precision < res.filter(x => x).length) break check;
-          ms = ms % timespans.mm;
-          res[4] = Math.floor(ms / timespans.s);
-          if (precision < res.filter(x => x).length) break check;
-          res[5] = ms % timespans.s;
-        } else return '';
-        if (array) return res;
-        let str = '';
+
+      // this isn't special cased, so get a number of ms
+      if (!res) {
+        let ms = typeof span === 'number' ? span : 's' in span ? +dateAndTimespan(new Date(span.s), span, 1) - +new Date(span.s) : (
+          span.d[0] * timespans.y + span.d[1] * timespans.m + span.d[2] * timespans.d +
+          span.d[3] * timespans.h + span.d[4] * timespans.mm + span.d[5] * timespans.s + span.d[6]
+        );
+        res = u.map(() => 0);
+
+        const next = { y: 'm', M: 'w', w: 'd', d: 'h', h: 'mm', m: 's' };
+        const nextDiv = { y: 12, M: 4.3, w: 7, d: 24, h: 60, m: 60 };
+
         for (let i = 0; i < res.length; i++) {
-          if (res[i]) str += `${str.length ? ' ' : ''}${res[i]} ${spans.ms[i]}${res[i] > 1 ? 's' : ''}`;
+          const k = u[i] === 'm' ? 'mm' : u[i] === 'M' ? 'm' : u[i];
+          if (k === 'l') {
+            res[i] = ms;
+            fraction = 0;
+            break;
+          }
+          res[i] = Math.floor(ms / timespans[k]);
+          ms -= res[i] * timespans[k];
+          if (next[u[i]]) fraction = (ms / timespans[next[u[i]]]) / nextDiv[u[i]];
+          else if (u[i] === 's') fraction = ms % 1000;
+        }
+      }
+
+      // check for rounding
+      if (namedArgs.round === true) {
+        if (fraction >= 0.5) res[res.length - 1]++;
+      } else if ((namedArgs.round || '')[0] === 'c') {
+        if (fraction > 0) res[res.length - 1]++;
+      }
+
+      // check to see if stringification is needed
+      if (namedArgs.string) {
+        const units = { y: 'year', M: 'month', w: 'week', d: 'day', h: 'hour', m: 'minute', s: 'second', l: 'millisecond' };
+        let str = '';
+        for (let i = 0; i < u.length; i++) {
+          if (!res[i]) continue;
+          str += `${str.length ? ' ' : ''}${res[i]} ${units[u[i]]}${res[i] > 1 ? 's' : ''}`;
         }
         return str;
-      }
+      } else return Array.isArray(namedArgs.unit) ? res : res[0];
+    } else {
+      if (namedArgs.string) {
+        if (typeof span === 'number') {
+          let ms = span;
+          let res = '';
+          const order = ['w', 'd', 'h', 'mm', 's'];
+          const units = ['week', 'day', 'hour', 'minute', 'second', 'millisecond'];
+          for (let i = 0; i < order.length; i++) {
+            if (ms > timespans[order[i]]) {
+              const u = Math.floor(ms / timespans[order[i]]);
+              ms -= timespans[order[i]] * u;
+              res += `${res.length ? ' ' : ''}${u} ${units[i]}${u > 1 ? 's' : ''}`;
+            }
+          }
+          if (ms) {
+            res += `${res.length ? ' ' : ''}${ms} millisecond${ms > 1 ? 's' : ''}`;
+          }
+        } else {
+          let res = '';
+          const units = ['year', 'month', 'day', 'hour', 'minute', 'second', 'millisecond'];
+          for (let i = 0; i < span.d.length; i++) {
+            if (span.d[i]) res += `${res.length ? ' ' : ''}${span.d[i]} ${units[i]}${span.d[i] > 1 ? 's' : ''}`;
+          }
+          return res;
+        }
+      } else return span;
     }
   }),
   simple(['string'], (_name: string, [value]: any[]): string => {
