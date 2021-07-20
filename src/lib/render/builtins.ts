@@ -143,7 +143,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 
       if (r.height > availableY || r.cancel) {
         if (commit) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx } } };
-        else return { output: '', height: y, continue: { offset: y, state: { part: state.state.part, src, current: i, context: rctx } } };
+        else return { output: '', height: y, continue: { offset: y, state: { part: state && state.state && state.state.part || 'body', src, current: i, context: rctx } } };
       } else if (!usedY) availableY -= r.height;
 
       if (!usedY) y += r.height;

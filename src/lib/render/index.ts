@@ -57,7 +57,7 @@ const avgs = {
 export function measureEstimate(text: string, width: number, font?: MeasureFont): number {
   const family = (font && font.family) || 'sans';
   const size = (font && font.size) || 0.83;
-  const avg = ((font.metric || ((family === 'mono' || /fixed|mono/i.test(family) ? avgs.mono :
+  const avg = (((font && font.metric) || ((family === 'mono' || /fixed|mono/i.test(family) ? avgs.mono :
     family === 'narrow' || /narrow|condensed/i.test(family) ? avgs.narrow :
       family === 'sans' || /sans|arial|helvetica/i.test(family) ? avgs.sans :
         avgs.serif))) * size) / 16;
