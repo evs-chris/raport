@@ -299,7 +299,7 @@ function mungeSort(context: Context, sorts: Sort[]|ValueOrExpr): Sort[] {
       const by = sortArr[i];
       if (typeof by === 'string') {
         if (by[0] === '-') sortArr[i] = { by: by.substr(1), desc: true };
-        else sortArr[i] = { by: by[0] === '+' ? by.substr(1) : by };
+        else sortArr[i] = { by: by[0] === '+' ? by.substr(1) : by, desc: false };
       }
     }
   }
