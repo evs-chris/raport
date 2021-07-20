@@ -1,3 +1,12 @@
+## 0.7.6
+
+2021-07-20
+
+## Data
+
+* `time-span` now special cases getting an exact span of months directly from a full time span.
+
+
 ## 0.7.5
 
 2021-07-20
