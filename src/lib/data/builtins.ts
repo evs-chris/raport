@@ -188,19 +188,31 @@ registerOperator(
       let res: number[];
 
       // special case for full spans
-      if (typeof span !== 'number' && u.length < 3 && u[0] === 'y' && (!u[1] || u[1] === 'M') && (!u[2] || u[2] === 'd')) {
-        res = u.map(u => {
-          if (u === 'y') {
-            fraction = span.d[1] / 12;
-            return span.d[0];
-          } else if (u === 'M') {
-            fraction = span.d[2] / 30;
-            return span.d[1];
-          } else {
-            fraction = span.d[3] / 24;
-            return span.d[2];
-          }
-        });
+      if (typeof span !== 'number') {
+        if (u.length < 4 && u[0] === 'y' && (!u[1] || u[1] === 'M') && (!u[2] || u[2] === 'd')) {
+          res = u.map(u => {
+            if (u === 'y') {
+              fraction = span.d[1] / 12;
+              return span.d[0];
+            } else if (u === 'M') {
+              fraction = span.d[2] / 30;
+              return span.d[1];
+            } else {
+              fraction = span.d[3] / 24;
+              return span.d[2];
+            }
+          });
+        } else if (u.length < 3 && u[0] === 'M' && (!u[1] || u[1] === 'd')) {
+          res = u.map(u => {
+            if (u === 'M') {
+              fraction = span.d[2] / 30;
+              return span.d[0] * 12 + span.d[1];
+            } else {
+              fraction = span.d[3] / 24;
+              return span.d[2];
+            }
+          });
+        }
       }
 
       // this isn't special cased, so get a number of ms
