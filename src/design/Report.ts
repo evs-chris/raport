@@ -1142,6 +1142,40 @@ Ractive.extendWith(Designer, {
         }
       };
     },
+    autosize(node) {
+      let autosizeTm: any;
+
+      function resize() {
+        autosizeTm = 0;
+        const pos = node.parentElement.scrollTop;
+        const sh = node.parentElement.scrollHeight;
+        const ch = node.parentElement.clientHeight;
+        const old = parseInt(node.style.height);
+        node.style.height = '';
+        node.style.overflow = '';
+        setTimeout(() => {
+          const next = node.scrollHeight + 1;
+          node.style.height = `${next}px`;
+          node.style.overflow = 'hidden';
+          node.parentElement.scrollTop = old && pos + ch + (next - old) >= sh ? pos + (next - old) : pos;
+        });
+      }
+
+      function defer() {
+        if (autosizeTm) clearTimeout(autosizeTm);
+        setTimeout(resize, 500);
+      }
+
+      node.addEventListener('focus', defer);
+      node.addEventListener('input', defer);
+
+      return {
+        teardown() {
+          node.removeEventListener('focus', defer);
+          node.removeEventListener('input', defer);
+        }
+      }
+    },
   },
 });
 

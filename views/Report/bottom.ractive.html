@@ -81,14 +81,14 @@
               </div>
               <div class-scrolled-wrapper style-flex-grow=1>
                 <div as-scrolled>
-                  <textarea lazy="500" on-input="@.autosize(@node)" class-expr-text id="expr-text">{{.str}}</textarea>
+                  <textarea lazy="500" as-autosize class-expr-text id="expr-text">{{.str}}</textarea>
                 </div>
               </div>
             {{/if}}
           {{else}}
             <div class-scrolled-wrapper style-flex-grow=1>
               <div as-scrolled>
-                <textarea lazy="500" on-input="@.autosize(@node)" class-expr-text id="expr-text">{{.str}}</textarea>
+                <textarea lazy="500" as-autosize class-expr-text id="expr-text">{{.str}}</textarea>
               </div>
             </div>
           {{/if}}
