@@ -292,6 +292,7 @@ There are a few operations built-in to the library to handle common expressions:
 
 | Name | Arguments | Description |
 | ---- | --------- | ----------- |
+| `case` | `string` | Returns the string formatted in the given case. Support cases are `upper`, `lower`, `snake`, `kebab`, `pascal`, `camel`, and `proper` e.g. `UPPER CASE`, `lower case`, `snake_case`, `kebab-case`, `PascalCase`, `camelCase`, and `Proper Case` |
 | `dollar` | | Returns the number with grouped whole number, two decimals, and a leadng dollar sign. |
 | `date` | `string` | Return the date formatted using the given string. See below for the breakdown of the format string. |
 | `integer` | `string? = ','` | Returns the number with grouped whole number and no decimals. The argument can specify the group string. This is also aliased as `int`. |
