@@ -197,7 +197,7 @@ function stringifyOp(value: Operation): string {
     return stringifyCase(value);
   } else if (op === '+' && value.args && value.args.length > 0 && findNestedStringOpL(op, value)) {
     const args = flattenNestedBinopsL(op, value);
-    return `'${args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[\$']/g, v => `\\${v}`) : `{${_stringify(a)}}`).join('')}'`
+    return `'${args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[{']/g, v => `\\${v}`).replace(/\$$/, '\\$') : `{${_stringify(a)}}`).join('')}'`
   } else if ((op === 'fmt' || op === 'format') && value.args && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'string') {
     const val = value.args[0];
     let vs = _stringify(val);
@@ -245,10 +245,10 @@ function stringifyLiteral(value: Literal): string {
   if (typeof value.v === 'string') {
     if (_tpl) return value.v.replace(/\\(.)/g, '\\\\$1').replace(/{{/g, '\\{{');
     if ((_key || !_noSym) && !checkIdent.test(value.v) && value.v.length) return `${_key ? '' : ':'}${value.v}`;
-    else if (!~value.v.indexOf("'")) return `'${value.v.replace(/[\$']/g, v => `\\${v}`)}'`;
-    else if (!~value.v.indexOf('`')) return `\`${value.v.replace(/[\$`]/g, v => `\\${v}`)}\``;
+    else if (!~value.v.indexOf("'")) return `'${value.v.replace(/[{']/g, v => `\\${v}`).replace(/\${/g, '\\${')}'`;
+    else if (!~value.v.indexOf('`')) return `\`${value.v.replace(/[{`]/g, v => `\\${v}`).replace(/\${/g, '\\${')}\``;
     else if (!~value.v.indexOf('"')) return `"${value.v}"`;
-    else return `'${value.v.replace(/['\$]/g, s => `\\${s}`)}'`;
+    else return `'${value.v.replace(/['{]/g, s => `\\${s}`).replace(/\${/g, '\\${')}'`;
   } else if (typeof value.v === 'number' || typeof value.v === 'boolean') {
     return `${value.v}`;
   } else if (value.v === 'undefined') {
