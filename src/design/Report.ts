@@ -592,10 +592,13 @@ export class Designer extends Ractive {
     URL.revokeObjectURL(url);
   }
 
-  reportToString(compact: boolean) {
+  reportToString(compact: boolean, js: boolean, strings: 'json'|'template') {
     const json = this.get('report');
     if (!compact) return JSON.stringify(json, null, 2);
-    else return JSON.stringify(stripDefaults(json));
+    else {
+      if (js) return jsonToJS(stripDefaults(json), strings);
+      else return JSON.stringify(stripDefaults(json));
+    }
   }
 
   loadReportFile() {
@@ -936,7 +939,7 @@ Ractive.extendWith(Designer, {
         this.evalLock = true;
         if (o === undefined && v) this.set('temp.expr.error', undefined);
         try {
-          const str = stringify(v);
+          const str = stringify(v, { template: this.get('temp.expr.html') });
 
           this.set('temp.expr.str', str);
 
@@ -1302,6 +1305,17 @@ function fmtAll(json: any): any {
   }
 
   return res;
+}
+
+const plainKeys = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+function jsonToJS(json: any, strings: 'json'|'template'): string {
+  if (typeof json === 'number') return `${json}`;
+  else if (typeof json === 'boolean') return json ? 'true' : 'false';
+  else if (json === null) return 'null';
+  else if (json === undefined) return 'null';
+  else if (typeof json === 'string') return strings === 'json' ? JSON.stringify(json) : `\`${json.replace(/(`|${|\\)/g, '\\$1')}\``;
+  else if (Array.isArray(json)) return `[${json.map(v => jsonToJS(v, strings)).join(',')}]`;
+  else if (typeof json === 'object') return `{${Object.entries(json).map(([k, v]) => v === undefined ? v : `${plainKeys.test(k) ? k : `'${k}'`}:${jsonToJS(v, strings)}`).filter(v => !!v).join(',')}}`;
 }
 
 registerOperator({

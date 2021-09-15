@@ -3,12 +3,14 @@
   <div class-definition>
     <div class-actions>
       <button class-ico on-click="@.loadReportFile()" title="Load report definition from a file">Load</button>
-      <button class-ico class-spacer on-click="@.download((~/report.name || 'report') + '.json', @.reportToString(true))" title="Save report definition to a file">Save</button>
-      <label class-spacer><input type="checkbox" checked="{{compact}}" style="vertical-align: middle;" /> Compact?</label>
+      <button class-ico class-spacer on-click="@.download((~/report.name || 'report') + '.js' + (~/tmp.js ? '' : 'on'), @.reportToString(true, ~/tmp.js, ~/tmp.strings))" title="Save report definition to a file">Save</button>
+      <label class-spacer><input type="checkbox" checked="{{~/tmp.compact}}" style="vertical-align: middle;" /> Compact?</label>
+      {{#if ~/tmp.compact}}<label class-spacer><input type="checkbox" checked="{{~/tmp.js}}" style="vertical-align: middle;" /> JS?</label>{{/if}}
+      {{#if ~/tmp.js}}<label class-spacer><select value="{{~/tmp.strings}}"><option>json</option><option>template</option></select></label>{{/if}}
       <button class-ico on-click="@.fmtAll()" title="Reformat all expressions">Format All</button>
     </div>
     <div class-json>
-      <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate="@.autosize(@node)" twoway=false value="{{@.reportToString(~/compact)}}" on-change="@.loadReportString(@node.value), @.update('temp')" /></div></div>
+      <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate="@.autosize(@node)" twoway=false value="{{@.reportToString(~/tmp.compact, ~/tmp.js, ~/tmp.strings)}}" on-change="@.loadReportString(@node.value), @.update('temp')" /></div></div>
     </div>
   </div>
 </div>
