@@ -1,3 +1,22 @@
+## 0.8.0
+
+2021-09-15
+
+### Parser
+
+* __BREAKING__: `$`s are now required for interpolators in backtick-quoted strings. This makes parsing simple JSON-ish javascript much more reliable.
+
+### Data
+
+* There is now an `interval` operator that will parse a raport interval from a string, with the `#`s being optional e.g. `interval('{count} days')` where `count` is `5` is equavalent to `#5 days#`.
+* The `date` operator will now try the raport date parser on strings that produce an `Invalid Date`.
+
+### Designer
+
+* Overflowing textareas will now properly get scrollbars, though there is a bit of a flash as the proper height gets measured.
+* There is now a `JS` mode for compact definition output. It can output strings in either JSON-encoded or template string format.
+
+
 ## 0.7.6
 
 2021-07-20
