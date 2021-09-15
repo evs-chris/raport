@@ -1,4 +1,4 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue, datesDiff, FullTimeSpan } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans } from './parse';
 
@@ -426,6 +426,9 @@ const triml = /^\s*/;
 const trimr = /\s*$/;
 const escapeRe = /([\.\[\]\{\}\(\)\^\$\*\+\-])/g;
 registerOperator(
+  simple(['eval'], (_name: string, [v], ctx): any => {
+    return evaluate(ctx, v);
+  }),
   simple(['padl', 'padr'], (name: string, args: any[]): string => {
     let [str, count, val] = args;
     return pad(name === 'padl', str, count, val);
@@ -476,12 +479,22 @@ registerOperator(
     if (!src) return [];
     return Object.values(src);
   }),
-  simple(['date'], (_name: string, [v]: any[]): Date => {
+  simple(['date'], (_name: string, [v]: any[], ctx): Date => {
     if (v !== undefined) {
       if (isDateRel(v)) return dateRelToDate(v);
+      if (typeof v === 'string') {
+        const dt = new Date(v);
+        if (isNaN(dt as any)) {
+          let val = evaluate(ctx, ~v.indexOf('#') ? v : `#${v}#`);
+          if (isDateRel(val)) return dateRelToDate(val);
+        }
+      }
       return new Date(v);
     }
     else return new Date();
+  }),
+  simple(['interval'], (_name: string, [v]: any[], ctx): DateRel => {
+    return evaluate(ctx, ~v.indexOf('#') ? v : `#${v}#`);
   }),
   simple(['upper', 'lower'], (name: string, [v]: any[]): string => {
     v = v == null ? '' : v;

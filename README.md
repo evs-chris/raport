@@ -211,20 +211,20 @@ There are a few operations built-in to the library to handle common expressions:
 | `==` | `...any` | `boolean` | This is an alias for `is`. |
 | `>` | `any, any` | `boolean` | Returns true if the first value is greater than the second value. |
 | `>=` | `any, any` | `boolean` | Returns true if the first value is greater than or equal to the second value. |
-| `||` | `...any` | `boolean` | This is an alias for `or`. |
+| `\|\|` | `...any` | `boolean` | This is an alias for `or`. |
 | `and` | `...any` | `boolean` | This will lazily evaluate its arguments and return false if any are not truthy or the last argument if all are truthy. |
 | `array` | `...any` | `array` | Returns the given values in an array. |
 | `avg` | aggregate | `number` | This will compute the average of the given application of source. |
 | `block` | aggregate | `any` | This will evaluate each argument and return the value of the last. |
 | `call` | `object, string, ...args` or `function, ...args` | `any` | This will call the given method or function with the remaining args returning the result. This operator should be avoided if possible becuase it is very much dependent on a JS runtime. |
-| `case` | `any, ...(match: value|boolean applicative, result: any)` | `any` | This will match the first value against the given conditional branches. If the condition of the branch is an applicative, the branch checks for a true value, otherwise it will compare the first value to the condition value for equality. Like `if`, this also lazily evaluates. It also supplies the special variable `@case` to the context of all of its branch conditions. |
+| `case` | `any, ...(match: value\|boolean applicative, result: any)` | `any` | This will match the first value against the given conditional branches. If the condition of the branch is an applicative, the branch checks for a true value, otherwise it will compare the first value to the condition value for equality. Like `if`, this also lazily evaluates. It also supplies the special variable `@case` to the context of all of its branch conditions. |
 | `ceil` | `number` | `number` | This will return the given number rounded up if there is a decimal. |
 | `clamp` | `number, number, number` | `number` | This takes a minimum, a value, and a maximum, and returns the minimum if the value is less than the minimum, the maximum if the value is more than the maximum, or the value otherwise. |
 | `coalesce` | `...any` | `any` | This will lazily return its first non-nullish argument. |
 | `coalesce-truth` | `...any` | `any` | This will lazily return its first truthy argument. |
 | `contains` | `array\|string, any\|array` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf`. If the value is an array, it will check for every value in the target array, returning `true` if all are found. |
 | `count` | aggregate | `number` | This will count the values in the given source. |
-| `date` | `string` | `date` | Creates a new `Date` with the given value. |
+| `date` | `string\|date` | `date` | Creates a new `Date` with the given value. If the date happens to be parseable as a raport date literal, with or without the `#`s, it will parse with the raport date literal parser. |
 | `does-not-contain` | `array\|string, any\|array` | `boolean` | `contains`, but negated. |
 | `each` | `array\|object, application, ...(condition: boolean, result: any)` | `string` | This will iterate over its source array or object and evaluate the body application once for each iteration. The results are then concatenated. Special references provided within the iteration context are `@index`, `@last` (the index of the last iteration), `@key`, `@last-key` (the key of the last iteration). For array values, `@key` and `@last-key` are the same as `@index` and `@last`, respectively. |
 | `filter` | `array, filter?, sort?, group?` | `array\|any` | Applies any supplied filter, sort, and group to the given array. This operator is an interface the function that powers report sources. |
@@ -241,6 +241,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `ilike` | `string\|array, string\|array, 'free'\|{free?:boolean}` | `boolean` | `like`, but case insensitive. |
 | `in` | `any\|array, array\|string\|DateRange\|any` | `boolean` | Returns true if the given `array\|string` contains the given value using `indexOf`. If the target is a date range, it will check to see if the value as a date is in the range. If the value is an array, it will check for every value in the source in the target array, returning `true` if all are found. If the target is anything else, it will check for equality. |
 | `intersect` | `array, array` | `array` | Returns an intersection of the two given arrays with no duplicates. |
+| `interval` | `string` | `interval` | Returns the given string as an interval. The `#`s in the interval literal syntax can be supplied but are not required. |
 | `is` | `any, any` | `boolean` | Returns true if the given values are equal (not strict). |
 | `is-not` | `any, any` | `boolean` | Returns true if the given values are not equal (not strict). |
 | `join` | aggregate `string` | `string` | This will join the values in the given source using the first non-local argument. |
@@ -257,7 +258,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `not-ilike` | `string\|array, string\|array, 'free'\|{free?:boolean}` | `boolean` | `not-like`, but case insensitive. |
 | `not-in` | `any\|array, array\|string` | `boolean` | `in`, but negated. |
 | `not-like` | `string\|array, string\|array, 'free'\|{free?:boolean}` | `boolean` | `like`, but negated. |
-| `nth` | aggregate `number` | This will return the nth application in the given source, using the 1-based index specified by the parameter. |
+| `nth` | aggregate | `number` | This will return the nth application in the given source, using the 1-based index specified by the parameter. |
 | `object` | `...(key: string, value: any)` | `any` | Creates an object from the given values where the odd-numbered args are keys and their subsequent event-numbered args are values e.g. `(object 'foo' true 'bar' 3.14159)` is `{ foo: true, bar: 3.14159 }`. |
 | `or` | `...any` | `boolean` | This will lazily evaluate its arguments and return the first truthy value or `false` if there aren't any. |
 | `padl` | `string, number, string?` | `string` | Pads the given string to the given number of characters by adding the last argument or a space to the left side if necessary. |
@@ -276,8 +277,8 @@ There are a few operations built-in to the library to handle common expressions:
 | `split` | `string, string?` | `string[]` | Takes the given string and splits it into an array of strings based on the second argument. If no second argument is provided, the resulting array will consist of each individual character of the source string. |
 | `substr` | `string\|array, number?, number?` | `string\|array` | This is an alias for `slice`. |
 | `sum` | aggregate | `number` | This will compute the sum of the given application of source. |
-| `time-span` | `number` or `timespan` or `date, date` with named arguments `unit: string|string[]`, `round: true|'ceil'|'floor'`, `string: boolean` | `string|number|number[]` | This takes a given timespan and returns it in terms of one or more units, possibly as a string. If given a number, it is assumed to be a number of milliseconds. If given to date-like things, it will create a timespan from them. If given a timespan, well it will just use the given timespan. One or more units can be specified for the returned value, with multiple units supplied as an array. Valid units are `[y]ears, [M|m]onths, [w]eeks, [d]ays, [h]ours, [m|mm]inutes, [s]econds, [ms]` where `M` will get months and `mm` or `m` not followed by an `o` will get minutes. If there's no way to get an exact measurement from the given span, estimates are made based on the average number of milliseconds in a term e.g. 365.25 days in a year and 30.45 days in a month. If passed a unit array, this will return an array of those units, unless you request it return a string. If passed a single unit as a string, it will return the single unit. By default, the final requested unit is `floor`ed, but you can request it be rounded or `ceil`inged with the `round` named argument. Rounding is done based on the next largest available unit after the smallest requiested unit e.g. hours if days are requested last or months if years are the only requested unit. Units must be specified in descending order by size. |
-| `time-span-ms` | `number` or `timespan` or `date, date` with named arguments `unit: string|string[]`, `round: true|'ceil'|'floor'`, `string: boolean` | `string|number|number[]` | This is an alias for `time-span`. |
+| `time-span` | `number` or `timespan` or `date, date` with named arguments `unit: string\|string[]`, `round: true\|'ceil'\|'floor'`, `string: boolean` | `string\|number\|number[]` | This takes a given timespan and returns it in terms of one or more units, possibly as a string. If given a number, it is assumed to be a number of milliseconds. If given to date-like things, it will create a timespan from them. If given a timespan, well it will just use the given timespan. One or more units can be specified for the returned value, with multiple units supplied as an array. Valid units are `[y]ears, [M|m]onths, [w]eeks, [d]ays, [h]ours, [m|mm]inutes, [s]econds, [ms]` where `M` will get months and `mm` or `m` not followed by an `o` will get minutes. If there's no way to get an exact measurement from the given span, estimates are made based on the average number of milliseconds in a term e.g. 365.25 days in a year and 30.45 days in a month. If passed a unit array, this will return an array of those units, unless you request it return a string. If passed a single unit as a string, it will return the single unit. By default, the final requested unit is `floor`ed, but you can request it be rounded or `ceil`inged with the `round` named argument. Rounding is done based on the next largest available unit after the smallest requiested unit e.g. hours if days are requested last or months if years are the only requested unit. Units must be specified in descending order by size. |
+| `time-span-ms` | `number` or `timespan` or `date, date` with named arguments `unit: string\|string[]`, `round: true\|'ceil'\|'floor'`, `string: boolean` | `string\|number\|number[]` | This is an alias for `time-span`. |
 | `trim` | `string` | `string` | Trims whitespace from both sides of the given string. |
 | `triml` | `string` | `string` | Trims whitespace from the left side of the given string. |
 | `trimr` | `string` | `string` | Trims whitespace from the right side of the given string. |
@@ -339,7 +340,7 @@ There is a second mode available for the raport parser that reads templates simi
 | ----- | ----------- | ------- |
 | text | no | Just plain old text. This is the stuff outside of the interpolators. |
 | `{{if [expression]}}` | yes | Branches (see below, `else if` and `else`) are evaluated and the first true condition or the final default will have its body rendered. |
-| `{{case [expression] when [expression]` | yes | Branches (see below, `when` and `else`) are evaluated and the first matching branch or the final default will have its body rendered. |
+| `{{case [expression] when [expression]}}` | yes | Branches (see below, `when` and `else`) are evaluated and the first matching branch or the final default will have its body rendered. |
 | `{{unless [expression]}}` | yes | If the value is true the body is rendered. Alternate branches are not supported. |
 | `{{with [expression]}}` | yes | The `with` interpolator sets its value as the context for its body and renders the body. If the value is falsey, the body will not be rendered. |
 | `{{each [expression]}}` | yes | The `each` interpolator will iterate over its value and render the body once for each iteration. This supports alternate branches if the value is not iterable (an object or array). |
