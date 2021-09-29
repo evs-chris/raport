@@ -261,6 +261,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `nth` | aggregate | `number` | This will return the nth application in the given source, using the 1-based index specified by the parameter. |
 | `object` | `...(key: string, value: any)` | `any` | Creates an object from the given values where the odd-numbered args are keys and their subsequent event-numbered args are values e.g. `(object 'foo' true 'bar' 3.14159)` is `{ foo: true, bar: 3.14159 }`. |
 | `or` | `...any` | `boolean` | This will lazily evaluate its arguments and return the first truthy value or `false` if there aren't any. |
+| `overlap` | `string, string, number = 0.5` | `string` | Finds the first overlapping substring within the two given strings that is at least a certain percentage of the smallest string's length long (3rd argument, defaults to 50%) using the `similar` operator. |
 | `padl` | `string, number, string?` | `string` | Pads the given string to the given number of characters by adding the last argument or a space to the left side if necessary. |
 | `padr` | `string, number, string?` | `string` | Pads the given string to the given number of characters by adding the last argument or a space to the right side if necessary. |
 | `pow` | `...number` | `number` | This is an alias for `**`. |
@@ -271,6 +272,8 @@ There are a few operations built-in to the library to handle common expressions:
 | `reverse` | `string\|array` | `string\|array` | Reverses the given string or array. |
 | `round` | `number` | `number` | This will return the given number rounded to the nearest integer. |
 | `set` | `path, any` | `void` | This will set the given path in a local if one matches or in the context value otherwise. |
+| `similar` | `string, string, number = 0.5, number = 2` | `[string, string, number]` | Finds the first similar substrings within the two given strings based on a threshhold (3rd argument, defaults to 50%) and fudge factor (4th argument, defaults to 2). The two similar substrings are returned in a tuple with the similarity percentage. |
+| `similarity` | `string, string, number = 0.5, number = 2` | `number` | Finds the similarity percentage of the first similar substrings within the two given strings using the `similar` operator. |
 | `slice` | `string\|array, number?, number?` | `string\|array` | Slices the given string or array from the first number argument index to the second number argument index. This is a proxy for the `slice` method on the first argument. |
 | `sort` | `array, sort` | `array` | Like `filter`, but can only apply sorts. |
 | `source` | `any` | `DataSet` | Takes the given value and turns it into a `DataSet` |

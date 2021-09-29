@@ -21,10 +21,99 @@ function equals(l: any, r: any): boolean {
   return l == r; // eslint-disable-line eqeqeq
 }
 
-const spans = {
-  exact: ['year', 'month', 'day', 'hour', 'minute', 'second', 'millisecond'],
-  ms: ['week', 'day', 'hour', 'minute', 'second', 'millisecond'],
-};
+/**
+ * Find a the first overlapping substring that contains threshhold percent characters of the smallest string length.
+ * @param a - the first string
+ * @param b - the second string
+ * @param threshhold - defaults to 0.5 - the percentage of the smaller string length needed to match
+ * @returns - the substring that matches
+ */
+export function overlap(a: string, b: string, threshhold: number = 0.5): string {
+  const res = similar(a, b, threshhold, 0);
+  return res && res[1] || undefined;
+}
+
+/**
+ * Finds the percentage similarity between two strings based on a minimum threshhold and a fudge factor. The minimum threshhold determins the earliest that the search can return. The fudge factor allows skipping characters in either string, though there is no backtracking.
+ * @param a - the first string
+ * @param b - the second string
+ * @param threshhold - defaults to 0.5 - the required similarity between two substrings, accounting for the fidge factor
+ * @param fudges - the number skippable characters in either string without a match
+ * @returns - the similarity of the first qualifying match
+ */
+export function similarity(a: string, b: string, threshhold: number = 0.5, fudges: number = 2): number {
+  const res = similar(a, b, threshhold, fudges);
+  return res && res[2] || 0;
+}
+
+/**
+ * Finds the similarity between two strings based on a minimum threshhold and a fudge factor. The minimum threshhold determins the earliest that the search can return. The fudge factor allows skipping characters in either string, though there is no backtracking.
+ * @param a - the first string
+ * @param b - the second string
+ * @param threshhold - defaults to 0.5 - the required similarity between two substrings, accounting for the fidge factor
+ * @param fudges - the number skippable characters in either string without a match
+ * @returns - a tuple of the substrings from each string and the similarity percentage, accounting for the fudge factor
+ */
+export function similar(a: string, b: string, threshhold: number = 0.5, fudges: number = 2): [string, string, number] {
+  if (!a || !b) return;
+  const aa = a.toLowerCase();
+  const bb = b.toLowerCase();
+
+  // check containment
+  if (~aa.indexOf(bb)) bb;
+  if (~bb.indexOf(aa)) aa;
+
+  let i1 = 0;
+  let i2 = 0;
+  let oa = 0;
+  let ob = 0;
+  let f = 0;
+  let f1 = 0;
+  let f2 = 0;
+  let fs = 0;
+  let sim = 0;
+
+  const alen = a.length;
+  const blen = b.length;
+  let aolen = 0;
+  let bolen = 0;
+
+  // walk a
+  for (i1 = 0; i1 < alen; i1++) {
+    // walk b
+    for (i2 = 0; i2 < blen; i2++) {
+      // if there's a match, see how far it goes
+      if (aa[i1] === bb[i2]) {
+        aolen = alen - i1;
+        bolen = blen - i2;
+        fs = 0;
+        // walk the remaining pieces of each string checking for matches
+        matchy: for (oa = 1, ob = 1; oa < aolen && ob < bolen;) {
+          if (aa[i1 + oa] === bb[i2 + ob]) { // nailed it
+            oa++, ob++;
+          } else { // not so much, so compare closer chars in each string, walking outward
+            for (f = 0; f <= fudges; f++) {
+              for (f1 = 0; f1 <= f; f1++) {
+                for (f2 = 0; f2 <= f; f2++) {
+                  if (aa[i1 + oa + f1] === bb[i2 + ob + f2]) {
+                    oa += f1;
+                    ob += f2;
+                    fs += Math.max(f1, f2); // keep track of the fudge factor
+                    continue matchy;
+                  }
+                }
+              }
+            }
+            break matchy; // not even fudge could save it
+          }
+        }
+
+        sim = (Math.max(oa, ob) - fs) / Math.min(aa.length, bb.length); // get approximate similarity
+        if (sim >= threshhold) return [aa.substr(i1, oa), bb.substr(i2, ob), sim]; // and if it exceeds the threshold, we're good
+      }
+    }
+  }
+}
 
 // basic ops
 registerOperator(
@@ -327,6 +416,15 @@ registerOperator(
   }),
   simple(['set'], (_name, [name, value]: any[], ctx): any => {
     safeSet(ctx, name, value);
+  }),
+  simple(['similarity'], (_name, [left, right, threshhold, fudges]: any[]): number => {
+    return similarity(`${left || ''}`, `${right || ''}`, threshhold, fudges);
+  }),
+  simple(['similar'], (_name, [left, right, threshhold, fudges]: any[]): any => {
+    return similar(`${left || ''}`, `${right || ''}`, threshhold, fudges);
+  }),
+  simple(['overlap'], (_name, [left, right, threshhold]: any[]): any => {
+    return overlap(`${left || ''}`, `${right || ''}`, threshhold);
   }),
 );
 
