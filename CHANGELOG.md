@@ -1,3 +1,15 @@
+## 0.8.1
+
+2021-09-29
+
+### Data
+
+* There are three new string operators, which are also exported from the library:
+  * `similar` - the main operator that finds similar substrings within two strings based on a minimum threshhold and a fudge factor
+  * `similarity` - get the similarity factor from the `similar` operator
+  * `overlap` - get a substring that is common to both strings that meets a minimum threshhold of size (and no fudge factor) using the `similar` operator
+
+
 ## 0.8.0
 
 2021-09-15
