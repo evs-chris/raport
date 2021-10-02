@@ -1148,20 +1148,11 @@ Ractive.extendWith(Designer, {
     autosize(node) {
       let autosizeTm: any;
 
+      const helper: HTMLTextAreaElement = this.find('#text-helper');
       function resize() {
-        autosizeTm = 0;
-        const pos = node.parentElement.scrollTop;
-        const sh = node.parentElement.scrollHeight;
-        const ch = node.parentElement.clientHeight;
-        const old = parseInt(node.style.height);
-        node.style.height = '';
-        node.style.overflow = '';
-        setTimeout(() => {
-          const next = node.scrollHeight + 1;
-          node.style.height = `${next}px`;
-          node.style.overflow = 'hidden';
-          node.parentElement.scrollTop = old && pos + ch + (next - old) >= sh ? pos + (next - old) : pos;
-        });
+        helper.style.width = `${node.clientWidth}px`;
+        helper.value = (node as HTMLTextAreaElement).value;
+        node.style.height = `${helper.scrollHeight + 8}px`;
       }
 
       function defer() {
@@ -1171,6 +1162,7 @@ Ractive.extendWith(Designer, {
 
       node.addEventListener('focus', defer);
       node.addEventListener('input', defer);
+      node.style.overflow = 'hidden';
 
       return {
         teardown() {
