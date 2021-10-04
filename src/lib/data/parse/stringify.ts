@@ -1,5 +1,5 @@
-import { ValueOrExpr, Operation, Literal, DateRel, DateRelRange, isDateRel } from '../index';
-import { endRef, timespans } from '../parse';
+import { ValueOrExpr, Operation, Literal, DateRel, DateRelRange, isDateRel, isTimespan, TimeSpan } from '../index';
+import { endRef, isTimespanMS, timespans, timeSpanToNumber } from '../parse';
 
 const checkIdent = new RegExp(`[${endRef.split('').map(v => `\\${v}`).join('')}]`);
 
@@ -138,6 +138,8 @@ function _stringify(value: ValueOrExpr): string {
     return stringifyLiteral(value);
   } else if (isDateRel(value)) {
     return stringifyDate(value);
+  } else if (isTimespan(value)) {
+    return stringifyTimespan(value);
   }
 }
 
@@ -359,6 +361,27 @@ function stringifyDate(value: DateRel): string {
   }
 
   return str;
+}
+
+function stringifyTimespan(value: TimeSpan): string {
+  if (typeof value === 'number' || isTimespanMS(value)) {
+    let str = '';
+    let rem = Math.abs(timeSpanToNumber(value));
+    spanKeys.forEach(k => {
+      const t = Math.floor(rem / timespans[k]);
+      rem = rem % timespans[k];
+      if (t) str += `${t}${k}`;
+    });
+    if (rem) str += `${rem}ms`;
+    return `#${str}#`;
+  } else {
+    const o = value.d;
+    let str = '';
+    spanExact.forEach((k, i) => {
+      if (o[i] != null) str += `${o[i]}${k}`;
+    });
+    return `#${str}#`;
+  }
 }
 
 const leadingSpace = /^\s+/;

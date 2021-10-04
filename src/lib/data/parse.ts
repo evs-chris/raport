@@ -1,6 +1,6 @@
 import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name, not } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
-import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation } from './index';
+import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation, TimeSpanMS } from './index';
 
 export const timespans = {
   y: 0,
@@ -15,6 +15,16 @@ export const timespans = {
 timespans.w = timespans.d * 7;
 timespans.y = Math.floor(timespans.d * 365.25);
 timespans.m = Math.floor(timespans.d * 30.45);
+
+export function isTimespanMS(v: any): v is TimeSpanMS {
+  return typeof v === 'object' && v && typeof v.ms === 'number';
+}
+
+export function timeSpanToNumber(v: TimeSpan): number {
+  if (typeof v === 'number') return v;
+  else if (isTimespanMS(v)) return v.ms;
+  else return ((((((((((((v.d[0] || 0) * 12) + (v.d[1] || 0)) * 30.45) + (v.d[2] || 0)) * 24) + (v.d[3] || 0)) * 60) + (v.d[4] || 0)) * 60) + (v.d[5] || 0)) * 1000) + (v.d[6] || 0);
+}
 
 const space = ' \r\n\t';
 const endSym = space + '():{}[]<>,"\'`\\;&#';
@@ -107,7 +117,7 @@ const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 
     delete span.y; delete span.m;
     let n = 0;
     for (const k in span) n += span[k] * (timespans[k] || 1);
-    return n;
+    return { ms: n };
   } else {
     const s: [number?, number?, number?, number?, number?, number?, number?] = [];
     if (span.y) s[0] = span.y;
@@ -183,11 +193,11 @@ const daterel = alt<DateRel>('date',
     if (tz != null) val.z = tz;
     return val;
   }),
-  map(seq(istr('in'), rws, timespan), v => (typeof v[2] === 'number' ? { f: 'n', o: v[2] } : { f: 'n', o: v[2].d })),
+  map(seq(istr('in'), rws, timespan), v => (typeof v[2] === 'number' || isTimespanMS(v[2]) ? { f: 'n', o: timeSpanToNumber(v[2]) } : { f: 'n', o: v[2].d })),
   map(seq(timespan, rws, alt<string|any[]>('relative time anchor', istr('ago'), seq(istr('from'), rws, istr('now'))), opt(timezone)), ([span, , ref, tz]) => {
     let val: DateRelSpan;
-    if (typeof span === 'number') {
-      val = { f: 'n', o: span * (ref === 'ago' ? -1 : 1) };
+    if (typeof span === 'number' || isTimespanMS(span)) {
+      val = { f: 'n', o: timeSpanToNumber(span) * (ref === 'ago' ? -1 : 1) };
     } else {
       val = { f: 'n', o: span.d, d: ref === 'ago' ? -1 : undefined };
     }

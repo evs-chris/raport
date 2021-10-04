@@ -1,4 +1,4 @@
-import { parse, parsePath, parseLetPath } from './parse';
+import { parse, parsePath, parseLetPath, isTimespanMS, timeSpanToNumber } from './parse';
 import { ParseError } from 'sprunge/lib';
 
 // Data
@@ -525,7 +525,10 @@ export interface DateExactRange {
 }
 export type DateRel = Date | DateRelSpan | DateRelRange | DateRelTimeRange | DateRelToDate | DateExactRange;
 
-export type TimeSpan = number|FullTimeSpan;
+export type TimeSpan = number|TimeSpanMS|FullTimeSpan;
+export interface TimeSpanMS {
+  ms: number;
+}
 export interface FullTimeSpan {
   s?: number;
   d: [number?, number?, number?, number?, number?, number?, number?];
@@ -716,7 +719,7 @@ export function dateRelToDate(rel: DateRel): Date {
 }
 
 export function isTimespan(v: any): v is TimeSpan {
-  return typeof v === 'number' || (typeof v === 'object' && Array.isArray(v.d));
+  return typeof v === 'number' || (typeof v === 'object' && Array.isArray(v.d)) || isTimespanMS(v);
 }
 
 export function addTimespan(l: TimeSpan, r: TimeSpan): TimeSpan {
@@ -724,9 +727,11 @@ export function addTimespan(l: TimeSpan, r: TimeSpan): TimeSpan {
   else {
     const res: TimeSpan = { d: [] };
     if (typeof l === 'number') res.d[6] = l;
+    else if (isTimespanMS(l)) res.d[6] = l.ms;
     else for (let i = 0; i < 7; i++) if (l.d[i]) res.d[i] = l.d[i];
 
     if (typeof r === 'number') res.d[6] = (res.d[6] || 0) + r;
+    else if (isTimespanMS(r)) res.d[6] = (res.d[6] || 0) + r.ms;
     else for (let i = 0; i < 7; i++) if (r.d[i]) res.d[i] = (res.d[i] || 0) + r.d[i];
     return res;
   }
@@ -735,6 +740,8 @@ export function addTimespan(l: TimeSpan, r: TimeSpan): TimeSpan {
 export function subtractTimespan(l: TimeSpan, r: TimeSpan): TimeSpan {
   if (typeof l === 'number' && typeof r === 'number') return l - r;
   else {
+    if (isTimespanMS(l)) l = l.ms;
+    if (isTimespanMS(r)) r = r.ms;
     if (typeof l === 'number') {
       const res = ({ d: (r as FullTimeSpan).d.slice() }) as FullTimeSpan;
       for (let i = 0; i < 7; i++) if (res.d[i]) res.d[i] = 0 - res.d[i];
@@ -814,6 +821,7 @@ export function datesDiff(l: Date, r: Date): FullTimeSpan {
 
 export function dateAndTimespan(l: Date, r: TimeSpan, m: 1|-1): Date {
   if (typeof r === 'number') return new Date(+l + r * m);
+  else if (isTimespanMS(r)) return new Date(+l + r.ms * m);
   else {
     let d = new Date(l);
     if (r.d[0]) d.setFullYear(d.getFullYear() + r.d[0] * m);
@@ -825,9 +833,4 @@ export function dateAndTimespan(l: Date, r: TimeSpan, m: 1|-1): Date {
     if (r.d[6]) d.setMilliseconds(d.getMilliseconds() + r.d[6] * m);
     return d;
   }
-}
-
-export function timeSpanToNumber(v: TimeSpan): number {
-  if (typeof v === 'number') return v;
-  else return ((((((((((((v.d[0] || 0) * 12) + (v.d[1] || 0)) * 30.45) + (v.d[2] || 0)) * 24) + (v.d[3] || 0)) * 60) + (v.d[4] || 0)) * 60) + (v.d[5] || 0)) * 1000) + (v.d[6] || 0);
 }

@@ -1,6 +1,6 @@
 import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
-import { timespans } from './parse';
+import { timespans, isTimespanMS, timeSpanToNumber } from './parse';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
   return {
@@ -277,7 +277,7 @@ registerOperator(
       let res: number[];
 
       // special case for full spans
-      if (typeof span !== 'number') {
+      if (typeof span !== 'number' && !isTimespanMS(span)) {
         if (u.length < 4 && u[0] === 'y' && (!u[1] || u[1] === 'M') && (!u[2] || u[2] === 'd')) {
           res = u.map(u => {
             if (u === 'y') {
@@ -306,7 +306,7 @@ registerOperator(
 
       // this isn't special cased, so get a number of ms
       if (!res) {
-        let ms = typeof span === 'number' ? span : 's' in span ? +dateAndTimespan(new Date(span.s), span, 1) - +new Date(span.s) : (
+        let ms = typeof span === 'number' || isTimespanMS(span) ? timeSpanToNumber(span) : 's' in span ? +dateAndTimespan(new Date(span.s), span, 1) - +new Date(span.s) : (
           span.d[0] * timespans.y + span.d[1] * timespans.m + span.d[2] * timespans.d +
           span.d[3] * timespans.h + span.d[4] * timespans.mm + span.d[5] * timespans.s + span.d[6]
         );
@@ -348,8 +348,8 @@ registerOperator(
       } else return Array.isArray(namedArgs.unit) ? res : res[0];
     } else {
       if (namedArgs.string) {
-        if (typeof span === 'number') {
-          let ms = span;
+        if (typeof span === 'number' || isTimespanMS(span)) {
+          let ms = timeSpanToNumber(span);
           let res = '';
           const order = ['w', 'd', 'h', 'mm', 's'];
           const units = ['week', 'day', 'hour', 'minute', 'second', 'millisecond'];
