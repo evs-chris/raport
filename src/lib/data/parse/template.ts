@@ -39,10 +39,10 @@ function min_one<T>(values: Parser<Array<T>>): Parser<Array<T|Value>> {
 const else_tag = branch(['else']);
 const branch_tag = branch(['else if', 'elseif', 'elsif', 'elif'], true);
 
-const each_op = map(seq(tag_value(['each']), min_one(rep(alt<Content>(branch_tag, else_tag, content))), tag_end), ([tag, content]) => ({ op: 'each', args: [tag[1]].concat(apply_first(cond_branches(content))) }));
-const if_op = map(seq(tag_value(['if']), min_one(rep(alt<Content>(branch_tag, else_tag, content))), tag_end), ([tag, content]) => ({ op: 'if', args: [tag[1]].concat(cond_branches(content)) }));
-const with_op = map(seq(tag_value(['with']), min_one(rep(alt<Content>(else_tag, content))), tag_end), ([tag, content]) => ({ op: 'with', args: [tag[1]].concat(apply_first(cond_branches(content))) }));
-const unless_op = map(seq(tag_value(['unless']), min_one(rep(content)), tag_end), ([tag, content]) => ({ op: 'unless', args: [tag[1]].concat(concat(content)) }));
+const each_op = map(seq(tag_value(['each']), min_one(rep(alt<Content>(branch_tag, else_tag, content))), tag_end), ([tag, content]) => ({ op: 'each', args: [tag[1]].concat(apply_first(cond_branches(content))) }), { primary: true, name: 'each-block' });
+const if_op = map(seq(tag_value(['if']), min_one(rep(alt<Content>(branch_tag, else_tag, content))), tag_end), ([tag, content]) => ({ op: 'if', args: [tag[1]].concat(cond_branches(content)) }), { primary: true, name: 'if-block' });
+const with_op = map(seq(tag_value(['with']), min_one(rep(alt<Content>(else_tag, content))), tag_end), ([tag, content]) => ({ op: 'with', args: [tag[1]].concat(apply_first(cond_branches(content))) }), { primary: true, name: 'with-block' });
+const unless_op = map(seq(tag_value(['unless']), min_one(rep(content)), tag_end), ([tag, content]) => ({ op: 'unless', args: [tag[1]].concat(concat(content)) }), { primary: true, name: 'unless-block' });
 const case_op = map(seq(case_value(['case']), min_one(rep(alt<Content>(branch(['when'], true), else_tag, content))), tag_end), ([tag, content]) => {
   const op = { op: 'case', args: tag.slice(1).concat(cond_branches(content)) };
   for (let i = 1; i < op.args.length; i += 2) {
@@ -50,11 +50,11 @@ const case_op = map(seq(case_value(['case']), min_one(rep(alt<Content>(branch(['
     if (typeof arg === 'object' && 'op' in arg) replaceCase(arg);
   }
   return op;
-});
+}, { primary: true, name: 'case-block' });
 
-const interpolator = map(seq(str('{{'), ws, value, ws, str('}}')), ([, , value]) => ({ op: 'string', args: [value] }), 'interpolator');
+const interpolator = map(seq(str('{{'), ws, value, ws, str('}}')), ([, , value]) => ({ op: 'string', args: [value] }), { primary: true, name: 'interpolator' });
 
-content.parser = alt<Value>('content', text, each_op, if_op, with_op, case_op, unless_op, interpolator);
+content.parser = alt<Value>({ primary: true, name: 'content' }, text, each_op, if_op, with_op, case_op, unless_op, interpolator);
 
 function apply_first(content: Value[]): Value[] {
   if (content.length) content[0] = { a: content[0] };

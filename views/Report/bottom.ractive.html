@@ -15,7 +15,6 @@
     <div class-editor>
       <div class-actions>
         <button disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>&#9655;</button>
-        <!--<button class-tab class-active="!~/temp.expr.tab || ~/temp.expr.tab === 'ast'" class-error="~/temp.expr.error" on-click="@.set('temp.expr.tab', 'ast')">AST</button>-->
         <button class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">{{#if ~/temp.expr.template}}Template{{else}}Text{{/if}}</button>
         {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.template}}<button class-ico on-click="@.fmt()">Format</button>{{/if}}
         <button class-tab style-display="{{~/temp.expr.html ? '' : 'none'}}" class-active="~/temp.expr.tab === 'html'" on-click="@.set('temp.expr.tab', 'html')">HTML</button>
@@ -25,17 +24,6 @@
           <button class-tab class-active="~/temp.expr.tab === 'parsed'" class-error="~/temp.expr.error" on-click="@.set('temp.expr.tab', 'parsed')">Parsed</button>
         {{/if}}
       </div>
-      <!--<div class-tab class-ast class-active-tab="!~/temp.expr.tab || ~/temp.expr.tab === 'ast'" class-error="~/temp.expr.error">
-        <div class-scrolled-wrapper style-flex-grow=1>
-          <div as-scrolled on-click="@node === @event.target && @.set('temp.expr.partpath', '')">
-            {{#if ~/temp.expr.ast}}
-              {{>ast-node ~/temp.expr.ast}}
-            {{else}}
-              <button class-ico on-click="@.set('temp.expr.ast', { v: '' })">+</button>
-            {{/if}}
-          </div>
-        </div>
-      </div>-->
       <div class-tab class-text class-active-tab="!~/temp.expr.tab || ~/temp.expr.tab === 'text'">
         {{#with ~/temp.expr}}
           {{#if .label}}
@@ -81,14 +69,14 @@
               </div>
               <div class-scrolled-wrapper style-flex-grow=1>
                 <div as-scrolled>
-                  <textarea lazy="500" as-autosize class-expr-text id="expr-text">{{.str}}</textarea>
+                  <Editor src="{{.str}}" template="{{.html || .template}}" />
                 </div>
               </div>
             {{/if}}
           {{else}}
             <div class-scrolled-wrapper style-flex-grow=1>
               <div as-scrolled>
-                <textarea lazy="500" as-autosize class-expr-text id="expr-text">{{.str}}</textarea>
+                <Editor src="{{.str}}" template="{{.html || .template}}" />
               </div>
             </div>
           {{/if}}
@@ -388,8 +376,6 @@
     width: 100%;
     box-sizing: border-box;
     padding: 0.5em;
-  }
-  .bottom-pane .text.tab textarea {
     min-height: 99%;
     border: none;
     outline: none;

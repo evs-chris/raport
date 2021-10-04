@@ -4,6 +4,9 @@ import Ractive, { InitOpts, ContextHelper, ReadLinkResult } from 'ractive';
 import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
+import { Editor } from './Editor';
+import autosize from './autosize';
+
 let sourceTm: any;
 
 export interface ExprOptions {
@@ -875,6 +878,7 @@ Ractive.extendWith(Designer, {
       exprExpand: {},
     };
   },
+  components: { Editor },
   computed: {
     operators() {
       const map = getOperatorMap();
@@ -1145,32 +1149,7 @@ Ractive.extendWith(Designer, {
         }
       };
     },
-    autosize(node) {
-      let autosizeTm: any;
-
-      const helper: HTMLTextAreaElement = this.find('#text-helper');
-      function resize() {
-        helper.style.width = `${node.clientWidth}px`;
-        helper.value = (node as HTMLTextAreaElement).value;
-        node.style.height = `${helper.scrollHeight + 8}px`;
-      }
-
-      function defer() {
-        if (autosizeTm) clearTimeout(autosizeTm);
-        setTimeout(resize, 500);
-      }
-
-      node.addEventListener('focus', defer);
-      node.addEventListener('input', defer);
-      node.style.overflow = 'hidden';
-
-      return {
-        teardown() {
-          node.removeEventListener('focus', defer);
-          node.removeEventListener('input', defer);
-        }
-      }
-    },
+    autosize,
   },
 });
 
@@ -1246,7 +1225,7 @@ function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>, template?: boole
   const opts = Object.assign(fmtOpts, { template });
   if (typeof str === 'string') {
     try {
-      return stringify(parser(str, opts),  { template });
+      return stringify(parser(str, opts),  { template, listWrap: 40 });
     } catch {
       return str;
     }
@@ -1254,30 +1233,30 @@ function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>, template?: boole
     return str.map(e => {
       if (typeof e === 'string') {
         try {
-          return stringify(parser(e, opts), { template });
+          return stringify(parser(e, opts), { template, listWrap: 40 });
         } catch {
           return e;
         }
       } else if ('text' in e && typeof e.text === 'string') {
         try {
-          return Object.assign({}, e, { text: stringify(parser(e.text, opts), { template }) });
+          return Object.assign({}, e, { text: stringify(parser(e.text, opts), { template, listWrap: 40 }) });
         } catch {
           return e;
         }
       } else if (isValueOrExpr(e)) {
-        return stringify(e, { template });
+        return stringify(e, { template, listWrap: 40 });
       } else {
         return e;
       }
     });
   } else if ('x' in str && typeof str.x === 'string') {
     try {
-      return { x: stringify(parser(str.x, opts), { template }) };
+      return { x: stringify(parser(str.x, opts), { template, listWrap: 40 }) };
     } catch {
       return str;
     }
   } else if (isValueOrExpr(str)) {
-    return stringify(str, { template });
+    return stringify(str, { template, listWrap: 40 });
   }
   return str;
 }

@@ -1,0 +1,102 @@
+<div class="syntax-editor">
+  <code class="ast-nodes">
+    <pre>{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}</pre>
+  </code>
+  <textarea as-autosize class-expr-text id="expr-text" spellcheck="false">{{src}}</textarea>
+</div>
+
+<template id="ast-node">
+  <span class="{{.name}}">{{#if .children.length}}{{#each .children}}{{#if ^^/extra[@index]}}{{#with ^^/extra[@index]}}<span class="ast-extra">{{~/src.substring(this.0, this.1)}}{{/with}}{{/if}}{{>ast-node}}{{/each}}{{#if .extra[.children.length]}}{{#with .extra[.children.length]}}<span class="ast-extra">{{~/src.substring(this.0, this.1)}}{{/with}}{{/if}}{{else}}{{(~/src || '').substring(.start, .end)}}{{/if}}</span>
+</template>
+
+<style>
+  .syntax-editor {
+    position: relative;
+    min-height: 99%;
+    color: #555;
+  }
+
+  .ast-extra {
+    color: #555;
+  }
+
+  .syntax-editor textarea {
+    position: absolute;
+    top: 0;
+    font-family: monospace;
+    color: transparent;
+    background: transparent;
+    caret-color: black;
+    min-height: 99%;
+    overflow: hidden;
+  }
+
+  .syntax-editor code {
+    padding: 0.5em;
+    font-family: monospace;
+    display: block;
+    box-sizing: border-box;
+    min-height: 99%;
+    overflow: hidden;
+  }
+
+  .syntax-editor > code > pre {
+    word-break: break-word;
+  }
+
+  .ast-nodes .reference {
+    color: #222;
+  }
+
+  .ast-nodes .primitive,
+  .ast-nodes .number,
+  .ast-nodes .date,
+  .ast-nides .timespan {
+    color: #164;
+  }
+
+  .ast-nodes .format-op {
+    color: #951;
+  }
+
+  .ast-nodes .string,
+  .ast-nodes .string > .ast-extra {
+    color: #a11;
+  }
+
+  .ast-nodes .string > .string-interpolation {
+    font-style: oblique;
+  }
+
+  .ast-nodes .binary-op > .ast-extra,
+  .ast-nodes .conditional > .ast-extra {
+    color: #708;
+  }
+
+  .ast-nodes .ast-fail {
+    color: #f00;
+  }
+
+  .ast-nodes .interpolator,
+  .ast-nodes .each-block > .ast-extra,
+  .ast-nodes .if-block > .ast-extra,
+  .ast-nodes .unless-block > .ast-extra,
+  .ast-nodes .case-block > .ast-extra,
+  .ast-nodes .with-block > .ast-extra {
+    font-weight: 600;
+  }
+
+  .ast-nodes .each-block > .ast-extra {
+    color: #167;
+  }
+
+  .ast-nodes .case-block > .ast-extra,
+  .ast-nodes .unless-block > .ast-extra,
+  .ast-nodes .if-block > .ast-extra {
+    color: #187;
+  }
+
+  .ast-nodes .with-block > .ast-extra {
+    color: #147;
+  }
+</style>
