@@ -204,9 +204,11 @@ function stringifyOp(value: Operation): string {
     if (typeof val !== 'string' && 'op' in val && (binops.includes(val.op) || unops.includes(val.op))) vs = `(${vs})`;
     return `${vs}#${[value.args[1].v].concat(value.args.slice(2).map(a => _stringify(a))).join(',')}`;
   } else if (binops.includes(op) && value.args && value.args.length > 1) {
-    const arg1 = value.args[0];
-    const others = value.args.slice(1);
-    return `${stringifyBinopArg(op, arg1, 1)} ${op} ${others.map(arg2 => stringifyBinopArg(op, arg2, 2)).join(` ${op} `)}`;
+    let parts = value.args.map((a, i) => stringifyBinopArg(op, a, i === 0 ? 1 : 2));
+    const long = parts.find(p => p.length > 30 || ~p.indexOf('\n')) || parts.reduce((a, c) => a + c.length, 0) && parts.length > 2;
+    const split = _noindent ? ' ' : long ? `\n${padl('', '  ', _level + 1)}` : ' ';
+    if (split.length > 1 || (!_noindent && long)) parts = [parts[0]].concat(parts.slice(1).map(p => indentAll('  ', p)));
+    return `${parts[0]} ${op}${split}${parts.slice(1).join(` ${op}${split.length > 1 ? `${split}` : split}`)}`;
   } else if (unops.includes(op) && value.args && value.args.length === 1) {
     const arg = value.args[0];
     if (typeof arg !== 'string' && 'op' in arg && (binops.includes(arg.op) || unops.includes(arg.op))) return `${op}(${_stringify(arg)})`;
@@ -364,6 +366,9 @@ const allLeadingSpace = /^\s+/gm;
 function outdentAll(amount: string, str: string): string {
   if (amount) return str.replace(allLeadingSpace, s => s.substr(amount.length));
   else return str;
+}
+function indentAll(amount: string, str: string): string {
+  return str.replace(/\n/gm, `\n${amount}`);
 }
 
 function wrapArgs(open: string, args: ValueOrExpr[], close: string, keyMod?: number, call?: boolean): string {
