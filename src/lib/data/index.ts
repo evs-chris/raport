@@ -706,7 +706,7 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
 }
 
 export function isDateRel(v: any): v is DateRel {
-  return typeof v === 'object' && (('f' in v && (Array.isArray(v.f) || 'o' in v)) || v instanceof Date);
+  return v && typeof v === 'object' && (('f' in v && (Array.isArray(v.f) || 'o' in v)) || v instanceof Date);
 }
 
 export function dateRelToDate(rel: DateRel): Date {
