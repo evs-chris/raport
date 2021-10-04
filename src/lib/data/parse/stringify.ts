@@ -327,6 +327,7 @@ function stringifyDate(value: DateRel): string {
       str += `${'d' in value && value.d === -1 ? ' ago' : ' from now'}${offsetToTimezone(-1, value.z)}`;
       return `#${str}#`;
     } else if (typeof value.o === 'number') { // milliseconds
+      if (value.o === 0) return `#now#`;
       let rem = Math.abs(value.o);
       spanKeys.forEach(k => {
         const t = Math.floor(rem / timespans[k]);
