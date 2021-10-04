@@ -1,6 +1,6 @@
 <div class="syntax-editor">
   <code class="ast-nodes">
-    <pre>{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}</pre>
+    <pre>{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}{{#if src.length > 0 && src[src.length - 1] === '\n'}} {{/if}}</pre>
   </code>
   <textarea as-autosize class-expr-text id="expr-text" spellcheck="false">{{src}}</textarea>
 </div>
@@ -29,6 +29,7 @@
     caret-color: black;
     min-height: 99%;
     overflow: hidden;
+    resize: none;
   }
 
   .syntax-editor code {
@@ -93,10 +94,10 @@
   .ast-nodes .case-block > .ast-extra,
   .ast-nodes .unless-block > .ast-extra,
   .ast-nodes .if-block > .ast-extra {
-    color: #187;
+    color: #189;
   }
 
   .ast-nodes .with-block > .ast-extra {
-    color: #147;
+    color: #145;
   }
 </style>

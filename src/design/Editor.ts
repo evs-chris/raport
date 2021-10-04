@@ -12,7 +12,8 @@ export class Editor extends Ractive {
   }
 
   highlightSyntax() {
-    const expr = this.get('src');
+    const expr = this.get('src') || '';
+    if (typeof expr !== 'string') return;
     const parser = this.get('template') ? parseTemplate : parse;
     const ast = parser(expr, { tree: true, compact: true } as any);
     this.set('ast', ast);

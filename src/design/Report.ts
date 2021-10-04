@@ -6,6 +6,7 @@ import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 import { Editor } from './Editor';
 import autosize from './autosize';
+import { trackfocus, getLastFocus } from './trackfocus';
 
 let sourceTm: any;
 
@@ -34,6 +35,8 @@ export interface PlainSource {
 }
 
 let autosizeTm: any;
+
+const binops = ['**', '*', '/%', '/', '%', '+', '-', '>=', '>', '<=', '<', 'gt', 'gte', 'lt', 'lte', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'and', '&&', 'or', '||'];
 
 export class Designer extends Ractive {
   constructor(opts?: InitOpts) {
@@ -512,7 +515,8 @@ export class Designer extends Ractive {
     if (this.get('temp.expr.html') || this.get('temp.expr.template')) ref = `{{${ref}}}`;
 
     if (tab === 'text') {
-      const node: HTMLTextAreaElement = this.find('textarea.expr-text') as any;
+      const node = getLastFocus() as HTMLInputElement;
+      if (!node) return;
 
       const cur = node.value;
       const pos = [node.selectionStart, node.selectionEnd];
@@ -532,32 +536,31 @@ export class Designer extends Ractive {
 
   insertOp(name: string) {
     const tab = this.get('temp.expr.tab') || 'text';
-
-    let op = `${name}()`;
-    if (this.get('temp.expr.html') || this.get('temp.expr.template')) op = `{{${op}}}`;
-
     if (tab === 'text') {
-      const node: HTMLTextAreaElement = this.find('textarea.expr-text') as any;
+      const el = getLastFocus() as HTMLInputElement;
+      if (!el) return;
 
-      const cur = node.value;
-      const pos = [node.selectionStart, node.selectionEnd];
-      node.value = cur.substring(0, pos[0]) + op + cur.substr(pos[1]);
-      node.selectionStart = node.selectionEnd = pos[0] + op.length - 1;
+      const cur = el.value;
+      const pos = [el.selectionStart, el.selectionEnd];
+      let rep = cur.substring(pos[0], pos[1]);
+      let cursor: number;
 
-      node.dispatchEvent(new InputEvent('input'));
-      node.dispatchEvent(new InputEvent('change'));
-      node.focus();
-    } else if (tab === 'html') {
-      return this.command('insertText', false, op);
-    } else if (tab === 'ast') {
-      const active = this.get('temp.expr.partpath') || 'temp.expr.ast';
-      const part = this.get(active);
-      if (!part) {
-        this.set('temp.expr.ast', { op: name });
-        this.set('temp.expr.partpath', active);
+      if (binops.includes(name)) {
+        rep = ` ${name} `;
+        cursor = pos[0] + rep.length;
       } else {
-        this.set(active, { op: name, args: [part] });
+        rep = `${name}(${rep})`
+        cursor = pos[0] + rep.length - 1;
       }
+
+      el.value = cur.substring(0, pos[0]) + rep + cur.substr(pos[1]);
+      el.selectionStart = el.selectionEnd = cursor;
+
+      el.dispatchEvent(new InputEvent('input'));
+      el.dispatchEvent(new InputEvent('change'));
+      el.focus();
+    } else {
+      return this.command('insertText', false, `{{${name}}}`);
     }
   }
 
@@ -660,6 +663,10 @@ export class Designer extends Ractive {
 
   inRepeater(path: string) {
     return /\.row\./.test(path);
+  }
+
+  getPartStrings(arr: Array<string|{ text: string }>): string {
+    return arr.map(c => (c as any).text || c).join(' + ');
   }
 
   nodeForPosition(pos: number, name?: true): ParseError|ParseNode[] {
@@ -1150,6 +1157,7 @@ Ractive.extendWith(Designer, {
       };
     },
     autosize,
+    trackfocus,
   },
 });
 

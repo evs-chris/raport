@@ -29,7 +29,7 @@
           {{#if .label}}
             {{#if Array.isArray(.str)}}
               <div style="display: flex; justify-content: space-between;">
-                <button class-plain on-click="@context.set('.str', '')">Convert to Text</button>
+                <button class-plain on-click="@context.set('.str', @.getPartStrings(.str))">Convert to Text</button>
                 <button class-ico class-large on-click="@context.push('.str', '')" title="Add part">+</button>
               </div>
               <div class-scrolled-wrapper style-flex-grow=1>
@@ -41,11 +41,11 @@
                       <button class-ico class-spacer disabled="{{@index === @last}}" on-click="@.moveDown(@context)" title="Move down">&#9660;</button>
                       {{#if typeof . === 'string'}}
                         <button class-ico on-click="@context.set('.', { text: . })" title="Format part">F</button>
-                        <textarea lazy="500" class-expr-text {{#if @index === 0}}id="expr-text"{{/if}}>{{.}}</textarea>
+                        <Editor src="{{.}}" />
                       {{else}}
                         <button class-ico class-spacer on-click="@context.set('.', .text)" title="Plain part">T</button>
                         <input value="{{.id}}" placeholder="Tracking ID" title="Track this value by assigning it a unique ID" />
-                        <textarea title="Part expression" lazy="500" class-expr-text>{{.text}}</textarea>
+                        <Editor src="{{.text}}" />
                         <input title="Font Family" placeholder="Font Family" value="{{.font.family}}" />
                         <input title="Color" placeholder="Color" value="{{.font.color}}" />
                         <input title="Size" placeholder="Size (1)" value="{{.font.size}}" type="number" />
@@ -583,7 +583,7 @@
     border-radius: 0.2em;
   }
 
-  .label-part textarea {
+  .label-part code {
     background-color: #f5f5f5;
   }
 

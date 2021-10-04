@@ -3,7 +3,9 @@ export default function autosize(node: HTMLElement) {
 
   const helper: HTMLTextAreaElement = node.cloneNode() as any;
   helper.style.position = 'absolute';
-  helper.style.left = '-1000px';
+  helper.style.left = '-110%';
+  helper.style.zIndex = '-1';
+  helper.style.height = '1em';
   document.body.appendChild(helper);
 
   function resize() {
