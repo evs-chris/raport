@@ -106,7 +106,7 @@ q.test('strings must have an endquote', t => {
 });
 
 q.test('parser must consume all input', t => {
-  t.matches(parseErr('a b'), 'consume all');
+  t.matches(parseErr('a b +'), 'consume all');
 });
 
 q.test(`whitespace alone doesn't count as more input`, t => {
