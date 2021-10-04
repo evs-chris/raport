@@ -249,11 +249,11 @@ function stringifyLiteral(value: Literal): string {
     else if (!~value.v.indexOf('`')) return `\`${value.v.replace(/[{`]/g, v => `\\${v}`).replace(/\${/g, '\\${')}\``;
     else if (!~value.v.indexOf('"')) return `"${value.v}"`;
     else return `'${value.v.replace(/['{]/g, s => `\\${s}`).replace(/\${/g, '\\${')}'`;
-  } else if (typeof value.v === 'number' || typeof value.v === 'boolean') {
+  } else if (typeof value.v === 'number' || typeof value.v === 'boolean' || value.v === 'true' || value.v === 'false') {
     return `${value.v}`;
-  } else if (value.v === 'undefined') {
+  } else if (value.v === 'undefined' || value.v === undefined) {
     return 'undefined';
-  } else if (value.v === 'null') {
+  } else if (value.v === 'null' || value.v === null) {
     return 'null';
   } else if (Array.isArray(value.v)) {
     if (_noarr) return `(array${value.v.length ? ' ' : ''}${value.v.map(v => _stringify({ v })).join(_listcommas ? ', ': ' ')})`;
