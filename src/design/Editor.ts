@@ -96,3 +96,34 @@ Ractive.extendWith(Editor, {
   decorators: { autosize },
 });
 
+export class Viewer extends Ractive {
+  constructor(opts?: InitOpts) {
+    super(opts);
+  }
+
+  highlightSyntax() {
+    const expr = this.get('src') || '';
+    if (typeof expr !== 'string') return;
+    const parser = this.get('template') ? parseTemplate : parse;
+    const ast = parser(expr, { tree: true, compact: true } as any);
+    this.set('ast', ast);
+  }
+}
+
+Ractive.extendWith(Viewer, {
+  template: { v: template.v, t: template.p.viewer }, cssId: 'raport-ast-view',
+  css: css + `
+  pre { margin: 0; white-space: pre-wrap; }
+  .syntax-editor code { padding: 0; }
+  .syntax-editor { max-height: 100%; overflow: auto; }
+  `,
+  partials: {
+    'ast-node': template.p['ast-node'],
+  },
+  observe: {
+    'src template'() {
+      this.highlightSyntax();
+    },
+  },
+});
+

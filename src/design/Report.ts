@@ -4,7 +4,7 @@ import Ractive, { InitOpts, ContextHelper, ReadLinkResult } from 'ractive';
 import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
-import { Editor } from './Editor';
+import { Editor, Viewer } from './Editor';
 import autosize from './autosize';
 import { trackfocus, getLastFocus } from './trackfocus';
 
@@ -189,7 +189,7 @@ export class Designer extends Ractive {
     if (f.size) res += `font-size: ${f.size}rem;`;
     if (f.line) res += `line-height: ${f.line}rem;`;
     if (f.align) res += `text-align: ${f.align};`;
-    if (f.color) res += `color: ${f.color};`;
+    if (f.color) res += `color: ${f.color} !important;`;
     if (f.family) res += `font-family: ${f.family};`;
     if (f.weight) res += `font-weight: ${f.weight};`;
     if (f.right) res += `padding-right: ${f.right}rem;`;
@@ -885,7 +885,7 @@ Ractive.extendWith(Designer, {
       exprExpand: {},
     };
   },
-  components: { Editor },
+  components: { Editor, Viewer },
   computed: {
     operators() {
       const map = getOperatorMap();

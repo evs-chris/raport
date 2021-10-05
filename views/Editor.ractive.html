@@ -9,6 +9,14 @@
   <span class="{{.name}}">{{#if .children.length}}{{#each .children}}{{#if ^^/extra[@index]}}{{#with ^^/extra[@index]}}<span class="ast-extra">{{~/src.substring(this.0, this.1)}}{{/with}}{{/if}}{{>ast-node}}{{/each}}{{#if .extra[.children.length]}}{{#with .extra[.children.length]}}<span class="ast-extra">{{~/src.substring(this.0, this.1)}}{{/with}}{{/if}}{{else}}{{(~/src || '').substring(.start, .end)}}{{/if}}</span>
 </template>
 
+<template id="viewer">
+  <div class="syntax-editor">
+    <code class="ast-nodes">
+      <pre>{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}{{#if src.length > 0 && src[src.length - 1] === '\n'}} {{/if}}</pre>
+    </code>
+  </div>
+</template>
+
 <style>
   .syntax-editor {
     position: relative;
