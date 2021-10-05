@@ -1,3 +1,24 @@
+## 0.8.2
+
+2021-10-05
+
+### Data
+
+* __BUG__: `null`s in data are better handled by built-in operators and internal functions.
+
+### Parser
+
+* __BUG__: `is-not` now parses with higher priority than `is` so that it can actually be parsed.
+* __BUG__: The stringifier now properly outputs `#now#`.
+* Interval timespans (those that are represented by a number of milliseconds) now parse to a wrapper type so that they can be properly stringified.
+* Stringifying long binary operands will now wrap and indent the sebsequent operands.
+
+### Designer
+
+* The expression editor now has syntax highlighting and in/outdent support.
+* The designer also has syntax highlighting for widget expressions.
+
+
 ## 0.8.1
 
 2021-09-29
