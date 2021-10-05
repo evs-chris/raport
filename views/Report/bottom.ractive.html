@@ -17,6 +17,7 @@
         <button disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>&#9655;</button>
         <button class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">{{#if ~/temp.expr.template}}Template{{else}}Text{{/if}}</button>
         {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.template}}<button class-ico on-click="@.fmt()">Format</button>{{/if}}
+        {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.path}}<label><input type=checkbox checked="{{~/temp.expr.template}}" /> Template</label>{{/if}}
         <button class-tab style-display="{{~/temp.expr.html ? '' : 'none'}}" class-active="~/temp.expr.tab === 'html'" on-click="@.set('temp.expr.tab', 'html')">HTML</button>
         <div style-flex-grow=2 />
         <button class-tab class-active="~/temp.expr.tab === 'result'" on-click="@.set('temp.expr.tab', 'result')">Result</button>
