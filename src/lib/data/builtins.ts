@@ -134,10 +134,10 @@ registerOperator(
         l = +l; r = +r;
       } else if (typeof l === 'string' || typeof r === 'string') {
         l = new Date(l); r = new Date(r);
-      } else if ('f' in l && 'o' in l) {
+      } else if (l && 'f' in l && 'o' in l) {
         l = dateRelToRange(l)[name[0] === '<' ? 1 : 0];
         r = new Date(r);
-      } else if ('f' in r && 'o' in r) {
+      } else if (r && 'f' in r && 'o' in r) {
         r = dateRelToRange(r)[name === '<' || name === '>=' ? 0 : 1];
         l = new Date(l);
       }
@@ -306,7 +306,7 @@ registerOperator(
 
       // this isn't special cased, so get a number of ms
       if (!res) {
-        let ms = typeof span === 'number' || isTimespanMS(span) ? timeSpanToNumber(span) : 's' in span ? +dateAndTimespan(new Date(span.s), span, 1) - +new Date(span.s) : (
+        let ms = typeof span === 'number' || isTimespanMS(span) ? timeSpanToNumber(span) : span && 's' in span ? +dateAndTimespan(new Date(span.s), span, 1) - +new Date(span.s) : (
           span.d[0] * timespans.y + span.d[1] * timespans.m + span.d[2] * timespans.d +
           span.d[3] * timespans.h + span.d[4] * timespans.mm + span.d[5] * timespans.s + span.d[6]
         );
@@ -799,7 +799,7 @@ registerOperator({
   names: ['find'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
     if (!args[0]) return;
-    if (typeof args[0] === 'object' && 'a' in args[0]) return arr.find((e, i) => evalApply(ctx, args[0], [e, i]));
+    if (typeof args[0] === 'object' && args[0] && 'a' in args[0]) return arr.find((e, i) => evalApply(ctx, args[0], [e, i]));
     else {
       const v = evalParse(ctx, args[0]);
       return arr.find(e => e == v);
