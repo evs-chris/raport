@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { InitOpts, ContextHelper, ReadLinkResult } from 'ractive';
-import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySource, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap } from 'raport/index';
+import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 import { Editor, Viewer } from './Editor';
@@ -375,9 +375,8 @@ export class Designer extends Ractive {
     const res = new Root({}, { parameters: this.get('params') });
     const report: Report = this.get('report');
     const srcs = await this.buildSources();
+    applySources(res, report.sources || [], srcs);
     for (const src of report.sources || []) {
-      const av = srcs[src.source];
-      if (av) applySource(res, src, { [src.source]: av });
       if (!((src.name || src.source) in res.value)) res.value[src.name || src.source] = (res.sources[src.name || src.source] || {}).value;
     }
     return res;

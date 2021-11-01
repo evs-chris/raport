@@ -228,18 +228,29 @@ interface ReportExtras {
 export function run(report: Report, sources: SourceMap, parameters?: ParameterMap|Root, extra?: ReportExtras): string {
   const ctx = parameters && 'root' in parameters && parameters.root === parameters ? parameters as Root : new Root(Object.assign({}, report.context), { parameters });
 
-  if (report.sources) {
-    for (const src of report.sources) {
-      applySource(ctx, src, sources);
-    }
-    for (const k in ctx.sources) { // set sources in root of context
-      ctx.value[k] = ctx.sources[k].value;
-    }
-  }
+  if (report.sources) applySources(ctx, report.sources, sources);
 
   if (report.type === 'delimited') return runDelimited(report, ctx);
   else if (report.type === 'flow') return runFlow(report, ctx, extra);
   else return runPage(report, ctx, extra);
+}
+
+/** Apply multiple sources to a context together. Each source base is available before filter/sort/group is applied in case a source needs to reference a later source for those purposes. */
+export function applySources(context: RootContext, sources: ReportSource[], map: SourceMap) {
+  const srcs = context.sources;
+  for (const source of sources) {
+    let base = sources[source.source || source.name] || { value: [] };
+    if (source.base) base = { value: evaluate(extend(context, { value: base.value, special: { source: base } }), source.base) };
+    srcs[source.name || source.source] = base;
+  }
+
+  for (const source of sources) {
+    if (source.filter || source.sort || source.group) srcs[source.name || source.source] = filter(srcs[source.name || source.source], source.filter, source.sort, source.group, context);
+  }
+
+  for (const k in map) { // set sources in root of context
+    context.value[k] = srcs[k].value;
+  }
 }
 
 export function applySource(context: RootContext, source: ReportSource, sources: SourceMap) {
