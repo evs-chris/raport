@@ -171,6 +171,11 @@ export const timeexact = alt<[number, number?, number?, number?]>(
   map(istr('midnight'), () => [0, 0, 0, 0]),
 );
 
+export const parseTime = makeParser(map(seq(timeexact, opt(seq(ws, timezone))), ([tm, z]) => {
+  if (z) tm.push(z[1]);
+  return tm;
+}), { trim: true, consumeAll: true });
+
 const dateend = opt(seq(ws, str('>')));
 const daterel = alt<DateRel>('date',
   map(seq(opt(istr('last', 'this', 'next')), rws, istr('week', 'month', 'year'), opt(timezone), dateend), ([o, , f, tz, e]) => {

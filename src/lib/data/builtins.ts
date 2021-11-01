@@ -1,6 +1,6 @@
 import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
-import { timespans, isTimespanMS, timeSpanToNumber } from './parse';
+import { timespans, isTimespanMS, timeSpanToNumber, parseTime } from './parse';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
   return {
@@ -577,19 +577,36 @@ registerOperator(
     if (!src) return [];
     return Object.values(src);
   }),
-  simple(['date'], (_name: string, [v]: any[], ctx): Date => {
+  simple(['date'], (_name: string, [v, t]: any[], ctx): Date => {
+    let res: Date;
     if (v !== undefined) {
-      if (isDateRel(v)) return dateRelToDate(v);
-      if (typeof v === 'string') {
+      if (isDateRel(v)) res = dateRelToDate(v);
+      else if (typeof v === 'string') {
         const dt = new Date(v);
         if (isNaN(dt as any)) {
           let val = evaluate(ctx, ~v.indexOf('#') ? v : `#${v}#`);
-          if (isDateRel(val)) return dateRelToDate(val);
+          if (isDateRel(val)) res = dateRelToDate(val);
         }
       }
-      return new Date(v);
+      if (!res) res = new Date(v);
     }
-    else return new Date();
+    else res = new Date();
+
+
+    if (t) {
+      if (res === v) res = new Date(v);
+
+      if (typeof t === 'string') t = parseTime(t);
+      if (Array.isArray(t)) {
+        res.setHours(t[0] || 0, t[1] || 0, t[2] || 0, t[3] || 0);
+        if (t[4] != null) {
+          const offset = t[4] + res.getTimezoneOffset();
+          res.setMinutes(res.getMinutes() + offset);
+        }
+      }
+    }
+
+    return res;
   }),
   simple(['interval'], (_name: string, [v]: any[], ctx): DateRel => {
     return evaluate(ctx, ~v.indexOf('#') ? v : `#${v}#`);
