@@ -1,3 +1,24 @@
+## 0.8.3
+
+2021-11-01
+
+### Data
+
+* The `date` operator now supports a second arguemt that allows you to set the time on the resulting date. It can be either a string, to be parsed with the parser used by date literals, or an array with `[hours, minutes, second, milliseconds, timezone offset in minutes]`, where only the first element is required and the timezone is only used if present.
+
+### Parser
+
+* __BUG__: `lte` and `gte` are now parsed properly.
+
+### Report
+
+* Data sources are now evaluated and installed before they are filtered, so that data sources that have other data source dependencies have a chance to work correctly.
+
+### Designer
+
+* __BUG__: The font size in the eval textarea is now specified as `1em` so that highlighting works in blink-based browsers without weird misalignment.
+
+
 ## 0.8.2
 
 2021-10-05
