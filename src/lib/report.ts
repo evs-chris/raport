@@ -239,17 +239,13 @@ export function run(report: Report, sources: SourceMap, parameters?: ParameterMa
 export function applySources(context: RootContext, sources: ReportSource[], map: SourceMap) {
   const srcs = context.sources;
   for (const source of sources) {
-    let base = sources[source.source || source.name] || { value: [] };
+    let base = map[source.source || source.name] || { value: [] };
     if (source.base) base = { value: evaluate(extend(context, { value: base.value, special: { source: base } }), source.base) };
     srcs[source.name || source.source] = base;
   }
 
   for (const source of sources) {
     if (source.filter || source.sort || source.group) srcs[source.name || source.source] = filter(srcs[source.name || source.source], source.filter, source.sort, source.group, context);
-  }
-
-  for (const k in map) { // set sources in root of context
-    context.value[k] = srcs[k].value;
   }
 }
 
