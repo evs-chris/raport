@@ -1,3 +1,12 @@
+## 0.8.4
+
+2021-11-08
+
+### Report
+
+* __BREAKING__: Sources are no longer automatically exposed as root data. While technically not specified as feature, removing this could be considered breaking. If you want to reference a source, it's much more clear to do so with the canonical (and now, only) `*source` form.
+
+
 ## 0.8.3
 
 2021-11-01
