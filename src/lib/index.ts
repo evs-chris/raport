@@ -19,7 +19,7 @@ export {
   Type, ArrayType, ValueType, Value, Literal, Reference, ValueOrExpr,
 } from './data/index';
 export { inspect } from './data/schema';
-export { parse, parsePath } from './data/parse';
+export { parse, parsePath, parseTime, parseDate } from './data/parse';
 export { stringify } from './data/parse/stringify';
 export { parse as parseTemplate } from './data/parse/template';
 

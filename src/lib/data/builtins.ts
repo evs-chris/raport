@@ -1,6 +1,6 @@
 import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
-import { timespans, isTimespanMS, timeSpanToNumber, parseTime } from './parse';
+import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate } from './parse';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
   return {
@@ -582,7 +582,8 @@ registerOperator(
     if (v !== undefined) {
       if (isDateRel(v)) res = dateRelToDate(v);
       else if (typeof v === 'string') {
-        const dt = new Date(v);
+        let dt = parseDate(v);
+        if (!dt) dt = new Date(v);
         if (isNaN(dt as any)) {
           let val = evaluate(ctx, ~v.indexOf('#') ? v : `#${v}#`);
           if (isDateRel(val)) res = dateRelToDate(val);

@@ -248,6 +248,8 @@ export const dateexact: Parser<Date|DateRel> = map(seq(
 
 export const date = bracket(str('#'), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), str('#'), { primary: true, name: 'date' });
 
+export const parseDate = makeParser(map(seq(opt(str('#')), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), opt(str('#'))), ([, d,]) => d), { trim: true, consumeAll: true, undefinedOnError: true });
+
 export const string = alt<Value>({ primary: true, name: 'string' },
   map(seq(str(':'), read1To(endSym, true)), v => ({ v: v[1]})),
   map(bracket(str('"'), rep(alt<string>('string-part',
