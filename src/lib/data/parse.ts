@@ -113,8 +113,8 @@ const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 
     else if (parts[i][2] === 'ms' || parts[i][2] === 'milliseconds' || parts[i][2] === 'millisecond') span.ms += parts[i][0];
   }
 
-  if (!span.y && !span.m) {
-    delete span.y; delete span.m;
+  if (!span.y && !span.m && !span.d) {
+    delete span.y; delete span.m; delete span.d;
     let n = 0;
     for (const k in span) n += span[k] * (timespans[k] || 1);
     return { ms: n };
