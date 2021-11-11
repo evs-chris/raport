@@ -1,3 +1,17 @@
+## 0.8.5
+
+2021-11-11
+
+### Data
+
+* The `date` operator now uses the internal date parser first.
+* The internal interval parser no longer assumes that a day is 24 hours because I hate daylight savings time.
+
+### Library
+
+* `parseDate` and `parseTime` are now exported from the root module.
+
+
 ## 0.8.4
 
 2021-11-08
@@ -84,7 +98,7 @@
 
 2021-07-20
 
-## Data
+### Data
 
 * `time-span` now special cases getting an exact span of months directly from a full time span.
 
@@ -98,12 +112,12 @@
 * __BUG__: Having a measured field without specified font settings will no longer throw.
 * __BUG__: Repeaters that get to the body without saved state will no longer throw on suspend.
 
-## Data
+### Data
 
 * __BREAKING__: `time-span` has been rewritten to be more useful. The old behavior is still achievable with slightly different arguments.
 * Full timespans now include a date anchor by default to make them convertable to an exact number of milliseconds.
 
-## Library
+### Library
 
 * The main library now exports `parsePath` to parse reference paths.
 
