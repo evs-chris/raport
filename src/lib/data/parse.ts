@@ -174,7 +174,7 @@ export const timeexact = alt<[number, number?, number?, number?]>(
 export const parseTime = makeParser(map(seq(timeexact, opt(seq(ws, timezone))), ([tm, z]) => {
   if (z) tm.push(z[1]);
   return tm;
-}), { trim: true, consumeAll: true });
+}), { trim: true, consumeAll: true, undefinedOnError: true });
 
 const dateend = opt(seq(ws, str('>')));
 const daterel = alt<DateRel>('date',
