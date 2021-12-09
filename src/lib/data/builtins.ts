@@ -334,6 +334,11 @@ registerOperator(
         if (fraction >= 0.5) res[res.length - 1]++;
       } else if ((namedArgs.round || '')[0] === 'c') {
         if (fraction > 0) res[res.length - 1]++;
+        // very special case for months that get rounded to a year
+        if (u[0] === 'y' && u[1] === 'M' && u.length === 2 && res[1] === 12) {
+          res[0]++;
+          res[1] = 0;
+        }
       }
 
       // check to see if stringification is needed
