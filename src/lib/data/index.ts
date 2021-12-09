@@ -765,6 +765,7 @@ export function datesDiff(l: Date, r: Date): FullTimeSpan {
   const b = l < r ? r : l;
   const res: FullTimeSpan = { d: [0, 0, 0, 0, 0, 0, 0], s: +a };
   let num = b.getFullYear() - a.getFullYear() - 1;
+  let tmp1: number, tmp2: number;
   if (num > 0) {
     res.d[0] += num;
     a.setFullYear(b.getFullYear() - 1);
@@ -773,10 +774,31 @@ export function datesDiff(l: Date, r: Date): FullTimeSpan {
   if (a > b) a.setFullYear(a.getFullYear() - 1);
   else res.d[0]++;
 
+  // jumping months can make days get weird
   while (true) {
-    a.setMonth(a.getMonth() + 1);
+    num = a.getDate();
+    tmp1 = a.getMonth();
+    tmp2 = a.getFullYear();
+    a.setDate(num + 1);
+    if (a.getMonth() !== tmp1) {
+      a.setDate(1);
+      a.setMonth(tmp1 + 2);
+      a.setDate(0);
+    } else {
+      a.setDate(num);
+      a.setMonth(tmp1 + 1);
+      if (tmp1 === 11 ? a.getMonth() !== 0 : a.getMonth() !== tmp1 + 1) {
+        a.setDate(1);
+        a.setMonth(tmp1 + 2);
+        a.setDate(0);
+      }
+    }
     if (a > b) {
-      a.setMonth(a.getMonth() - 1);
+      // make sure we stay in the correct year
+      a.setFullYear(tmp2);
+      a.setDate(1);
+      a.setMonth(tmp1);
+      a.setDate(num);
       break;
     } else res.d[1]++;
   }
