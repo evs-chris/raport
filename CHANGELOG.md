@@ -1,3 +1,12 @@
+## 0.8.6
+
+2021-12-09
+
+### Data
+
+* __BUG__: The underlying function that handles calculating the interval between two dates now handles month/day transitions more accurately.
+
+
 ## 0.8.5
 
 2021-11-11
