@@ -1,3 +1,12 @@
+## 0.8.7
+
+2021-12-09
+
+### Data
+
+* __BUG__: For `time-span` with `round::ceil` with `unit:[:y :M]`, where the months ceils to 12, the result will now have the year incremented and the months set to 0.
+
+
 ## 0.8.6
 
 2021-12-09
