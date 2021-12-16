@@ -1,3 +1,12 @@
+## 0.8.8
+
+2021-12-16
+
+### Data
+
+* __BUG__: `time-span` will once again handle DST boundaries correctly.
+
+
 ## 0.8.7
 
 2021-12-09
