@@ -8,6 +8,12 @@ function simple(names: string[], apply: (name: string, values: any[], ctx: Conte
   };
 }
 
+const spanMap = {
+  y: [0, 12],
+  M: [1, 30],
+  d: [2, 24],
+};
+
 const space = /^\s*$/;
 function isNum(v: any): v is number {
   return !isNaN(v) && !space.test(v);
@@ -278,28 +284,11 @@ registerOperator(
 
       // special case for full spans
       if (typeof span !== 'number' && !isTimespanMS(span)) {
-        if (u.length < 4 && u[0] === 'y' && (!u[1] || u[1] === 'M') && (!u[2] || u[2] === 'd')) {
+        const us = u.join('');
+        if (u.length < 4 && (us === 'y' || us === 'yM' || us === 'yMd' || us === 'M' || us === 'Md' || us === 'd')) {
           res = u.map(u => {
-            if (u === 'y') {
-              fraction = span.d[1] / 12;
-              return span.d[0];
-            } else if (u === 'M') {
-              fraction = span.d[2] / 30;
-              return span.d[1];
-            } else {
-              fraction = span.d[3] / 24;
-              return span.d[2];
-            }
-          });
-        } else if (u.length < 3 && u[0] === 'M' && (!u[1] || u[1] === 'd')) {
-          res = u.map(u => {
-            if (u === 'M') {
-              fraction = span.d[2] / 30;
-              return span.d[0] * 12 + span.d[1];
-            } else {
-              fraction = span.d[3] / 24;
-              return span.d[2];
-            }
+            fraction = span.d[spanMap[u][0] + 1] / spanMap[u][1];
+            return span.d[spanMap[u][0]];
           });
         }
       }

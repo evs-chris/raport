@@ -156,7 +156,7 @@ q.test('find', t => {
 
 q.test('format', t => {
   // TODO: test all of the builtins
-  t.equal(evaluate('(format (date :2019-04-20) :date :yyyy-MM-dd)'), new Date(+(new Date(`2019-04-20`)) - (new Date().getTimezoneOffset() * 60000)).toISOString().substr(0, 10));
+  t.equal(evaluate('(format #2019-4-20# :date :yyyy-MM-dd)'), `2019-04-20`);
 });
 
 q.test('get', t => {
@@ -298,6 +298,18 @@ q.test('or', t => {
 // TODO: source
 // TODO: substr
 // TODO: sum
+
+q.test('time-span', t => {
+  t.equal(evaluate('time-span(#2021-10-31# #2021-11-10# unit::d)'), 10, 'fall dst is accurate');
+  t.equal(evaluate('time-span(#2021-10-30# #2021-11-10# unit::d)'), 11, 'fall dst is accurate');
+  t.equal(evaluate('time-span(#2022-03-10# #2022-03-17# unit::d)'), 7, 'spring dst is accurate');
+  t.deepEqual(evaluate(`time-span(#1999-1-15# #2011-12-27# unit:[:y :M])`), [12, 11]);
+  t.deepEqual(evaluate(`time-span(#1999-1-15# #2011-12-14# unit:[:y :M])`), [12, 10]);
+  t.deepEqual(evaluate(`time-span(#1999-1-30# #2011-12-27# unit:[:y :M])`), [12, 10]);
+  t.deepEqual(evaluate(`time-span(#1999-1-31# #1999-2-28# unit:[:M :d])`), [1, 0]);
+  t.deepEqual(evaluate(`time-span(#1999-2-28# #1999-3-31# unit:[:M :d])`), [1, 0]);
+});
+
 // TODO: trim
 // TODO: triml
 // TODO: trimr
