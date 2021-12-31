@@ -308,6 +308,7 @@ q.test('time-span', t => {
   t.deepEqual(evaluate(`time-span(#1999-1-30# #2011-12-27# unit:[:y :M])`), [12, 10]);
   t.deepEqual(evaluate(`time-span(#1999-1-31# #1999-2-28# unit:[:M :d])`), [1, 0]);
   t.deepEqual(evaluate(`time-span(#1999-2-28# #1999-3-31# unit:[:M :d])`), [1, 0]);
+  t.equal(evaluate('time-span(#2021-10-01# #2021-12-31# unit::d)'), 91, 'span in single units is accurate');
 });
 
 // TODO: trim

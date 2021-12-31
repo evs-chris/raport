@@ -285,11 +285,33 @@ registerOperator(
       // special case for full spans
       if (typeof span !== 'number' && !isTimespanMS(span)) {
         const us = u.join('');
-        if (u.length < 4 && (us === 'y' || us === 'yM' || us === 'yMd' || us === 'M' || us === 'Md' || us === 'd')) {
+        if (us === 'd') {
+          if (span.s) {
+            const from = new Date(span.s);
+            from.setHours(0);
+            from.setMinutes(0);
+            from.setSeconds(0);
+            from.setMilliseconds(0);
+            const to = new Date(+from);
+            to.setFullYear(to.getFullYear() + span.d[0]);
+            to.setMonth(to.getMonth() + span.d[1]);
+            to.setDate(to.getDate() + span.d[2]);
+            const dist = +to - +from;
+            let d = Math.floor(dist / 86400000);
+            const r = dist % 86400000;
+            if (r >= 82800000) d++;
+            res = [d];
+          } else {
+            // this is an approximation
+            res[0] += span.d[0] * 365;
+            res[0] += span.d[1] * 30;
+          }
+        } else if (u.length < 4 && (us === 'y' || us === 'yM' || us === 'yMd' || us === 'M' || us === 'Md' || us === 'd')) {
           res = u.map(u => {
             fraction = span.d[spanMap[u][0] + 1] / spanMap[u][1];
             return span.d[spanMap[u][0]];
           });
+          if (u[0] === 'M') res[0] += span.d[0] * 12;
         }
       }
 

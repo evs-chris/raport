@@ -167,8 +167,9 @@ export const timeexact = alt<[number, number?, number?, number?]>(
     if (ms) res[3] = +ms;
     return res;
   }),
-  map(istr('noon'), () => [12, 0, 0, 0]),
-  map(istr('midnight'), () => [0, 0, 0, 0]),
+  map(istr('start', 'midnight'), () => [0, 0, 0, 0]),
+  map(istr('noon', 'mid'), () => [12, 0, 0, 0]),
+  map(istr('end'), () => [23, 59, 59, 999]),
 );
 
 export const parseTime = makeParser(map(seq(timeexact, opt(seq(ws, timezone))), ([tm, z]) => {
