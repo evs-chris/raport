@@ -1,3 +1,10 @@
+## 0.8.9
+
+2021-12-31
+
+* __BUG__: `time-span` will once again compute `unit::d`, `unit::M`, and `unit:[:M :d]` as accurately as is possible with the given input. For exact spanswith an anchored start timestamp, it should be exact.
+
+
 ## 0.8.8
 
 2021-12-16
