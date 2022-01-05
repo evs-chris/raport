@@ -1,6 +1,17 @@
+## 0.8.10
+
+2022-01--5
+
+### Data
+
+* __BUG__: `time-span` will now properly handle leap years.
+
+
 ## 0.8.9
 
 2021-12-31
+
+### Data
 
 * __BUG__: `time-span` will once again compute `unit::d`, `unit::M`, and `unit:[:M :d]` as accurately as is possible with the given input. For exact spanswith an anchored start timestamp, it should be exact.
 
