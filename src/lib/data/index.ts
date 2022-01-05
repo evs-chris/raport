@@ -761,8 +761,13 @@ export function subtractTimespan(l: TimeSpan, r: TimeSpan): TimeSpan {
 
 export function datesDiff(l: Date, r: Date): FullTimeSpan {
   if (isNaN(+l) || isNaN(+r)) return { d: [] };
-  const a = new Date(l < r ? l : r);
-  const b = l < r ? r : l;
+  if (r < l) {
+    const s = r;
+    r = l;
+    l = s;
+  }
+  const a = new Date(l);
+  const b = r;
   const res: FullTimeSpan = { d: [0, 0, 0, 0, 0, 0, 0], s: +a };
   let num = b.getFullYear() - a.getFullYear() - 1;
   let tmp1: number, tmp2: number;
@@ -773,6 +778,12 @@ export function datesDiff(l: Date, r: Date): FullTimeSpan {
   a.setFullYear(a.getFullYear() + 1);
   if (a > b) a.setFullYear(a.getFullYear() - 1);
   else res.d[0]++;
+
+  // watch out for leap year
+  if (l.getMonth() === 1 && l.getDate() === 29 && a.getMonth() !== 1) {
+    a.setDate(29);
+    a.setMonth(1);
+  }
 
   // jumping months can make days get weird
   while (true) {
