@@ -198,7 +198,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
         state.last = i;
         return { output: s, continue: state, height: h + ps.map(([y, h]) => y + h).reduce((a, c) => c > a ? c : a, 0) };
       } else {
-        const lp = Array.isArray(layout) && layout[i];
+        const lp = Array.isArray(layout) && (layout[i] || [0, 0]);
         let p = Array.isArray(lp) ? { x: lp[0] + m[3], y: lp[1] + m[0], maxX: placement.maxX } : (lp || placement);
 
         if (!layout || typeof layout === 'string') {
