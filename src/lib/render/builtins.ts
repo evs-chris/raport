@@ -188,7 +188,7 @@ registerRenderer<MeasuredLabel>('measured', (w, ctx, placement, state) => {
     let s = style(w, placement, ctx, { computedHeight: height, container: true });
     s[0] = `line-height:1em;` + s[0];
     return {
-      height, output: `<span class="measured"${styleClass(ctx, ['label'], s)}>${escapeHTML(text)}</span>`
+      height, output: `<span${styleClass(ctx, ['measured', 'label'], s)}>${escapeHTML(text)}</span>`
     };
   }
 });
