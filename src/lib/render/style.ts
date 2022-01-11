@@ -1,5 +1,5 @@
 import { Borders, Font, Placement, Widget } from '../report';
-import { expandMargin, getHeightWithMargin, getWidthWithMargin, getHeight, RenderContext } from './index';
+import { expandMargin, getHeightWithMargin, getWidth, getWidthWithMargin, getHeight, RenderContext } from './index';
 import { evaluate, ValueOrExpr } from '../data/index';
 
 export interface StyleOptions {
@@ -40,7 +40,7 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   let s = `left:${placement.x || 0}rem;top:${(placement.y || 0)}rem;`;
   let i = ``;
   if (!w.width) s += `right:${(w.margin || {})[1] || 0}rem;`;
-  else if (typeof w.width !== 'number' && 'percent' in w.width) s += `width:${w.width.percent}%;`;
+  else if (typeof w.width !== 'number' && 'percent' in w.width) s += `width:${getWidth(w, placement, context)}rem;`
   else s += `width:${getWidthWithMargin(w, placement, context)}rem;`
 
   const h = getHeightWithMargin(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize) || 1;
