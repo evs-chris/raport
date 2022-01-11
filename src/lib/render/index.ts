@@ -247,6 +247,15 @@ export function getWidth(w: Widget, placement: Placement, context: RenderContext
   else return +((width.percent / 100) * (placement.maxX || 51)).toFixed(4);
 }
 
+export function getInnerWidth(w: Widget, placement: Placement, context: RenderContext): number {
+  let width = getWidth(w, placement, context);
+  if (w.margin) {
+    const m = expandMargin(w, context);
+    width -= m[1] + m[3];
+  }
+  return width;
+}
+
 export function getWidthWithMargin(w: Widget, placement: Placement, context: RenderContext): number {
   let r = getWidth(w, placement, context);
   if (w.margin) {
