@@ -1,6 +1,18 @@
+## 0.8.11
+
+2022-01-11
+
+### Render
+
+* __BUG__: Measured labels now output classy styles correctly.
+* __BUG__: Containers with a manual layout will now default the coordinates for any given child to 0, 0.
+* __BUG__: Containers will now use their inner width (width widthout margins) as available inner space to avoid child overflow.
+* __BUG__: Widgets with percentage widths will now render with an exact computed width rather than a percentage, so margins are fully respected.
+
+
 ## 0.8.10
 
-2022-01--5
+2022-01-05
 
 ### Data
 
