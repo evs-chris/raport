@@ -51,7 +51,7 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   else s += `${!opts || !opts.container || (w.font && w.font.line) ? `line-height:${(w.font && w.font.line || w.font && w.font.size) || getHeight(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize)}rem;` : ''}`;
 
   if (w.margin) {
-    const m = expandMargin(w, context);
+    const m = expandMargin(w, context, placement);
     if (m[0] || m[1] || m[2] || m[3]) s += `padding:${m[0]}rem ${m[1]}rem ${m[2]}rem ${m[3]}rem;`;
   } else if (w.font && w.font.right) {
     s += `padding-right:${w.font.right}rem;`;

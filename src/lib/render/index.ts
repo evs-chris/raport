@@ -111,7 +111,7 @@ export interface RenderState<T = any> {
 /** Render the given widget to string or a continuation using a registered renderer */
 export function renderWidget(w: Widget, context: RenderContext, placement: Placement, state?: RenderState): RenderContinuation {
   const renderer = renderers[w.type];
-  if (!renderer || (w.hide && evaluate(context, w.hide))) return { output: '' };
+  if (!renderer || (w.hide && evaluate(extendContext(context.context, { special: { widget: w, placement } }), w.hide))) return { output: '' };
 
   if (!('height' in w) && renderer.container) w.height = 'auto'; 
   const h = getHeightWithMargin(w, placement, context);
@@ -126,7 +126,7 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   let extraHeight = 0;
 
   if (w.margin) {
-    const m = expandMargin(w, context);
+    const m = expandMargin(w, context, placement);
     extraHeight += m[0] + m[2];
     if (placement.availableX) {
       placement.availableX -= m[1] + m[3];
@@ -161,7 +161,7 @@ export function registerLayout(name: string, layout: (widget: Widget, offset: nu
 registerLayout('row', (w, o, m, p, ps, context) => {
   let n: Placement;
   const nw = getWidthWithMargin(w, p, context);
-  const br = isComputed(w.br) ? evaluate(context, w.br.x) : w.br;
+  const br = isComputed(w.br) ? evaluate(extendContext(context.context, { special: { placement: p, widget: w } }), w.br.x) : w.br;
   if (p.availableX && ps[0][0] + ps[0][2] + nw > p.availableX) {
     n = { x: m[3], y: maxYOffset(ps), availableX: br ? 0 : p.availableX && (p.availableX - m[3]), maxX: p.maxX };
   } else {
@@ -183,13 +183,13 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
     const offset = (state || { offset: 0 }).offset;
     const ps: Array<[number, number, number, number]> = [[0, offset, 0, 0]];
 
-    const m = expandMargin(widget, context);
+    const m = expandMargin(widget, context, placement);
     ps[0][0] += m[3];
     ps[0][1] += m[0];
 
     for (let i = state && state.state && state.state.last || 0; i < widget.widgets.length; i++) {
       const w: Widget = widget.widgets[i];
-      if (w.hide && evaluate(context, w.hide)) continue;
+      if (w.hide && evaluate(extendContext(context.context, { special: { widget: w, placement } }), w.hide)) continue;
 
       // allow widgets that are taller than max height to be dropped
       let h = placement && getHeightWithMargin(w, placement, context);
@@ -246,7 +246,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
 }
 
 export function getWidth(w: Widget, placement: Placement, context: RenderContext): number {
-  let width = isComputed(w.width) ? evaluate(context, w.width.x) : w.width;
+  let width = isComputed(w.width) ? evaluate(extendContext(context.context, { special: { widget: w, placement} }), w.width.x) : w.width;
   if (!width) return placement.maxX || 51;
   else if (typeof width === 'number') return width;
   else return +((width.percent / 100) * (placement.maxX || 51)).toFixed(4);
@@ -255,7 +255,7 @@ export function getWidth(w: Widget, placement: Placement, context: RenderContext
 export function getInnerWidth(w: Widget, placement: Placement, context: RenderContext): number {
   let width = getWidth(w, placement, context);
   if (w.margin) {
-    const m = expandMargin(w, context);
+    const m = expandMargin(w, context, placement);
     width -= m[1] + m[3];
   }
   return width;
@@ -264,7 +264,7 @@ export function getInnerWidth(w: Widget, placement: Placement, context: RenderCo
 export function getWidthWithMargin(w: Widget, placement: Placement, context: RenderContext): number {
   let r = getWidth(w, placement, context);
   if (w.margin) {
-    const m = expandMargin(w, context);
+    const m = expandMargin(w, context, placement);
     r += m[1] + m[3];
   } else if (w.font && w.font.right) {
     r += w.font.right;
@@ -285,7 +285,7 @@ function maxFontSize(w: Widget) {
 
 export function getHeight(w: Widget, placement: Placement, context: RenderContext, computed?: number, linesize?: boolean): number {
   let r = 1;
-  let h = isComputed(w.height) ? evaluate(context, w.height.x) : w.height;
+  let h = isComputed(w.height) ? evaluate(extendContext(context.context, { special: { widget: w, placement, computed, linesize } }), w.height.x) : w.height;
   if (h == null && linesize) h = maxFontSize(w);
   if (typeof h === 'number') r = h;
   else if (typeof h === 'object' && 'percent' in h && h.percent && placement.availableY) r = +(placement.availableY * (h.percent / 100)).toFixed(4);
@@ -293,7 +293,7 @@ export function getHeight(w: Widget, placement: Placement, context: RenderContex
   else if (h === 'grow') {
     r = placement.availableY || 0;
     if (w.margin) {
-      const m = expandMargin(w, context);
+      const m = expandMargin(w, context, placement);
       r -= m[0] + m[2];
     }
   }
@@ -303,7 +303,7 @@ export function getHeight(w: Widget, placement: Placement, context: RenderContex
 export function getHeightWithMargin(w: Widget, placement: Placement, context: RenderContext, computed?: number, linesize?: boolean): number {
   let h = getHeight(w, placement, context, computed, linesize);
   if (w.margin) {
-    const m = expandMargin(w, context);
+    const m = expandMargin(w, context, placement);
     h += m[0] + m[2];
   }
   return h;
@@ -317,9 +317,9 @@ function maxXOffset(points: Array<[number, number, number, number]>): number {
   return points.reduce((a, c) => a > c[0] + c[2] ? a : c[0] + c[2], 0);
 }
 
-export function expandMargin(w: { margin?: Margin|Computed }, context: RenderContext): [number, number, number, number] {
+export function expandMargin(w: { margin?: Margin|Computed }, context: RenderContext, placement: Placement): [number, number, number, number] {
   if (w.margin) {
-    const m = isComputed(w.margin) ? evaluate(context, w.margin.x) : w.margin;
+    const m = isComputed(w.margin) ? evaluate(extendContext(context.context, { special: { widget: w, placement} }), w.margin.x) : w.margin;
     if (Array.isArray(m)) {
       if (m.length === 4) return m.map(e => +e) as [number, number, number, number];
       else if (m.length === 2) return [+m[0], +m[1], +m[0], +m[1]];

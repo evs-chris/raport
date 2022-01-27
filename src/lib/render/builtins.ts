@@ -63,7 +63,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   let r: RenderContinuation;
   let html = '';
   let commit = false;
-  const m = expandMargin(w, ctx);
+  const m = expandMargin(w, ctx, placement);
   let y = !state || !state.state || state.state.part === 'header' ? m[0] : 0;
   availableY -= y;
   let group: Group;

@@ -396,7 +396,7 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
     html += `</div>\n`;
   }
 
-  const margin = report.size && report.size.margin ? expandMargin(report.size, ctx) : [1.5, 1.5, 1.5, 1.5];
+  const margin = report.size && report.size.margin ? expandMargin(report.size, ctx, { x: 0, y: 0, availableX: width, maxX: width }) : [1.5, 1.5, 1.5, 1.5];
 
   return `<html><head><style>
     html { font-size: 100%; margin: 0; padding: 0; }
