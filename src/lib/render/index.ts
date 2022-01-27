@@ -287,6 +287,13 @@ export function getHeight(w: Widget, placement: Placement, context: RenderContex
   if (typeof h === 'number') r = h;
   else if (typeof h === 'object' && 'percent' in h && h.percent && placement.availableY) r = +(placement.availableY * (h.percent / 100)).toFixed(4);
   else if (h === 'auto' || (computed && !h)) return computed || NaN;
+  else if (h === 'grow') {
+    r = placement.availableY || 0;
+    if (w.margin) {
+      const m = expandMargin(w, context);
+      r -= m[0] + m[2];
+    }
+  }
   return r;
 }
 
