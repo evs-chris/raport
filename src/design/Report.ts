@@ -196,6 +196,19 @@ export class Designer extends Ractive {
     return res;
   }
 
+  calcManualLayout(l: [number, number], width: string, height: string): string {
+    l = l || [] as any;
+    const x = l[0] || 0;
+    const y = l[1] || 0;
+    let res = '';
+    if (x < 0) res += `margin-left: calc(100% - ${width} - ${-x - 1}rem); margin-right: -100%;`;
+    else res += `margin-left: ${x}rem; margin-right: calc(${-x}rem - ${width});`;
+    if (y < 0) res += `margin-top: calc(100% - ${height} - ${-y - 1}rem); margin-bottom: ${-y - 1}rem;`;
+    else res += `margin-top: ${y}rem;`
+    return res;
+    return `margin-left: ${x}rem; margin-top: ${y}rem; margin-right: calc(${-x}rem - ${width})`;
+  }
+
   split(path: string, pop?: number, ...add: string[]): string[] {
     const res = Ractive.splitKeypath(path);
     if (pop) res.splice(-pop, pop);

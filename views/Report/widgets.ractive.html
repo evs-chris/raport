@@ -38,7 +38,7 @@
   {{#with @.calcWidthWithMargin(., @keypath) as widthMargin, @.calcHeightWithMargin(.) as heightMargin}}
   <div as-widget=.type style="width: {{widthMargin}}; {{#if .type !== 'container'}}height: {{heightMargin}}{{/if}}"
     {{#if Array.isArray(^^/layout)}}
-      style="margin-left: {{(^^/layout[@index] || [])[0] || 0}}rem; margin-top: {{(^^/layout[@index] || [])[1] || 0}}rem; margin-right: calc(-{{(^^/layout[@index] || [])[0] || 0}}rem - {{widthMargin}})"
+      style="{{@.calcManualLayout(^^/layout[@index], widthMargin, heightMargin)}}"
       {{#if ~/temp.widget === @keypath}}as-moveable{{/if}}
     {{else}}
       style="{{#if .br === true}}break-after: always;{{/if}}"

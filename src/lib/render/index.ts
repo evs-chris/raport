@@ -211,6 +211,9 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
         p.maxX = p.maxX || placement.maxX;
         p.maxY = p.maxY || placement.maxY;
 
+        if (p.x < 0) p.x = (placement.availableX || 1) + p.x - getWidthWithMargin(w, placement, context) + 1;
+        if (p.y < 0) p.y = (placement.availableY || 1) + p.y - h + 1;
+
         const { x, y } = p;
         const r = renderWidget(w, context, p, state && state.child);
 
