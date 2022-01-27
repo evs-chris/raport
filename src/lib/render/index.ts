@@ -145,6 +145,8 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   }
   if (isNaN(h) && placement.availableY && r.height > placement.availableY) return { output: '', continue: { offset: 0 }, height: r.height, cancel: true };
 
+  r.height = r.height || 0;
+
   r.height += extraHeight;
 
   return r;
