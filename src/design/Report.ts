@@ -1274,7 +1274,7 @@ function stripDefaults(json: any): any {
   const res: any = {};
   for (const k in json) {
     const v = json[k];
-    if (v === false) continue;
+    if (v === false && k !== 'classifyStyles') continue;
     else if ((k === 'hide' || k === 'br') && !v) continue;
     else if (k === 'height' && v === 'auto' && (json.type === 'container' || json.type === 'repeater')) continue;
     else if (Array.isArray(v)) {
