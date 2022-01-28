@@ -1,7 +1,7 @@
 import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, Root, Context, RootContext, extend, evaluate, filter } from './data/index';
 
 import { renderWidget, RenderContext, RenderResult, RenderState, expandMargin } from './render/index';
-import { styleClass } from './render/style';
+import { styleClass, styleFont } from './render/style';
 
 export type ReportType = 'delimited'|'flow'|'page';
 
@@ -53,6 +53,12 @@ export interface Delimited<T = {}> extends BaseReport<T> {
 
 export interface Displayed<T = {}> extends BaseReport<T> {
   widgets: Widget[];
+  font?: {
+    family?: string;
+    color?: string;
+    size?: number;
+    line?: number;
+  };
 }
 
 // flow
@@ -345,7 +351,7 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
   });
 
   return `<html style="font-size:100%;margin:0;padding:0;"><head><style>
-    .page { width: ${size.width - 2 * size.margin[1]}rem; height: ${size.height - 2 * size.margin[0]}rem; position: absolute; overflow: hidden; left: ${size.margin[1]}rem; top: ${size.margin[0]}rem; }
+    .page { width: ${size.width - 2 * size.margin[1]}rem; height: ${size.height - 2 * size.margin[0]}rem; position: absolute; overflow: hidden; left: ${size.margin[1]}rem; top: ${size.margin[0]}rem; ${report.font ? styleFont(report.font) : ''} }
     .page-back { width: ${size.width}rem; height: ${size.height}rem; }
     body { font-size: 0.83rem; }
     @media screen {
@@ -401,7 +407,7 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
   return `<html><head><style>
     html { font-size: 100%; margin: 0; padding: 0; }
     body { font-size: 0.83rem; padding: 0; margin: 0;${width ? ` width: ${width}rem;` : ''} }
-    #wrapper { height:${y}rem; position: relative; }
+    #wrapper { height:${y}rem; position: relative; ${report.font ? styleFont(report.font) : ''} }
     @media screen {
       body { margin: 1rem; background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem ${margin[2]}rem ${margin[3]}rem; }
       html { background-color: #999; }

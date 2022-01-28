@@ -56,6 +56,10 @@
                 </select></span></label>
               {{/if}}
             {{/if}}
+            <label><span>Text Size</span><span><input type=number value="{{~/report.font.size}}" /></span></label>
+            <label><span>Line Height</span><span><input type=number value="{{~/report.font.line}}" /></span></label>
+            <label><span>Font</span><span><input value="{{~/report.font.family}}" /></span></label>
+            <label><span>Color</span><span><input value="{{~/report.font.color}}" /></span></label>
           {{else}}
             <label><span>Record Delimiter</span><span><input value="{{temp.record}}" /></span></label>
             <label><span>Field Delimiter</span><span><input value="{{temp.field}}" /></span></label>
