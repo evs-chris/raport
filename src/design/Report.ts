@@ -1,6 +1,6 @@
 import { css, template } from 'views/Report';
 
-import Ractive, { InitOpts, ContextHelper, ReadLinkResult } from 'ractive';
+import Ractive, { InitOpts, ContextHelper, ReadLinkResult, ObserverHandle } from 'ractive';
 import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
@@ -38,6 +38,8 @@ let autosizeTm: any;
 
 const binops = ['**', '*', '/%', '/', '%', '+', '-', '>=', '>', '<=', '<', 'gt', 'gte', 'lt', 'lte', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'and', '&&', 'or', '||'];
 
+const form_els = ['INPUT', 'TEXTAREA', 'SELECT'];
+
 export class Designer extends Ractive {
   constructor(opts?: InitOpts) {
     super(opts);
@@ -45,6 +47,9 @@ export class Designer extends Ractive {
 
   evalLock = false;
   _scrollers: Array<() => void> = [];
+  _undo: string[] = [];
+  _redo: string[] = [];
+  _undoWatch: ObserverHandle;
 
   addWidget(type: string) {
     const widget: any = { type };
@@ -871,6 +876,50 @@ export class Designer extends Ractive {
     this.link(path, 'project');
     this.link('project.report', 'report');
     this.link('project.sources', 'sources');
+    this.resetUndo();
+  }
+
+  resetUndo() {
+    this._undo = [];
+    this._redo = [];
+  }
+
+  undo() {
+    if (this.event && ~form_els.indexOf(this.event.event.target.nodeName)) return false;
+    this._undoWatch.silence();
+    let s = this._undo.shift();
+    if (s && JSON.stringify(this.get('report')) === s) {
+      this._redo.unshift(s);
+      s = this._undo.shift();
+    }
+    if (s) {
+      this._redo.unshift(s);
+      this.set('report', JSON.parse(s));
+    }
+    this._undoWatch.resume();
+  }
+
+  redo() {
+    if (this.event && ~form_els.indexOf(this.event.event.target)) return false;
+    this._undoWatch.silence();
+    let s = this._redo.shift();
+    if (s && JSON.stringify(this.get('report')) === s) {
+      this._undo.unshift(s);
+      s = this._redo.shift();
+    }
+    if (s) {
+      this._undo.unshift(s);
+      this.set('report', JSON.parse(s));
+    }
+    this._undoWatch.resume();
+  }
+
+  _onChange(v: any) {
+    const s = JSON.stringify(v);
+    if (s === this._undo[0]) return;
+    this._undo.unshift(JSON.stringify(v));
+    if (this.undo.length > 40) this._undo = this._undo.slice(0, 40);
+    this._redo = [];
   }
 }
 
@@ -1008,18 +1057,26 @@ Ractive.extendWith(Designer, {
     },
     'report.defaultParams'(v) {
       this.set('params', Object.assign({}, v));
-    }
+    },
   },
   on: {
     init() {
+      this.resetUndo();
       this.command('styleWithCSS', false, 'true');
       this.loadProjects();
+      this._undoWatch = this.observe('report', debounce(this._onChange, 2000), { defer: true, init: true });
     },
     expr(ctx, path?: string) {
       const p = path || ctx.resolve();
       this.link(p, 'expr');
       this.set('temp.expr.path', p);
     },
+    teardown() {
+      this._undoWatch.cancel();
+    },
+    render() {
+      setTimeout(() => this._onChange(this.get('report')), 100);
+    }
   },
   decorators: {
     expr(node, path?: string) {
@@ -1171,6 +1228,33 @@ Ractive.extendWith(Designer, {
     autosize,
     trackfocus,
   },
+  events: {
+    keys: function KeyEvent(_node, fire) {
+      const options = Object.assign({}, arguments[arguments.length - 1]);
+      if (arguments.length > 2) {
+        options.keys = [];
+        for (let i = 2; i < arguments.length; i++) {
+          if (typeof arguments[i] === 'string') options.keys.push(arguments[i]);
+        }
+      }
+
+      const mods = ['ctrl', 'shift', 'alt', 'meta'];
+      const listener = (ev: KeyboardEvent) => {
+        for (const mod of mods) {
+          if (options[mod] && !ev[`${mod}Key`] || !options[mod] && ev[`${mod}Key`]) return;
+        }
+        if (~options.keys.indexOf(ev.key)) fire({ event: ev });
+      };
+
+      window.addEventListener('keydown', listener, { capture: true, passive: true });
+
+      return {
+        teardown() {
+          window.removeEventListener('keydown', listener, { capture: true });
+        }
+      }
+    }
+  },
 });
 
 function tryJSON(str: string): any {
@@ -1307,6 +1391,20 @@ function jsonToJS(json: any, strings: 'json'|'template'): string {
   else if (typeof json === 'string') return strings === 'json' ? JSON.stringify(json) : `\`${json.replace(/(`|${|\\)/g, '\\$1')}\``;
   else if (Array.isArray(json)) return `[${json.map(v => jsonToJS(v, strings)).join(',')}]`;
   else if (typeof json === 'object') return `{${Object.entries(json).map(([k, v]) => v === undefined ? v : `${plainKeys.test(k) ? k : `'${k}'`}:${jsonToJS(v, strings)}`).filter(v => !!v).join(',')}}`;
+}
+
+function debounce(fn: (...args: any[]) => void, time: number): (...args: any[]) => void {
+  let tm: any;
+  function wrapper(...args: any[]) {
+    if (tm) {
+      clearTimeout(tm);
+    }
+    tm = setTimeout(() => {
+      tm = null;
+      fn.apply(this, args);
+    }, time);
+  }
+  return wrapper;
 }
 
 registerOperator({
