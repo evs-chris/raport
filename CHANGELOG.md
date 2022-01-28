@@ -1,3 +1,15 @@
+## 0.9.0
+
+2022-01-27
+
+### Render
+
+* __BUG__: Empty containers will no longer cause a `NaN` height to break layout.
+* Heights can now be set to `grow`, which will cause the widget to consume the remaining vertical space, accounting for margins.
+* Manual layouts can now specify negative coordinates to specify offset from the right and bottom edges of the container. Since `-0` doesn't survive in JSON, `-1` is the starting edge for the right/bottom e.g. `-1, -1` will have the widget touching the bottom, right corner of its container. This is particularly useful when combined with `grow`ing containers.
+* Computed properties like `height`, `width`, `margin`, `hide`, and `br` now get access to `@placement` and `@widget` special values in the computation context.
+
+
 ## 0.8.11
 
 2022-01-11
