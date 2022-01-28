@@ -247,7 +247,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
 
 export function getWidth(w: Widget, placement: Placement, context: RenderContext): number {
   let width = isComputed(w.width) ? evaluate(extendContext(context.context, { special: { widget: w, placement} }), w.width.x) : w.width;
-  if (!width) return placement.maxX || 51;
+  if (!width) return placement.availableX || placement.maxX || 51;
   else if (typeof width === 'number') return width;
   else return +((width.percent / 100) * (placement.maxX || 51)).toFixed(4);
 }
