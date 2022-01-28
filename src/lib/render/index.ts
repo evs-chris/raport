@@ -226,7 +226,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
         } else {
           if (r.cancel && !ps.length) return { output: '', cancel: true };
           s += r.output;
-          ps.unshift([x, y, r.width || getWidthWithMargin(w, placement, context), r.height || getHeightWithMargin(w, placement, context)]);
+          ps.unshift([x, y, r.width || getWidthWithMargin(w, placement, context), r.height || getHeightWithMargin(w, placement, context) || 0]);
           if (r.continue) {
             state = state || { offset: 0 };
             state.child = r.continue;
