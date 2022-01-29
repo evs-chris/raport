@@ -157,12 +157,13 @@ export function registerLayout(name: string, layout: (widget: Widget, offset: nu
 
 registerLayout('row', (w, o, m, p, ps, context) => {
   let n: Placement;
-  const nw = getWidthWithMargin(w, p, context);
+  const availableX = p.maxX - ps[0][0] - ps[0][2];
+  const nw = getWidthWithMargin(w, { x: p.x, y: p.y, maxX: p.maxX, maxY: p.maxY, availableY: p.availableY, availableX }, context);
   const br = isComputed(w.br) ? evaluate(extendContext(context.context, { special: { placement: p, widget: w } }), w.br.x) : w.br;
-  if (br || p.availableX && ps[0][0] + ps[0][2] + nw > p.availableX) {
+  if (br || ps[0][0] + ps[0][2] + nw > p.maxX) {
     n = { x: m[3], y: maxYOffset(ps), availableX: p.maxX, maxX: p.maxX };
   } else {
-    n = { x: ps[0][0] + ps[0][2], y: ps[0][1], availableX: p.availableX, maxX: p.maxX };
+    n = { x: ps[0][0] + ps[0][2], y: ps[0][1], availableX, maxX: p.maxX };
   }
 
   n.y -= o;
@@ -198,6 +199,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
       } else {
         const lp = Array.isArray(layout) && (layout[i] || [0, 0]);
         let p = Array.isArray(lp) ? { x: lp[0] + m[3], y: lp[1] + m[0], maxX: placement.maxX } : (lp || placement);
+        if (Array.isArray(lp)) p.availableX = p.maxX - p.x;
 
         if (!layout || typeof layout === 'string') {
           const l = layout ? layouts[layout as string] || layouts.row : layouts.row;
@@ -245,7 +247,8 @@ export function getWidth(w: Widget, placement: Placement, context: RenderContext
   let width = isComputed(w.width) ? evaluate(extendContext(context.context, { special: { widget: w, placement} }), w.width.x) : w.width;
   const m = w.margin && expandMargin(w, context, placement);
   let pct = false;
-  if (!width && width !== 0) width = placement.availableX || placement.maxX || 51;
+  if (width === 'grow') width = placement.availableX || placement.maxX;
+  else if (!width && width !== 0) width = placement.maxX || 51;
   else if (typeof width === 'number') width;
   else {
     width = +((width.percent / 100) * (placement.maxX || 51)).toFixed(4);

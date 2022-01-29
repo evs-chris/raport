@@ -160,8 +160,8 @@ export interface Computed {
 export interface Widget extends Style {
   type: string;
   [key: string]: any;
-  width?: Dimension|Computed; // default 100%
-  height?: Dimension|'auto'|Computed; // optional, defaulting to 1
+  width?: Dimension|Computed|'grow'; // default 100%
+  height?: Dimension|'auto'|Computed|'grow'; // optional, defaulting to 1
   margin?: Margin|Computed;
   box?: 'expand'|'contain';
   hide?: ValueOrExpr;

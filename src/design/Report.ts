@@ -148,17 +148,17 @@ export class Designer extends Ractive {
     return h;
   }
 
-  calcWidth(w: Widget): string {
+  calcWidth(w: Widget, context: ContextHelper): string {
     if (!w.width || isComputed(w.width)) return '100%';
-    else if (typeof w.width === 'object' && w.width.percent) return `${w.width.percent}%`;
-    if (typeof w.width === 'number') return `${w.width}rem`;
-    else return `${w.width.percent}%`;
+    else if (w.width === 'grow' && Array.isArray(context.get('../../layout'))) return `(100% - ${context.get(`../../layout[${context.get('@index')}][0]`) || 0}rem)`; 
+    else if (typeof w.width === 'object' && 'percent' in w.width) return `${w.width.percent}%`;
+    else if (typeof w.width === 'number') return `${w.width}rem`;
   }
 
-  calcWidthWithMargin(w: Widget, path: string): string {
-    if (/^report\.widgets\.\d+$/.test(path)) return '100%';
-    const width = this.calcWidth(w);
-    if (!w.margin || isComputed(w.margin)) return width;
+  calcWidthWithMargin(w: Widget, context: ContextHelper): string {
+    if (/^report\.widgets\.\d+$/.test(context.resolve())) return '100%';
+    const width = this.calcWidth(w, context);
+    if (!w.margin || isComputed(w.margin)) return ~width.indexOf('(') ? `calc${width}` : width;
     if (typeof w.margin === 'number') return `calc(${width} + ${2 * w.margin}rem)`;
     else if (w.margin.length === 2) return `calc(${width} + ${2 * w.margin[1]}rem)`;
     else if (w.margin.length === 4) return `calc(${width} + ${w.margin[1] + w.margin[3]}rem)`;

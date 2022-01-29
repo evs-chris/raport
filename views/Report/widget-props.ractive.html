@@ -1,4 +1,4 @@
-<label><span title="Width of the {{.type}} in rem, if a number, a percentage of the parent, or an expression, defaulting to 100%">Width <button class-hide /><button class-ico on-click="@context.set('.width', typeof .width === 'number' || .width === undefined ? { percent: .width } : typeof .width === 'object' && 'percent' in .width ? { x: '' } : .width.percent)" title="{{typeof .width === 'number' || .width === undefined ? 'Change to percent' : typeof .width === 'object' && 'percent' in .width ? 'Change to Expression' : 'Change to REM'}}">
+<label><span title="Width of the {{.type}} in rem, if a number, a percentage of the parent, grow/fill, or an expression, defaulting to 100%">Width <button class-hide /><button class-ico on-click="@context.set('.width', typeof .width === 'number' || .width === undefined ? { percent: .width } : typeof .width === 'object' && 'percent' in .width ? { x: '' } : typeof .width === 'object' && 'x' in .width ? 'grow' : .width.percent)" title="{{typeof .width === 'number' || .width === undefined ? 'Change to percent' : typeof .width === 'object' && 'percent' in .width ? 'Change to Expression' : typeof .width === 'object' && 'x' in .width ? 'Change to Fill/Grow' : 'Change to REM'}}">
     {{#if typeof .width === 'number' || .width === undefined}}#{{elseif typeof .width === 'object' && 'percent' in .width}}%{{else}}&#9998;{{/if}}
   </button></span>
   <span><div>
@@ -6,6 +6,8 @@
       <input type="number" value="{{.width}}" style-width="calc(100% - 2rem)" /><span class-unit>rem</span>
     {{elseif typeof .width === 'object' && 'percent' in .width}}
       <input type="number" value="{{.width.percent}}" style-width="calc(100% - 2rem)" /><span class-unit>%</span>
+    {{elseif .width === 'grow'}}
+      Fill/Grow
     {{else}}
       <textarea>{{.width.x}}</textarea>
     {{/if}}
