@@ -2,7 +2,7 @@ import { Container, Label, Repeater, Image, MeasuredLabel, HTML } from '../repor
 import { evaluate, filter, Group, ValueOrExpr, isValueOrExpr } from '../data/index';
 import { parse as parseTemplate } from '../data/parse/template';
 
-import { addStyle, escapeHTML, extend, getWidth, getInnerWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin } from './index';
+import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin, getWidthWithMargin } from './index';
 import { styleClass, style, styleFont } from './style';
 
 registerRenderer<Label>('label', (w, ctx, placement) => {
@@ -43,13 +43,14 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
   if (!w.height) w.height = 'auto';
   else if (typeof w.height === 'number') h = getHeightWithMargin(w, placement, ctx);
   const wctx = w.context ? extend(ctx, { value: evaluate(ctx, w.context) }) : ctx;
-  const cw = getInnerWidth(w, placement, ctx) || placement.availableX;
+  const cw = getWidth(w, placement, ctx) || placement.availableX;
   const r = renderWidgets(w, wctx, { x: 0, y: 0, availableX: cw, availableY: h || placement.availableY, maxX: cw, maxY: placement.maxY }, state, w.layout);
   if (!r.cancel) {
     r.output = `<div${styleClass(ctx, ['container'], style(w, placement, ctx, { computedHeight: h || r.height, container: true }))}>${r.output}</div>`;
     r.height = h || r.height;
-    r.width = cw || r.width;
+    r.width = getWidthWithMargin(w, placement, ctx);
   }
+  if (r.continue && !w.bridge) return { cancel: true, output: '' };
   return r;
 }, { container: true });
 

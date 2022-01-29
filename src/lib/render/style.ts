@@ -39,16 +39,14 @@ export function styleClass(ctx: RenderContext, cls: string[], [style, inline]: [
 export function style(w: Widget, placement: Placement, context: RenderContext, opts?: StyleOptions): [string, string] {
   let s = `left:${placement.x || 0}rem;top:${(placement.y || 0)}rem;`;
   let i = ``;
-  if (!w.width) s += `right:${(w.margin || {})[1] || 0}rem;`;
-  else if (typeof w.width !== 'number' && 'percent' in w.width) s += `width:${getWidth(w, placement, context)}rem;`
-  else s += `width:${getWidthWithMargin(w, placement, context)}rem;`
+
+  s += `width:${getWidthWithMargin(w, placement, context)}rem;`;
 
   const h = getHeightWithMargin(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize) || 1;
   if (opts && opts.container && opts.computedHeight) i = `height:${h}rem;`;
   else s += `height:${h}rem;`;
 
-  if (w.font && w.font.line === 0) s += `line-height:initial;`
-  else s += `${!opts || !opts.container || (w.font && w.font.line) ? `line-height:${(w.font && w.font.line || w.font && w.font.size) || getHeight(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize)}rem;` : ''}`;
+  s += `${!opts || !opts.container || (w.font && w.font.line) ? `line-height:${(w.font && w.font.line || w.font && w.font.size) || getHeight(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize)}rem;` : ''}`;
 
   if (w.margin) {
     const m = expandMargin(w, context, placement);
@@ -69,8 +67,8 @@ export function styleFont(f: Font): string {
   if (f.family) s += `font-family:${f.family};`;
   if (f.color) s += `color:${f.color};`;
   if (f.align) s += `text-align:${f.align};`;
-  if (f.line) s += `line-height:${f.line}rem;`;
-  else if (f.size) s += `line-height:${f.size}rem;`;
+  if (f.line === 0) s += `line-height:initial;`;
+  else if (f.line == null && f.size) s += `line-height:${f.size}rem;`;
   if (f.size) s += `font-size:${f.size}rem;`;
   if (f.weight) s += `font-weight:${f.weight};`;
   if (f.pre) s += `white-space:pre-wrap;`;

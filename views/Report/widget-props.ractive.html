@@ -69,6 +69,13 @@
     <textarea>{{.margin.x}}</textarea>
   {{/if}}
 </span></label>
+<label><span title="Setting box to contain will make the margins fit within the designated size. Setting box to expand will expand the width to include the margin. The default depends on the type of sizing, with contain for percentages and expand for others.">Box</span><span>
+  <select value="{{.box}}">
+    <option value="{{undefined}}">Default</option>
+    <option value="contain">Contain</option>
+    <option value="expand">Expand</option>
+  </select>
+</span></label>
 <label><span>Border {{#if typeof .border === 'string'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.border')">&#9998;</button>{{/if}}</span><span>
   <div class=toggles>
     <span class-toggle class-active="typeof .border === 'undefined'" {{#if typeof .border !== 'undefined'}}on-click="@context.set('.border', undefined)"{{/if}}>None</span>

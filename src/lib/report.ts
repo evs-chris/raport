@@ -163,6 +163,7 @@ export interface Widget extends Style {
   width?: Dimension|Computed; // default 100%
   height?: Dimension|'auto'|Computed; // optional, defaulting to 1
   margin?: Margin|Computed;
+  box?: 'expand'|'contain';
   hide?: ValueOrExpr;
   br?: boolean|Computed;
 }
@@ -171,6 +172,7 @@ export interface Container extends Widget {
   widgets: Widget[];
   layout?: Layout;
   context?: ValueOrExpr;
+  bridge?: boolean;
 }
 
 export interface Image extends Widget {

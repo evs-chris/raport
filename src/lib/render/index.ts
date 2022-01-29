@@ -128,9 +128,6 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   if (w.margin) {
     const m = expandMargin(w, context, placement);
     extraHeight += m[0] + m[2];
-    if (placement.availableX) {
-      placement.availableX -= m[1] + m[3];
-    }
     if (placement.availableY) {
       placement.availableY -= m[0] + m[2];
     }
@@ -162,11 +159,10 @@ registerLayout('row', (w, o, m, p, ps, context) => {
   let n: Placement;
   const nw = getWidthWithMargin(w, p, context);
   const br = isComputed(w.br) ? evaluate(extendContext(context.context, { special: { placement: p, widget: w } }), w.br.x) : w.br;
-  if (p.availableX && ps[0][0] + ps[0][2] + nw > p.availableX) {
-    n = { x: m[3], y: maxYOffset(ps), availableX: br ? 0 : p.availableX && (p.availableX - m[3]), maxX: p.maxX };
+  if (br || p.availableX && ps[0][0] + ps[0][2] + nw > p.availableX) {
+    n = { x: m[3], y: maxYOffset(ps), availableX: p.maxX, maxX: p.maxX };
   } else {
-    n = { x: ps[0][0] + ps[0][2], y: ps[0][1], maxX: p.maxX };
-    if (p.availableX) n.availableX = br ? 0 : p.availableX - (ps[0][0] + ps[0][2]) - nw;
+    n = { x: ps[0][0] + ps[0][2], y: ps[0][1], availableX: p.availableX, maxX: p.maxX };
   }
 
   n.y -= o;
@@ -224,7 +220,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
           s += r;
           ps.unshift([x, y, getWidthWithMargin(w, placement, context), getHeightWithMargin(w, placement, context)]);
         } else {
-          if (r.cancel && !ps.length) return { output: '', cancel: true };
+          if (r.cancel) return { output: '', cancel: true };
           s += r.output;
           ps.unshift([x, y, r.width || getWidthWithMargin(w, placement, context), r.height || getHeightWithMargin(w, placement, context) || 0]);
           if (r.continue) {
@@ -247,16 +243,17 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
 
 export function getWidth(w: Widget, placement: Placement, context: RenderContext): number {
   let width = isComputed(w.width) ? evaluate(extendContext(context.context, { special: { widget: w, placement} }), w.width.x) : w.width;
-  if (!width) return placement.availableX || placement.maxX || 51;
-  else if (typeof width === 'number') return width;
-  else return +((width.percent / 100) * (placement.maxX || 51)).toFixed(4);
-}
-
-export function getInnerWidth(w: Widget, placement: Placement, context: RenderContext): number {
-  let width = getWidth(w, placement, context);
-  if (w.margin) {
-    const m = expandMargin(w, context, placement);
-    width -= m[1] + m[3];
+  const m = w.margin && expandMargin(w, context, placement);
+  let pct = false;
+  if (!width && width !== 0) width = placement.availableX || placement.maxX || 51;
+  else if (typeof width === 'number') width;
+  else {
+    width = +((width.percent / 100) * (placement.maxX || 51)).toFixed(4);
+    pct = true;
+  }
+  if (typeof width === 'number' && (w.box === 'contain' || pct && w.box !== 'expand')) {
+    if (m) width -= m[1] + m[3];
+    else if (w.font && w.font.right) width -= w.font.right;
   }
   return width;
 }
