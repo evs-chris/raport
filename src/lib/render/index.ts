@@ -224,8 +224,15 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
           ps.unshift([x, y, getWidthWithMargin(w, placement, context), getHeightWithMargin(w, placement, context)]);
         } else {
           if (r.cancel) return { output: '', cancel: true };
+          const h = r.height || getHeightWithMargin(w, placement, context) || 0;
+          if (y + h > placement.availableY) {
+            const offset = maxYOffset(ps);
+            state = state || { offset };
+            state.last = i;
+            return { output: s, continue: state, height: offset };
+          }
           s += r.output;
-          ps.unshift([x, y, r.width || getWidthWithMargin(w, placement, context), r.height || getHeightWithMargin(w, placement, context) || 0]);
+          ps.unshift([x, y, r.width || getWidthWithMargin(w, placement, context), h]);
           if (r.continue) {
             state = state || { offset: 0 };
             state.child = r.continue;
