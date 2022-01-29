@@ -184,7 +184,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
     ps[0][0] += m[3];
     ps[0][1] += m[0];
 
-    for (let i = state && state.state && state.state.last || 0; i < widget.widgets.length; i++) {
+    for (let i = state && state.last || 0; i < widget.widgets.length; i++) {
       const w: Widget = widget.widgets[i];
       if (w.hide && evaluate(extendContext(context.context, { special: { widget: w, placement } }), w.hide)) continue;
 
@@ -193,9 +193,10 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
       if (h > placement.maxY) h = 1;
 
       if (placement && placement.availableY && h > placement.availableY) {
-        state = state || { offset: maxYOffset(ps) };
+        const offset = maxYOffset(ps);
+        state = state || { offset };
         state.last = i;
-        return { output: s, continue: state, height: h + ps.map(([y, h]) => y + h).reduce((a, c) => c > a ? c : a, 0) };
+        return { output: s, continue: state, height: offset };
       } else {
         const lp = Array.isArray(layout) && (layout[i] || [0, 0]);
         let p = Array.isArray(lp) ? { x: lp[0] + m[3], y: lp[1] + m[0], maxX: placement.maxX } : (lp || placement);

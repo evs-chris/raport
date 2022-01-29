@@ -50,7 +50,8 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
     r.height = h || r.height;
     r.width = getWidthWithMargin(w, placement, ctx);
   }
-  if (r.continue && !w.bridge) return { cancel: true, output: '' };
+  if (r.continue && !w.bridge) return { continue: { offset: 0, last: 0 }, output: '' };
+  else if (r.continue) r.continue.offset = 0;
   return r;
 }, { container: true });
 
