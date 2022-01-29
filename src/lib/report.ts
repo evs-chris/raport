@@ -411,7 +411,7 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
     body { font-size: 0.83rem; padding: 0; margin: 0;${width ? ` width: ${width}rem;` : ''} }
     #wrapper { height:${y}rem; position: relative; ${report.font ? styleFont(report.font) : ''} }
     @media screen {
-      body { margin: 1rem; background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem ${margin[2]}rem ${margin[3]}rem; }
+      body { margin: 1rem${width ? ' auto' : ''}; background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem ${margin[2]}rem ${margin[3]}rem; }
       html { background-color: #999; }
     }${Object.entries(ctx.styles).map(([_k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}
   </style>${extras && extras.head || ''}</head><body>\n<div id=wrapper>${html}</div>${extras && extras.foot || ''}</body></html>`;
