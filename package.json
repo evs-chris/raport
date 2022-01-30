@@ -26,7 +26,7 @@
     "@types/qunit": "^2.9",
     "eslint": "^6",
     "qunit": "^2.9",
-    "ractive": "1.4.0-build-53",
+    "ractive": "1.4.0-build-64",
     "rollup": "^2.42",
     "rollup-plugin-sourcemaps": "^0.4.2",
     "source-map-support": "^0.5",

@@ -1,6 +1,6 @@
 <div class-properties>
   <div class-header style-height=3rem>
-    <h3>Widgets</h3>
+    <h3>{{#if ~/reparent}}Moving...{{else}}Widgets{{/if}}</h3>
     {{#if ~/report.type !== 'delimited' && (~/widget.type === 'container' || ~/temp.widget === 'report')}}
       <select value="{{~/add}}" on-change="@.addWidget(@node.value)">
         <option>container</option>
@@ -12,17 +12,20 @@
       </select>
       <button on-click="@.addWidget(~/add)" class=add>+</button>
     {{/if}}
-    <button class-ico on-click="@.treeScrollToActive()">A</button>
+    {{#if ~/reparent}}<button class-ico on-click="@.set('reparent', undefined)" title="Cancel move">{{>reparent, true as cancel}}</button>{{/if}}
+    <button class-ico on-click="@.treeScrollToActive()" title="Scroll active widget into view">{{>scrollto}}</button>
   </div>
   <div class="shrinky scrolled-wrapper">
     <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
-      <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="@.selectWidget('report')"><span class-line style-height=1.8rem on-mouseover="@.set('temp.hover', 'report'), false">Report</span>
+      {{#with report}}
+      <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : @.selectWidget('report')"><span class-line on-mouseover="@.set('temp.hover', 'report'), false">Report</span>
         {{#if report.type === 'delimited'}}
           {{>delimited-fields}}
         {{else}}
-          {{#with report}}{{>widget-tree}}{{/with}}
+          {{>widget-tree}}
         {{/if}}
       </div>
+      {{/with}}
     </div>
   </div>
   {{#if ~/temp.widget}}
@@ -154,7 +157,7 @@
 
 <template id="delimited-fields">
   <div class="delimited children">
-    {{#each report.fields}}
+    {{#each .fields}}
       <div class-node class-active="@keypath === ~/temp.expr.path" on-click="@.editExpr(@context)">
         <span class-line on-mouseover="@.set('temp.expr.hover', @keypath), false" on-mouseout="@.set('temp.expr.hover', ''), false"><span>{{@index}}. {{.}}</span>
           <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context, '../', @index), ~/report.header && @.moveUp(@context, '~/report.header', @index), false">&#9650;</button>
@@ -170,6 +173,7 @@
 <style>
   .properties {
     width: 20em;
+    min-width: 18vw;
     flex-grow: 0;
     flex-shrink: 0;
     overflow-y: auto;
@@ -217,6 +221,7 @@
   .properties .tree .node {
     color: #222;
     cursor: pointer;
+    position: relative;
   }
 
   .properties .tree .node.active > .line {
@@ -228,7 +233,6 @@
     background-color: #4596ff20;
   }
 
-  .properties .tree .node .line:hover ~ .children > .node,
   .properties .tree .node.hover > .children > .node {
     background-color: #26bf1017;
   }
@@ -238,11 +242,16 @@
     align-items: center;
     padding: 0.1rem 0.25rem;
     margin: 0.1rem;
+    min-height: 2rem;
   }
 
-  .properties .tree .node .line:hover,
   .properties .tree .node.hover > .line {
     background-color: #26bf10;
+    color: #fff;
+  }
+
+  .properties .tree .node.moving > .line {
+    background-color: #8061ee;
     color: #fff;
   }
 

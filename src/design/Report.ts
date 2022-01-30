@@ -344,6 +344,24 @@ export class Designer extends Ractive {
     ctx.splice(path || '../', idx, 0, item);
   }
 
+  reparent(target: ContextHelper) {
+    const w: ContextHelper = this.get('reparent');
+    this.set('reparent', undefined);
+    if (!w || !target) return;
+
+    let layout: any[];
+    if (Array.isArray(w.get('../../layout'))) {
+      layout = w.splice('../../layout', w.get('@index'), 1).result[0];
+    }
+
+    if (Array.isArray(target.get('.layout'))) {
+      target.push('.layout', layout || [0, 0]);
+    }
+
+    const obj = w.splice('../', w.get('@index'), 1).result[0];
+    target.push('.widgets', obj);
+  }
+
   addHeader() {
     this.set('report.headers', (this.get('report.fields') || []).map(() => ''));
   }

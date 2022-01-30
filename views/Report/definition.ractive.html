@@ -7,7 +7,7 @@
       <label class-spacer><input type="checkbox" checked="{{~/tmp.compact}}" style="vertical-align: middle;" /> Compact?</label>
       {{#if ~/tmp.compact}}<label class-spacer><input type="checkbox" checked="{{~/tmp.js}}" style="vertical-align: middle;" /> JS?</label>{{/if}}
       {{#if ~/tmp.js}}<label class-spacer><select value="{{~/tmp.strings}}"><option>json</option><option>template</option></select></label>{{/if}}
-      <button class-ico on-click="@.fmtAll()" title="Reformat all expressions">Format All</button>
+      <button class="ico text" on-click="@.fmtAll()" title="Reformat all expressions">Format All</button>
     </div>
     <div class-json>
       <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate="@.autosize(@node)" twoway=false value="{{@.reportToString(~/tmp.compact, ~/tmp.js, ~/tmp.strings)}}" on-change="@.loadReportString(@node.value), @.update('temp')" /></div></div>

@@ -1,10 +1,12 @@
 <div class=children>
   {{#if .type === 'repeater' && .group}}
     {{#each .group}}
-      <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.selectWidget(@keypath), false">
+      <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : @.selectWidget(@keypath), false">
         <span class-line on-mouseover="@.set('temp.hover', @keypath), false"><span>group {{@index + 1}}</span>
-          <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context), @.moveUp(@context, '^^/groupEnds'), false" title="Move up">&#9650;</button>
-          <button class-ico disabled="{{@index === @last}}" on-click="@.moveDown(@context), @.moveDown(@context, '^^/groupEnds'), false" title="Move down">&#9660;</button>
+          <span class=actions>
+            <button class="ico up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context), @.moveUp(@context, '^^/groupEnds'), false" title="Move up">{{>arrow}}</button>
+            <button class="ico down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context), @.moveDown(@context, '^^/groupEnds'), false" title="Move down">{{>arrow}}></button>
+          </span>
           <button class-ico class-large on-click="@.removeWidget(@context), false" title="Remove">&times;</button>
         </span>
         {{>widget-tree}}
@@ -13,7 +15,7 @@
   {{/if}}
   {{#each .}}
     {{#if .type === 'container'}}
-      <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
+      <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : @.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
         <span class-line>
           <span>{{@key}}</span>
           {{#if @key !== 'row' || ../type !== 'repeater'}}<button class-ico class-large on-click="@.removeWidget(@context), false">&times;</button>{{/if}}
@@ -23,11 +25,16 @@
     {{/if}}
   {{/each}}
   {{#each .widgets}}
-    <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
+    <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" class-moving="~/reparent && @keypath === ~/reparent.resolve()" on-click="~/reparent && ~/reparent.resolve() === @keypath ? @.set('reparent', undefined) : ~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : @.selectWidget(@keypath), false" {{#if !~/reparent || .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1}}on-mouseover="@.set('temp.hover', @keypath), false"{{/if}}>
       <span class-line><span>{{.type}}</span>
-        <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context), Array.isArray(^^/layout) ? @.moveUp(@context, '^^/layout') : false, false">&#9650;</button>
-        <button class-ico disabled="{{@index === @last}}" on-click="@.moveDown(@context), Array.isArray(^^/layout) ? @.moveDown(@context, '^^/groupEnds') : false, false">&#9660;</button>
-        <button class-ico class-large on-click="@.removeWidget(@context), false">&times;</button>
+        {{#if !~/reparent}}
+          <span class=actions>
+            <button class=ico title="Move to another container" on-click="@.set('reparent', @context), false">{{>reparent}}</button>
+            <button class="ico up-arrow" title="Move up" disabled="{{@index === 0}}" on-click="@.moveUp(@context), Array.isArray(^^/layout) ? @.moveUp(@context, '^^/layout') : false, false">{{>arrow}}</button>
+            <button class="ico down-arrow" title="Move down" disabled="{{@index === @last}}" on-click="@.moveDown(@context), Array.isArray(^^/layout) ? @.moveDown(@context, '^^/groupEnds') : false, false">{{>arrow}}</button>
+          </span>
+          <button class-ico class-large on-click="@.removeWidget(@context), false">&times;</button>
+        {{/if}}
         </span>
         {{>widget-tree}}
     </div>
@@ -72,7 +79,7 @@
 </template>
 
 <template id="label">
-  <span class-content on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false" on-click="@.selectWidget(@keypath)" title="{{.text}}">
+  <span class-content {{#unless ~/reparent}}on-mouseover="@.set('temp.hover', @keypath), false"{{/unless}} on-mouseout="@.set('temp.hover', ''), false" on-click="@.selectWidget(@keypath)" title="{{.text}}">
     {{#if Array.isArray(.text)}}
       {{#each .text}}{{#if typeof . === 'string'}}{{.}}{{else}}<span {{#if .font}}style="{{@.calcFont(.)}}"{{/if}}>{{.text}}</span>{{/if}}{{/each}}
     {{else}}
@@ -82,7 +89,7 @@
 </template>
 
 <template id="measured">
-  <span class-content on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false" on-click="@.selectWidget(@keypath)" title="{{.text}}">{{.text}}</span>
+  <span class-content {{#unless ~/reparent}}on-mouseover="@.set('temp.hover', @keypath), false"{{/unless}} on-mouseout="@.set('temp.hover', ''), false" on-click="@.selectWidget(@keypath)" title="{{.text}}">{{.text}}</span>
 </template>
 
 <template id="image">
@@ -103,7 +110,7 @@
 </template>
 
 <template id="repeater">
-  <div class=bar on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false">
+  <div class=bar {{#unless ~/reparent}}on-mouseover="@.set('temp.hover', @keypath), false"{{/unless}} on-mouseout="@.set('temp.hover', ''), false">
     <span>Repeater</span>
 
     {{#if .group}}
@@ -143,3 +150,57 @@
     {{/if}}
   </div>
 </template>
+
+<template id="arrow">
+  <svg viewBox="4 7 16 10"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"></path></svg>  
+</template>
+
+<template id="reparent">
+  <svg viewBox="0 0 16 16">
+    <path d="m 7.717269,6.5496963 c 1.1791128,1.1791128 3.537021,3.5439517 3.537021,3.5439517 0,0 -1.8715903,1.878096 -3.536918,3.543424 -0.2087145,0.208715 0.4174295,0.834858 0.626144,0.626143 1.739959,-1.739959 4.170103,-4.170102 4.170103,-4.170102 0,0 -2.8836136,-2.8836169 -4.170102,-4.1701053 C 8.1346942,5.7141849 7.5084462,6.3408735 7.717269,6.5496963 Z" />
+    <path d="M 1.25,1.265625 V 3.1953125 H 3.1816406 V 1.265625 Z m 3.8613281,0 V 3.1953125 H 7.0410156 V 1.265625 Z m 3.859375,0 V 3.1953125 H 10.900391 V 1.265625 Z m 3.8593749,0 V 3.1953125 H 14.75 V 1.265625 Z" />
+    <path d="m 3.5527344,4 c 0,1.570084 0,5.1494183 0,5.1494183 0,0.8840967 0.4590976,1.4746067 1.428392,1.4746067 l 7.3118426,-0.0166 -0.0039,-1.0000001 -7.2599976,0.014648 c -0.3569634,0 -0.476331,-0.1906315 -0.476331,-0.5277838 0,0 0,-3.4980046 0,-5.0942891 0,-0.3333353 -1.000006,-0.3333353 -1.000006,0 z" />
+    {{#if cancel}}
+      <path d="M 2.5878906 1.7539062 L 1.3984375 2.9433594 L 6.7871094 8.3320312 L 1.3984375 13.720703 L 2.5878906 14.912109 L 7.9765625 9.5234375 L 13.367188 14.912109 L 14.556641 13.720703 L 9.1679688 8.3320312 L 14.556641 2.9433594 L 13.367188 1.7539062 L 7.9765625 7.1425781 L 2.5878906 1.7539062 z" opacity=0.5 fill=red />
+    {{/if}}
+  </svg>
+</template>
+
+<template id="scrollto">
+  <svg viewBox="0 0 16 16">
+    <path d="m 7.9921875,0.95883941 c -0.250488,-0.00872 -0.5000001,0.18861599 -0.5,0.59179689 0,2.4565678 0.014046,5.4488885 0.015625,5.7792969 -0.414832,-0.4134912 -1.618944,-1.609179 -3.0527344,-3.0429688 -0.208715,-0.2087145 -0.833715,0.4162855 -0.625,0.625 L 8,9.0818863 12.169922,4.9119644 c 0.208822,-0.2088228 -0.41813,-0.8357759 -0.626953,-0.6269531 -1.010297,1.0102962 -2.5173079,2.5148582 -3.0351565,3.03125 -0.00152,-0.3342485 -0.013672,-3.072983 -0.013672,-5.71875 0,-0.4162448 -0.2514651,-0.62995161 -0.5019531,-0.63867189 z M 8.28125,7.5408707 C 8.2531767,7.5688634 8,7.8221207 8,7.8221207 c 0,0 -0.257095,-0.255216 -0.2792969,-0.2773438 z" />
+    <path d="m 1.9238281,10.37163 v 2 H 14.076172 v -2 z" />
+    <path d="m 1.9238281,13.169922 v 2 H 14.076172 v -2 z" />
+  </svg>
+</template>
+
+<style>
+  .line .actions {
+    display: none;
+    position: absolute;
+    right: 3rem;
+  }
+  .line:hover .actions {
+    display: block;
+  }
+  button.ico svg {
+    width: 100%;
+    height: 100%;
+    border-radius: 0.2rem;
+  }
+  .line button.ico svg {
+    fill: #fff;
+  }
+  .line button.ico:hover svg {
+    fill: #5010bf;
+  }
+
+  button.ico[disabled] svg,
+  button.ico[disabled]:hover svg {
+    fill: gray;
+  }
+
+  button.ico.up-arrow svg {
+    transform: rotate(180deg);
+  }
+</style>
