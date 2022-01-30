@@ -2,7 +2,7 @@
   <input type="file" style="display: none;" id="import-file" accept="application/json" />
   <div class-definition>
     <div class-actions>
-      <button class-ico class-spacer on-click="@.loadImportFile()" title="Import data from a file">Load</button>
+      <button class="ico text" class-spacer on-click="@.loadImportFile()" title="Import data from a file">Load</button>
       <label><input type="checkbox" style="vertical-align: middle;" checked="{{data.type === 'fetch'}}" twoway=false on-change="@.set('data.type', @node.checked ? 'fetch' : undefined)" /> Fetch request?</label>
     </div>
     {{#if data.type === 'fetch'}}

@@ -2,8 +2,8 @@
   <input type="file" style="display: none;" id="definition-file" accept="application/json" />
   <div class-definition>
     <div class-actions>
-      <button class-ico on-click="@.loadReportFile()" title="Load report definition from a file">Load</button>
-      <button class-ico class-spacer on-click="@.download((~/report.name || 'report') + '.js' + (~/tmp.js ? '' : 'on'), @.reportToString(true, ~/tmp.js, ~/tmp.strings))" title="Save report definition to a file">Save</button>
+      <button class="ico text" on-click="@.loadReportFile()" title="Load report definition from a file">Load</button>
+      <button class="ico text" class-spacer on-click="@.download((~/report.name || 'report') + '.js' + (~/tmp.js ? '' : 'on'), @.reportToString(true, ~/tmp.js, ~/tmp.strings))" title="Save report definition to a file">Save</button>
       <label class-spacer><input type="checkbox" checked="{{~/tmp.compact}}" style="vertical-align: middle;" /> Compact?</label>
       {{#if ~/tmp.compact}}<label class-spacer><input type="checkbox" checked="{{~/tmp.js}}" style="vertical-align: middle;" /> JS?</label>{{/if}}
       {{#if ~/tmp.js}}<label class-spacer><select value="{{~/tmp.strings}}"><option>json</option><option>template</option></select></label>{{/if}}
