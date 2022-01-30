@@ -985,8 +985,15 @@ Ractive.extendWith(Designer, {
         this.set(k.replace('temp', 'report'), (parse(`'${v.replace(/'/g, '\\\'')}'`) as Literal).v);
       } catch {}
     },
+    expr(v) {
+      if (!this.evalLock) {
+        this.evalLock = true;
+        this.set('temp.expr.str', v);
+        this.evalLock = false;
+      }
+    },
     'temp.expr.str'(v) {
-      if (!v) {
+      if (!v && typeof v !== 'string') {
         this.set('temp.expr.error', undefined);
         this.set('temp.expr.ast', undefined);
         return;

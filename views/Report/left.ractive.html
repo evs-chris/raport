@@ -35,7 +35,9 @@
     {{#if ~/temp.widget === 'report'}}
       <div class="growy scrolled-wrapper"><div as-scrolled>
         <div class=sheet>
-          <label><span>Name <button class-ico on-click="@.editExpr('report.name', { template: true }), false">&#9998;</button></span><span><input value="{{report.name}}" /></span></label>
+          <label><span>Name <button class-ico on-click="@.editExpr('report.name', { template: true }), false">&#9998;</button></span><span>
+            <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src="{{report.name}}" tabout template /></div>
+          </span></label>
           <label><span>Type</span><span><select value="{{report.type}}">
             <option value="page">Paged</option>
             <option value="flow">Continuous</option>

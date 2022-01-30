@@ -6,6 +6,8 @@ import { parse, parseTemplate } from 'raport/index';
 
 import autosize from './autosize';
 
+const notSpace = /[^\s]/;
+
 export class Editor extends Ractive {
   constructor(opts?: InitOpts) {
     super(opts);
@@ -28,6 +30,10 @@ export class Editor extends Ractive {
 
       if (pos[0] === pos[1]) {
         idx = txt.lastIndexOf('\n', pos[0]);
+        if (this.get('tabout')) {
+          if (txt.length === 0) return true;
+          if (!ev.shiftKey && notSpace.test(txt.substring(idx === -1 ? 0 : idx, pos[0]))) return true;
+        }
         if (idx === pos[0]) idx = txt.lastIndexOf('\n', idx - 1);
         if (idx === -1) idx = 0;
         else idx += 1
@@ -94,6 +100,7 @@ Ractive.extendWith(Editor, {
     },
   },
   decorators: { autosize },
+  attributes: ['src', 'template', 'tabout'],
 });
 
 export class Viewer extends Ractive {
@@ -125,5 +132,6 @@ Ractive.extendWith(Viewer, {
       this.highlightSyntax();
     },
   },
+  attributes: ['src', 'template'],
 });
 

@@ -1,32 +1,32 @@
 <label><span title="Width of the {{.type}} in rem, if a number, a percentage of the parent, grow/fill, or an expression, defaulting to 100%">Width <button class-hide /><button class-ico on-click="@context.set('.width', typeof .width === 'number' || .width === undefined ? { percent: .width } : typeof .width === 'object' && 'percent' in .width ? { x: '' } : typeof .width === 'object' && 'x' in .width ? 'grow' : .width.percent)" title="{{typeof .width === 'number' || .width === undefined ? 'Change to percent' : typeof .width === 'object' && 'percent' in .width ? 'Change to Expression' : typeof .width === 'object' && 'x' in .width ? 'Change to Fill/Grow' : 'Change to REM'}}">
     {{#if typeof .width === 'number' || .width === undefined}}#{{elseif typeof .width === 'object' && 'percent' in .width}}%{{else}}&#9998;{{/if}}
   </button></span>
-  <span><div>
+  <span>
     {{#if typeof .width === 'number' || .width === undefined}}
-      <input type="number" value="{{.width}}" style-width="calc(100% - 2rem)" /><span class-unit>rem</span>
+      <div><input type="number" value="{{.width}}" style-width="calc(100% - 2rem)" /><span class-unit>rem</span></div>
     {{elseif typeof .width === 'object' && 'percent' in .width}}
-      <input type="number" value="{{.width.percent}}" style-width="calc(100% - 2rem)" /><span class-unit>%</span>
+      <div><input type="number" value="{{.width.percent}}" style-width="calc(100% - 2rem)" /><span class-unit>%</span></div>
     {{elseif .width === 'grow'}}
-      Fill/Grow
+      <div>Fill/Grow</div>
     {{else}}
-      <textarea>{{.width.x}}</textarea>
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.width.x}} tabout /></div>
     {{/if}}
-  </div></span>
+  </span>
 </label>
 <label><span title="Height of the {{.type}} in rem, if a number, a percentage of the parent, or an expression, fill/grow, default to{{#if type === 'label'}}the largest font size or{{/if}} 1">Height <button class-hide /><button class-ico on-click="@context.set('.height', typeof .height === 'number' || .height  === undefined ? { percent: .height } : typeof .height === 'object' && 'percent' in .height ? { x: '' } : typeof .height === 'object' && 'x' in .height ? 'grow' : .height.percent)" title="{{typeof .height === 'number' || .height  === undefined ? 'Change to percent' : typeof .height === 'object' && 'percent' in .height ? 'Change to Expression' : typeof .height === 'object' && 'x' in .height ? 'Change to Fill/Grow' : 'Change to REM'}}">
     {{#if typeof .height === 'number' || .height === undefined}}#{{elseif typeof .height === 'object' && 'percent' in .height}}%{{else}}&#9998;{{/if}}
   </button></span>
-  <span><div>
+  <span>
     {{#if typeof .height === 'number' || .height === undefined}}
-      <input type="number" value="{{.height}}" style-width="calc(100% - 2rem)" /><span class-unit>rem</span>
+      <div><input type="number" value="{{.height}}" style-width="calc(100% - 2rem)" /><span class-unit>rem</span></div>
     {{elseif typeof .height === 'object' && 'percent' in .height}}
-      <input type="number" value="{{.height.percent}}" style-width="calc(100% - 2rem)" /><span class-unit>%</span>
+      <div><input type="number" value="{{.height.percent}}" style-width="calc(100% - 2rem)" /><span class-unit>%</span></div>
     {{elseif .height === 'grow'}}
-      Fill/Grow
+      <div>Fill/Grow</div>
     {{else}}
-      <textarea>{{.height.x}}</textarea>
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.height.x}} tabout /></div>
     {{/if}}
-  </div></span>
+  </span>
 </label>
 {{#with ~/[@.split(~/temp.widget, 2)]}}
   {{#if Array.isArray(.layout)}}
@@ -39,12 +39,14 @@
       {{#if typeof ^^/br !== 'object'}}
         <input type=checkbox checked="{{^^/br}}" />
       {{elseif typeof ^^/br === 'object'}}
-        <textarea>{{^^/br.x}}</textarea>
+        <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{^^/br.x}} tabout /></div>
       {{/if}}
     </span></label>
   {{/if}}
 {{/with}}
-<label><span title="If this evaluates to true, the widget will be hidden and not affect automatic layouts">Hidden <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')">&#9998;</button></span><span><textarea>{{.hide}}</textarea></span></label>
+<label><span title="If this evaluates to true, the widget will be hidden and not affect automatic layouts">Hidden <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')">&#9998;</button></span><span>
+    <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.hide}} tabout /></div>
+  </span></label>
 <label><span>Margin</span><span>
   <div class=toggles>
     <span class-toggle class-active="typeof .margin === 'undefined'" {{#if typeof .margin !== 'undefined'}}on-click="@context.set('.margin', undefined)"{{/if}}>None</span>
@@ -68,7 +70,7 @@
       <span /><input type=number value="{{.margin[2]}}" /><span />
     </div>
   {{elseif .margin.x !== undefined}}
-    <textarea>{{.margin.x}}</textarea>
+    <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.margin.x}} tabout /></div>
   {{/if}}
 </span></label>
 <label><span title="Setting box to contain will make the margins fit within the designated size. Setting box to expand will expand the width to include the margin. The default depends on the type of sizing, with contain for percentages and expand for others.">Box</span><span>
@@ -142,7 +144,9 @@
 <template id="sure" src="./test.ractive.html" />
 
 <template id="label-props">
-  <label><span>Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text', { label: true })">&#9998;</button></span><span>{{#if Array.isArray(.text)}}<button class-plain on-click="@context.set('.text', @.getPartStrings(.text)), @.editExpr('.text', { label: true })">Convert to Text</button>{{else}}<textarea>{{.text}}</textarea>{{/if}}</span></label>
+  <label><span>Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text', { label: true })">&#9998;</button></span><span>{{#if Array.isArray(.text)}}<button class-plain on-click="@context.set('.text', @.getPartStrings(.text)), @.editExpr('.text', { label: true })">Convert to Text</button>{{else}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.text}} tabout /></div>
+    {{/if}}</span></label>
   {{#if @.inRepeater(~/temp.widget)}}
     <label><span>ID {{#if .id != null}}
         <button class-ico class-large title="Remove aggregate id" on-click="@context.set('.id', undefined)">&times;</button>
@@ -166,7 +170,9 @@
 </template>
 
 <template id="html-props">
-  <label><span>HTML <button title="Edit in Expression Editor" class-ico title="Edit in Expression Editor" on-click="@.editExpr('.html', { html: true })">&#9998;</button></span><span><textarea>{{.html}}</textarea></span></label>
+  <label><span>HTML <button title="Edit in Expression Editor" class-ico title="Edit in Expression Editor" on-click="@.editExpr('.html', { html: true })">&#9998;</button></span><span>
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.html}} tabout template /></div>
+    </span></label>
 </template>
 
 <template id="container-props">
@@ -185,7 +191,9 @@
 </template>
 
 <template id="measured-props">
-  <label><span>Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text')">&#9998;</button></span><span><textarea>{{.text}}</textarea></span></label>
+  <label><span>Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text')">&#9998;</button></span><span>
+    <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.text}} tabout /></div>
+  </span></label>
   <label><span title="">Metric</span><span><input type="number" value="{{.font.metric}}" /></span></label>
 </template>
 
@@ -206,7 +214,9 @@
 </template>
 
 <template id="image-props">
-  <label><span>URL <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.url')">&#9998;</button></span><span><textarea>{{.url}}</textarea></span></label>
+  <label><span>URL <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.url')">&#9998;</button></span><span>
+    <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.url}} tabout /></div>
+  </span></label>
 </template>
 
 <style>
