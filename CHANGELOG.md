@@ -1,3 +1,23 @@
+## 0.9.1
+
+2022-01-29
+
+### Render
+
+* __BUG__: Another scenario with empty containers causing a `NaN` height to break layouts is now fixed.
+* There is now support for report-level base font settings.
+* Width handling has been expanded to allow choosing contain or expand for widths and margins, where contain will cause the final width of the widget to be the set width with the margins within and expand growing the width by the size of the margins. Percentage widths default to contain and other widths default to expand.
+* Widths now support grow/fill mode, where they expand to fill the remaining `x` axis space in the layout. In manual layouts, this is the width of the container remaining from the `x` coordinate of the widget.
+* The output of flowed reports with a set width will now be centered on screens.
+* Containers now have the option to bridge page breaks, rendering what will fit at the bottom of one and resuming at the top of the next.
+
+### Designer
+
+* __BUG__: `classifyStyles` set to `false` is now exported correctly in compact mode.
+* Changes to the defition can be undone/redone using `ctrl-z`/`ctrl-shift-z`.
+* Widgets can be moved from one container to another using the widget tree. Click the move button to put that widget into move mode and then click a container to move the widget. You can cancel the move by clicking the widget again or using the button at the top of the left pane.
+
+
 ## 0.9.0
 
 2022-01-27
