@@ -99,7 +99,7 @@
   {{#if typeof .border === 'number'}}
     <input type=number value="{{.border}}" />
   {{elseif typeof .border === 'string'}}
-    <textarea>{{.border}}</textarea>
+    <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.border}} tabout /></div>
   {{elseif .border.length === 1}}
     <input type=number value="{{.border[0]}}" />
   {{elseif .border.length === 2}}
