@@ -175,7 +175,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 }, { container: true });
 
 registerRenderer<Image>('image', (w, ctx, placement) => {
-  addStyle(ctx, 'image', `.image {position:absolute;}`);
+  addStyle(ctx, 'image', `.image {position:absolute;box-sizing:border-box;}`);
   return `<img src="${evaluate(ctx, w.url)}"${styleClass(ctx, ['image'], style(w, placement, ctx))} />`;
 });
 

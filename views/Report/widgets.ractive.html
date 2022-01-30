@@ -95,6 +95,7 @@
 
 <template id="image">
   {{#with @local as ctx}}
+    <span class-content {{#unless ~/reparent}}on-mouseover="@.set('temp.hover', @keypath), false"{{/unless}} on-mouseout="@.set('temp.hover', ''), false" title="{{.url}}">{{#unless ctx.preview}}IMG{{/unless}}</span>
     <span class="preview btn" title="Toggle Preview" on-click="@context.toggle('ctx.preview')">&#9678;</span>
     {{#if ctx.preview}}
       <img src="{{@.evalExpr(.url)}}" style="width: 100%; height: 100%;" />
