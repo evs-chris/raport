@@ -92,8 +92,8 @@ function isBorder(b: any): b is Borders {
   return typeof b === 'object' && ('top' in b || 'bottom' in b || 'left' in b || 'right' in b);
 }
 
-export function styleImage(w: Widget): [string, string] {
-  const s = `background-size:${!w.fit ? 'contain;background-position:center' : w.fit === 'stretch' ? '100% 100%' : 'cover'};`;
+export function styleImage(fit?: string): [string, string] {
+  const s = `background-size:${!fit || fit === 'contain' ? 'contain;background-position:center' : fit === 'stretch' ? '100% 100%' : 'cover'};`;
   
   return [s, ''];
 }

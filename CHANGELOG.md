@@ -5,6 +5,7 @@ Unreleased
 ### Render
 
 * Image widgets will now use an `<img>` tag for fit stretch so you can avoid needing to enable backgrounds when converting the HTML to PDF.
+* Image fit can now be an expression.
 
 
 ## 0.9.2

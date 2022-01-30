@@ -225,11 +225,17 @@
   <label><span>URL <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.url')">&#9998;</button></span><span>
     <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.url}} tabout /></div>
   </span></label>
-  <label><span>Fit</span><span><select value="{{.fit}}">
-    <option value="{{undefined}}">Contain</option>
-    <option value="cover">Cover</option>
-    <option value="stretch">Stretch</option>
-  </select></span></label>
+  <label><span>Fit <button class-ico on-click="@context.set('.fit', !.fit || typeof .fit === 'string' ? { x: '' } : undefined)" title="Sitch to {{.fit && typeof .fit !== 'object' ? 'Expression' : 'Value'}}">&#9998;</button></span><span>
+    {{#if !.fit || typeof .fit === 'string'}}
+      <select value="{{.fit}}">
+        <option value="{{undefined}}">Contain</option>
+        <option value="cover">Cover</option>
+        <option value="stretch">Stretch</option>
+      </select>
+    {{else}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.fit.x}} tabout /></div>
+    {{/if}}
+  </span></label>
 </template>
 
 <style>

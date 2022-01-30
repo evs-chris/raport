@@ -177,11 +177,11 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 registerRenderer<Image>('image', (w, ctx, placement) => {
   addStyle(ctx, 'image', `.image {position:absolute;box-sizing:border-box;} .image .inner {background-repeat:no-repeat;height:100%;}`);
 
-  const fit = w.fit;
+  const fit = w.fit && typeof w.fit === 'object' ? evaluate(ctx, w.fit.x) : w.fit;
   if (fit === 'stretch') {
     return `<img src="${evaluate(ctx, w.url)}" ${styleClass(ctx, ['image'], style(w, placement, ctx))} />`;
   } else {
-    return `<div ${styleClass(ctx, ['image'], style(w, placement, ctx))}><div ${styleClass(ctx, ['inner'], styleImage(w), `background-image:url('${evaluate(ctx, w.url)}');`)}></div></div>`;
+    return `<div ${styleClass(ctx, ['image'], style(w, placement, ctx))}><div ${styleClass(ctx, ['inner'], styleImage(fit), `background-image:url('${evaluate(ctx, w.url)}');`)}></div></div>`;
   }
 });
 
