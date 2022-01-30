@@ -30,7 +30,7 @@
   </div>
   {{#if ~/temp.widget}}
     <div class=header>
-      <h3>{{~/temp.name}}Properties</h3>
+      <h3>{{~/temp.name[0].toUpperCase()}}{{~/temp.name.substr(1)}}Properties</h3>
     </div>
     {{#if ~/temp.widget === 'report'}}
       <div class="growy scrolled-wrapper"><div as-scrolled>
@@ -299,6 +299,10 @@
 
   .properties .sheet > label > *:first-of-type {
     border-width: 1px 1px 1px 0;
+  }
+
+  .properties .sheet > label > *:first-of-type > * {
+    vertical-align: middle;
   }
 
   .properties .sheet input, .properties .sheet select {

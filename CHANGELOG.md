@@ -7,6 +7,11 @@ Unreleased
 * Image widgets will now use an `<img>` tag for fit stretch so you can avoid needing to enable backgrounds when converting the HTML to PDF.
 * Image fit can now be an expression.
 
+### Designer
+
+* Property type switch buttons are now all normalized with the same icon.
+* Properties with editors can now all be edited in the external expression editor.
+
 
 ## 0.9.2
 
