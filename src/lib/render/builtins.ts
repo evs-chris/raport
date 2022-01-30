@@ -3,7 +3,7 @@ import { evaluate, filter, Group, ValueOrExpr, isValueOrExpr } from '../data/ind
 import { parse as parseTemplate } from '../data/parse/template';
 
 import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin, getWidthWithMargin } from './index';
-import { styleClass, style, styleFont } from './style';
+import { styleClass, style, styleFont, styleImage } from './style';
 
 registerRenderer<Label>('label', (w, ctx, placement) => {
   addStyle(ctx, 'label', `.label {position:absolute;box-sizing:border-box;}`);
@@ -175,8 +175,8 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 }, { container: true });
 
 registerRenderer<Image>('image', (w, ctx, placement) => {
-  addStyle(ctx, 'image', `.image {position:absolute;box-sizing:border-box;}`);
-  return `<img src="${evaluate(ctx, w.url)}"${styleClass(ctx, ['image'], style(w, placement, ctx))} />`;
+  addStyle(ctx, 'image', `.image {position:absolute;box-sizing:border-box;} .image .inner {background-repeat:no-repeat;height:100%;}`);
+  return `<div ${styleClass(ctx, ['image'], style(w, placement, ctx))}><div ${styleClass(ctx, ['inner'], styleImage(w), `background-image:url('${evaluate(ctx, w.url)}');`)}></div></div>`;
 });
 
 registerRenderer<MeasuredLabel>('measured', (w, ctx, placement, state) => {

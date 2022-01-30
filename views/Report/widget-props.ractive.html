@@ -225,6 +225,11 @@
   <label><span>URL <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.url')">&#9998;</button></span><span>
     <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.url}} tabout /></div>
   </span></label>
+  <label><span>Fit</span><span><select value="{{.fit}}">
+    <option value="{{undefined}}">Contain</option>
+    <option value="cover">Cover</option>
+    <option value="stretch">Stretch</option>
+  </select></span></label>
 </template>
 
 <style>

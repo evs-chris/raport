@@ -91,3 +91,9 @@ export function styleBorder(b: number|number[]|Borders|ValueOrExpr, context: Ren
 function isBorder(b: any): b is Borders {
   return typeof b === 'object' && ('top' in b || 'bottom' in b || 'left' in b || 'right' in b);
 }
+
+export function styleImage(w: Widget): [string, string] {
+  const s = `background-size:${!w.fit ? 'contain;background-position:center' : w.fit === 'stretch' ? '100% 100%' : 'cover'};`;
+  
+  return [s, ''];
+}

@@ -177,6 +177,7 @@ export interface Container extends Widget {
 
 export interface Image extends Widget {
   url: ValueOrExpr;
+  fit?: 'cover'|'stretch';
 }
 
 export interface Span {
