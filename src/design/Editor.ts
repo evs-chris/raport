@@ -117,7 +117,7 @@ Ractive.extendWith(Editor, {
     },
   },
   decorators: { autosize },
-  attributes: ['src', 'template', 'tabout'],
+  attributes: ['src', 'template', 'tabout', 'primary'],
 });
 
 export class Viewer extends Ractive {

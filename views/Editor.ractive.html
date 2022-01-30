@@ -2,7 +2,7 @@
   <code class="ast-nodes">
     <pre>{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}{{#if src.length > 0 && src[src.length - 1] === '\n'}} {{/if}}</pre>
   </code>
-  <textarea as-autosize class-expr-text id="expr-text" spellcheck="false" on-keydown="@.keydown(@event)">{{src}}</textarea>
+  <textarea as-autosize class-expr-text {{#if primary}}id="expr-text"{{/if}} spellcheck="false" on-keydown="@.keydown(@event)">{{src}}</textarea>
 </div>
 
 <template id="ast-node">

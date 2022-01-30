@@ -53,6 +53,7 @@
     {{#if .margin}}style="{{@.calcMargin(.)}}"{{/if}}
     {{#if .border}}style="{{@.calcBorder(.)}}"{{/if}}
     {{#if .font}}style="{{@.calcFont(.)}}"{{/if}}
+    on-click="@.selectWidget(@keypath)"
   >
     {{#if Array.isArray(../)}}<span class="remove btn" title="Remove {{.type}}" on-click="@.removeWidget(@context, false)">&times;</span>{{/if}}
     {{>.type}}
@@ -79,7 +80,7 @@
 </template>
 
 <template id="label">
-  <span class-content {{#unless ~/reparent}}on-mouseover="@.set('temp.hover', @keypath), false"{{/unless}} on-mouseout="@.set('temp.hover', ''), false" on-click="@.selectWidget(@keypath)" title="{{.text}}">
+  <span class-content {{#unless ~/reparent}}on-mouseover="@.set('temp.hover', @keypath), false"{{/unless}} on-mouseout="@.set('temp.hover', ''), false" title="{{.text}}">
     {{#if Array.isArray(.text)}}
       {{#each .text}}{{#if typeof . === 'string'}}{{.}}{{else}}<span {{#if .font}}style="{{@.calcFont(.)}}"{{/if}}>{{.text}}</span>{{/if}}{{/each}}
     {{else}}
@@ -89,7 +90,7 @@
 </template>
 
 <template id="measured">
-  <span class-content {{#unless ~/reparent}}on-mouseover="@.set('temp.hover', @keypath), false"{{/unless}} on-mouseout="@.set('temp.hover', ''), false" on-click="@.selectWidget(@keypath)" title="{{.text}}">{{.text}}</span>
+  <span class-content {{#unless ~/reparent}}on-mouseover="@.set('temp.hover', @keypath), false"{{/unless}} on-mouseout="@.set('temp.hover', ''), false" title="{{.text}}">{{.text}}</span>
 </template>
 
 <template id="image">

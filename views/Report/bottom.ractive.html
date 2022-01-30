@@ -42,11 +42,11 @@
                       <button class-ico class-spacer disabled="{{@index === @last}}" on-click="@.moveDown(@context)" title="Move down">&#9660;</button>
                       {{#if typeof . === 'string'}}
                         <button class-ico on-click="@context.set('.', { text: . })" title="Format part">F</button>
-                        <Editor src="{{.}}" />
+                        <Editor src="{{.}}" primary="{{@index === 0}}" />
                       {{else}}
                         <button class-ico class-spacer on-click="@context.set('.', .text)" title="Plain part">T</button>
                         <input value="{{.id}}" placeholder="Tracking ID" title="Track this value by assigning it a unique ID" />
-                        <Editor src="{{.text}}" />
+                        <Editor src="{{.text}}" primary="{{@index === 0}}" />
                         <input title="Font Family" placeholder="Font Family" value="{{.font.family}}" />
                         <input title="Color" placeholder="Color" value="{{.font.color}}" />
                         <input title="Size" placeholder="Size (1)" value="{{.font.size}}" type="number" />
@@ -70,14 +70,14 @@
               </div>
               <div class-scrolled-wrapper style-flex-grow=1>
                 <div as-scrolled>
-                  <Editor src="{{.str}}" template="{{.html || .template}}" />
+                  <Editor src="{{.str}}" template="{{.html || .template}}" primary />
                 </div>
               </div>
             {{/if}}
           {{else}}
             <div class-scrolled-wrapper style-flex-grow=1>
               <div as-scrolled>
-                <Editor src="{{.str}}" template="{{.html || .template}}" />
+                <Editor src="{{.str}}" template="{{.html || .template}}" primary />
               </div>
             </div>
           {{/if}}
