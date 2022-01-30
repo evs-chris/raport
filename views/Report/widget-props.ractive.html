@@ -109,6 +109,7 @@
     </div>
   {{/if}}
 </span></label>
+{{#if .type !== 'image'}}
 <label><span>Alignment</span><span>
   <select value="{{.font.align}}">
     <option value="{{undefined}}">(default)</option>
@@ -117,14 +118,18 @@
     <option>right</option>
   </select>
 </span></label>
-{{#unless .type === 'measured'}}
+{{/if}}
+{{#unless .type === 'measured' || .type === 'image'}}
 <label><span title="Display all whitespace, including newlines, within the content of the {{.type}}?">Significant Space?</span><span><input type=checkbox twoway=false checked="{{.font.pre}}" on-change="@context.set('.font.pre', @node.checked ? true : undefined)" /></span></label>
 {{/unless}}
+{{#if .type !== 'image'}}
 <label><span>Prevent Overflow?</span><span><input type=checkbox twoway=false checked="{{.font.clamp}}" on-change="@context.set('.font.clamp', @node.checked ? true : undefined)" /></span></label>
 <label><span>Text Size</span><span><input type=number value="{{.font.size}}" /></span></label>
-{{#unless .type === 'measured'}}
+{{/if}}
+{{#unless .type === 'measured' || .type === 'image'}}
 <label><span>Line Height</span><span><input type=number value="{{.font.line}}" /></span></label>
 {{/unless}}
+{{#if .type !== 'image'}}
 <label><span>Font Family</span><span><input value="{{.font.family}}" /></span></label>
 <label><span>Text Color</span><span><input value="{{.font.color}}" /></span></label>
 <label><span>Weight</span><span>
@@ -136,7 +141,10 @@
     <option value="700">bolder</option>
   </select>
 </span></label>
+{{/if}}
+{{#if !.margin}}
 <label><span title="Padding to add to the right side of the {{.type}}, which is useful for right-aligned text">Right Pad</span><span><input type=number value="{{.font.right}}" /></span></label>
+{{/if}}
 
 <template id="page-props">
 </template>
