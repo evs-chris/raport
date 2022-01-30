@@ -7,6 +7,7 @@ import { parse, parseTemplate } from 'raport/index';
 import autosize from './autosize';
 
 const notSpace = /[^\s]/;
+const initSpace = /^(\s*).*/;
 
 export class Editor extends Ractive {
   constructor(opts?: InitOpts) {
@@ -85,6 +86,22 @@ export class Editor extends Ractive {
       n.selectionStart = pos[0];
       n.selectionEnd = pos[1];
 
+      n.dispatchEvent(new InputEvent('input'));
+      n.dispatchEvent(new InputEvent('change'));
+      return false;
+    } else if (ev.key === 'Enter') {
+      const n: HTMLTextAreaElement = ev.target as any;
+      let txt = n.value;
+      let pos = [n.selectionStart, n.selectionEnd];
+      let idx = txt.lastIndexOf('\n');
+
+      const line = txt.substring(~idx ? idx + 1 : 0, pos[0]);
+      const space = line.replace(initSpace, '$1');
+      
+      txt = txt.substr(0, pos[0]) + '\n' + space + txt.substr(pos[1]);
+      n.selectionStart = n.selectionEnd = pos[0] + space.length + 1;
+
+      n.value = txt;
       n.dispatchEvent(new InputEvent('input'));
       n.dispatchEvent(new InputEvent('change'));
       return false;
