@@ -1,3 +1,20 @@
+## 0.9.2
+
+2022-01-30
+
+### Render
+
+* __BUG__: Image widgets stay within their bounds if they have a margin.
+* __BREAKING__: Image widgets can now be set to cover, stretch, or contain, which is the default. This uses `background-image`, so it will require printing backgrounds to output the image.
+
+### Designer
+
+* __BUG__: The designer run output no longer includes html shadows for print output.
+* Expression properties now use the code editor for input.
+* The code editor will now maintain the indentation of lines.
+* Irrelevant widget properties are no longer available in the property editor.
+
+
 ## 0.9.1
 
 2022-01-29
