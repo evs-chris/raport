@@ -84,11 +84,13 @@ export class Designer extends Ractive {
   frameExtra() {
     return `
       <style>
-        html:before, html:after { content: ' '; position: fixed; display: block; z-index: 2; box-shadow: 0 0 10px #000; transition: opacity 0.4s ease-in-out; opacity: 1; width: 100%; height: 5px; }
-        html:before { top: -5px; }
-        html:after { bottom: -5px; }
-        html.scrolled-top:before { opacity: 0; }
-        html.scrolled-bottom:after { opacity: 0; }
+        @media screen {
+          html:before, html:after { content: ' '; position: fixed; display: block; z-index: 2; box-shadow: 0 0 10px #000; transition: opacity 0.4s ease-in-out; opacity: 1; width: 100%; height: 5px; }
+          html:before { top: -5px; }
+          html:after { bottom: -5px; }
+          html.scrolled-top:before { opacity: 0; }
+          html.scrolled-bottom:after { opacity: 0; }
+        }
       </style>
       <script>
         const html = document.scrollingElement || document.documentElement;
