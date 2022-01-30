@@ -993,16 +993,15 @@ Ractive.extendWith(Designer, {
       }
     },
     'temp.expr.str'(v) {
-      if (!v && typeof v !== 'string') {
+      if (!v) {
         this.set('temp.expr.error', undefined);
         this.set('temp.expr.ast', undefined);
-        return;
       }
 
       const path = this.get('temp.expr.path');
       const html = this.get('temp.expr.html') || this.get('temp.expr.template');
       if (path) this.set(path, v);
-      if (!this.evalLock) {
+      if (!this.evalLock && v.trim()) {
         this.evalLock = true;
         try {
           const arr = Array.isArray(v) ? v : [v];
