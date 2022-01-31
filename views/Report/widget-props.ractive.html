@@ -38,7 +38,7 @@
   {{else}}
     <label><span title="Cause the next widget to start on the next line in an automatic layout">Break? <button class-ico on-click="@context.set('^^/br', typeof ^^/br === 'object' ? false : { x: ''})" title="{{typeof ^^/br === 'object' ? 'Change to Boolean' : 'Change to Expression'}}">
     {{>switch}}
-    {{#if typeof ^^/br === 'object' && 'x' in ^^/br}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide'), false">&#9998;</button>{{/if}}
+    {{#if typeof ^^/br === 'object' && 'x' in ^^/br}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('^^/br.x'), false">&#9998;</button>{{/if}}
   </button></span><span>
       {{#if typeof ^^/br !== 'object'}}
         <input type=checkbox checked="{{^^/br}}" />
