@@ -90,7 +90,7 @@ Unreleased
 
 ### Data
 
-* __BUG__: `time-span` will once again compute `unit::d`, `unit::M`, and `unit:[:M :d]` as accurately as is possible with the given input. For exact spanswith an anchored start timestamp, it should be exact.
+* __BUG__: `time-span` will once again compute `unit::d`, `unit::M`, and `unit:[:M :d]` as accurately as is possible with the given input. For exact spans with an anchored start timestamp, it should be exact.
 
 
 ## 0.8.8
@@ -297,7 +297,7 @@ Unreleased
 
 ### Data
 
-* __BUG_: Filters once again correctly evaluate applications.
+* __BUG__: Filters once again correctly evaluate applications.
 
 ### Parser
 
@@ -613,7 +613,7 @@ There is now a [Ractive.js](https://ractive.js.org)-based designer available. It
 * The built-in operators are now all kebab-cased to play nicely with expressions.
 * The `Parameter` type is now extendable.
 * Sorting and filtering can both be done with full expressions rather than a fixed array or operation application respectively.
-* The `Root` context class will now accept and `ExtendOptions` object to initialize parameters and special refs.
+* The `Root` context class will now accept an `ExtendOptions` object to initialize parameters and special refs.
 
 #### Report
 
