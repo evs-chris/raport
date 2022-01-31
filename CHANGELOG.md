@@ -11,6 +11,7 @@ Unreleased
 
 * Property type switch buttons are now all normalized with the same icon.
 * Properties with editors can now all be edited in the external expression editor.
+* Expression properties that are being edited in the eval expression will unlink if their parent object gets removed or type changed from `object`.
 
 
 ## 0.9.2

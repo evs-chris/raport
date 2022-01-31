@@ -312,6 +312,13 @@ export class Designer extends Ractive {
 
     const el = document.getElementById(`expr-${html ? 'html' : 'text'}`);
     if (el) el.focus();
+
+    const parent = Ractive.joinKeys(...Ractive.splitKeypath(path).slice(0, -1));
+    let watch: ObserverHandle;
+    watch = this.observe(`${parent} temp.expr.path`, (v, _o, k) => {
+      if (k === 'temp.expr.path') return watch.cancel();
+      if (!v || typeof v !== 'object') this.checkLink('expr');
+    }, { init: false });
   }
 
   editParam(ctx: ContextHelper) {
