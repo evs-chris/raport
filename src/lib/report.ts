@@ -234,10 +234,31 @@ interface ReportExtras {
   foot?: string;
 }
 
+/** Initialize a parameter map based on the parameters defined by the given report. */
+export function initParameters(report: Report, sources: SourceMap, parameters?: ParameterMap|Root): ParameterMap {
+  const ctx = parameters && 'root' in parameters && parameters.root === parameters ? parameters as Root : new Root(Object.assign({}, report.context), { parameters });
+  ctx.parameters = Object.assign({}, report.defaultParams, ctx.parameters);
+  const inits: ParameterMap = {};
+
+  if (report.sources) applySources(ctx, report.sources, sources);
+
+  if (Array.isArray(report.parameters)) {
+    for (const p of report.parameters) {
+      if (p.init && p.name) {
+        inits[p.name] = evaluate(ctx, p.init);
+      }
+    }
+  }
+
+  return inits;
+}
+
+/** Run the given report to string. If the report is displayed, the result will be HTML. Otherwise, it will be plain text. */
 export function run(report: Report, sources: SourceMap, parameters?: ParameterMap|Root, extra?: ReportExtras): string {
   const ctx = parameters && 'root' in parameters && parameters.root === parameters ? parameters as Root : new Root(Object.assign({}, report.context), { parameters });
 
   if (report.sources) applySources(ctx, report.sources, sources);
+  ctx.parameters = Object.assign({}, initParameters(report, sources), ctx.parameters);
 
   if (report.type === 'delimited') return runDelimited(report, ctx);
   else if (report.type === 'flow') return runFlow(report, ctx, extra);

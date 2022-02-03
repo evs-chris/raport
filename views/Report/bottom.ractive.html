@@ -157,20 +157,31 @@
     {{#with ~/param}}
       <label><span>Name</span><input value="{{.name}}" /></label>
       <label><span>Type</span><select value="{{.type}}">{{>types}}</select></label>
+      {{#if .type === 'string'}}<label><span>Refine</span><select value="{{.refine}}">
+        <option value="{{undefined}}">(none)</option>
+        <option value="text">Multiline Text</option>
+        <option value="code">Expression</option>
+      </select></label>{{/if}}
       <label><input type=checkbox checked="{{.required}}" /> Require?</label>
       <label><span>Label</span><input value="{{.label}}" /></label>
-      <label><input type=checkbox twoway=false checked="{{!!.options}}" on-change="@context.set('.options', !!.options ? undefined : [])" /> Options?</label>
-      {{#if !!.options}}
+      {{#if .init === undefined}}
+        <label><input type=checkbox twoway=false on-change="@context.set('.init', '')" /> Initialization expression?</label>
+      {{else}}
+        <label><input type=checkbox twoway=false checked on-change="@context.set('.init', undefined)" /> Initialization expression?</label>
+        <div style="height: 5em; border: 1px solid #ccc; overflow: auto; margin-right: 1em;"><Editor src="{{.init}}" /></div>
+      {{/if}}
+      <label><input type=checkbox twoway=false checked="{{Array.isArray(.options)}}" on-change="@context.set('.options', Array.isArray(.options) ? undefined : [])" /> Options?</label>
+      {{#if Array.isArray(.options)}}
         <div class-options style="height: 100%; width: 30rem;">
-          <div>
+          <h3>Options</h3>
+          <div class="option-entry">
             {{#with @local as ctx}}
               <label><span>Label</span><br/><input value="{{ctx.label}}" /></label>
               <label><span>Value</span><br/><input value="{{ctx.value}}" /></label>
-              <button disabled="{{ctx.label || !ctx.value}}" class-ico class-large on-click="@context.push('.options', !ctx.label ? ctx.value : { label: ctx.label, value: ctx.value }), @context.set({ 'ctx.label': '', 'ctx.value': '' })">+</button>
+              <button disabled="{{!ctx.value}}" class-ico class-large on-click="@context.push('.options', !ctx.label ? ctx.value : { label: ctx.label, value: ctx.value }), @context.set({ 'ctx.label': '', 'ctx.value': '' })">+</button>
             {{/with}}
           </div>
           {{#if .options}}
-            <h3>Options</h3>
             <div class-scrolled-wrapper><div as-scrolled>
               {{#each .options}}
                 <div>
@@ -602,5 +613,18 @@
   }
   .label-part label {
     white-space: nowrap;
+  }
+
+  .option-entry {
+    box-sizing: border-box;
+    display: flex;
+    margin-bottom: 0.5em;
+    align-items: end;
+    justify-content: space-between;
+  }
+  .option-entry > * {
+    flex-shrink: 1;
+    flex-grow: 1;
+    margin: 0.2em;
   }
 </style>

@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { InitOpts, ContextHelper, ReadLinkResult, ObserverHandle } from 'ractive';
-import { Report, Literal, run, parse, stringify, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap } from 'raport/index';
+import { Report, Literal, run, parse, stringify, initParameters, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap, Parameter } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 import { Editor, Viewer } from './Editor';
@@ -1092,6 +1092,13 @@ Ractive.extendWith(Designer, {
     },
     'report.defaultParams'(v) {
       this.set('params', Object.assign({}, v));
+    },
+    'report.parameters': {
+      handler(v: Parameter[]) {
+        if (v) this.set('params', initParameters(this.get('report'), this.buildSources()));
+      },
+      init: false,
+      strict: true,
     },
   },
   on: {

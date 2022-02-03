@@ -555,6 +555,8 @@ export interface ParameterBase {
   name: string;
   type?: Type;
   required?: boolean;
+  refine?: string;
+  init?: ValueOrExpr;
 }
 
 export interface ParameterMap {

@@ -1,5 +1,5 @@
 export {
-  run, applySource, applySources,
+  run, applySource, applySources, initParameters,
   Delimited, Displayed, Flow, Page,
   Widget, Container, HTML, Label, Image, Span, Repeater,
   Borders, Dimension, Font, Margin, MeasureFont, PageOrientation, PageSize, PageSizes, PartSource, Placement, Report, ReportSource, ReportType, Style,
