@@ -968,7 +968,8 @@ Ractive.extendWith(Designer, {
       temp: {
         expr: {
           tab: 'text',
-        }
+        },
+        widget: 'report',
       },
       exprExpand: {},
     };
