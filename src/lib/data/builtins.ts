@@ -620,6 +620,9 @@ registerOperator(
           const offset = t[4] + res.getTimezoneOffset();
           res.setMinutes(res.getMinutes() + offset);
         }
+      } else {
+        const offset = t + res.getTimezoneOffset();
+        res.setMinutes(res.getMinutes() + offset);
       }
     }
 
