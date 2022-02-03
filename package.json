@@ -37,8 +37,10 @@
     "start": "ENV=dev rollup -c rollup.config.js -w",
     "build": "ENV=dev rollup -c rollup.config.js",
     "build:prod": "scripts/build-prod.sh",
-    "tsc:definitions": "tsc -p lib.tsconfig.json --emitDeclarationOnly",
-    "package": "rm -r lib &>/dev/null; rm -r design &>/dev/null; ENV=prod rollup -c rollup.config.js; tsc -p lib.tsconfig.json --emitDeclarationOnly && cp -r build/src/lib/* lib && cp -r build/src/design/* design",
+    "tsc:definitions": "tsc -p lib.tsconfig.json --emitDeclarationOnly && cp -r build/src/lib/* lib && cp -r build/src/design/* design",
+    "package": "npm run tsc:definitions; npm run build:prod",
+    "clean:package": "rm -r lib &>/dev/null; rm -r design &>/dev/null; mkdir lib; mkdir design; npm run tsc:definitions; npm run build:prod",
+    "old:package": "rm -r lib &>/dev/null; rm -r design &>/dev/null; ENV=prod rollup -c rollup.config.js; tsc -p lib.tsconfig.json --emitDeclarationOnly && cp -r build/src/lib/* lib && cp -r build/src/design/* design",
     "dev": "ENV=dev rollup -c rollup.config.js -w",
     "clean": "rm -r build &>/dev/null; rm -r lib &>/dev/null",
     "test": "rollup -c test.rollup.config.js && qunit --require 'source-map-support/register' build/test.js"
