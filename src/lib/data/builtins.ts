@@ -1,4 +1,4 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate } from './parse';
 
@@ -858,7 +858,15 @@ registerFormat('dollar', (n, [dec, sign]) => {
 });
 
 registerFormat('date', (n, [fmt]) => {
-  return date(isDateRel(n) ? dateRelToDate(n) : n, fmt);
+  return date(isDateRel(n) ? dateRelToExactRange(n) : n, fmt);
+});
+
+registerFormat('time', n => {
+  return date(isDateRel(n) ? dateRelToExactRange(n) : n, 'HH:mm:ss');
+});
+
+registerFormat('timestamp', n => {
+  return date(isDateRel(n) ? dateRelToExactRange(n) : n, 'yyyy-MM-ddTHH:mm:sszzz');
 });
 
 registerFormat('integer', (n, [group]) => {

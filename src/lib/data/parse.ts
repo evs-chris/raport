@@ -133,14 +133,19 @@ const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 
 
 export const timezone = map(seq(ws, alt<string|[string, string, [string, string]]>('timezone',
   istr('z'),
-  seq(opt(chars(1, '+-')), read1(digits),
+  seq(opt(chars(1, '+-')), alt(chars(4, digits), chars(2, digits), chars(1, digits)),
     opt(seq(str(':'), chars(2, digits)))
   )
 )), v => {
   if (v[1][0] === 'z') return 0;
   else {
-    let res = +v[1][1] * 60;
-    if (v[1][2]) res += +v[1][2][1];
+    let res: number;
+    if (v[1][1].length === 4) {
+      res = +v[1][1].substr(0, 2) * 60 + +v[1][1].substr(3, 2);
+    } else {
+      res = +v[1][1] * 60;
+      if (v[1][2]) res += +v[1][2][1];
+    }
     if (v[1][0] === '-') res *= -1;
     return res;
   }

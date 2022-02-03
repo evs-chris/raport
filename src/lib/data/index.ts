@@ -737,10 +737,23 @@ export function isDateRel(v: any): v is DateRel {
   return v && typeof v === 'object' && (('f' in v && (Array.isArray(v.f) || 'o' in v)) || v instanceof Date);
 }
 
+export function isDateExactRange(v: any): v is DateExactRange {
+  return v && typeof v === 'object' && 'f' in v && Array.isArray(v.f);
+}
+
 export function dateRelToDate(rel: DateRel): Date {
   const range = dateRelToRange(rel);
   if ('e' in rel && rel.e != null) return range[1];
   else return range[0];
+}
+
+export function dateRelToExactRange(rel: DateRel): DateExactRange {
+  if (!rel) return;
+  if (isDateExactRange(rel)) return rel;
+  const dt = dateRelToDate(rel);
+  return {
+    f: [dt.getFullYear(), dt.getMonth(), dt.getDate(), dt.getHours(), dt.getMinutes(), dt.getSeconds(), dt.getMilliseconds(), 'z' in rel ? rel.z : dt.getTimezoneOffset()],
+  };
 }
 
 export function isTimespan(v: any): v is TimeSpan {
