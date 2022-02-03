@@ -141,7 +141,7 @@ export const timezone = map(seq(ws, alt<string|[string, string, [string, string]
   else {
     let res: number;
     if (v[1][1].length === 4) {
-      res = +v[1][1].substr(0, 2) * 60 + +v[1][1].substr(3, 2);
+      res = +v[1][1].substr(0, 2) * 60 + +v[1][1].substr(2, 2);
     } else {
       res = +v[1][1] * 60;
       if (v[1][2]) res += +v[1][2][1];
