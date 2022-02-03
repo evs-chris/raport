@@ -1428,7 +1428,7 @@ function jsonToJS(json: any, strings: 'json'|'template'): string {
   else if (typeof json === 'object') return `{${Object.entries(json).map(([k, v]) => v === undefined ? v : `${plainKeys.test(k) ? k : `'${k}'`}:${jsonToJS(v, strings)}`).filter(v => !!v).join(',')}}`;
 }
 
-function debounce(fn: (...args: any[]) => void, time: number): (...args: any[]) => void {
+export function debounce(fn: (...args: any[]) => void, time: number): (...args: any[]) => void {
   let tm: any;
   function wrapper(...args: any[]) {
     if (tm) {

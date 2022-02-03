@@ -1,1 +1,1 @@
-export { Designer as ReportDesigner, AvailableSource, ExprOptions } from './Report';
+export { Designer as ReportDesigner, AvailableSource, ExprOptions, debounce } from './Report';
