@@ -752,7 +752,7 @@ export function dateRelToExactRange(rel: DateRel): DateExactRange {
   if (isDateExactRange(rel)) return rel;
   const dt = dateRelToDate(rel);
   return {
-    f: [dt.getFullYear(), dt.getMonth(), dt.getDate(), dt.getHours(), dt.getMinutes(), dt.getSeconds(), dt.getMilliseconds(), 'z' in rel ? rel.z : dt.getTimezoneOffset()],
+    f: [dt.getFullYear(), dt.getMonth(), dt.getDate(), dt.getHours(), dt.getMinutes(), dt.getSeconds(), dt.getMilliseconds(), 'z' in rel ? rel.z : -dt.getTimezoneOffset()],
   };
 }
 

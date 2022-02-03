@@ -100,17 +100,22 @@ export function date(d: string|Date|DateExactRange, fmt: string): string {
     } else if (m[0] === 'a') {
       return H > 11 ? 'PM' : 'AM';
     } else if (m[0] === 'z') {
-      const min = 0 - Z;
+      let min = 0 - Z;
+      const bit = min < 0 ? '-' : '+';
+      min = Math.abs(min);
       let r: number = min;
-      if (m.length === 1) r = Math.floor(min / 60);
-      else if (m.length === 2) {
+      if (m.length === 1) {
+        r = Math.floor(min / 60);
+      } else if (m.length === 2) {
         const mm = min % 60;
-        return `${min >= 0 ? '+' : ''}${Math.floor(min / 60)}${mm < 10 ? '0' : ''}${mm}`;
+        const h = Math.floor(min / 60);
+        return `${bit}${h < 10 ? '0' : ''}${h}${mm < 10 ? '0' : ''}${mm}`;
       } else if (m.length === 3) {
         const mm = min % 60;
-        return `${min >= 0 ? '+' : ''}${Math.floor(min / 60)}:${mm < 10 ? '0' : ''}${mm}`;
+        const h = Math.floor(min / 60);
+        return `${bit}${h < 10 ? '0' : ''}${h}:${mm < 10 ? '0' : ''}${mm}`;
       } else r = min;
-      return `${r >= 0 ? '+' : ''}${r}`;
+      return `${bit}${r}`;
     }
   });
 }
