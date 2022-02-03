@@ -17,6 +17,7 @@ export {
   Operator, AggregateOperator, CheckedOperator, ValueOperator,
   Operation,
   Type, ArrayType, ValueType, Value, Literal, Reference, ValueOrExpr,
+  template,
 } from './data/index';
 export { inspect } from './data/schema';
 export { parse, parsePath, parseTime, parseDate } from './data/parse';

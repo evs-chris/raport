@@ -1,4 +1,5 @@
-import { parse, parsePath, parseLetPath, isTimespanMS, timeSpanToNumber } from './parse';
+import { parse, parsePath, parseLetPath, isTimespanMS } from './parse';
+import { parse as parseTemplate } from './parse/template';
 import { ParseError } from 'sprunge/lib';
 
 // Data
@@ -225,7 +226,7 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, val
   } else if (isContext(root)) {
     r = root;
     !Array.isArray(value) && (e = value);
-  } else if (root && 'context' in root && isContext(root.context)) {
+  } else if (root && typeof root === 'object' && 'context' in root && isContext(root.context)) {
     r = root.context;
     !Array.isArray(value) && (e = value);
   } else if (isValueOrExpr(value)) {
@@ -236,6 +237,28 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, val
     e = root;
   }
   return evalParse(r, e);
+}
+
+export function template(template: string): string;
+export function template(root: Context|{ context: Context }|any, template: string): string;
+export function template(root: string|Context|{ context: Context }|any, template?: string): string {
+  let r: Context;
+  let t: string;
+  if (typeof root === 'string') {
+    r = new Root();
+    t = root;
+  } else if (isContext(root)) {
+    r = root;
+    t = template || '';
+  } else if (root && typeof root === 'object' && 'context' in root && isContext(root.context)) {
+    r = root.context;
+    t = template || '';
+  } else {
+    r = new Root();
+    t = root;
+  }
+  r = extend(r, { parser: parseTemplate });
+  return evalParse(r, t);
 }
 
 export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[]): any {
