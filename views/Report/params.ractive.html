@@ -1,5 +1,6 @@
 <div class-scrolled-wrapper style-flex-grow=1><div as-scrolled>
   <button on-click="@.set('report.defaultParams', params)" class="ico text" title="Save these values as the report defaults">Save as Defaults</button>
+  <button on-click="@.initParams()" class="ico text" title="Re-initialize all parameters">Re-init Params</button>
   <div class="param-editor">
   {{#each ~/report.parameters}}{{#if .name}}
     <div class-param>

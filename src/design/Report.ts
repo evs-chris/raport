@@ -941,6 +941,10 @@ export class Designer extends Ractive {
     this._undoWatch.resume();
   }
 
+  async initParams() {
+    this.set('params', initParameters(this.get('report'), await this.buildSources()));
+  }
+
   _onChange(v: any) {
     const s = JSON.stringify(v);
     if (s === this._undo[0]) return;
@@ -1094,8 +1098,8 @@ Ractive.extendWith(Designer, {
       this.set('params', Object.assign({}, v));
     },
     'report.parameters': {
-      handler(v: Parameter[]) {
-        if (v) this.set('params', initParameters(this.get('report'), this.buildSources()));
+      async handler(v: Parameter[]) {
+        if (v) this.initParams();
       },
       init: false,
       strict: true,
