@@ -429,7 +429,7 @@ export class Designer extends Ractive {
 
   async buildSources(): Promise<SourceMap> {
     const report: Report = this.get('report');
-    const avs: AvailableSource[] = this.get('sources');
+    const avs: AvailableSource[] = this.get('sources') || [];
     const res: SourceMap = {};
     for (const src of report.sources || []) {
       const av = avs.find(s => s.name === src.source);
