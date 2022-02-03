@@ -15,7 +15,7 @@
         <span class-which><button class="ico large" on-click="@.checkLink('import')">&times;</button> Close Import</span>
       {{/if}}
       {{#if tab === 'result'}}<button class="ico text" on-click="@.download((~/report.name || 'report') + (~/report.type === 'delimited' ? '.csv' : '.html'), ~/result, ~/report.type === 'delimited' ? 'text/csv' : 'text/html')" title="Save output to a file">Save Output</button>{{/if}}
-      <button on-click="@.set('tab', 'project')" class-tab class-right class-active="tab === 'project'">Project</button>
+      {{#if ~/projects}}<button on-click="@.set('tab', 'project')" class-tab class-right class-active="tab === 'project'">Project</button>{{/if}}
     </div>
     <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">
       {{>design}}
@@ -29,9 +29,11 @@
     <div class-result class-tab class-active-tab="tab === 'result'">
       <iframe id=result srcdoc="{{~/report.type === 'delimited' ? '<style>pre { margin: 1rem; background-color: #fff; padding: 0.5rem; }</style><code><pre>' + result + '</pre></code>' + @.frameExtra() : result}}"></iframe>
     </div>
-    <div class-project class-tab class-active-tab="tab === 'project'">
-      {{>project}}
-    </div>
+    {{#if ~/projects}}
+      <div class-project class-tab class-active-tab="tab === 'project'">
+        {{>project}}
+      </div>
+    {{/if}}
     <div class-bottom-pane class-active="~/temp.bottom.pop">
       {{>bottom}}
     </div>

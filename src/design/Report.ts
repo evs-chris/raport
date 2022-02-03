@@ -972,6 +972,7 @@ Ractive.extendWith(Designer, {
         widget: 'report',
       },
       exprExpand: {},
+      projects: true,
     };
   },
   components: { Editor, Viewer },
@@ -1097,8 +1098,8 @@ Ractive.extendWith(Designer, {
     init() {
       this.resetUndo();
       this.command('styleWithCSS', false, 'true');
-      this.loadProjects();
       this._undoWatch = this.observe('report', debounce(this._onChange, 2000), { defer: true, init: true });
+      setTimeout(() => this.loadProjects(), 500);
     },
     expr(ctx, path?: string) {
       const p = path || ctx.resolve();
