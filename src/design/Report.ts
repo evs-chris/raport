@@ -529,7 +529,7 @@ export class Designer extends Ractive {
     if (c !== c.root) {
       while (c) {
         c = c.parent;
-        if (c === c.root) prefix = '#';
+        if (c === c.root) prefix = '~';
         else prefix += '^';
         if (last === c.value) continue;
 
