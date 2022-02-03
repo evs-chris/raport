@@ -23,7 +23,48 @@ export class Editor extends Ractive {
   }
 
   keydown(ev: KeyboardEvent) {
-    if (ev.key === 'Tab') {
+    let key = ev.key;
+    let shift = ev.shiftKey;
+
+    if (key === 'Backspace') {
+      const n: HTMLTextAreaElement = ev.target as any;
+      const txt = n.value;
+      if (n.selectionStart === n.selectionEnd) {
+        const idx = txt.lastIndexOf('\n', n.selectionStart - 1);
+        const str = txt.substring(idx > 0 ? idx + 1 : 0, n.selectionStart);
+        if (str && !notSpace.test(str) && str.length > 1) {
+          key = 'Tab';
+          shift = true;
+        }
+      }
+    }
+
+    if (key === 'Home') {
+      const n: HTMLTextAreaElement = ev.target as any;
+      const txt = n.value;
+      if (n.selectionStart) {
+        const idx = txt.lastIndexOf('\n', n.selectionStart - 1);
+        let line = txt.substring(idx > 0 ? idx + 1 : 0, n.selectionStart);
+
+        let space = line.replace(initSpace, '$1');
+        if (!line || notSpace.test(line)) {
+          if (!line) {
+            let nidx = line.indexOf('\n', idx);
+            if (!~nidx) nidx = txt.length;
+            let i = n.selectionStart;
+            for (i; i < nidx; i++) if (notSpace.test(txt[i])) break;
+            n.selectionStart = i;
+          } else {
+            n.selectionStart = n.selectionStart - line.length + space.length;
+          }
+        } else {
+          n.selectionStart = n.selectionStart - line.length;
+        }
+
+        if (!shift) n.selectionEnd = n.selectionStart;
+        return false;
+      }
+    } else if (key === 'Tab') {
       const n: HTMLTextAreaElement = ev.target as any;
       let txt = n.value;
       let pos = [n.selectionStart, n.selectionEnd];
@@ -33,12 +74,12 @@ export class Editor extends Ractive {
         idx = txt.lastIndexOf('\n', pos[0]);
         if (this.get('tabout')) {
           if (txt.length === 0) return true;
-          if (!ev.shiftKey && notSpace.test(txt.substring(idx === -1 ? 0 : idx, pos[0]))) return true;
+          if (!shift && notSpace.test(txt.substring(idx === -1 ? 0 : idx, pos[0]))) return true;
         }
         if (idx === pos[0]) idx = txt.lastIndexOf('\n', idx - 1);
         if (idx === -1) idx = 0;
         else idx += 1
-        if (ev.shiftKey) {
+        if (shift) {
           if (txt.substr(idx, 2) === '  ') {
             txt = txt.substring(0, idx) + txt.substr(idx + 2);
             pos[0] = pos[0] - 2;
@@ -53,7 +94,7 @@ export class Editor extends Ractive {
         idx = txt.lastIndexOf('\n', n.selectionEnd);
         if (idx === pos[0] && idx == pos[1]) idx = txt.lastIndexOf('\n', idx - 1);
         for (; ~idx && idx > n.selectionStart;) {
-          if (ev.shiftKey) {
+          if (shift) {
             if (txt.substr(idx + 1, 2) === '  ') {
               txt = txt.substring(0, idx + 1) + txt.substr(idx + 3);
               pos[1] = pos[1] - 2;
@@ -68,7 +109,7 @@ export class Editor extends Ractive {
         if (!~idx) idx = 0;
         else idx += 1;
         if (~idx) {
-          if (ev.shiftKey) {
+          if (shift) {
             if (txt.substr(idx, 2) === '  ') {
               txt = txt.substring(0, idx) + txt.substr(idx + 2);
               pos[0] = pos[0] - 2;
@@ -93,15 +134,15 @@ export class Editor extends Ractive {
       const n: HTMLTextAreaElement = ev.target as any;
       let txt = n.value;
       let pos = [n.selectionStart, n.selectionEnd];
-      let idx = txt.lastIndexOf('\n');
+      let idx = txt.lastIndexOf('\n', pos[0] - 1);
 
-      const line = txt.substring(~idx ? idx + 1 : 0, pos[0]);
+      const line = txt.substring(idx >= 0 ? idx + 1 : 0, pos[0]);
       const space = line.replace(initSpace, '$1');
       
       txt = txt.substr(0, pos[0]) + '\n' + space + txt.substr(pos[1]);
+      n.value = txt;
       n.selectionStart = n.selectionEnd = pos[0] + space.length + 1;
 
-      n.value = txt;
       n.dispatchEvent(new InputEvent('input'));
       n.dispatchEvent(new InputEvent('change'));
       return false;
