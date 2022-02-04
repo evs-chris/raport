@@ -2,16 +2,43 @@
 
 Unreleased
 
+### Library
+
+* Builds will now properly update the typings.
+* Report parameters now support `string`s with a `refine` property that can be used to change the designer-rendered editor. Current this supports `text` for a textarea/multiline input and `code` for an expression editor.
+* Report parameters now support initialization via an `init` parameter that can be an expression. Parameters are initialized at report run, with `run` supplied parameters `Object.assign`ed over the init parameters.
+* New helper function `initParameters` returns a parameter map composed of report parameters that have initializers.
+* New helper function `template` will evaluate a template expression and return the resulting string, which is much more convenient than supplying the template parser to a context when evaluating the expression.
+
 ### Render
 
 * Image widgets will now use an `<img>` tag for fit stretch so you can avoid needing to enable backgrounds when converting the HTML to PDF.
 * Image fit can now be an expression.
 
+### Data
+
+* ___BUG__: Converting a relative date to an exact date now accounts for the time zone.
+* The `date` format now supports outputting the time zone using `z`, `zz`, `zzz`, and `zzzz`.
+* The `date` function now supports moving the date into another time zone in addition to the existing support for adjusting the time.
+
+### Parser
+
+* Time zones can now be in the iso8601 format without a `:`.
+
 ### Designer
 
+* __BUG__: New line handling in the middle of a expression editor no longer duplicates text.
+* __BUG__: The expression editor textarea and displayed code no longer get their sizes out of sync when the parent font size is not 1 em.
+* __BUG__: The root context root reference sigil is now `~` rather than the old `#`.
+* __BUG__: Avoid exception caused by designer available sources becoming something other than an object.
 * Property type switch buttons are now all normalized with the same icon.
 * Properties with editors can now all be edited in the external expression editor.
 * Expression properties that are being edited in the eval expression will unlink if their parent object gets removed or type changed from `object`.
+* The expression editor now handles backspace in leading indent as outdent and home will jump between the beginning of the line and the first non-space character.
+* The designer will now start with the report widget selected.
+* The projects tab can be hidden, which is useful for embedding.
+* `debounce` is now exported by the designer library.
+* You can now re-initialize report parameters from the parameters entry pane. Parameters are automatically initialized if the report parameters array is replaced.
 
 
 ## 0.9.2
