@@ -1,6 +1,8 @@
 import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
-import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate } from './parse';
+import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseExpr, parse } from './parse';
+import { parse as parseTemplate } from './parse/template';
+import { stringify } from './parse/stringify';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
   return {
@@ -390,9 +392,17 @@ registerOperator(
       } else return span;
     }
   }),
-  simple(['string'], (_name: string, [value]: any[]): string => {
+  simple(['string', 'unparse'], (name: string, args: any[]): string => {
+    const [value] = args;
+    let opts = args.slice(-1)[0] || {};
+    if (name === 'unparse') opts = Object.assign({}, opts, { raport: 1 });
+    if (opts.raport && opts.tpl) opts.template = 1;
     if (value === null || value === undefined) return '';
     if (Array.isArray(value)) return value.join(', ');
+
+    if (typeof opts === 'object' && opts.json) return JSON.stringify(value);
+    else if (typeof opts === 'object' && opts.raport) return stringify(value, opts);
+
     let res = `${value}`;
     if (res.slice(0, 7) === '[object') return JSON.stringify(value);
     return res;
@@ -663,6 +673,17 @@ registerOperator(
     const fmt = formats[v];
     if (!fmt) return `${n}`;
     else return fmt(n, s);
+  }),
+  simple(['parse'], (_name: string, args: any[]): any => {
+    let opts = args.slice(-1)[0] || {};
+    if (typeof opts !== 'object') opts = {};
+    const [v] = args;
+
+    if (opts.date) return parseDate(v, opts);
+    else if (opts.template || opts.tpl) return parseTemplate(v, opts);
+    else if (opts.time) return parseTime(v, opts);
+    else if (opts.expr) return parseExpr(v, opts);
+    else return parse(v, opts);
   }),
 );
 
