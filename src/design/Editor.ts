@@ -6,6 +6,8 @@ import { parse, parseTemplate } from 'raport/index';
 
 import autosize from './autosize';
 
+import { debounce } from './Report'
+
 const notSpace = /[^\s]/;
 const initSpace = /^(\s*).*/;
 
@@ -20,6 +22,9 @@ export class Editor extends Ractive {
     const parser = this.get('template') ? parseTemplate : parse;
     const ast = parser(expr, { tree: true, compact: true } as any);
     this.set('ast', ast);
+    if (!this.rendered) return;
+    const pre = this.find('pre');
+    if (pre) this.set('lines', breakLines(expr, pre.clientWidth));
   }
 
   keydown(ev: KeyboardEvent) {
@@ -152,9 +157,11 @@ export class Editor extends Ractive {
 
 Ractive.extendWith(Editor, {
   template, css, cssId: 'raport-editor',
-  observe: {
-    'src template'() {
-      this.highlightSyntax();
+  on: {
+    init() {
+      this.observe('src template', debounce(function() {
+        this.highlightSyntax();
+      }, 150));
     },
   },
   decorators: { autosize },
@@ -172,6 +179,9 @@ export class Viewer extends Ractive {
     const parser = this.get('template') ? parseTemplate : parse;
     const ast = parser(expr, { tree: true, compact: true } as any);
     this.set('ast', ast);
+    if (!this.rendered) return;
+    const pre = this.find('pre');
+    if (pre) this.set('lines', breakLines(expr, pre.clientWidth));
   }
 }
 
@@ -185,11 +195,29 @@ Ractive.extendWith(Viewer, {
   partials: {
     'ast-node': template.p['ast-node'],
   },
-  observe: {
-    'src template'() {
-      this.highlightSyntax();
+  on: {
+    init() {
+      this.observe('src template', debounce(function() {
+        this.highlightSyntax();
+      }, 150));
     },
   },
   attributes: ['src', 'template'],
 });
 
+function breakLines(src: string, width: number) {
+  if (width < 16) return [];
+  const char = (16 * 0.85) * 0.6;
+  const count = Math.floor(width / char);
+  const res = [];
+  const lines = src.split('\n');
+
+  for (let il = 0; il < lines.length; il++) {
+    const l = lines[il];
+    const vert = Math.ceil(l.length / count);
+    res.push(il + 1);
+    if (vert > 1) for (let i = 1; i < vert; i++) res.push('');
+  }
+
+  return res;
+}

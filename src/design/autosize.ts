@@ -5,7 +5,12 @@ export default function autosize(node: HTMLElement) {
   helper.style.position = 'absolute';
   helper.style.left = '-110%';
   helper.style.zIndex = '-1';
-  helper.style.height = '1em';
+  helper.style.height = '1rem';
+  helper.style.fontSize = '0.85rem !important';
+  helper.style.lineHeight = '1rem !important';
+  helper.style.padding = '0.5rem !important';
+  helper.style.wordBreak = 'break-all';
+  helper.style.whiteSpace = 'pre-wrap';
   document.body.appendChild(helper);
 
   function resize() {

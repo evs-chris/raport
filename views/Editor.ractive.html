@@ -1,8 +1,11 @@
 <div class="syntax-editor" {{>extra-attributes}}>
-  <code class="ast-nodes">
-    <pre>{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}{{#if src.length > 0 && src[src.length - 1] === '\n'}} {{/if}}</pre>
-  </code>
-  <textarea as-autosize class-expr-text {{#if primary}}id="expr-text"{{/if}} spellcheck="false" on-keydown="@.keydown(@event)">{{src}}</textarea>
+  {{#if ~/lines.length > 4}}<div class="line-nos">{{#each ~/lines}}{{.}}<br />{{/each}}</div>{{/if}}
+  <div class="editor-pane">
+    <code class="ast-nodes">
+      <pre>{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}{{#if src.length > 0 && src[src.length - 1] === '\n'}} {{/if}}</pre>
+    </code>
+    <textarea as-autosize class-expr-text {{#if primary}}id="expr-text"{{/if}} spellcheck="false" on-keydown="@.keydown(@event)">{{src}}</textarea>
+  </div>
 </div>
 
 <template id="ast-node">
@@ -22,6 +25,27 @@
     position: relative;
     min-height: 99%;
     color: #555;
+    display: flex;
+  }
+
+  .syntax-editor > .line-nos {
+    height: 100%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    font-family: monospace;
+    font-size: 0.85rem !important;
+    line-height: 1rem !important;
+    background-color: #f9f9f9;
+    padding: 0.5rem !important;
+    color: #222;
+    border-right: 1px solid #999;
+    text-align: right;
+  }
+
+  .syntax-editor > .editor-pane {
+    position: relative;
+    flex-grow: 1;
+    flex-shrink: 1;
   }
 
   .ast-extra {
@@ -39,28 +63,30 @@
     overflow: hidden;
     resize: none;
     margin: 0 !important;
-    padding: 0.5em !important;
-    line-height: 1em !important;
-    font-size: 1em;
+    padding: 0.5rem !important;
+    line-height: 1rem !important;
+    font-size: 0.85rem !important;
     white-space: pre-wrap;
+    word-break: break-all;
   }
 
   .syntax-editor code {
-    padding: 0.5em;
+    padding: 0.5rem;
     font-family: monospace;
     display: block;
     box-sizing: border-box;
     min-height: 99%;
     overflow: hidden;
-    line-height: 1em;
-    font-size: 1em;
-    min-height: 2em;
+    line-height: 1rem;
+    font-size: 0.85rem;
+    min-height: 2rem;
   }
 
-  .syntax-editor > code > pre {
-    word-break: break-word;
+  .syntax-editor > .editor-pane > code > pre {
+    word-break: break-all;
     white-space: pre-wrap;
-    margin: 0;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .ast-nodes .reference {
