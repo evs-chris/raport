@@ -976,7 +976,7 @@ Ractive.extendWith(Designer, {
         widget: 'report',
       },
       exprExpand: {},
-      projects: true,
+      showProjects: true,
     };
   },
   components: { Editor, Viewer },
