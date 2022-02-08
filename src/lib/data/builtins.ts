@@ -593,8 +593,12 @@ registerOperator(
     if (!src) return [];
     return Object.values(src);
   }),
-  simple(['date'], (_name: string, [v, t]: any[], ctx): Date => {
-    let res: Date;
+  simple(['date'], (_name: string, args: any[], ctx): Date|DateRel => {
+    let [v, t] = args;
+    let opts = args.slice(-1)[0] || {};
+    if (typeof opts !== 'object') opts = {};
+
+    let res: Date|DateRel;
     if (v !== undefined) {
       if (isDateRel(v)) res = dateRelToDate(v);
       else if (typeof v === 'string') {
@@ -602,7 +606,10 @@ registerOperator(
         if (!dt) dt = new Date(v);
         if (isNaN(dt as any)) {
           let val = evaluate(ctx, ~v.indexOf('#') ? v : `#${v}#`);
-          if (isDateRel(val)) res = dateRelToDate(val);
+          if (isDateRel(val)) {
+            if (opts.rel || opts.parse) res = val;
+            else res = dateRelToDate(val);
+          }
         }
       }
       if (!res) res = new Date(v);
@@ -610,19 +617,35 @@ registerOperator(
     else res = new Date();
 
 
-    if (t) {
-      if (res === v) res = new Date(v);
-
+    if (opts.rel || opts.parse) {
+      if (!isDateRel(res) || res instanceof Date) res = dateRelToExactRange(res);
       if (typeof t === 'string') t = parseTime(t);
       if (Array.isArray(t)) {
-        res.setHours(t[0] || 0, t[1] || 0, t[2] || 0, t[3] || 0);
-        if (t[4] != null) {
-          const offset = t[4] + res.getTimezoneOffset();
-          res.setMinutes(res.getMinutes() + offset);
+        if ('f' in res && Array.isArray(res.f)) {
+          const f = res.f;
+          [f[3], f[4], f[5], f[6]] = f.slice(3);
         }
-      } else {
-        const offset = t + res.getTimezoneOffset();
-        res.setMinutes(res.getMinutes() + offset);
+      } else if (typeof t === 'number') {
+        if ('f' in res && Array.isArray(res.f)) res.f[7] = t;
+        else if ('t' in res && Array.isArray(res.t)) res.t[4] = t;
+        else (res as any).z = t;
+      }
+    } else {
+      if (t) {
+        if (res === v) res = new Date(v);
+        const rdt = res as Date;
+
+        if (typeof t === 'string') t = parseTime(t);
+        if (Array.isArray(t)) {
+          rdt.setHours(t[0] || 0, t[1] || 0, t[2] || 0, t[3] || 0);
+          if (t[4] != null) {
+            const offset = t[4] + rdt.getTimezoneOffset();
+            rdt.setMinutes(rdt.getMinutes() + offset);
+          }
+        } else if (typeof t === 'number') {
+          const offset = t + rdt.getTimezoneOffset();
+          rdt.setMinutes(rdt.getMinutes() + offset);
+        }
       }
     }
 
