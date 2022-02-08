@@ -1,6 +1,21 @@
+## 0.9.4
+
+2022-02-08
+
+### Data
+
+* The `date` function now supports parsing in native mode, meaning it will return a raport date rather than a JS Date if asked. You can do so by passing a named argument (either `rel` or `parse`, which do the same thing) that's truthy e.g. `date(some-string rel:1)`. It will also adjust the time or timezone, if possible, on the resulting date if you pass it a second argument e.g. `date(some-date :-8 rel:1)` gives you `some-date` but in PST.
+* There are now official `parse`/`unparse` functions to parse and stringify raport expressions, dates, times, and templates. `unparse` is an alias for `string` and will automatically put it into `raport` mode. `string` gets named arguments for requesting `json` mode and `raport` mode. In `raport` mode, any additional named arguments are passed to raport's `stringify` function.
+
+### Designer
+
+* __BUG__: The projects tab will no longer automatically disappear if you don't have any stored projects. The flag to hide the tab is now `showProjects` rather than the already used `projects`.
+* Longer expressions (5 or more lines, wrapped) will now automatically show line numbers in expression editors.
+
+
 ## 0.9.3
 
-Unreleased
+2022-02-04
 
 ### Library
 
