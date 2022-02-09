@@ -10,6 +10,7 @@
 
 * The `date` operator now offers the option to `shift` a relative date to the target timezone rather than just setting the timezone on the date.
 * You can now register multiple aliases for a formatter at the same time using a `string[]` as the name parameter.
+* The `timestamp` is renamed to `iso8601` and a new `timestamp` formatter that results in a more human readable timestamp without a timezone replaces it. A more readable timestamp formatter with timezone is available as `timestamptz`.
 
 
 ## 0.9.4
