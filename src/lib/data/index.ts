@@ -656,8 +656,9 @@ export function extend(context: Context, opts: ExtendOptions): Context {
 }
 
 export const formats: { [name: string]: (value: any, args?: any[]) => string } = {};
-export function registerFormat<T = any>(name: string, format: (value: T, args?: any[]) => string) {
-  formats[name] = format;
+export function registerFormat<T = any>(name: string|string[], format: (value: T, args?: any[]) => string) {
+  if (Array.isArray(name)) name.forEach(n => formats[n] = format);
+  else formats[name] = format;
 }
 export function unregisterFormat(name: string) {
   delete formats[name];
