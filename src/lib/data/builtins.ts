@@ -627,18 +627,22 @@ registerOperator(
     else res = new Date();
 
 
-    if (opts.rel || opts.parse) {
-      if (!isDateRel(res) || res instanceof Date) res = dateRelToExactRange(res);
+    if ((opts.rel || opts.parse) && isDateRel(res)) {
+      let rel = dateRelToExactRange(res);
       if (typeof t === 'string') t = parseTime(t);
       if (Array.isArray(t)) {
-        if ('f' in res && Array.isArray(res.f)) {
-          const f = res.f;
-          [f[3], f[4], f[5], f[6]] = f.slice(3);
-        }
+        const f = rel.f;
+        [f[3], f[4], f[5], f[6]] = f.slice(3);
       } else if (typeof t === 'number') {
-        if ('f' in res && Array.isArray(res.f)) res.f[7] = t;
-        else if ('t' in res && Array.isArray(res.t)) res.t[4] = t;
-        else (res as any).z = t;
+        if (opts.shift) {
+          const diff = (+rel.f[7] || 0) - t;
+          const dt = dateRelToDate(rel);
+          dt.setMinutes(dt.getMinutes() - diff);
+          rel = dateRelToExactRange(dt);
+        }
+
+        rel.f[7] = t;
+        res = rel;
       }
     } else {
       if (t) {
@@ -913,6 +917,14 @@ registerFormat('time', n => {
 });
 
 registerFormat('timestamp', n => {
+  return date(isDateRel(n) ? dateRelToExactRange(n) : n, 'yyyy-MM-dd HH:mm:ss');
+});
+
+registerFormat('timestamptz', n => {
+  return date(isDateRel(n) ? dateRelToExactRange(n) : n, 'yyyy-MM-dd HH:mm:sszzz');
+});
+
+registerFormat('iso8601', n => {
   return date(isDateRel(n) ? dateRelToExactRange(n) : n, 'yyyy-MM-ddTHH:mm:sszzz');
 });
 
