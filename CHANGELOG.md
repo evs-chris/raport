@@ -1,11 +1,25 @@
+## 0.9.5
+
+2022-02-09
+
+### Parser
+
+* __BUG__: `parseTime` will now properly parse a time that could also parse as a timezone rather than parsing it as a timezone.
+
+### Data
+
+* The `date` operator now offers the option to `shift` a relative date to the target timezone rather than just setting the timezone on the date.
+* You can now register multiple aliases for a formatter at the same time using a `string[]` as the name parameter.
+
+
 ## 0.9.4
 
 2022-02-08
 
 ### Data
 
-* The `date` function now supports parsing in native mode, meaning it will return a raport date rather than a JS Date if asked. You can do so by passing a named argument (either `rel` or `parse`, which do the same thing) that's truthy e.g. `date(some-string rel:1)`. It will also adjust the time or timezone, if possible, on the resulting date if you pass it a second argument e.g. `date(some-date :-8 rel:1)` gives you `some-date` but in PST.
-* There are now official `parse`/`unparse` functions to parse and stringify raport expressions, dates, times, and templates. `unparse` is an alias for `string` and will automatically put it into `raport` mode. `string` gets named arguments for requesting `json` mode and `raport` mode. In `raport` mode, any additional named arguments are passed to raport's `stringify` function.
+* The `date` operator now supports parsing in native mode, meaning it will return a raport date rather than a JS Date if asked. You can do so by passing a named argument (either `rel` or `parse`, which do the same thing) that's truthy e.g. `date(some-string rel:1)`. It will also adjust the time or timezone, if possible, on the resulting date if you pass it a second argument e.g. `date(some-date :-8 rel:1)` gives you `some-date` but in PST.
+* There are now official `parse`/`unparse` operator to parse and stringify raport expressions, dates, times, and templates. `unparse` is an alias for `string` and will automatically put it into `raport` mode. `string` gets named arguments for requesting `json` mode and `raport` mode. In `raport` mode, any additional named arguments are passed to raport's `stringify` operator.
 
 ### Designer
 
@@ -34,7 +48,7 @@
 
 * ___BUG__: Converting a relative date to an exact date now accounts for the time zone.
 * The `date` format now supports outputting the time zone using `z`, `zz`, `zzz`, and `zzzz`.
-* The `date` function now supports moving the date into another time zone in addition to the existing support for adjusting the time.
+* The `date` operator now supports moving the date into another time zone in addition to the existing support for adjusting the time.
 
 ### Parser
 
@@ -313,7 +327,7 @@
 ### Data
 
 * __BUG__: Timespans are now correctly treated as literals during evaluation.
-* The `time-span` function can now handle producing exact spans from date to date when passed two dates as the first arguments.
+* The `time-span` operator can now handle producing exact spans from date to date when passed two dates as the first arguments.
 
 ### Parser
 
