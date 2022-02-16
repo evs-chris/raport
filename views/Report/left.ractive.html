@@ -110,7 +110,7 @@
             <div class-src>
               <div class-src-name><input value="{{.name}}" /></div>
               <div class-src-btn>
-                <button class-ico class-large title="Import data..." on-click="@context.link(@keypath, '~/data'), @.set('tab', 'import')">{{>pencil}}</button>
+                <button class-ico class-large title="Import data..." on-click="@.editProvidedData(@context)">{{>pencil}}</button>
                 <button class-ico class-large title="Log data to console..." on-click="@.logData(.)">{{>'console'}}</button>
                 <button class-ico class-large on-click="@.checkLink('import', @keypath), @context.splice('../', @index, 1)">{{>times}}</button>
               </div>

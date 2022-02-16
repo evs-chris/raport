@@ -50,6 +50,7 @@ export class Designer extends Ractive {
   _undo: string[] = [];
   _redo: string[] = [];
   _undoWatch: ObserverHandle;
+  _importText: HTMLTextAreaElement;
 
   addWidget(type: string) {
     const widget: any = { type };
@@ -275,6 +276,21 @@ export class Designer extends Ractive {
     ctx.set('.height', Math.ceil((ctx.node.nextElementSibling as HTMLElement).offsetHeight / 16));
     ctx.set('ctx.autosize', false);
     ctx.set('ctx.preview', preview);
+  }
+
+  async editProvidedData(ctx: ContextHelper) {
+    ctx.link(ctx.resolve(), '~/data');
+    const source: AvailableSource = ctx.get();
+
+    let val: any;
+    if ('type' in source && source.type === 'fetch') val = await this.fetchData();
+    else if ('data' in source || 'values' in source) val = source.data ? source.data : await source.values();
+
+    if (typeof val === 'object' && 'value' in val) val = val.value;
+    if (typeof val === 'string') this._importText.value = val;
+    else this._importText.value = JSON.stringify(val, null, 2);
+
+    this.set('tab', 'import');
   }
 
   async logData(source: AvailableSource) {
@@ -504,8 +520,9 @@ export class Designer extends Ractive {
       const req: RequestInit = { headers, method: data.method };
       if (req.method === 'POST' || req.method === 'PUT') req.body = this.evalExpr(data.body, true, ctx);
       const res = await fetch(url, req);
+      const txt = await res.text();
       if (set) this.set('data.data', await res.text());
-      else return res.text();
+       return res.text();
     }  catch {}
   }
 
@@ -1273,6 +1290,14 @@ Ractive.extendWith(Designer, {
     },
     autosize,
     trackfocus,
+    tracked(node, name) {
+      this[name] = node;
+      return {
+        teardown() {
+          if (this[name] === node) this[name] = undefined;
+        },
+      };
+    },
   },
   events: {
     keys: function KeyEvent(_node, fire) {
