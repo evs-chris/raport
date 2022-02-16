@@ -15,10 +15,12 @@
     {{/if}}
   </span>
 </label>
-<label><span title="Height of the {{.type}} in rem, if a number, a percentage of the parent, or an expression, fill/grow, default to{{#if type === 'label'}}the largest font size or{{/if}} 1">Height <button class-hide /><button class-ico on-click="@context.set('.height', typeof .height === 'number' || .height  === undefined ? { percent: .height } : typeof .height === 'object' && 'percent' in .height ? { x: '' } : typeof .height === 'object' && 'x' in .height ? 'grow' : .height.percent)" title="{{typeof .height === 'number' || .height  === undefined ? 'Change to percent' : typeof .height === 'object' && 'percent' in .height ? 'Change to Expression' : typeof .height === 'object' && 'x' in .height ? 'Change to Fill/Grow' : 'Change to REM'}}">
-    {{>switch}}
+<label><span title="Height of the {{.type}} in rem, if a number, a percentage of the parent, or an expression, fill/grow, default to{{#if type === 'label'}}the largest font size or{{/if}} 1">Height
+    <button class-ico on-click="@context.set('.height', typeof .height === 'number' || .height  === undefined ? { percent: .height } : typeof .height === 'object' && 'percent' in .height ? { x: '' } : typeof .height === 'object' && 'x' in .height ? 'grow' : .height.percent)" title="{{typeof .height === 'number' || .height  === undefined ? 'Change to percent' : typeof .height === 'object' && 'percent' in .height ? 'Change to Expression' : typeof .height === 'object' && 'x' in .height ? 'Change to Fill/Grow' : 'Change to REM'}}">
+      {{>switch}}
+    </button>
     {{#if typeof .height === 'object' && 'x' in .height}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.height.x'), false">{{>pencil}}</button>{{/if}}
-  </button></span>
+  </span>
   <span>
     {{#if typeof .height === 'number' || .height === undefined}}
       <div><input type="number" value="{{.height}}" style-width="calc(100% - 2rem)" /><span class-unit>rem</span></div>
