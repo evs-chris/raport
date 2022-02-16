@@ -13,7 +13,7 @@
       <div class-fetch class-scrolled-wrapper>
         <div as-scrolled>
         {{#with data}}
-          <label class-input style-width=26rem>URL <button class-ico on-click="@.editExpr(@keypath + '.url', { template: true }), false">&#9998;</button><input value="{{.url}}" /></label>
+          <label class-input style-width=26rem>URL <button class-ico on-click="@.editExpr(@keypath + '.url', { template: true }), false">{{>pencil}}</button><input value="{{.url}}" /></label>
           <label class-input>Method<select value="{{.method}}">
             <option>GET</option>
             <option>POST</option>
@@ -26,14 +26,14 @@
             <h3>Headers</h3>
             {{#each .headers}}
               <div class-fetch-header>
-                <button class-ico class-large title="Remove header" on-click="@context.splice('../', @index, 1)">&times;</button>
+                <button class-ico title="Remove header" on-click="@context.splice('../', @index, 1)">{{>times}}</button>
                 <label class-input>Header<input value="{{.[0]}}" /></label>
-                <label class-input>Value <button class-ico on-click="@.editExpr(@keypath + '.1', { template: true }), false">&#9998;</button><input value="{{.[1]}}" /></label>
+                <label class-input>Value <button class-ico on-click="@.editExpr(@keypath + '.1', { template: true }), false">{{>pencil}}</button><input value="{{.[1]}}" /></label>
               </div>
             {{/each}}
           {{/if}}
           {{#if .method !== 'GET'}}
-            <label class-area>Body <button class-ico on-click="@.editExpr(@keypath + '.body', { template: true }), false">&#9998;</button><textarea>{{.body}}</textarea></label>
+            <label class-area>Body <button class-ico on-click="@.editExpr(@keypath + '.body', { template: true }), false">{{>pencil}}</button><textarea>{{.body}}</textarea></label>
           {{/if}}
         {{/with}}
         </div>

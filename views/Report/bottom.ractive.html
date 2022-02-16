@@ -4,17 +4,17 @@
   {{#if ~/temp.bottom.param}}<span class-tab class-active="~/temp.bottom.tab === 'param'" on-click="@.set('temp.bottom.tab', 'param'), @.set('temp.bottom.pop', true)">Parameter</span>{{/if}}
   {{#if ~/temp.bottom.source}}<span class-tab class-active="~/temp.bottom.tab === 'source'" on-click="@.set('temp.bottom.tab', 'source'), @.set('temp.bottom.pop', true)">Source</span>{{/if}}
   <span class-which>
-    {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button class-ico class-large on-click="@.checkLink('expr')">&times;</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
-    {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button class-ico class-large on-click="@.checkLink('param')">&times;</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
-    {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button class-ico class-large on-click="@.checkLink('source')">&times;</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
+    {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button class-ico on-click="@.checkLink('expr')">{{>times}}</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
+    {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button class-ico on-click="@.checkLink('param')">{{>times}}</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
+    {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button class-ico on-click="@.checkLink('source')">{{>times}}</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
   </span>
-  <button on-click="@.toggle('temp.bottom.pop')" class-ico style-height="2.5rem">{{#if ~/temp.bottom.pop}}&#9660;{{else}}&#9650;{{/if}}</button>
+  <button on-click="@.toggle('temp.bottom.pop')" class-ico style-height="2.5rem" class="{{#if ~/temp.bottom.pop}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>
 </div>
 <div class-bottom>
   <div class-tab class-active-tab="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'">
     <div class-editor>
       <div class-actions>
-        <button disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>&#9655;</button>
+        <button disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>{{>play}}</button>
         <button class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">{{#if ~/temp.expr.template}}Template{{else}}Text{{/if}}</button>
         {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.template}}<button class="ico text" on-click="@.fmt()">Format</button>{{/if}}
         {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.path}}<label><input type=checkbox checked="{{~/temp.expr.template}}" /> Template</label>{{/if}}
@@ -37,9 +37,9 @@
                 <div as-scrolled>
                   {{#each .str}}
                     <div class-label-part>
-                      <button class-ico class-large class-spacer on-click="@context.splice('../', @index, 1)" title="Remove part">&times;</button>
-                      <button class-ico disabled="{{@index === 0}}" on-click="@.moveUp(@context)" title="Move up">&#9650;</button>
-                      <button class-ico class-spacer disabled="{{@index === @last}}" on-click="@.moveDown(@context)" title="Move down">&#9660;</button>
+                      <button class-ico class-spacer on-click="@context.splice('../', @index, 1)" title="Remove part">{{>times}}</button>
+                      <button class-ico class-up-arrow disabled="{{@index === 0}}" on-click="@.moveUp(@context)" title="Move up">{{>arrow}}</button>
+                      <button class-ico class-spacer class-down-arrow disabled="{{@index === @last}}" on-click="@.moveDown(@context)" title="Move down">{{>arrow}}</button>
                       {{#if typeof . === 'string'}}
                         <button class-ico on-click="@context.set('.', { text: . })" title="Format part">F</button>
                         <Editor src="{{.}}" primary="{{@index === 0}}" />
@@ -187,7 +187,7 @@
                 <div>
                   {{#if typeof . === 'string'}}<input value="{{.}}" />
                   {{else}}<input value="{{.label}}" /> <input value="{{.value}}" />{{/if}}
-                  <button class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button>
+                  <button class-ico on-click="@context.splice('../', @index, 1)">{{>times}}</button>
                 </div>
               {{/each}}
             </div></div>
@@ -203,9 +203,9 @@
     {{#with ~/source}}
       <label><span>Name</span><input value="{{.name}}" /></label>
       <label><span>Source</span><select value="{{.source}}">{{#each ~/sources}}<option>{{.name}}</option>{{/each}}</select></label>
-      <label><span>Base <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.base')">&#9998;</button></span><textarea rows=1>{{.base}}</textarea></label>
-      <label><span>Filter <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.filter')">&#9998;</button></span><textarea rows=1>{{.filter}}</textarea></label>
-      <label><span>Sort <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.sort')">&#9998;</button></span><textarea rows=1>{{.sort}}</textarea></label>
+      <label><span>Base <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.base')">{{>pencil}}</button></span><textarea rows=1>{{.base}}</textarea></label>
+      <label><span>Filter <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.filter')">{{>pencil}}</button></span><textarea rows=1>{{.filter}}</textarea></label>
+      <label><span>Sort <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.sort')">{{>pencil}}</button></span><textarea rows=1>{{.sort}}</textarea></label>
       {{#if Array.isArray(.group)}}
         <div class-options style="height: 100%; width: 20rem;">
           <h3>
@@ -217,8 +217,8 @@
               <div class-group-edit>
                 <span>{{@index + 1}}</span>
                 <textarea rows=1>{{.}}</textarea>
-                <button title="Edit group expression" class-ico on-click="@.editExpr('~/' + @keypath)">&#9998;</button>
-                <button title="Remove group" class-ico class-large on-click="@context.splice('../', @index, 1)">&times;</button>
+                <button title="Edit group expression" class-ico on-click="@.editExpr('~/' + @keypath)">{{>pencil}}</button>
+                <button title="Remove group" class-ico on-click="@context.splice('../', @index, 1)">{{>times}}</button>
               </div>
             {{/each}}
           </div></div>
@@ -292,13 +292,13 @@
       <option>reference</option>
       <option>undefined</option>
     </select>
-    <button class-ico on-click="Array.isArray(../) ? @context.splice('../', @index, 1) : @context.set('.', undefined)">&times;</button>
+    <button class-ico on-click="Array.isArray(../) ? @context.splice('../', @index, 1) : @context.set('.', undefined)">{{>times}}</button>
   </div>
 </template>
 
 <template id="ast-dim-actions">
   <div class-ast-actions>
-    <button class-ico on-click="Array.isArray(../) ? @context.splice('../', @index, 1) : @context.set('.', undefined)">&times;</button>
+    <button class-ico on-click="Array.isArray(../) ? @context.splice('../', @index, 1) : @context.set('.', undefined)">{{>times}}</button>
   </div>
 </template>
 
@@ -477,7 +477,7 @@
   }
   .bottom-pane .properties > label > span:first-of-type {
     font-size: 0.8rem;
-    display: block;
+    display: flex;
   }
   .bottom-pane .properties input, .bottom-pane .properties select {
     border: none;

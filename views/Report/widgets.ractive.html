@@ -7,7 +7,7 @@
             <button class="ico up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context), @.moveUp(@context, '^^/groupEnds'), false" title="Move up">{{>arrow}}</button>
             <button class="ico down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context), @.moveDown(@context, '^^/groupEnds'), false" title="Move down">{{>arrow}}></button>
           </span>
-          <button class-ico class-large on-click="@.removeWidget(@context), false" title="Remove">&times;</button>
+          <button class-ico on-click="@.removeWidget(@context), false" title="Remove">{{>times}}</button>
         </span>
         {{>widget-tree}}
       </div>
@@ -18,7 +18,7 @@
       <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : @.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
         <span class-line>
           <span>{{@key}}</span>
-          {{#if @key !== 'row' || ../type !== 'repeater'}}<button class-ico class-large on-click="@.removeWidget(@context), false">&times;</button>{{/if}}
+          {{#if @key !== 'row' || ../type !== 'repeater'}}<button class-ico on-click="@.removeWidget(@context), false">{{>times}}</button>{{/if}}
         </span>
         {{>widget-tree}}
       </div>
@@ -33,7 +33,7 @@
             <button class="ico up-arrow" title="Move up" disabled="{{@index === 0}}" on-click="@.moveUp(@context), Array.isArray(^^/layout) ? @.moveUp(@context, '^^/layout') : false, false">{{>arrow}}</button>
             <button class="ico down-arrow" title="Move down" disabled="{{@index === @last}}" on-click="@.moveDown(@context), Array.isArray(^^/layout) ? @.moveDown(@context, '^^/groupEnds') : false, false">{{>arrow}}</button>
           </span>
-          <button class-ico class-large on-click="@.removeWidget(@context), false">&times;</button>
+          <button class-ico on-click="@.removeWidget(@context), false">{{>times}}</button>
         {{/if}}
         </span>
         {{>widget-tree}}
@@ -55,7 +55,7 @@
     {{#if .font}}style="{{@.calcFont(.)}}"{{/if}}
     on-click="@.selectWidget(@keypath)"
   >
-    {{#if Array.isArray(../)}}<span class="remove btn" title="Remove {{.type}}" on-click="@.removeWidget(@context, false)">&times;</span>{{/if}}
+    {{#if Array.isArray(../)}}<span class="remove btn" title="Remove {{.type}}" on-click="@.removeWidget(@context, false)">{{>times}}</span>{{/if}}
     {{>.type}}
   </div>
   {{/with}}
@@ -102,14 +102,14 @@
         IMG
       {{/if}}
     </span>
-    <span class="preview btn" title="Toggle Preview" on-click="@context.toggle('ctx.preview')">&#9678;</span>
+    <span class="preview btn" title="Toggle Preview" on-click="@context.toggle('ctx.preview')">{{>eye}}</span>
   {{/with}}
 </template>
 
 <template id="html">
   {{#with @local as ctx}}
-    <span class="preview btn" title="Toggle Preview" on-click="@context.toggle('ctx.preview')">&#9678;</span>
-    <span class="autosize btn" title="Autosize Block" on-click="@.autosizeHtml(@context)">&#8597;</span>
+    <span class="preview btn" title="Toggle Preview" on-click="@context.toggle('ctx.preview')">{{>eye}}</span>
+    <span class="autosize btn" title="Autosize Block" on-click="@.autosizeHtml(@context)">{{>autosize}}</span>
     <span class-content on-click="@.editExpr(@context.resolve('.html'), { html: true })" class-preview="ctx.preview" {{#if ctx.preview}}style-font-size="{{.font.size || 0.83}}rem" style-line-height="{{.font.line === 0 ? 'initial' : (.font.line || .font.size || 1) + 'rem'}}"{{/if}} {{#if ctx.autosize}}style="height: auto;"{{/if}} {{#if .html.length < 50}}title="{{.html}}"{{/if}}>{{#if ctx.preview}}{{{.html}}}{{else}}<Viewer src="{{.html}}" template=true />{{/if}}</span>
   {{/with}}
 </template>
@@ -183,6 +183,44 @@
   <svg viewBox="0 0 16 16">
     <path d="m 11.226563,3.7128906 -0.707032,0.7070313 1.642578,1.6445312 H 3.046875 v 1 h 11.529297 z" />
     <path d="M 1.1855469,8.9433594 4.5351562,12.292969 5.2421875,11.585938 3.5996094,9.9433594 h 9.1171876 v -1 z" />
+  </svg>
+</template>
+
+<template id="console">
+  <svg viewBox="0 0 16 16">
+    <path d="m 2.5800781,4.140625 a 0.39687499,0.39687499 0 0 0 -0.2773437,0.1230469 0.39687499,0.39687499 0 0 0 0.011719,0.5625 L 5.9921875,8.3320313 2.3085938,12.015625 a 0.39687499,0.39687499 0 0 0 0,0.5625 0.39687499,0.39687499 0 0 0 0.5605468,0 L 6.8417969,8.6054688 a 0.39687499,0.39687499 0 0 0 0.00391,-0.00391 0.39687499,0.39687499 0 0 0 0.00195,-0.00195 0.39687499,0.39687499 0 0 0 0.00977,-0.015625 0.39687499,0.39687499 0 0 0 0.076172,-0.1425781 0.39687499,0.39687499 0 0 0 0.011719,-0.060547 A 0.39687499,0.39687499 0 0 0 6.9433594,8.25 0.39687499,0.39687499 0 0 0 6.9316406,8.1992188 0.39687499,0.39687499 0 0 0 6.8417969,8.0449219 a 0.39687499,0.39687499 0 0 0 -0.00391,0 0.39687499,0.39687499 0 0 0 -0.00391,-0.00781 L 2.8632813,4.25 A 0.39687499,0.39687499 0 0 0 2.5800781,4.140625 Z" />
+    <path d="m 7.0917969,11.767578 v 0.792969 h 6.4453121 v -0.792969 z" />
+  </svg>
+</template>
+
+<template id="pencil">
+  <svg viewBox="0 0 16 16">
+    <path fill=none stroke="#000" d="m 10.574807,3.7181493 1.230348,-1.230348 c 0.786061,-0.1047571 2.169305,1.3270952 2.115927,2.0909526 l -1.24767,1.2476704 z m 0,0 L 12.677529,5.825142 5.136945,13.365724 3.5226704,13.820162 1.9083957,14.2746 2.5400804,12.67292 3.1717651,11.07124 10.574806,3.718149 Z" />
+  </svg>
+</template>
+
+<template id="play">
+  <svg viewBox="0 0 16 16">
+    <path d="M 2.5273438,2.1328125 A 0.39691468,0.39691468 0 0 0 2.328125,2.4765625 V 14.357422 a 0.39691468,0.39691468 0 0 0 0.5957031,0.34375 L 13.201172,8.7675781 a 0.39691468,0.39691468 0 0 0 0,-0.6875 L 2.9238281,2.1328125 a 0.39691468,0.39691468 0 0 0 -0.3964843,0 z m 0.5957031,1.03125 9.0878911,5.2597656 -9.0878911,5.2460939 z" />
+  </svg>
+</template>
+
+<template id="eye">
+  <svg viewBox="0 0 16 16">
+    <path d="M 8.0292969,3.84375 C 5.8187216,3.7959779 3.2719166,4.828582 0.6875,7.9414062 L 0.47851563,8.1933594 0.68554687,8.4472656 C 4.2213376,12.771626 7.6072279,13.362529 10.207031,12.503906 12.806835,11.645284 14.588183,9.4664365 15.279297,8.4121094 L 15.449219,8.1542969 15.240234,7.9257812 C 14.56764,7.1977999 12.721311,5.0903713 10.117188,4.2148437 9.4661566,3.9959619 8.7661553,3.859674 8.0292969,3.84375 Z M 8.0019531,4.6191406 C 8.6565753,4.6408129 9.2772607,4.769772 9.8632813,4.9667969 12.042444,5.6994492 13.625228,7.3762655 14.40625,8.2207031 13.700218,9.2262323 12.130956,11.032675 9.9589844,11.75 7.7038396,12.494794 4.8499214,12.067539 1.5566406,8.1992188 3.9323632,5.4612889 6.1082738,4.5564473 8.0019531,4.6191406 Z" />
+    <circle r="3.5391803" cy="8.3395138" cx="8.0542507" fill="#000" />
+  </svg>
+</template>
+
+<template id="times">
+  <svg viewBox="0 0 16 16">
+    <path d="m 3.081157,3.2367593 a 0.39687499,0.39687499 0 0 0 -0.28125,0.1171875 0.39687499,0.39687499 0 0 0 0,0.5605469 L 7.3038132,8.4184 2.799907,12.920353 a 0.39687499,0.39687499 0 0 0 0,0.560547 0.39687499,0.39687499 0 0 0 0.5625,0 L 7.8643601,8.9789468 12.368266,13.4809 a 0.39687499,0.39687499 0 0 0 0.560547,0 0.39687499,0.39687499 0 0 0 0,-0.560547 L 8.424907,8.4184 12.928813,3.9144937 a 0.39687499,0.39687499 0 0 0 0,-0.5605469 0.39687499,0.39687499 0 0 0 -0.560547,0 L 7.8643601,7.8558999 3.362407,3.3539468 A 0.39687499,0.39687499 0 0 0 3.081157,3.2367593 Z" />
+  </svg>
+</template>
+
+<template id="autosize">
+  <svg viewBox="0 0 16 16">
+    <path d="m 7.8643604,1.1461781 c -0.1252288,1.027e-4 -0.2452523,0.050113 -0.333504,0.13896 L 3.8599966,4.9559978 c -0.1847627,0.1839512 -0.1847627,0.4830568 0,0.667008 0.1836871,0.1832173 0.4810049,0.1832173 0.664692,0 L 7.3942123,2.7534819 V 14.081037 L 4.5246886,11.213829 c -0.1836871,-0.183218 -0.4810049,-0.183218 -0.664692,0 -0.1832174,0.183687 -0.1832174,0.481004 0,0.664692 l 3.6708598,3.673175 c 0.088631,0.088 0.1892895,0.136645 0.333504,0.136645 0.1442144,0 0.2225519,-0.0257 0.3335039,-0.136645 0.1109522,-0.110954 3.6708597,-3.673175 3.6708597,-3.673175 0.183218,-0.183688 0.183218,-0.481005 0,-0.664692 -0.183951,-0.184763 -0.483057,-0.184763 -0.667008,0 L 8.3345084,14.081037 V 2.7534819 l 2.8672076,2.8695239 c 0.183951,0.1847627 0.483057,0.1847627 0.667008,0 0.184763,-0.1839512 0.184763,-0.4830568 0,-0.667008 L 8.1978643,1.2851381 C 8.1096126,1.1962906 7.9895891,1.1462808 7.8643604,1.1461781 Z" />
   </svg>
 </template>
 

@@ -2,7 +2,7 @@
   {{>left}}
   <div class=layout on-keys('z', { ctrl: true })="@.undo(), true" on-keys('Z', { ctrl: true, shift: true })="@.redo(), true">
     <div class-actions>
-      <button disabled="{{report.type === 'delimited' && report.sources.length !== 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>&#9655;</button>
+      <button disabled="{{report.type === 'delimited' && report.sources.length !== 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>{{>play}}</button>
       <button on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">Designer</button>
       {{#if result}}
         <button on-click="@.set('tab', 'result')" class-tab class-active="tab === 'result'">Output</button>
@@ -12,7 +12,7 @@
         <button on-click="@.set('tab', 'import')" class-tab class-active="tab === 'import'">Import Data</button>
       {{/if}}
       {{#if data && tab === 'import'}}
-        <span class-which><button class="ico large" on-click="@.checkLink('import')">&times;</button> Close Import</span>
+        <span class-which><button class="ico" on-click="@.checkLink('import')">{{>times}}</button> Close Import</span>
       {{/if}}
       {{#if tab === 'result'}}<button class="ico text" on-click="@.download((~/report.name || 'report') + (~/report.type === 'delimited' ? '.csv' : '.html'), ~/result, ~/report.type === 'delimited' ? 'text/csv' : 'text/html')" title="Save output to a file">Save Output</button>{{/if}}
       {{#if ~/showProjects}}<button on-click="@.set('tab', 'project')" class-tab class-right class-active="tab === 'project'">Project</button>{{/if}}
@@ -107,8 +107,8 @@
     background-color: transparent;
     cursor: pointer;
     outline: none;
-    width: 1.2rem;
-    height: 1.2rem;
+    width: 1.2em;
+    height: 1.2em;
     margin-left: 0.1rem;
     box-sizing: content-box;
   }
@@ -430,6 +430,14 @@
   }
   .widget > .autosize.btn {
     right: 2.3rem;
+  }
+
+  .widget > .btn > svg {
+    width: 100%;
+    height: 100%;
+  }
+  .widget > .btn > svg path, .widget > .btn > svg circle {
+    fill: #fff;
   }
 
   .widget:hover > .btn {

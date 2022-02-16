@@ -19,7 +19,7 @@
               </div>
               <div class-children class-fields>
                 {{#each report.headers}}
-                  <div class="field" on-click="@.editExpr(@context)" class-active-expr="~/temp.expr.path === @keypath" as-expr><span>{{.}}</span><button class-ico class-large on-click="@.removeWidget(@context), false">&times;</button></div>
+                  <div class="field" on-click="@.editExpr(@context)" class-active-expr="~/temp.expr.path === @keypath" as-expr><span>{{.}}</span><button class-ico on-click="@.removeWidget(@context), false">{{>times}}</button></div>
                 {{/each}}
               </div>
             </div>
@@ -31,7 +31,7 @@
             </div>
             <div class-children class-fields>
               {{#each report.fields}}
-                <div class="field" on-click="@.editExpr(@context)" class-active-expr="~/temp.expr.path === @keypath" as-expr><span>{{.}}</span><button class-ico class-large on-click="@.removeWidget(@context), false">&times;</button></div>
+                <div class="field" on-click="@.editExpr(@context)" class-active-expr="~/temp.expr.path === @keypath" as-expr><span>{{.}}</span><button class-ico on-click="@.removeWidget(@context), false">{{>times}}</button></div>
               {{/each}}
             </div>
           </div>
