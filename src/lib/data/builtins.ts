@@ -928,17 +928,11 @@ registerFormat('iso8601', n => {
   return date(isDateRel(n) ? dateRelToExactRange(n) : n, 'yyyy-MM-ddTHH:mm:sszzz');
 });
 
-registerFormat('integer', (n, [group]) => {
-  return number(n, 0, group);
-});
-registerFormat('int', (n, [group]) => {
+registerFormat(['integer', 'int'], (n, [group]) => {
   return number(n, 0, group);
 });
 
-registerFormat('number', (n, [dec, group]) => {
-  return number(n, dec, group);
-});
-registerFormat('num', (n, [dec, group]) => {
+registerFormat(['number', 'num'], (n, [dec, group]) => {
   return number(n, dec, group);
 });
 
