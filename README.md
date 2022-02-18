@@ -90,6 +90,8 @@ In addition to containers, the basic widgets supplied in this library are the `L
 
 A flowed report may optionally have a width, but it never has a height. As such, a flowed report will continue on without interruption until all of its content is rendered.
 
+Flowed reports can optionally include watermarks and overlays, which are only rendered once at the top of the report output. See the description in the Paged report section below for more information.
+
 #### Paged
 
 A paged report requires a page size in order to render, and an orientation can optionally be supplied too, where the runner will handle flipping the dimensions and margins around to handle the orientation.
@@ -97,6 +99,8 @@ A paged report requires a page size in order to render, and an orientation can o
 Since a paged report has height constraints on any given piece of the report, rendering of widgets can be optionally interrupted and resumed on a new page. Whether or not a widget supports interruption is up to the individual widget, but by default most containers require that their entire content fit in the available space in order to render. If a widget can't fit on the page by itself, it will render as an error placeholder.
 
 Paged reports can optionally include page headers and footers that are rendered at the top and bottom of each page if supplied. The context for headers and footers contain additional special variables `@page` and `@pages` the contain the current page number and total number of pages, respectively. Page headers and footers are always expected to be the same size.
+
+Paged reports can optionally include watermarks and overlays that are rendered below and above the report content of each page if supplied. The context for watermarks and overlays contain the same special variables as headers and footers and additionally get a `@size` variable that has `x` and `y` properties corresponding to the usable page width and height respectively.
 
 ## Data
 
@@ -159,6 +163,9 @@ There are a number of special references that are context-specific:
 | `@specials`| any | The specials for the nearest context that has any. |
 | `@placement` | width, height, margin, hide, br expressions | The computed placement for the widget for which the property is being computed. |
 | `@widget` | widgth, height, margin, hide, br expressions | The widget definition for the widget for which the property is being computed. |
+| `@page` | page header, footer, watermark, and overlay | The current page number being rendered, starting with `1`. |
+| `@pages` | page header, footer, watermark, and overlay | The number of pages in the report output. |
+| `@size` | page header, footer, watermark, and overlay | An object with `x` and `y` properties corresponding to the usable width and height of the page. |
 
 #### Operations
 

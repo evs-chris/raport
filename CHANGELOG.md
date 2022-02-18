@@ -1,3 +1,21 @@
+## 0.10.0
+
+_Unreleased_
+
+### Render
+
+* __BUG:__ Heights in percentages now render correctly against total parent size. They also respect contain/expand box properties.
+* There are now watermark and overlay containers available on displayed reports.
+  * Watermarks are rendered below the report page content.
+  * Overlays are rendered above the report page content.
+  * In paged reports, both get access to the `@size` special reference, which has `x` and `y` properties that correspond to available page width and height, respectively. They also have access to the usual `@page` and `@pages` that headers and footers get.
+
+### Designer
+
+* __BUG:__ The widget tree can now remove page headers and footers in addition to the new watermarks and overlays.
+* Containers with a set height will now render with a set height, though for percentages it is a percentage of the width because CSS.
+
+
 ## 0.9.5
 
 2022-02-09
