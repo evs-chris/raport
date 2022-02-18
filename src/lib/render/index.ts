@@ -294,9 +294,15 @@ function maxFontSize(w: Widget) {
 export function getHeight(w: Widget, placement: Placement, context: RenderContext, computed?: number, linesize?: boolean): number {
   let r = 1;
   let h = isComputed(w.height) ? evaluate(extendContext(context.context, { special: { widget: w, placement, computed, linesize } }), w.height.x) : w.height;
+  const m = w.margin && expandMargin(w, context, placement);
+  let pct = false;
   if (h == null && linesize) h = maxFontSize(w);
+
   if (typeof h === 'number') r = h;
-  else if (typeof h === 'object' && 'percent' in h && h.percent && placement.availableY) r = +(placement.availableY * (h.percent / 100)).toFixed(4);
+  else if (typeof h === 'object' && 'percent' in h && h.percent && placement.maxY) {
+    r = +(placement.maxY * (h.percent / 100)).toFixed(4);
+    pct = true;
+  }
   else if (h === 'auto' || (computed && !h)) return computed || NaN;
   else if (h === 'grow') {
     r = placement.availableY || 0;
@@ -305,6 +311,9 @@ export function getHeight(w: Widget, placement: Placement, context: RenderContex
       r -= m[0] + m[2];
     }
   }
+
+  if (typeof r === 'number' && (w.box === 'contain' || pct && w.box !== 'expand') && m) r -= m[0] + m[2];
+
   return r;
 }
 

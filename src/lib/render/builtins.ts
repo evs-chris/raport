@@ -41,10 +41,10 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
   addStyle(ctx, 'container', `.container {position:absolute;box-sizing:border-box;}`);
   let h: number;
   if (!w.height) w.height = 'auto';
-  else if (typeof w.height === 'number') h = getHeightWithMargin(w, placement, ctx);
+  else if (w.height !== 'auto') h = getHeightWithMargin(w, placement, ctx);
   const wctx = w.context ? extend(ctx, { value: evaluate(ctx, w.context) }) : ctx;
   const cw = getWidth(w, placement, ctx) || placement.availableX;
-  const r = renderWidgets(w, wctx, { x: 0, y: 0, availableX: cw, availableY: h || placement.availableY, maxX: cw, maxY: placement.maxY }, state, w.layout);
+  const r = renderWidgets(w, wctx, { x: 0, y: 0, availableX: cw, availableY: h || placement.availableY, maxX: cw, maxY: h != null ? h : placement.maxY }, state, w.layout);
   if (!r.cancel) {
     r.output = `<div${styleClass(ctx, ['container'], style(w, placement, ctx, { computedHeight: h || r.height, container: true }))}>${r.output}</div>`;
     r.height = h || r.height;
