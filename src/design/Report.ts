@@ -748,13 +748,16 @@ export class Designer extends Ractive {
   }
 
   removeWidget(ctx: ContextHelper) {
-    if (this.get('temp.widget') === ctx.resolve()) this.set('temp.widget', undefined);
+    const path = ctx.resolve();
+    let link: ReadLinkResult;
+    if (this.get('temp.widget') === path) this.set('temp.widget', 'report');
+    if ((link = this.readLink('widget')) && link.keypath === path) this.unlink('widget');
     this.checkLink('expr', ctx.resolve());
     if (ctx.get('^^/groupEnds')) ctx.splice('^^/groupEnds', ctx.get('^^/groupEnds') - 1 - ctx.get('@index'), 1);
     if (ctx.get('../type') === 'repeater') ctx.set('^^/' + ctx.get('@key'), undefined); 
+    else if (path === 'report.header' || path === 'report.footer' || path === 'report.watermark' || path === 'report.overlay') this.set(path, undefined);
     else {
       if (Array.isArray(ctx.get('^^/layout'))) ctx.splice('^^/layout', ctx.get('@index'), 1);
-      const path = ctx.resolve();
       const idx: number = ctx.get('@index');
       ctx.splice('../', idx, 1);
       if (path.startsWith('report.fields') && ctx.get('../headers')) ctx.splice('../headers', idx, 1);
@@ -1002,7 +1005,13 @@ Ractive.extendWith(Designer, {
       const map = getOperatorMap();
       const keys = Object.keys(map).filter(k => !~k.indexOf('parse')).sort();
       return keys.reduce((a, c) => (a[c] = map[c], a), {} as typeof map);
-    }
+    },
+    inWatermark() {
+      return /^report.water/.test(this.get('temp.widget'));
+    },
+    inOverlay() {
+      return /^report.overlay/.test(this.get('temp.widget'));
+    },
   },
   observe: {
     'report.type'(v: 'delimited'|'page'|'flow') {

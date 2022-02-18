@@ -41,27 +41,61 @@
   </div></div>
 {{else}}
   <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
-    <div class="paper" style="{{@.paperSize()}}" on-click="@.selectWidget('report')">
-      <div class=bar style-cursor=pointer on-click="@.unlink('widget'), @.unlink('expr'), @.set('temp', { name: 'report ', widget: 'report' })" class-active="temp.widget === 'report'" class-hover="temp.hover === 'report'" on-mouseover="@.set('temp.hover', 'report'), false" on-mouseout="@.set('temp.hover', ''), false">
-        <span>report</span>
+    <div class="paper" style="{{@.paperSize()}}" on-click="@event.target === @node ? @.selectWidget('report') : true">
+      <div class=bar style-cursor=pointer on-click="@.unlink('widget'), @.unlink('expr'), @.set('temp', { name: 'report ', widget: 'report' })" class-active="temp.widget === 'report' || temp.widget === 'report.watermark' || temp.widget === 'report.overlay'" class-hover="temp.hover === 'report' || temp.hover === 'report.watermark' || temp.hover === 'report.overlay'" on-mouseover="@.set('temp.hover', ~/inWatermark ? 'report.watermark' : ~/inOverlay ? 'report.overlay' : 'report'), false" on-mouseout="@.set('temp.hover', ''), false">
+        <span>
+          {{#if ~/inWatermark}}Watermark
+          {{elseif ~/inOverlay}}Overlay
+          {{else}}Report{{/if}}
+        </span>
         {{#if report.type === 'page'}}
-          {{#if report.header}}
-            <span class-btn on-click="@.set('report.header', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove page header</span>
-          {{else}}
-            <span class-btn on-click="@.set('report.header', { type: 'container' })">Add page header</span>
-          {{/if}}
+          {{#if !~/temp.widget || !/^report.(water|overlay)/.test(~/temp.widget)}}
+            {{#if report.header}}
+              <span class-btn on-click="@.set('report.header', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove page header</span>
+            {{else}}
+              <span class-btn on-click="@.set('report.header', { type: 'container' })">Add page header</span>
+            {{/if}}
 
-          {{#if report.footer}}
-            <span class-btn on-click="@.set('report.footer', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove page footer</span>
-          {{else}}
-            <span class-btn on-click="@.set('report.footer', { type: 'container' })">Add page footer</span>
+            {{#if report.footer}}
+              <span class-btn on-click="@.set('report.footer', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove page footer</span>
+            {{else}}
+              <span class-btn on-click="@.set('report.footer', { type: 'container' })">Add page footer</span>
+            {{/if}}
           {{/if}}
+        {{/if}}
+
+        {{#if report.watermark}}
+          <span class-btn on-click="@.set('report.watermark', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove watermark</span>
+          {{#unless ~/inWatermark}}<span class-btn on-click="@.link('report.watermark', 'widget'), @.set('temp.widget', 'report.watermark'), false">Edit watermark</span>{{/unless}}
+        {{else}}
+          <span class-btn on-click="@.set('report.watermark', { type: 'container' }), @.link('report.watermark', 'widget'), @.set('temp.widget', 'report.watermark'), false">Add watermark</span>
+        {{/if}}
+
+        {{#if report.overlay}}
+          <span class-btn on-click="@.set('report.overlay', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove overlay</span>
+          {{#unless ~/inOverlay}}<span class-btn on-click="@.link('report.overlay', 'widget'), @.set('temp.widget', 'report.overlay'), false">Edit overlay</span>{{/unless}}
+        {{else}}
+          <span class-btn on-click="@.set('report.overlay', { type: 'container' }), @.link('report.overlay', 'widget'), @.set('temp.widget', 'report.overlay'), false">Add overlay</span>
+        {{/if}}
+
+        {{#if /^report.(water|overlay)/.test(~/temp.widget)}}
+          <span class-btn on-click="@.unlink('widget'), @.set('temp.widget', '')">Edit report</span>
         {{/if}}
       </div>
       {{#if ~/report.type === 'page' && ~/report.header}}{{>widget ~/report.header, 'page header' as label}}{{/if}}
-      {{#each ~/report.widgets}}
-        {{>widget}}
-      {{/each}}
+      {{#if /^report.water/.test(~/temp.widget)}}
+        {{#each ~/report.watermark.widgets}}
+          {{>widget}}
+        {{/each}}
+      {{elseif /^report.overlay/.test(~/temp.widget)}}
+        {{#each ~/report.overlay.widgets}}
+          {{>widget}}
+        {{/each}}
+      {{else}}
+        {{#each ~/report.widgets}}
+          {{>widget}}
+        {{/each}}
+      {{/if}}
       {{#if ~/report.type === 'page' && ~/report.footer}}{{>widget ~/report.footer, 'page footer' as label}}{{/if}}
     </div>
   </div></div>

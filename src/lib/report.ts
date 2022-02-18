@@ -59,6 +59,8 @@ export interface Displayed<T = {}> extends BaseReport<T> {
     size?: number;
     line?: number;
   };
+  watermark?: Container;
+  overlay?: Container;
 }
 
 // flow
@@ -314,6 +316,7 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
   const pages: string[] = [''];
   let page = 0;
   let availableY = size.height - 2 * size.margin[0];
+  const pageY = availableY;
   let maxY = availableY;
   let y = 0;
   const availableX = size.width - 2 * size.margin[1];
@@ -361,6 +364,12 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
   pages.forEach((p, i) => {
     let n = `<div class="page-back pb${i}"><div${styleClass(ctx, ['page', `ps${i}`], ['', ''], '', 'p')}>\n`;
     context.special.page = i + 1;
+    if (report.watermark) {
+      context.special.size = { x: availableX, y: pageY };
+      const r = renderWidget(report.watermark, ctx, { x: 0, y: 0, maxX: availableX, maxY: pageY });
+      n += r.output + '\n';
+      delete context.special.size;
+    }
     if (report.header) {
       const r = renderWidget(report.header, ctx, { x: 0, y: 0, maxX: availableX, maxY });
       n += r.output + '\n';
@@ -369,6 +378,12 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
     if (report.footer) {
       const r = renderWidget(report.footer, ctx, { x: 0, y: footTop, maxX: availableX, maxY });
       n += r.output + '\n';
+    }
+    if (report.overlay) {
+      context.special.size = { x: availableX, y: pageY };
+      const r = renderWidget(report.overlay, ctx, { x: 0, y: 0, maxX: availableX, maxY: pageY });
+      n += r.output + '\n';
+      delete context.special.size;
     }
     n += '\n</div></div>';
     pages[i] = n;
@@ -405,8 +420,8 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
   if (report.width) width = report.width;
   else if (report.size) width = report.orientation !== 'portrait' ? report.size.height : report.size.width;
 
-  for (const w of report.widgets) {
-    html += `<div${styleClass(ctx, [], [`position:absolute;right:0rem;left:0rem;${width ? `width:${width}rem;` : ''}`, ''], `top:${y}rem;`, 'p')}>\n`;
+  function render(w: Widget, cls: string) {
+    html += `<div${styleClass(ctx, cls ? [cls] : [], [`position:absolute;right:0rem;left:0rem;${width ? `width:${width}rem;` : ''}`, ''], `top:${y}rem;`, 'p')}>\n`;
     let r: RenderResult;
     let yy = 0;
     do {
@@ -426,12 +441,24 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
     html += `</div>\n`;
   }
 
+  if (report.watermark) render(report.watermark, 'watermark');
+  let maxY = y;
+  y = 0;
+  for (const w of report.widgets) render(w, 'main');
+  if (y > maxY) y = maxY;
+  y = 0;
+  if (report.overlay) render(report.overlay, 'overlay');
+  if (y > maxY) y = maxY;
+
   const margin = report.size && report.size.margin ? expandMargin(report.size, ctx, { x: 0, y: 0, availableX: width, maxX: width }) : [1.5, 1.5, 1.5, 1.5];
 
   return `<html><head><style>
     html { font-size: 100%; margin: 0; padding: 0; }
     body { font-size: 0.83rem; padding: 0; margin: 0;${width ? ` width: ${width}rem;` : ''} }
-    #wrapper { height:${y}rem; position: relative; ${report.font ? styleFont(report.font) : ''} }
+    #wrapper { height:${maxY}rem; position: relative; ${report.font ? styleFont(report.font) : ''} }
+    .watermark { z-index: 0; }
+    .main { z-index: 5; }
+    .overlay { z-index: 10; }
     @media screen {
       body { margin: 1rem${width ? ' auto' : ''}; background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem ${margin[2]}rem ${margin[3]}rem; }
       html { background-color: #999; }
