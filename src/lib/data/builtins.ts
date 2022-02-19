@@ -630,10 +630,14 @@ registerOperator(
     if ((opts.rel || opts.parse) && isDateRel(res)) {
       let rel = dateRelToExactRange(res);
       if (typeof t === 'string') t = parseTime(t);
+
       if (Array.isArray(t)) {
         const f = rel.f;
-        [f[3], f[4], f[5], f[6]] = f.slice(3);
-      } else if (typeof t === 'number') {
+        f[3] = t[0], f[4] = t[1], f[5] = t[2], f[6] = t[3];
+        t = t[4];
+      }
+
+      if (typeof t === 'number') {
         if (opts.shift) {
           const diff = (+rel.f[7] || 0) - t;
           const dt = dateRelToDate(rel);
@@ -653,11 +657,11 @@ registerOperator(
         if (Array.isArray(t)) {
           rdt.setHours(t[0] || 0, t[1] || 0, t[2] || 0, t[3] || 0);
           if (t[4] != null) {
-            const offset = t[4] + rdt.getTimezoneOffset();
+            const offset = -rdt.getTimezoneOffset() - t[4];
             rdt.setMinutes(rdt.getMinutes() + offset);
           }
         } else if (typeof t === 'number') {
-          const offset = t + rdt.getTimezoneOffset();
+          const offset = -rdt.getTimezoneOffset() - t;
           rdt.setMinutes(rdt.getMinutes() + offset);
         }
       }
