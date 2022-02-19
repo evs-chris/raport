@@ -754,7 +754,7 @@ export function dateRelToExactRange(rel: DateRel): DateExactRange {
   const dt = dateRelToDate(rel);
   const offset = dt.getTimezoneOffset();
   const z = 'z' in rel && rel.z != null ? rel.z : 'f' in rel && rel.f === 'd' && 't' in rel && rel.t[4] != null ? rel.t[4] : null;
-  if (z != null) dt.setMinutes(dt.getMinutes() - (offset + z));
+  if (rel instanceof Date && z != null) dt.setMinutes(dt.getMinutes() - (offset + z));
   return {
     f: [dt.getFullYear(), dt.getMonth(), dt.getDate(), dt.getHours(), dt.getMinutes(), dt.getSeconds(), dt.getMilliseconds(), z != null ? z : -offset],
   };
