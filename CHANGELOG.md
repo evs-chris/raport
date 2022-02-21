@@ -1,6 +1,6 @@
 ## 0.10.0
 
-_Unreleased_
+2022-02-21
 
 ### Render
 
@@ -9,6 +9,11 @@ _Unreleased_
   * Watermarks are rendered below the report page content.
   * Overlays are rendered above the report page content.
   * In paged reports, both get access to the `@size` special reference, which has `x` and `y` properties that correspond to available page width and height, respectively. They also have access to the usual `@page` and `@pages` that headers and footers get.
+
+### Data
+
+* __BUG__: `date` properly supports time plus timezone time strings as the second argument. For instance, `date(#now# :midnight-10)` in `-5` will result in <F8>
+* __BUG__: Date literals with a timezone will no longer shift when formatting as a timestamp.
 
 ### Designer
 
