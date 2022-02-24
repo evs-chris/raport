@@ -189,7 +189,7 @@ Ractive.extendWith(Viewer, {
   template: { v: template.v, t: template.p.viewer }, cssId: 'raport-ast-view',
   css: css + `
   pre { margin: 0; white-space: pre-wrap; }
-  .syntax-editor code { padding: 0; }
+  .syntax-editor code { padding: 0; flex-grow: 1; }
   .syntax-editor { max-height: 100%; overflow: auto; }
   `,
   partials: {
