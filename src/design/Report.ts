@@ -250,6 +250,7 @@ export class Designer extends Ractive {
   }
 
   async eval() {
+    const start = Date.now();
     const str: string|any[] = this.get('temp.expr.str');
     let v: string = this.get('temp.expr.path');
     if (v && v.startsWith('widget.')) v = v.replace('widget', this.get('temp.widget'));
@@ -261,6 +262,7 @@ export class Designer extends Ractive {
         return '';
       }).join('') :
       evaluate(ctx, this.get('temp.expr.html') || this.get('temp.expr.template') ? parseTemplate(str) : str);
+    console.log(`eval: ${Date.now() - start}ms`);
     this.set('temp.expr.result', res);
     this.set('temp.expr.tab', 'result');
   }
