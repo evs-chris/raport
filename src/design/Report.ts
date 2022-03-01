@@ -739,12 +739,14 @@ export class Designer extends Ractive {
   }
 
   fmt() {
+    this._onChange(this.get('report'));
     const str = this.get('temp.expr.str');
     this.set('temp.expr.str', fmt(str, this.get('temp.expr.html')));
   }
 
   fmtAll() {
     const json = this.get('report');
+    this._onChange(json);
     this.set('report', fmtAll(json));
   }
 
