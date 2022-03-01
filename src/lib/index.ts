@@ -19,11 +19,13 @@ export {
   Type, ArrayType, ValueType, Value, Literal, Reference, ValueOrExpr,
   template,
 } from './data/index';
-export { inspect } from './data/schema';
+export { inspect, validate, checkType } from './data/schema';
 export { diff, Diff } from './data/diff';
 export { parse, parsePath, parseTime, parseDate } from './data/parse';
 export { stringify } from './data/parse/stringify';
 export { parse as parseTemplate } from './data/parse/template';
+
+export { parseSchema, unparseSchema } from './data/parse/schema';
 
 export {
   registerLayout, registerRenderer, isComputed,

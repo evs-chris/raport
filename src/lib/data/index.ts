@@ -4,8 +4,16 @@ import { ParseError } from 'sprunge/lib';
 
 // Data
 export interface Schema {
-  root: Type;
+  /** An optional type for the value */
+  type?: Type;
+  /** Child fields belonging to the field */
   fields?: Field[];
+  /** Types of unnamed fields in object prototypes */
+  rest?: Schema;
+  /** Types of tuple or union */
+  types?: Schema[];
+  /** Literal value of field */
+  literal?: string|number|boolean|undefined|null;
 }
 
 export interface DataSource<T = any, R = any> {
@@ -33,19 +41,17 @@ export class CachedDataSource<R = any> implements DataSource<any, R> {
 
 export interface SourceMap { [key: string]: DataSet }
 
-export type ValueType = 'string'|'number'|'boolean'|'date'|'object';
-export type ArrayType = 'string[]'|'number[]'|'boolean[]'|'date[]'|'object[]';
-export type Type = ValueType|ArrayType|'value'|'array'|'any';
+export type ValueType = 'string'|'number'|'boolean'|'date'|'object'|'literal';
+export type ArrayType = 'string[]'|'number[]'|'boolean[]'|'date[]'|'object[]'|'tuple[]'|'union[]';
+export type Type = ValueType|ArrayType|'value'|'array'|'union'|'tuple'|'any';
 
-export interface Field {
+export interface Field extends Schema {
   /** The property name for the field */
   name: string;
+  /** Whether this field is required */
+  required?: true;
   /** A user-friendly name for the field */
   label?: string;
-  /** An optional type for the field */
-  type?: Type;
-  /** Child fields belonging to the field */
-  fields?: Field[];
 }
 
 export interface Operation {
@@ -479,7 +485,7 @@ export function isKeypath(v: any): v is string|Keypath {
 
 export interface Reference { r: string|Keypath };
 export interface Application { a: Value; n?: string[]; };
-export interface Literal { v: any };
+export interface Literal { v: any; s?: 1 };
 
 /** A timespan specified in milliseconds */
 export interface DateRelSpanMS {

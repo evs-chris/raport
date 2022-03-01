@@ -1,6 +1,7 @@
 import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name, not } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
 import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation, TimeSpanMS } from './index';
+import { type as schema } from './parse/schema';
 
 export const timespans = {
   y: 0,
@@ -254,6 +255,8 @@ export const dateexact: Parser<Date|DateRel> = map(seq(
 
 export const date = bracket(str('#'), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), str('#'), { primary: true, name: 'date' });
 
+export const typelit = map(seq(str('@['), ws, schema, ws, str(']')), ([, , v]) => ({ v, s: 1 } as Value), { name: 'typelit', primary: true });
+
 export const parseDate = makeParser(map(seq(opt(str('#')), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), opt(str('#'))), ([, d,]) => d), { trim: true, consumeAll: true, undefinedOnError: true });
 
 export const string = alt<Value>({ primary: true, name: 'string' },
@@ -262,7 +265,7 @@ export const string = alt<Value>({ primary: true, name: 'string' },
     read1To('\\"'), JStringEscape, JStringUnicode, JStringHex
   )), str('"')), a => ({ v: ''.concat(...a) })), 
   map(bracket(str(`'`), rep(alt('string-part',
-    map(read1To(`'\\$\{`, true), v => ({ v })),
+    map(read1To(`'\\$\{`, true), v => ({ v } as Value)),
     map(str('\\$', '$$'), () => ({ v: '$' })),
     bracket(str('${', '{'), value, str('}'), { primary: true, name: 'string-interpolation' }),
     map(str('$', '{'), v => ({ v })),
@@ -271,7 +274,7 @@ export const string = alt<Value>({ primary: true, name: 'string' },
     map(JStringEscape, v => ({ v })),
   )), str(`'`)), stringInterp),
   map(bracket(str('`'), rep(alt('string-part',
-    map(read1To('`\\${', true), v => ({ v })),
+    map(read1To('`\\${', true), v => ({ v } as Value)),
     map(str('\\$', '$$'), () => ({ v: '$' })),
     bracket(str('${'), value, str('}'), { primary: true, name: 'string-interpolation' }),
     map(str('$', '{'), v => ({ v })),
@@ -450,7 +453,7 @@ args.parser = map(repsep(alt<[Value, Value] | Value>('argument', namedArg, value
 
 const letter = map(seq(str('let'), rws, localpath, ws, str('='), ws, value), ([, , k, , , , v]) => ({ op: 'let', args: [{ v: k }, v] }), { primary: true, name: 'let' });
 const setter = map(seq(str('set'), rws, keypath, ws, str('='), ws, value), ([, , k, , , , v]) => ({ op: 'set', args: [{ v: k }, v] }), { primary: true, name: 'set' });
-values.parser = alt('expression', array, object, literal, string, application, unop, call_op, letter, setter, ref, block);
+values.parser = alt('expression', array, object, literal, typelit, string, application, unop, call_op, letter, setter, ref, block);
 
 export const parseBlock = makeParser<Value>(map(rep1sep(value, read1(space + ';'), 'allow'), args => args.length === 1 ? args[0] : { op: 'block', args }, 'expression-sequence'), { trim: true });
 export const parseExpr = makeParser(value, { trim: true });

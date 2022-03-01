@@ -1476,14 +1476,6 @@ function jsonToJS(json: any, strings: 'json'|'template'): string {
 
 registerOperator({
   type: 'value',
-  names: ['parse', 'unparse'],
-  apply(name, [str, opts]) {
-    return name === 'parse' ? (opts && opts.template ? parseTemplate : parse)(str) : stringify(str, opts);
-  }
-});
-
-registerOperator({
-  type: 'value',
   names: ['log'],
   apply(_name, args) {
     console.log.apply(console, args);

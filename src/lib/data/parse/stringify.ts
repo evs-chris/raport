@@ -1,5 +1,6 @@
 import { ValueOrExpr, Operation, Literal, DateRel, DateRelRange, isDateRel, isTimespan, TimeSpan } from '../index';
 import { endRef, isTimespanMS, timespans, timeSpanToNumber } from '../parse';
+import { unparseSchema } from './schema';
 
 const checkIdent = new RegExp(`[${endRef.split('').map(v => `\\${v}`).join('')}]`);
 
@@ -246,6 +247,7 @@ function stringifyRootBlock(block: Operation): string {
 }
 
 function stringifyLiteral(value: Literal): string {
+  if (value.s === 1) return `@[${unparseSchema(value.v)}]`;
   if (typeof value.v === 'string') {
     if (_tpl) return value.v.replace(/\\(.)/g, '\\\\$1').replace(/{{/g, '\\{{');
     if ((_key || !_noSym) && !checkIdent.test(value.v) && value.v.length) return `${_key ? '' : ':'}${value.v}`;

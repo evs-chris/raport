@@ -2,7 +2,9 @@ import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator,
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseExpr, parse } from './parse';
 import { parse as parseTemplate } from './parse/template';
+import { parseSchema, unparseSchema } from './parse/schema';
 import { stringify } from './parse/stringify';
+import { validate } from './schema';
 import { diff } from './diff';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
@@ -402,6 +404,7 @@ registerOperator(
     if (Array.isArray(value)) return value.join(', ');
 
     if (typeof opts === 'object' && opts.json) return JSON.stringify(value);
+    if (typeof opts === 'object' && opts.schema) return unparseSchema(value);
     else if (typeof opts === 'object' && opts.raport) return stringify(value, opts);
 
     let res = `${value}`;
@@ -452,6 +455,11 @@ registerOperator(
   }),
   simple(['overlap'], (_name, [left, right, threshhold]: any[]): any => {
     return overlap(`${left || ''}`, `${right || ''}`, threshhold);
+  }),
+  simple(['validate', 'valid'], (name, [left, right, mode]) => {
+    const res = validate(left, right, mode);
+    if (name === 'valid') return res === true;
+    else return res;
   }),
   simple(['diff'], (_, [left, right]) => {
     return diff(left, right);
@@ -695,6 +703,7 @@ registerOperator(
     else if (opts.template || opts.tpl) return parseTemplate(v, opts);
     else if (opts.time) return parseTime(v, opts);
     else if (opts.expr) return parseExpr(v, opts);
+    else if (opts.schema) return parseSchema(v);
     else return parse(v, opts);
   }),
 );

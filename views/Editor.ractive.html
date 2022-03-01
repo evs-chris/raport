@@ -91,6 +91,7 @@
 
   .ast-nodes .reference {
     color: #222;
+    font-weight: 500;
   }
 
   .ast-nodes .primitive,
@@ -98,6 +99,7 @@
   .ast-nodes .date,
   .ast-nides .timespan {
     color: #164;
+    font-weight: 500;
   }
 
   .ast-nodes .format-op {
@@ -116,6 +118,26 @@
   .ast-nodes .binary-op > .ast-extra,
   .ast-nodes .conditional > .ast-extra {
     color: #708;
+  }
+
+  .ast-nodes .typelit,
+  .ast-nodes .typelit > .ast-extra {
+    color: #371;
+  }
+
+  .ast-nodes .typelit .key {
+    color: #630;
+  }
+
+  .ast-nodes .typelit .type {
+    color: #45c;
+    font-weight: 500;
+  }
+
+  .ast-nodes .typelit .key,
+  .ast-nodes .typelit .literal {
+    font-weight: 500;
+    color: #239;
   }
 
   .ast-nodes .ast-fail {
