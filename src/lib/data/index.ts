@@ -14,6 +14,8 @@ export interface Schema {
   types?: Schema[];
   /** Literal value of field */
   literal?: string|number|boolean|undefined|null;
+  /** Addition validators on the value */
+  checks?: ValueOrExpr[];
 }
 
 export interface DataSource<T = any, R = any> {

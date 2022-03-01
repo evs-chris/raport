@@ -1,7 +1,6 @@
 import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name, not } from 'sprunge/lib';
-import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex } from 'sprunge/lib/json';
-import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation, TimeSpanMS } from './index';
-import { type as schema } from './parse/schema';
+import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex, JString } from 'sprunge/lib/json';
+import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation, TimeSpanMS, Schema, Field } from './index';
 
 export const timespans = {
   y: 0,
@@ -52,6 +51,7 @@ export const object: Parser<Value> = {};
 export const value: Parser<Value> = {};
 export const values: Parser<Value> = {};
 export const tpl: Parser<Value> = {};
+export const application: Parser<Value> = {};
 
 const escmap: { [k: string]: string } = { n: '\n', r: '\r', t: '\t', b: '\b' };
 const pathesc = map(seq(str('\\'), chars(1)), ([, char]) => escmap[char] || char);
@@ -255,7 +255,7 @@ export const dateexact: Parser<Date|DateRel> = map(seq(
 
 export const date = bracket(str('#'), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), str('#'), { primary: true, name: 'date' });
 
-export const typelit = map(seq(str('@['), ws, schema, ws, str(']')), ([, , v]) => ({ v, s: 1 } as Value), { name: 'typelit', primary: true });
+export const typelit = map(seq(str('@['), ws, schema(), ws, str(']')), ([, , v]) => ({ v, s: 1 } as Value), { name: 'typelit', primary: true });
 
 export const parseDate = makeParser(map(seq(opt(str('#')), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), opt(str('#'))), ([, d,]) => d), { trim: true, consumeAll: true, undefinedOnError: true });
 
@@ -444,7 +444,7 @@ block.parser = map(bracket(
 value.parser = operation;
 
 const namedArg: Parser<[Value, Value]> = map(seq(ident, str(':'), ws, value), ([k, , , v]) => [{ v: k }, v], 'named-arg');
-const application = map(seq(opt(bracket(check(str('|'), ws), rep1sep(opName, read1(space + ','), 'allow'), str('|'))), ws, str('=>', '=\\'), ws, value), ([names, , , , value]) => (names ? { a: value, n: names } : { a: value }), { primary: true, name: 'application' });
+application.parser = map(seq(opt(bracket(check(str('|'), ws), rep1sep(opName, read1(space + ','), 'allow'), str('|'))), ws, str('=>', '=\\'), ws, value), ([names, , , , value]) => (names ? { a: value, n: names } : { a: value }), { primary: true, name: 'application' });
 args.parser = map(repsep(alt<[Value, Value] | Value>('argument', namedArg, value), read1(space + ','), 'allow'), (args) => {
   const [plain, obj] = args.reduce((a, c) => ((Array.isArray(c) ? a[1].push(c) : a[0].push(c)), a), [[], []] as [Array<Value>, Array<[Value, Value]>]);
   if (obj.length) plain.push(objectOp(obj));
@@ -459,3 +459,60 @@ export const parseBlock = makeParser<Value>(map(rep1sep(value, read1(space + ';'
 export const parseExpr = makeParser(value, { trim: true });
 export const parse = parseBlock;
 export default parse;
+
+export function schema() {
+  const ident = read1To(' \r\n\t():{}[]<>,"\'`\\;&#.+/*|^%=!?', true);
+
+  const type: Parser<Schema> = {};
+  const value = map(str('string[]', 'number[]', 'boolean[]', 'date[]', 'any', 'string', 'number', 'boolean', 'date'), s => (s === 'any' ? undefined : { type: s } as Schema), { name: 'type', primary: true });
+  const key = map(seq(name(ident, { name: 'key', primary: true }), opt(str('?')), ws, str(':'), ws, type), ([name, opt, , , , type]) => {
+    const res: Field = type as Field;
+    res.name = name;
+    if (!opt) res.required = true;
+    return res;
+  });
+  const literal = alt<Schema>(
+    { name: 'literal', primary: true }, 
+    map(alt<string|number>(JString, JNum), v => {
+      return { type: 'literal', literal: v } as Schema;
+    }),
+    map(str('true', 'false', 'null', 'undefined'), v => {
+      return { type: 'literal', literal: v === 'true' ? true : v === 'false' ? false : v === 'null' ? null : undefined } as Schema;
+    }),
+  );
+  const rest = map(seq(str('...'), ws, str(':'), ws, type), ([, , , , type]) => {
+    return Object.assign({ name: '...' }, type) as Field;
+  });
+  const object: Parser<Schema> = map(seq(str('{'), ws, repsep(alt(key, rest), read1(' \t\n,;'), 'allow'), ws, str('}'), opt(str('[]'))), ([, , keys, , , arr], fail) => {
+    const rests = keys.filter(k => k.name === '...');
+    if (rests.length > 1) fail('only one object rest can be specified');
+    else {
+      const rest = rests[0];
+      keys = keys.filter(k => k.name !== '...');
+      const type: Schema = { type: arr ? 'object[]' : 'object' };
+      if (keys.length) type.fields = keys;
+      if (rest) {
+        delete rest.name;
+        type.rest = rest;
+      }
+      return type;
+    }
+  });
+  const tuple = map(seq(str('['), ws, repsep(type, read1(' \t\r\n,')), ws, str(']'), opt(str('[]'))), ([, , types, , , arr]) => {
+    return { type: arr ? 'tuple[]' : 'tuple', types } as Schema;
+  });
+  const maybe_union = map(rep1sep(alt<Schema>(value, object, tuple, literal), seq(ws, str('|'), ws)), types => {
+    if (types.length === 1) return types[0];
+    else return { type: 'union', types: types } as Schema;
+  });
+  const union_array = alt<Schema>(
+    map(seq(str('Array<'), ws, maybe_union, ws, str('>')), ([, , union]) => ({ type: 'union[]', types: union.types } as Schema)),
+    maybe_union,
+  );
+
+  type.parser = map(seq(union_array, ws, repsep(map(seq(str('?'), ws, application), ([, , a]) => a), rws, 'allow')), ([type, , checks]) => {
+    if (checks && checks.length) type.checks = checks;
+    return type;
+  });
+  return type;
+}

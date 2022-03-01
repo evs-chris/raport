@@ -1,6 +1,7 @@
 import { Schema, Field, Type } from './index';
 import { join } from './diff';
 import { parseSchema, unparseSchema } from './parse/schema';
+import { evalApply, Root } from './index';
 
 const date = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 function isDate(v: any) {
@@ -67,7 +68,7 @@ function getType(v: any): Type {
 export type ValidationResult = ValidationError[] | true;
 export interface ValidationError {
   error: string;
-  type?: 'strict';
+  type?: 'strict'|'check';
   path?: string;
   actual?: string;
   expected?: string;
@@ -86,7 +87,7 @@ export function validate(value: any, schema: Schema|string, mode?: 'strict'|'loo
 }
 
 function _validate(value: any, schema: Schema, mode: 'strict'|'loose', path: string): ValidationResult {
-  const { type, fields, rest, types, literal } = schema || {};
+  const { type, fields, rest, types, literal, checks } = schema || {};
   if (!checkType(value, type, literal)) return [{ error: `type mismatch for '${type}'`, actual: unparseSchema(inspect(value)), value, path, expected: unparseSchema(schema) }];
 
   const errs: ValidationError[] = [];
@@ -146,6 +147,15 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'loose', path: str
       } else if (mode === 'strict') {
         for (const k in v) if (v[k] != null && !fields || !fields.find(f => f.name === k)) errs.push({ error: `unknown field ${k}`, path: p, type: 'strict', value: v[k] });
       }
+    }
+  }
+
+  if (!errs.length && checks && checks.length) {
+    let tmp: string|boolean;
+    const root = new Root({});
+    for (let i = 0; i < checks.length; i++) {
+      const c = checks[i];
+      if ((tmp = evalApply(root, c, [value])) !== true && tmp !== undefined) errs.push({ error: tmp === false ? `check ${i + 1} failed` : tmp, path, value, type: 'check' });
     }
   }
 

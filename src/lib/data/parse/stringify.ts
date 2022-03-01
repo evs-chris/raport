@@ -1,6 +1,6 @@
 import { ValueOrExpr, Operation, Literal, DateRel, DateRelRange, isDateRel, isTimespan, TimeSpan } from '../index';
 import { endRef, isTimespanMS, timespans, timeSpanToNumber } from '../parse';
-import { unparseSchema } from './schema';
+import { Schema } from '../index';
 
 const checkIdent = new RegExp(`[${endRef.split('').map(v => `\\${v}`).join('')}]`);
 
@@ -247,7 +247,7 @@ function stringifyRootBlock(block: Operation): string {
 }
 
 function stringifyLiteral(value: Literal): string {
-  if (value.s === 1) return `@[${unparseSchema(value.v)}]`;
+  if (value.s === 1) return `@[${stringifySchema(value.v)}]`;
   if (typeof value.v === 'string') {
     if (_tpl) return value.v.replace(/\\(.)/g, '\\\\$1').replace(/{{/g, '\\{{');
     if ((_key || !_noSym) && !checkIdent.test(value.v) && value.v.length) return `${_key ? '' : ':'}${value.v}`;
@@ -594,4 +594,46 @@ function stringifyTemplateCase(op: Operation): string {
   }
   res += '{{/}}';
   return res;
+}
+
+export function stringifySchema(schema: Schema): string {
+  if (!schema) return 'any';
+  const t = schema.type;
+  const ts = schema.types;
+  let fin: string;
+  switch (t) {
+    case 'object':
+    case 'object[]':
+      const arr = ~t.indexOf('[]');
+      if (!schema.fields && !schema.rest) {
+        fin = `{}${arr ? '[]' : ''}`;
+        break;
+      }
+      const fields = schema.fields ? schema.fields.map(f => `${f.name}: ${stringifySchema(f)}`).join(', ') : '';
+      fin = `{ ${fields}${schema.rest ? `${fields.length ? ', ' : ''}...: ${stringifySchema(schema.rest)}` : ''} }${arr ? '[]' : ''}`;
+      break;
+    case 'union':
+    case 'union[]':
+      const ures = ts.map(u => stringifySchema(u)).join('|');
+      if (~t.indexOf('[]')) fin = `Array<${ures}>`;
+      else fin = ures;
+      break;
+    case 'literal':
+      if (typeof schema.literal === 'string') fin = `'${schema.literal.replace(/'/g, '\\\'')}'`;
+      fin = `${schema.literal}`;
+      break;
+    case 'tuple':
+    case 'tuple[]':
+      let tres: string;
+      if (!t || t.length === 0) tres = '[]';
+      else tres = `[${ts.map(t => stringifySchema(t)).join(', ')}]`;
+      if (~t.indexOf('[]')) fin = `${tres}[]`;
+      else fin = tres;
+      break;
+    default: fin = t || 'any';
+  }
+
+  if (schema.checks && schema.checks.length) fin += ' ?' + schema.checks.map(c => stringify(c)).join(' ?');
+
+  return fin;
 }
