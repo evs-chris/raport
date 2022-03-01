@@ -70,14 +70,14 @@
               </div>
               <div class-scrolled-wrapper style-flex-grow=1>
                 <div as-scrolled>
-                  <Editor src="{{.str}}" template="{{.html || .template}}" primary />
+                  <Editor src="{{.str}}" template="{{.html || .template}}" on-run="@.eval()" primary />
                 </div>
               </div>
             {{/if}}
           {{else}}
             <div class-scrolled-wrapper style-flex-grow=1>
               <div as-scrolled>
-                <Editor src="{{.str}}" template="{{.html || .template}}" primary />
+                <Editor src="{{.str}}" template="{{.html || .template}}" on-run="@.eval()" primary />
               </div>
             </div>
           {{/if}}

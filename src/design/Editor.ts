@@ -136,6 +136,11 @@ export class Editor extends Ractive {
       n.dispatchEvent(new InputEvent('change'));
       return false;
     } else if (ev.key === 'Enter') {
+      if (ev.ctrlKey) {
+        this.fire('run');
+        return false;
+      }
+
       const n: HTMLTextAreaElement = ev.target as any;
       let txt = n.value;
       let pos = [n.selectionStart, n.selectionEnd];
