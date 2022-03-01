@@ -427,8 +427,15 @@ function group(arr: any[], groups: Array<ValueOrExpr>, ctx: Context, level: numb
 
 function applyOperator(root: Context, operation: Operation): any {
   const op = opMap[operation.op];
-  // if the operator doesn't exist, skip
-  if (!op) return true;
+
+  // if the operator doesn't exist, try a local or skip
+  if (!op) {
+    const local = safeGet(root, operation.op);
+    if (local && typeof local === 'object' && 'a' in local) {
+      return evalApply(root, local, operation.args.map(a => evalParse(root, a)));
+    }
+    return true;
+  }
 
   let args: any[];
   if (op.type === 'checked') {
