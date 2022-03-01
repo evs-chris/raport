@@ -743,13 +743,13 @@ export class Designer extends Ractive {
   fmt() {
     this._onChange(this.get('report'));
     const str = this.get('temp.expr.str');
-    this.set('temp.expr.str', fmt(str, this.get('temp.expr.html')));
+    this.set('temp.expr.str', fmt(str, this.get('temp.expr.html'), this.get('tmp.nowrap')));
   }
 
   fmtAll() {
     const json = this.get('report');
     this._onChange(json);
-    this.set('report', fmtAll(json));
+    this.set('report', fmtAll(json, this.get('tmp.nowrap')));
   }
 
   removeWidget(ctx: ContextHelper) {
@@ -1408,13 +1408,15 @@ function stripDefaults(json: any): any {
 }
 
 const fmtOpts = { throw: true, consumeAll: true };
-function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>, template?: boolean): Computed|ValueOrExpr|Array<ValueOrExpr|Span> {
+function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>, template?: boolean, compact?: boolean): Computed|ValueOrExpr|Array<ValueOrExpr|Span> {
   if (typeof str !== 'string' && typeof str !== 'object') return str;
   const parser = template ? parseTemplate : parse;
   const opts = Object.assign(fmtOpts, { template });
+  const listWrap = compact ? 0 : 40;
+  const noIndent = compact;
   if (typeof str === 'string') {
     try {
-      return stringify(parser(str, opts),  { template, listWrap: 40 });
+      return stringify(parser(str, opts),  { template, listWrap, noIndent });
     } catch {
       return str;
     }
@@ -1422,46 +1424,46 @@ function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>, template?: boole
     return str.map(e => {
       if (typeof e === 'string') {
         try {
-          return stringify(parser(e, opts), { template, listWrap: 40 });
+          return stringify(parser(e, opts), { template, listWrap, noIndent });
         } catch {
           return e;
         }
       } else if ('text' in e && typeof e.text === 'string') {
         try {
-          return Object.assign({}, e, { text: stringify(parser(e.text, opts), { template, listWrap: 40 }) });
+          return Object.assign({}, e, { text: stringify(parser(e.text, opts), { template, listWrap, noIndent }) });
         } catch {
           return e;
         }
       } else if (isValueOrExpr(e)) {
-        return stringify(e, { template, listWrap: 40 });
+        return stringify(e, { template, listWrap, noIndent });
       } else {
         return e;
       }
     });
   } else if ('x' in str && typeof str.x === 'string') {
     try {
-      return { x: stringify(parser(str.x, opts), { template, listWrap: 40 }) };
+      return { x: stringify(parser(str.x, opts), { template, listWrap, noIndent }) };
     } catch {
       return str;
     }
   } else if (isValueOrExpr(str)) {
-    return stringify(str, { template, listWrap: 40 });
+    return stringify(str, { template, listWrap, noIndent });
   }
   return str;
 }
 
-function fmtAll(json: any): any {
+function fmtAll(json: any, compact?: boolean): any {
   if (typeof json !== 'object') return json;
 
-  if (Array.isArray(json)) return json.map(fmtAll);
+  if (Array.isArray(json)) return json.map(j => fmtAll(j, compact));
 
   const res = {};
 
   for (const k in json) {
     const v = json[k];
-    if (k === 'text' || k === 'width' || k === 'height' || k === 'hide' || k === 'br') res[k] = fmt(v);
-    else if (k === 'name' || k === 'html') res[k] = fmt(v, true);
-    else res[k] = fmtAll(v);
+    if (k === 'text' || k === 'width' || k === 'height' || k === 'hide' || k === 'br') res[k] = fmt(v, false, compact);
+    else if (k === 'name' || k === 'html') res[k] = fmt(v, true, compact);
+    else res[k] = fmtAll(v, compact);
   }
 
   return res;
