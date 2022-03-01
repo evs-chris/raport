@@ -90,3 +90,41 @@ function concat(values: Value[]): Value {
 }
 
 export const parse = makeParser(alt<Value>(map(rep1(content), args => concat(args)), map(ws, () => ({ v: '' }))), { trim: true });
+
+// Tag token parser
+export interface Block {
+  t: 'mblock';
+  n: string;
+  v?: Value;
+  l: [number, number];
+
+}
+
+export interface CaseBlock {
+  t: 'mcblock';
+  v: Value;
+  c: Value;
+  l: [number, number];
+}
+
+export interface BlockClose {
+  t: 'mclose';
+  n?: string;
+  l: [number, number];
+}
+
+export interface Interpolator {
+  t: 'mvalue';
+  v: Value;
+  l: [number, number];
+}
+
+export type Mustache = Block | CaseBlock | BlockClose | Interpolator;
+
+export const mustache = alt<Mustache>(
+  map(seq(str('{{'), ws, str('if', 'else if', 'elseif', 'elsif', 'elif', 'unless', 'when', 'with', 'each'), rws, value, ws, str('}}')), ([, , n, , v], _, s, e) => ({ t: 'mblock', n, v, l: [s, e] } as Block), 'block'),
+  map(seq(str('{{'), ws, str('else'), ws, str('}}')), (_1, _2, s, e) => ({ t: 'mblock', n: 'else', l: [s, e] }), 'else block'),
+  map(seq(str('{{'), ws, str('case'), rws, value, rws, str('when'), rws, value, str('}}')), ([ , , , , v, , , , c], _, s, e) => ({ t: 'mcblock', v, c, l: [s, e]} as CaseBlock), 'case block'),
+  map(seq(str('{{'), ws, value, ws, str('}}')), ([ , , v], _, s, e) => ({ t: 'mvalue', v, l: [s, e ] } as Interpolator)),
+  map(seq(str('{{'), ws, str('/'), ws, readTo('}'), ws, str('}}')), ([, , , , n], _, s, e) => ({ t: 'mclose', l: [s, e], n: n || undefined } as BlockClose)),
+);

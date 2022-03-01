@@ -22,6 +22,7 @@ export {
 export { inspect, validate, checkType } from './data/schema';
 export { diff, Diff, deepEqual } from './data/diff';
 export { parse, parsePath, parseTime, parseDate } from './data/parse';
+export { parseXml } from './data/parse/xml';
 export { stringify } from './data/parse/stringify';
 export { parse as parseTemplate } from './data/parse/template';
 
