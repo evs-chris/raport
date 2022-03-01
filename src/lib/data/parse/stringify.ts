@@ -234,7 +234,7 @@ function stringifyOp(value: Operation): string {
     else path = _stringify(arg);
     return `${op} ${path} = ${_stringify(value.args[1])}`;
   } else if (op === 'get' && value.args.length === 2 && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'object' && 'k' in value.args[1].v) {
-    return `${stringify(value.args[0])}${stringify({ r: { k: ['r'].concat(value.args[1].v.k) } }).substr(1)}`;
+    return `${_stringify(value.args[0])}${_stringify({ r: { k: ['r'].concat(value.args[1].v.k) } }).substr(1)}`;
   } else if (call_op.test(op)) {
     return wrapArgs(`${op}(`, value.args || [], ')', 0, true);
   } else {
@@ -249,8 +249,15 @@ function stringifyRootBlock(block: Operation): string {
 }
 
 function stringifyLiteral(value: Literal): string {
-  if (value.s === 1) return `@[${stringifySchema(value.v)}]`;
-  if (typeof value.v === 'string') {
+  if (value.s === 1) {
+    _level++;
+    const res = stringifySchema(value.v);
+    _level--;
+    if (~res.indexOf('\n')) {
+      const level = padl('', '  ', _level);
+      return `@[\n${level}  ${res}\n${level}]`;
+    } else return `@[${res}]`;
+  } else if (typeof value.v === 'string') {
     if (_tpl) return value.v.replace(/\\(.)/g, '\\\\$1').replace(/{{/g, '\\{{');
     if ((_key || !_noSym) && !checkIdent.test(value.v) && value.v.length) return `${_key ? '' : ':'}${value.v}`;
     else if (!~value.v.indexOf("'")) return `'${value.v.replace(/[{']/g, v => `\\${v}`).replace(/\${/g, '\\${')}'`;
@@ -525,7 +532,7 @@ function stringifyCase(op: Operation): string {
       res = typeof a === 'object' && 'op' in a ? _stringify(a).replace(caseRE, '_') : _stringify(a);
     }
 
-    if (i !== 0)_level--;
+    if (i !== 0) _level--;
 
     return res;
   });
@@ -602,40 +609,89 @@ export function stringifySchema(schema: Schema): string {
   if (!schema) return 'any';
   const t = schema.type;
   const ts = schema.types;
-  let fin: string;
+
+  let strs: string[];
+  let fin = '', open = '', close = '', join = '';
+
   switch (t) {
     case 'object':
     case 'object[]':
-      const arr = ~t.indexOf('[]');
+      const arr = !!~t.indexOf('[]');
       if (!schema.fields && !schema.rest) {
         fin = `{}${arr ? '[]' : ''}`;
         break;
       }
-      const fields = schema.fields ? schema.fields.map(f => `${f.name}: ${stringifySchema(f)}`).join(', ') : '';
-      fin = `{ ${fields}${schema.rest ? `${fields.length ? ', ' : ''}...: ${stringifySchema(schema.rest)}` : ''} }${arr ? '[]' : ''}`;
+      _level++;
+      strs = schema.fields ? schema.fields.map(f => {
+        const str = stringifySchema(f);
+        return `${f.name}${f.required ? '' : '?'}: ${str}`;
+      }) : [];
+      if (schema.rest) strs.push(`...: ${stringifySchema(schema.rest)}`);
+      _level--;
+      open = '{';
+      close = `}${arr ? '[]' : ''}`;
+      join = ', ';
       break;
     case 'union':
     case 'union[]':
-      const ures = ts.map(u => stringifySchema(u)).join('|');
-      if (~t.indexOf('[]')) fin = `Array<${ures}>`;
-      else fin = ures;
+      _level++;
+      strs = ts.map(u => stringifySchema(u));
+      if (~t.indexOf('[]')) open = 'Array<', close = '>';
+      else if (schema.checks && schema.checks.length) open = '(', close = ')';
+      join = strs.length > 6 || strs.find(s => ~s.indexOf('\n')) ? ' | ' : '|';
+      _level--;
       break;
     case 'literal':
       if (typeof schema.literal === 'string') fin = `'${schema.literal.replace(/'/g, '\\\'')}'`;
-      fin = `${schema.literal}`;
+      else fin = `${schema.literal}`;
       break;
     case 'tuple':
     case 'tuple[]':
-      let tres: string;
-      if (!t || t.length === 0) tres = '[]';
-      else tres = `[${ts.map(t => stringifySchema(t)).join(', ')}]`;
-      if (~t.indexOf('[]')) fin = `${tres}[]`;
-      else fin = tres;
+      if (!t || t.length === 0) {
+        fin = '[]';
+        break;
+      }
+
+      _level++;
+      open = '[', close = `]${~t.indexOf('\n') ? '[]' : ''}`;
+      join = ', ';
+      strs = ts.map(t => stringifySchema(t));
+      _level--;
       break;
     default: fin = t || 'any';
   }
 
-  if (schema.checks && schema.checks.length) fin += ' ?' + schema.checks.map(c => stringify(c)).join(' ?');
+  if (!fin) {
+    const level = padl('', '  ', _level);
+    if (_listwrap === 0) fin = `${open}\n${level}  ${strs.join(join)}\n${level}${close}`;
+    else if (_listwrap === 1) fin = `${open}\n${level}  ${strs.join(`${join}\n${level}  `)}\n${level}${close}`;
+    else {
+      let line = '';
+      
+      const last = strs.length - 1;
+      for (let i = 0; i < strs.length; i++) {
+        if (~strs[i].indexOf('\n')) {
+          line = '';
+          fin += `\n${level}  ` + strs[i] + (i !== last ? join : '');
+        } else {
+          fin += strs[i], line += strs[i];
+          if (i !== last) fin += join, line += join;
+        }
+
+        if (line.length > _listwrap && !~(strs[i + 1] || '').indexOf('\n')) {
+          fin += `\n${level}  `;
+          line = '';
+        }
+      }
+
+      if (~fin.indexOf('\n')) fin = `${open}\n${level}  ${fin}\n${level}${close}`;
+      else fin = `${open}${open === '{' ? ' ' : ''}${fin}${open === '{' ? ' ' : ''}${close}`;
+    }
+  }
+
+  if (schema.checks && schema.checks.length) {
+    fin += ` ?${schema.checks.map(c => _stringify(c)).join(' ?')}`;
+  }
 
   return fin;
 }
