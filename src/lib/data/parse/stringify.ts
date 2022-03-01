@@ -254,8 +254,8 @@ function stringifyLiteral(value: Literal): string {
     const res = stringifySchema(value.v);
     _level--;
     if (~res.indexOf('\n')) {
-      const level = padl('', '  ', _level);
-      return `@[\n${level}  ${res}\n${level}]`;
+      const level = _noindent ? ' ' : `\n${padl('', '  ', _level)}`;
+      return `@[${level}${level !== ' ' ? '  ' : ''}${res}${level}]`;
     } else return `@[${res}]`;
   } else if (typeof value.v === 'string') {
     if (_tpl) return value.v.replace(/\\(.)/g, '\\\\$1').replace(/{{/g, '\\{{');
@@ -662,12 +662,13 @@ export function stringifySchema(schema: Schema): string {
   }
 
   if (!fin) {
-    const level = padl('', '  ', _level);
-    const l2 = open ? `${level}  ` : level;
-    const lopen = open ? `${open}\n${l2}` : '';
-    const lclose = close ? `\n${level}${close}` : '';
+    const level = _noindent ? ' ' : padl('', '  ', _level);
+    const l2 = open && !_noindent ? `${level}  ` : level;
+    const nl = _noindent ? '' : '\n';
+    const lopen = open ? `${open}${nl}${l2}` : '';
+    const lclose = close ? `${nl}${level}${close}` : '';
     if (_listwrap === 0) fin = `${lopen}${strs.join(join)}${lclose}`;
-    else if (_listwrap === 1) fin = `${lopen}${strs.join(`${join}\n${l2}`)}${lclose}`;
+    else if (_listwrap === 1) fin = `${lopen}${strs.join(`${join}${nl}${l2}`)}${lclose}`;
     else {
       let line = '';
       
@@ -675,14 +676,14 @@ export function stringifySchema(schema: Schema): string {
       for (let i = 0; i < strs.length; i++) {
         if (~strs[i].indexOf('\n')) {
           line = '';
-          fin += `\n${l2}` + strs[i] + (i !== last ? join : '');
+          fin += `${nl}${l2}` + strs[i] + (i !== last ? join : '');
         } else {
           fin += strs[i], line += strs[i];
           if (i !== last) fin += join, line += join;
         }
 
         if (line.length > _listwrap && i !== last && !~(strs[i + 1] || '').indexOf('\n')) {
-          fin += `\n${l2}`;
+          fin += `${nl}${l2}`;
           line = '';
         }
       }
