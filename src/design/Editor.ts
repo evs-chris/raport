@@ -6,7 +6,7 @@ import { parse, parseTemplate } from 'raport/index';
 
 import autosize from './autosize';
 
-import { debounce } from './Report'
+import { debounce } from './util'
 
 const notSpace = /[^\s]/;
 const initSpace = /^(\s*).*/;

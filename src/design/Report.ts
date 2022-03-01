@@ -7,6 +7,7 @@ import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 import { Editor, Viewer } from './Editor';
 import autosize from './autosize';
 import { trackfocus, getLastFocus } from './trackfocus';
+import { debounce } from './util';
 
 let sourceTm: any;
 
@@ -1471,20 +1472,6 @@ function jsonToJS(json: any, strings: 'json'|'template'): string {
   else if (typeof json === 'string') return strings === 'json' ? JSON.stringify(json) : `\`${json.replace(/(`|${|\\)/g, '\\$1')}\``;
   else if (Array.isArray(json)) return `[${json.map(v => jsonToJS(v, strings)).join(',')}]`;
   else if (typeof json === 'object') return `{${Object.entries(json).map(([k, v]) => v === undefined ? v : `${plainKeys.test(k) ? k : `'${k}'`}:${jsonToJS(v, strings)}`).filter(v => !!v).join(',')}}`;
-}
-
-export function debounce(fn: (...args: any[]) => void, time: number): (...args: any[]) => void {
-  let tm: any;
-  function wrapper(...args: any[]) {
-    if (tm) {
-      clearTimeout(tm);
-    }
-    tm = setTimeout(() => {
-      tm = null;
-      fn.apply(this, args);
-    }, time);
-  }
-  return wrapper;
 }
 
 registerOperator({
