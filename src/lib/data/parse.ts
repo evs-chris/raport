@@ -451,8 +451,8 @@ args.parser = map(repsep(alt<[Value, Value] | Value>('argument', namedArg, value
   return plain;
 });
 
-const letter = map(seq(str('let'), rws, localpath, ws, str('='), ws, value), ([, , k, , , , v]) => ({ op: 'let', args: [{ v: k }, v] }), { primary: true, name: 'let' });
-const setter = map(seq(str('set'), rws, keypath, ws, str('='), ws, value), ([, , k, , , , v]) => ({ op: 'set', args: [{ v: k }, v] }), { primary: true, name: 'set' });
+const letter = map(seq(str('let'), rws, name(localpath, { name: 'reference', primary: true }), ws, str('='), ws, value), ([, , k, , , , v]) => ({ op: 'let', args: [{ v: k }, v] }), { primary: true, name: 'let' });
+const setter = map(seq(str('set'), rws, name(keypath, { name: 'reference', primary: true }), ws, str('='), ws, value), ([, , k, , , , v]) => ({ op: 'set', args: [{ v: k }, v] }), { primary: true, name: 'set' });
 values.parser = alt('expression', array, object, literal, typelit, string, application, unop, call_op, letter, setter, ref, block);
 
 export const parseBlock = makeParser<Value>(map(rep1sep(value, read1(space + ';'), 'allow'), args => args.length === 1 ? args[0] : { op: 'block', args }, 'expression-sequence'), { trim: true });
@@ -520,7 +520,7 @@ export function schema() {
     maybe_union,
   );
 
-  type.parser = map(seq(union_array, ws, repsep(map(seq(str('?'), ws, application), ([, , a]) => a), rws, 'allow')), ([type, , checks]) => {
+  type.parser = map(seq(union_array, ws, repsep(map(seq(name(str('?'), { name: 'condition', primary: true }), ws, application), ([, , a]) => a), rws, 'allow')), ([type, , checks]) => {
     if (checks && checks.length) type.checks = checks;
     return type;
   });
