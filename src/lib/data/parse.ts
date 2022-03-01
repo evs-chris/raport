@@ -506,7 +506,16 @@ export function schema() {
     else return { type: 'union', types: types } as Schema;
   });
   const union_array = alt<Schema>(
-    map(seq(str('Array<'), ws, maybe_union, ws, str('>')), ([, , union]) => ({ type: 'union[]', types: union.types } as Schema)),
+    map(seq(str('Array<'), ws, maybe_union, ws, str('>')), ([, , union], fail) => {
+      if (union.type === 'union') return { type: 'union[]', types: union.types } as Schema;
+      else if (union.type === 'literal') fail('literal types cannot be array types');
+      else if (union.type === 'array' || ~union.type.indexOf('[]')) fail('array types cannot be array types');
+      else if (union.type === 'any') fail('any cannot be an array type');
+      else {
+        union.type += '[]';
+        return union;
+      }
+    }),
     maybe_union,
   );
 
