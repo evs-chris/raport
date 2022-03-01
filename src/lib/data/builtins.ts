@@ -3,6 +3,7 @@ import { date, dollar, ordinal, number, phone } from './format';
 import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseExpr, parse } from './parse';
 import { parse as parseTemplate } from './parse/template';
 import { stringify } from './parse/stringify';
+import { diff } from './diff';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
   return {
@@ -451,6 +452,9 @@ registerOperator(
   }),
   simple(['overlap'], (_name, [left, right, threshhold]: any[]): any => {
     return overlap(`${left || ''}`, `${right || ''}`, threshhold);
+  }),
+  simple(['diff'], (_, [left, right]) => {
+    return diff(left, right);
   }),
 );
 
