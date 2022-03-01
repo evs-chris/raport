@@ -16,8 +16,8 @@ function _diff(v1: any, v2: any, path: string, diff: Diff): Diff {
     return diff;
   }
 
-  const ks = Object.keys(v1);
-  for (const k of Object.keys(v2)) if (!~ks.indexOf(k)) ks.push(k);
+  const ks = Object.keys(v1 || {});
+  for (const k of Object.keys(v2 || {})) if (!~ks.indexOf(k)) ks.push(k);
 
   for (const k of ks) {
     const vv1 = v1[k];
