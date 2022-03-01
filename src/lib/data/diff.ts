@@ -12,6 +12,7 @@ export function diff(v1: any, v2: any): Diff {
 
 function _diff(v1: any, v2: any, path: string, diff: Diff): Diff {
   if (typeof v1 !== 'object' || typeof v2 !== 'object') {
+    if (v1 === v2) return diff;
     diff[path] = [v1, v2];
     return diff;
   }
