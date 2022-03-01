@@ -233,6 +233,8 @@ function stringifyOp(value: Operation): string {
     else if ('v' in arg && typeof arg.v === 'object' && 'k' in arg.v) path = _stringify({ r: arg.v });
     else path = _stringify(arg);
     return `${op} ${path} = ${_stringify(value.args[1])}`;
+  } else if (op === 'get' && value.args.length === 2 && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'object' && 'k' in value.args[1].v) {
+    return `${stringify(value.args[0])}${stringify({ r: { k: ['r'].concat(value.args[1].v.k) } }).substr(1)}`;
   } else if (call_op.test(op)) {
     return wrapArgs(`${op}(`, value.args || [], ')', 0, true);
   } else {
