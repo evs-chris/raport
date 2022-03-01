@@ -634,12 +634,12 @@ export function stringifySchema(schema: Schema): string {
       break;
     case 'union':
     case 'union[]':
-      _level++;
-      strs = ts.map(u => stringifySchema(u));
       if (~t.indexOf('[]')) open = 'Array<', close = '>';
       else if (schema.checks && schema.checks.length) open = '(', close = ')';
+      if (open) _level++;
+      strs = ts.map(u => stringifySchema(u));
       join = strs.length > 6 || strs.find(s => ~s.indexOf('\n')) ? ' | ' : '|';
-      _level--;
+      if (open) _level--;
       break;
     case 'literal':
       if (typeof schema.literal === 'string') fin = `'${schema.literal.replace(/'/g, '\\\'')}'`;
@@ -663,8 +663,11 @@ export function stringifySchema(schema: Schema): string {
 
   if (!fin) {
     const level = padl('', '  ', _level);
-    if (_listwrap === 0) fin = `${open}\n${level}  ${strs.join(join)}\n${level}${close}`;
-    else if (_listwrap === 1) fin = `${open}\n${level}  ${strs.join(`${join}\n${level}  `)}\n${level}${close}`;
+    const l2 = open ? `${level}  ` : level;
+    const lopen = open ? `${open}\n${l2}` : '';
+    const lclose = close ? `\n${level}${close}` : '';
+    if (_listwrap === 0) fin = `${lopen}${strs.join(join)}${lclose}`;
+    else if (_listwrap === 1) fin = `${lopen}${strs.join(`${join}\n${l2}`)}${lclose}`;
     else {
       let line = '';
       
@@ -672,19 +675,19 @@ export function stringifySchema(schema: Schema): string {
       for (let i = 0; i < strs.length; i++) {
         if (~strs[i].indexOf('\n')) {
           line = '';
-          fin += `\n${level}  ` + strs[i] + (i !== last ? join : '');
+          fin += `\n${l2}` + strs[i] + (i !== last ? join : '');
         } else {
           fin += strs[i], line += strs[i];
           if (i !== last) fin += join, line += join;
         }
 
-        if (line.length > _listwrap && !~(strs[i + 1] || '').indexOf('\n')) {
-          fin += `\n${level}  `;
+        if (line.length > _listwrap && i !== last && !~(strs[i + 1] || '').indexOf('\n')) {
+          fin += `\n${l2}`;
           line = '';
         }
       }
 
-      if (~fin.indexOf('\n')) fin = `${open}\n${level}  ${fin}\n${level}${close}`;
+      if (~fin.indexOf('\n')) fin = `${lopen}${fin}${lclose}`;
       else fin = `${open}${open === '{' ? ' ' : ''}${fin}${open === '{' ? ' ' : ''}${close}`;
     }
   }
