@@ -516,6 +516,7 @@ export function schema() {
         return union;
       }
     }),
+    map(seq(str('('), ws, maybe_union, ws, str(')')), ([, , union]) => union),
     maybe_union,
   );
 
