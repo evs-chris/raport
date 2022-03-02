@@ -22,6 +22,8 @@ export interface BaseStringifyOpts {
   noNamedArgs?: boolean;
   /** Output HTML-friendly syntax */
   htmlSafe?: boolean;
+  /** Strip checks out of schema types */
+  noChecks?: boolean;
 }
 export interface SimpleStringifyOpts extends BaseStringifyOpts {
   /** Render all operations as s-expressions rather than sugary raport expressions. */
@@ -49,6 +51,7 @@ let _listwrap: number = 60;
 let _lastarg: boolean = false;
 let _noname: boolean = false;
 let _html: boolean = false;
+let _nochecks: boolean = false;
 
 let _level = 0;
 
@@ -81,6 +84,7 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
   _listwrap = 'listWrap' in opts ? (!opts.listWrap ? 0 : opts.listWrap === true ? 1 : opts.listWrap) : 60;
   _noname = opts.noNamedArgs;
   _html = opts.htmlSafe;
+  _nochecks = opts.noChecks;
   if (!_sexprops && typeof value === 'object' && 'op' in value && value.op === 'block') return stringifyRootBlock(value);
   else return _stringify(value);
 }
@@ -611,7 +615,9 @@ function stringifyTemplateCase(op: Operation): string {
   return res;
 }
 
-export function stringifySchema(schema: Schema): string {
+export function stringifySchema(schema: Schema, noChecks?: boolean): string {
+  if (noChecks !== undefined) _nochecks = noChecks;
+
   if (!schema) return 'any';
   const t = schema.type;
   const ts = schema.types;
@@ -664,11 +670,20 @@ export function stringifySchema(schema: Schema): string {
       strs = ts.map(t => stringifySchema(t));
       _level--;
       break;
-    default: fin = t || 'any';
+    default:
+      fin = schema.ref || t || 'any';
+      break;
+  }
+
+  let defs: string;
+  const level = _noindent ? ' ' : padl('', '  ', _level);
+
+  if (schema.defs) {
+    const keys = Object.keys(schema.defs).sort();
+    defs = keys.map(k => `type ${k} = ${stringifySchema(schema.defs[k])}`).join(`\n${level}`);
   }
 
   if (!fin) {
-    const level = _noindent ? ' ' : padl('', '  ', _level);
     const l2 = open && !_noindent ? `${level}  ` : level;
     const nl = _noindent ? '' : '\n';
     const lopen = open ? `${open}${nl}${l2}` : '';
@@ -699,9 +714,11 @@ export function stringifySchema(schema: Schema): string {
     }
   }
 
-  if (schema.checks && schema.checks.length) {
-    fin += ` ?${schema.checks.map(c => _stringify(c)).join(' ?')}`;
+  if (!_nochecks && schema.checks && schema.checks.length) {
+    fin += ` ?${schema.checks.map(c => _stringify(c)).join(' ?')} `;
   }
+
+  if (defs) fin = `${defs}\n${level}${fin}`;
 
   return fin;
 }

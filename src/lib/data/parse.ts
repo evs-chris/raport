@@ -1,6 +1,6 @@
 import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name, not } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex, JString } from 'sprunge/lib/json';
-import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation, TimeSpanMS, Schema, Field } from './index';
+import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation, TimeSpanMS, Schema, Field, TypeMap } from './index';
 
 export const timespans = {
   y: 0,
@@ -464,7 +464,11 @@ export function schema() {
   const ident = read1To(' \r\n\t():{}[]<>,"\'`\\;&#.+/*|^%=!?', true);
 
   const type: Parser<Schema> = {};
+  const conditions = opt(seq(ws, rep1sep(map(seq(name(str('?'), { name: 'condition', primary: true }), ws, application), ([, , a]) => a), rws, 'disallow')));
   const value = map(str('string[]', 'number[]', 'boolean[]', 'date[]', 'any', 'string', 'number', 'boolean', 'date'), s => (s === 'any' ? undefined : { type: s } as Schema), { name: 'type', primary: true });
+  const typedef = map(seq(str('type'), ws, name(ident, { name: 'type', primary: true }), ws, str('='), ws, type), ([, , name, , , , type]) => ({ name, type }));
+  const typedefs = map(rep1sep(typedef, read1(' \t\n;'), 'disallow'), defs => defs.reduce((a, c) => (a[c.name] = c.type, a), {} as TypeMap));
+  const ref = map(ident, ref => ({ type: 'any', ref } as Schema), { name: 'type', primary: true });
   const key = map(seq(name(ident, { name: 'key', primary: true }), opt(str('?')), ws, str(':'), ws, type), ([name, opt, , , , type]) => {
     const res: Field = type as Field;
     res.name = name;
@@ -501,7 +505,11 @@ export function schema() {
   const tuple = map(seq(str('['), ws, repsep(type, read1(' \t\r\n,')), ws, str(']'), opt(str('[]'))), ([, , types, , , arr]) => {
     return { type: arr ? 'tuple[]' : 'tuple', types } as Schema;
   });
-  const maybe_union = map(rep1sep(alt<Schema>(value, object, tuple, literal), seq(ws, str('|'), ws)), types => {
+  const maybe_union = map(rep1sep(seq(alt<Schema>(value, object, tuple, literal, ref), conditions), seq(ws, str('|'), ws), 'disallow'), list => {
+    const types = list.map(([t, c]) => {
+      if (c && c[1] && c[1].length) t.checks = c[1];
+      return t;
+    });
     if (types.length === 1) return types[0];
     else return { type: 'union', types: types } as Schema;
   });
@@ -520,9 +528,15 @@ export function schema() {
     maybe_union,
   );
 
-  type.parser = map(seq(union_array, ws, repsep(map(seq(name(str('?'), { name: 'condition', primary: true }), ws, application), ([, , a]) => a), rws, 'allow')), ([type, , checks]) => {
-    if (checks && checks.length) type.checks = checks;
+  type.parser = map(seq(union_array, conditions), ([type, checks]) => {
+    if (checks && checks[1] && checks[1].length) type.checks = checks[1];
     return type;
   });
-  return type;
+
+  const root = map(seq(opt(typedefs), ws, type), ([defs, , type]) => {
+    if (defs) type.defs = defs;
+    return type;
+  });
+
+  return root;
 }

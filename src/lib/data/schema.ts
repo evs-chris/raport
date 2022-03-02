@@ -1,4 +1,4 @@
-import { Schema, Field, Type } from './index';
+import { Schema, Field, Type, TypeMap } from './index';
 import { join } from './diff';
 import { parseSchema, unparseSchema } from './parse/schema';
 import { evalApply, Root } from './index';
@@ -68,14 +68,14 @@ function getType(v: any): Type {
 export type ValidationResult = ValidationError[] | true;
 export interface ValidationError {
   error: string;
-  type?: 'strict'|'check';
+  type?: 'strict'|'check'|'missing';
   path?: string;
   actual?: string;
   expected?: string;
   value?: any;
 }
 
-export function validate(value: any, schema: Schema|string, mode?: 'strict'|'loose'): ValidationResult {
+export function validate(value: any, schema: Schema|string, mode?: 'strict'|'missing'|'loose'): ValidationResult {
   if (typeof schema === 'string') {
     const parsed = parseSchema(schema);
     if ('message' in parsed) return [{ error: 'invalid schema' }];
@@ -83,14 +83,29 @@ export function validate(value: any, schema: Schema|string, mode?: 'strict'|'loo
   }
 
   if (!schema) schema = { type: 'any' };
-  return _validate(value, schema, mode, '');
+  return _validate(value, schema, mode, '', schema.defs || {});
 }
 
-function _validate(value: any, schema: Schema, mode: 'strict'|'loose', path: string): ValidationResult {
-  const { type, fields, rest, types, literal, checks } = schema || {};
-  if (!checkType(value, type, literal)) return [{ error: `type mismatch for '${type}'`, actual: unparseSchema(inspect(value)), value, path, expected: unparseSchema(schema) }];
-
+function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose', path: string, map: TypeMap): ValidationResult {
+  schema = schema || {};
+  let _schema = schema;
   const errs: ValidationError[] = [];
+  const miss = mode === 'strict' || mode === 'missing';
+  if (_schema.ref) {
+    let s = _schema;
+    while (s && s.ref) s = map[s.ref];
+    if (s) _schema = s;
+    else if (miss) errs.push({ error: `missing type definition '${_schema.ref}'`, type: 'missing' });
+  }
+  let { checks } = _schema;
+  const { type, fields, rest, types, literal } = _schema;
+  if (!checkType(value, type, literal)) return [{ error: `type mismatch for '${type}'`, actual: unparseSchema(inspect(value)), value, path, expected: unparseSchema(_schema, true) }];
+
+  if (_schema !== schema && schema.checks) {
+    if (!checks) checks = schema.checks;
+    else checks = checks.concat(schema.checks);
+  }
+
   let tmp: ValidationResult;
 
   if ((type === 'tuple' || type === 'tuple[]') && types) {
@@ -106,7 +121,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'loose', path: str
         errs.push({ error: `missing ${diff} field${diff > 1 ? 's' : ''} in tuple`, path: p, expected: unparseSchema({ type: 'tuple', types }) });
       } else {
         for (let i = 0; i < types.length; i++) {
-          if ((tmp = _validate(v[i], types[i], mode, join(p, `${i}`))) !== true) errs.push.apply(errs, tmp);
+          if ((tmp = _validate(v[i], types[i], mode, join(p, `${i}`), map)) !== true) errs.push.apply(errs, tmp);
         }
 
         if (mode === 'strict' && v.length > types.length) errs.push({ error: `too many values for tuple`, type: 'strict', path: p, expected: unparseSchema({ type: 'tuple', types }) });
@@ -119,13 +134,17 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'loose', path: str
       const v = val[i];
       const p = arr ? join(path, `${i}`) : path;
       let ok = false;
+      let legit: ValidationError[];
       for (const u of types) {
-        if (_validate(v, u, mode, p) === true) {
+        if ((tmp = _validate(v, u, mode, p, map)) === true) {
           ok = true;
           break;
+        } else if (miss && tmp.find(e => e.type === 'missing') || tmp.find(e => e.type === 'check')) {
+          legit = tmp.filter(e => miss && e.type === 'missing' || e.type === 'check');
         }
       }
-      if (!ok) errs.push({ error: `type mismatch for union`, actual: unparseSchema(inspect(v)), expected: unparseSchema({ type: 'union', types }), value: v, path: p });
+      if (!ok && !legit) errs.push({ error: `type mismatch for union`, actual: unparseSchema(inspect(v)), expected: unparseSchema({ type: 'union', types }), value: v, path: p });
+      else if (!ok && legit) errs.push.apply(errs, legit);
     }
   } else if ((type === 'object' || type === 'object[]' || type === 'any') && fields || rest) {
     const arr = ~type.indexOf('[]');
@@ -136,13 +155,13 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'loose', path: str
       if (fields) {
         for (const f of fields) {
           if (f.required && !(f.name in v)) errs.push({ error: `requried field ${f.name} is missing`, path: join(p, f.name) });
-          else if (f.name in v && (tmp = _validate(v[f.name], f, mode, join(p, f.name))) !== true) errs.push.apply(errs, tmp);
+          else if (f.name in v && (tmp = _validate(v[f.name], f, mode, join(p, f.name), map)) !== true) errs.push.apply(errs, tmp);
         }
       }
       if (rest) {
         for (const k in v) {
           if (fields && fields.find(f => f.name === k)) continue;
-          if (v[k] != null && (tmp = _validate(v[k], rest, mode, join(p, k))) !== true) errs.push.apply(errs, tmp);
+          if (v[k] != null && (tmp = _validate(v[k], rest, mode, join(p, k), map)) !== true) errs.push.apply(errs, tmp);
         }
       } else if (mode === 'strict') {
         for (const k in v) if (v[k] != null && !fields || !fields.find(f => f.name === k)) errs.push({ error: `unknown field ${k}`, path: p, type: 'strict', value: v[k] });
@@ -151,11 +170,12 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'loose', path: str
   }
 
   if (!errs.length && checks && checks.length) {
-    let tmp: string|boolean;
+    let tmp: any;
     const root = new Root({});
     for (let i = 0; i < checks.length; i++) {
       const c = checks[i];
-      if ((tmp = evalApply(root, c, [value])) !== true && tmp !== undefined) errs.push({ error: tmp === false ? `check ${i + 1} failed` : tmp, path, value, type: 'check' });
+      tmp = evalApply(root, c, [value]);
+      if (!tmp || typeof tmp == 'string') errs.push({ error: typeof tmp !== 'string' || !tmp ? `check ${i + 1} failed` : tmp, path, value, type: 'check', expected: unparseSchema(schema, true) });
     }
   }
 

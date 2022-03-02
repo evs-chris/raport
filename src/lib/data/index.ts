@@ -2,6 +2,10 @@ import { parse, parsePath, parseLetPath, isTimespanMS } from './parse';
 import { parse as parseTemplate } from './parse/template';
 import { ParseError } from 'sprunge/lib';
 
+export interface TypeMap {
+  [name: string]: Schema;
+}
+
 // Data
 export interface Schema {
   /** An optional type for the value */
@@ -16,6 +20,10 @@ export interface Schema {
   literal?: string|number|boolean|undefined|null;
   /** Addition validators on the value */
   checks?: ValueOrExpr[];
+  /** An optional map of named types */
+  defs?: TypeMap;
+  /** If the type is 'any', this may be a name in a type map */
+  ref?: string;
 }
 
 export interface DataSource<T = any, R = any> {
