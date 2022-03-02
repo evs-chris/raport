@@ -1,3 +1,13 @@
+## 0.10.3
+
+2022-03-02
+
+## Parser
+
+* __BUG:__ The `any` schema type will no longer break the parser.
+* __BUG:__ Named schema types can now start with any of the built-ins e.g. `anything` and `booleanish` are now valid names.
+
+
 ## 0.10.2
 
 2022-03-02
