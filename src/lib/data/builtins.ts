@@ -201,6 +201,8 @@ registerOperator(
       const d = isDateRel(l) ? dateRelToRange(l)[0] : new Date(l);
       const n = d >= range[0] && d <= range[1];
       return name === 'in' ? n : !n;
+    } else if (typeof l === 'string' && typeof r === 'object' && !Array.isArray(r)) {
+      return l in r;
     } else if (!Array.isArray(r) && typeof r !== 'string') {
       return name === 'in' ? l == r : l != r;
     } else if (Array.isArray(l) && Array.isArray(r)) {
