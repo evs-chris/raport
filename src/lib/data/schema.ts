@@ -174,7 +174,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
     let tmp: any;
     for (let i = 0; i < checks.length; i++) {
       const c = checks[i];
-      tmp = evalApply(ctx, c, [value]);
+      tmp = evalApply(ctx, c, [value], true);
       if (!tmp || typeof tmp == 'string') errs.push({ error: typeof tmp !== 'string' || !tmp ? `check ${i + 1} failed` : tmp, path, value, type: 'check', expected: unparseSchema(schema, true) });
     }
   }

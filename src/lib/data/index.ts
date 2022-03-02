@@ -277,14 +277,24 @@ export function template(root: string|Context|{ context: Context }|any, template
   return evalParse(r, t);
 }
 
-export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[]): any {
+/**
+ * Evaluate an applicative with the given locals, naming them if the applicative declares named arguments.
+ * If swap is not true, then a new context extension will be used. Otherwise, the context locals will be
+ * swapped for the evaluation and replaced afterwards. Swap should only be used for applications that are
+ * passing the context value as the first local.
+ */
+export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[], swap?: boolean): any {
   if (typeof value === 'object' && 'a' in value) {
+    const c = swap ? ctx : extend(ctx, { value: locals[0] });
+    const l = ctx.locals;
+    let res: any;
     if ('n' in value) {
       const map = value.n.reduce((a, c, i) => (a[c] = locals[i], a), {} as ParameterMap);
-      return evalValue(extend(ctx, { value: locals[0], locals: map }), value.a);
-    } else {
-      return evalValue(extend(ctx, { value: locals[0] }), value.a);
+      c.locals = map;
     }
+    res = evalValue(c, value.a);
+    c.locals = l;
+    return res;
   } else {
     const v = evalParse(ctx, value);
     if (typeof v === 'object' && 'a' in v) return evalApply(ctx, v, locals);
