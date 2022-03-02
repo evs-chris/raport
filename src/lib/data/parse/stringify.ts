@@ -711,7 +711,7 @@ export function stringifySchema(schema: Schema, noChecks?: boolean): string {
       }
 
       if (~fin.indexOf('\n')) fin = `${lopen}${fin}${lclose}`;
-      else fin = `${open}${open === '{' ? ' ' : ''}${fin}${open === '{' ? ' ' : ''}${close}`;
+      else fin = `${open}${open === '{' ? ' ' : ''}${fin}${open === '{' && fin.substr(-1) !== ' ' ? ' ' : ''}${close}`;
     }
   }
 
