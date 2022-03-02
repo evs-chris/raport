@@ -52,14 +52,15 @@ let _html: boolean = false;
 
 let _level = 0;
 
-const binops = ['**', '*', '/%', '/', '%', '+', '-', '>=', 'gte', '>', 'gt', '<=', 'lte', '<', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'and', '&&', 'or', '||', '??'];
+const deepops = ['===', '!==', 'deep-is', 'deep-is-not'];
+const binops = deepops.concat(['**', '*', '/%', '/', '%', '+', '-', '>=', 'gte', '>', 'gt', '<=', 'lte', '<', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'strict-is', 'strict-is-not', 'and', '&&', 'or', '||', '??']);
 const unops = ['+', 'not'];
 const precedence = {
   '**': 1,
   '*': 2, '/%': 2, '/': 2, '%': 2,
   '+': 3, '-': 3,
   '>=': 4, '>': 4, '<=': 4, '<': 4, in: 4, like: 4, ilike: 4, 'not-in': 4, 'not-like': 4, 'not-ilike': 4, 'contains': 4, 'does-not-contain': 4, gt: 4, gte: 4, lt: 4, lte: 4,
-  'is': 5, 'is-not': 5, '==': 5, '!=': 5,
+  'is': 5, 'is-not': 5, '==': 5, '!=': 5, 'strict-is': 5, 'strict-is-not': 5, 'deep-is': 5, 'deep-is-not': 5, '===': 5, '!==': 5,
   'and': 6, '&&': 6,
   'or': 7, '||': 7, '??': 7,
 }
@@ -206,7 +207,7 @@ function stringifyOp(value: Operation): string {
     let vs = _stringify(val);
     if (typeof val !== 'string' && 'op' in val && (binops.includes(val.op) || unops.includes(val.op))) vs = `(${vs})`;
     return `${vs}#${[value.args[1].v].concat(value.args.slice(2).map(a => _stringify(a))).join(',')}`;
-  } else if (binops.includes(op) && value.args && value.args.length > 1) {
+  } else if (binops.includes(op) && value.args && value.args.length > 1 && (!deepops.includes(op) || value.args.length === 2)) {
     let parts = value.args.map((a, i) => stringifyBinopArg(op, a, i === 0 ? 1 : 2));
     const long = parts.find(p => p.length > 30 || ~p.indexOf('\n')) || parts.reduce((a, c) => a + c.length, 0) && parts.length > 2;
     const split = _noindent ? ' ' : long ? `\n${padl('', '  ', _level + 1)}` : ' ';

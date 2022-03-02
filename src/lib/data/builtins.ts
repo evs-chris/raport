@@ -1,11 +1,11 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseExpr, parse } from './parse';
 import { parse as parseTemplate } from './parse/template';
 import { parseSchema, unparseSchema } from './parse/schema';
 import { stringify } from './parse/stringify';
 import { validate } from './schema';
-import { diff } from './diff';
+import { diff, deepEqual } from './diff';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
   return {
@@ -128,10 +128,24 @@ export function similar(a: string, b: string, threshhold: number = 0.5, fudges: 
 
 // basic ops
 registerOperator(
-  simple(['is', 'is-not', '==', '!='], (name: string, values: any[]): boolean => {
+  simple(['is', 'is-not', '==', '!=', 'strict-is', 'strict-is-not'], (name: string, values: any[]): boolean => {
     const [l, r] = values;
     const res = equals(l, r);
     return name === 'is' || name === '==' ? res : !res;
+  }),
+  simple(['strict-is', 'strict-is-not'], (name: string, values: any[]): boolean => {
+    const [l, r] = values;
+    const res = l === r;
+    return name === 'strict-is' ? res : !res;
+  }),
+  simple(['deep-is', 'deep-is-not', '===', '!=='], (name: string, values: any[], ctx): boolean => {
+    let [l, r, equal] = values;
+    if (equal && isApplication(equal)) {
+      const eq = equal;
+      equal = (l: any, r: any) => evalApply(ctx, eq, [l, r]);
+    }
+    const res = deepEqual(l, r, equal);
+    return name === 'deep-is' || name === '===' ? res : !res;
   }),
   simple(['not'], (_name: string, values: any[]) => !values[0]),
   simple(['<', '>', '<=', '>=', 'gt', 'gte', 'lt', 'lte'], (name: string, values: any[]): boolean => {
@@ -461,8 +475,12 @@ registerOperator(
     if (name === 'valid') return res === true;
     else return res;
   }),
-  simple(['diff'], (_, [left, right]) => {
-    return diff(left, right);
+  simple(['diff'], (_, [left, right, equal], ctx) => {
+    if (equal && isApplication(equal)) {
+      const eq = equal;
+      equal = (l: any, r: any) => evalApply(ctx, eq, [l, r]);
+    }
+    return diff(left, right, equal);
   }),
 );
 

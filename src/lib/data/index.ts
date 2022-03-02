@@ -496,6 +496,10 @@ export interface Reference { r: string|Keypath };
 export interface Application { a: Value; n?: string[]; };
 export interface Literal { v: any; s?: 1 };
 
+export function isApplication(v: any): v is Application {
+  return typeof v === 'object' && 'a' in v && typeof v.a === 'object';
+}
+
 /** A timespan specified in milliseconds */
 export interface DateRelSpanMS {
   /** Starting point (now) */
