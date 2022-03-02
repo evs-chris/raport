@@ -52,7 +52,7 @@ let _html: boolean = false;
 
 let _level = 0;
 
-const binops = ['**', '*', '/%', '/', '%', '+', '-', '>=', 'gte', '>', 'gt', '<=', 'lte', '<', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'and', '&&', 'or', '||'];
+const binops = ['**', '*', '/%', '/', '%', '+', '-', '>=', 'gte', '>', 'gt', '<=', 'lte', '<', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'and', '&&', 'or', '||', '??'];
 const unops = ['+', 'not'];
 const precedence = {
   '**': 1,
@@ -61,7 +61,7 @@ const precedence = {
   '>=': 4, '>': 4, '<=': 4, '<': 4, in: 4, like: 4, ilike: 4, 'not-in': 4, 'not-like': 4, 'not-ilike': 4, 'contains': 4, 'does-not-contain': 4, gt: 4, gte: 4, lt: 4, lte: 4,
   'is': 5, 'is-not': 5, '==': 5, '!=': 5,
   'and': 6, '&&': 6,
-  'or': 7, '||': 7,
+  'or': 7, '||': 7, '??': 7,
 }
 
 const call_op = /^[-a-zA-Z_$0-9]/;

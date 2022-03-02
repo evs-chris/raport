@@ -721,13 +721,13 @@ registerOperator({
   },
 }, {
   type: 'checked',
-  names: ['or', '||'],
-  checkArg(_name: string, _i: number, _total: number, value: any): CheckResult {
-    if (value) return { result: value };
+  names: ['or', '||', '??'],
+  checkArg(name: string, _i: number, _total: number, value: any): CheckResult {
+    if (name === '??' ? value != null : value) return { result: value };
     else return 'continue';
   },
-  apply(): boolean {
-    return false; // if we made it this far, none were true
+  apply(name: string): boolean {
+    return name === '??' ? undefined : false; // if we made it this far, none were true
   },
 }, {
   type: 'checked',

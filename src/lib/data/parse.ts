@@ -347,7 +347,7 @@ export const binop_as = map(seq(binop_md, rep(seq(rws, name(str('+', '-'), 'adds
 export const binop_cmp = map(seq(binop_as, rep(seq(rws, name(str('>=', '>', '<=', '<', 'gte', 'gt', 'lte', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain'), 'cmp-op'), rws, binop_as))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'cmp-op');
 export const binop_eq = map(seq(binop_cmp, rep(seq(rws, name(str('is-not', 'is', '==', '!='), 'eq-op'), rws, binop_cmp))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'eq-op');
 export const binop_and = map(seq(binop_eq, rep(seq(rws, name(str('and', '&&'), 'and-op'), rws, binop_eq))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'and-op');
-export const binop_or = map(seq(binop_and, rep(seq(rws, name(str('or', '||'), 'or-op'), rws, binop_and))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'or-op');
+export const binop_or = map(seq(binop_and, rep(seq(rws, name(str('or', '||', '??'), 'or-op'), rws, binop_and))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'or-op');
 binop.parser = map(binop_or, v => v, { primary: true, name: 'binary-op' });
 
 if_op.parser = alt({ primary: true, name: 'conditional' },

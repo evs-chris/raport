@@ -179,7 +179,7 @@ Arguments may also be specified in a named form, which will result in them being
 | Name | Example | Notes |
 | ---- | ------- | ----- |
 | unary operator | `not true` | Supported unary operators are `not` and `+`. |
-| binary operator | `2 + 5`, `7 * 4 ** 2 + 1`, `person.birthdate in #today#` | Supported binary operators in order of precedence are exponentiation (`**`), mutiplication/division (`*`, `/`, `%`), addition/subtraction (`+`, `-`), comparison (`>=`, `>`, `<=`, `<`, `in`, `like`, `not-like`, `not-in`, `contains`, `does-not-contain`, `gt`, `gte`, `lt`, `lte`), equality (`is`, `is-not`, `==`, `!=`), boolean and (`and`, `&&`), and boolean or (`or`, `||`). At least one space is required on either side of a binary operator. |
+| binary operator | `2 + 5`, `7 * 4 ** 2 + 1`, `person.birthdate in #today#` | Supported binary operators in order of precedence are exponentiation (`**`), mutiplication/division (`*`, `/`, `%`), addition/subtraction (`+`, `-`), comparison (`>=`, `>`, `<=`, `<`, `in`, `like`, `not-like`, `not-in`, `contains`, `does-not-contain`, `gt`, `gte`, `lt`, `lte`), equality (`is`, `is-not`, `==`, `!=`), boolean and (`and`, `&&`), boolean or (`or`, `\|\|`), and nullish coalescing (`??`). At least one space is required on either side of a binary operator. |
 | call | `op-name(arg1 arg2)` | Call syntax is supported as convenience over s-expressions because it tends to be more familiar. It supports fewer operator names than the s-expression syntax, and the unavailable operators tend to be binary or unary. The example converts to `{ op: 'op-name', args: [{ r: { k: ['arg1'] } }, { r: { k: ['arg2'] } }] }` |
 | array | `[1, 2, 3]`, `[first middle last]` | Array expressions are surrounded by square brackets and contain any number of space and/or comma separated expressions. If all of the expressions are literals, the result will be a literal. If not, the result will be an array operation e.g. `{ op: 'array', args: [{ r: 'first' }, { r: 'middle' }, { r: 'last' }] }`. |
 | object | `{ "foo": 2, "bar": "baz" }`, `{ foo:2 bar:[1 2 3] }` | Object expressions are surrounded by curly braces and contain any number of key-value pairs. The keys are optionally quoted strings, followed by a `:`. The values are any expression, and pairs are separated by space and/or commas. Like array expressions, objects containing only literals evaluate to a literal, and are otherwise an `object` operation. |
@@ -223,6 +223,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `==` | `...any` | `boolean` | This is an alias for `is`. |
 | `>` | `any, any` | `boolean` | Returns true if the first value is greater than the second value. |
 | `>=` | `any, any` | `boolean` | Returns true if the first value is greater than or equal to the second value. |
+| `??` | `any, any` | `any` | Returns the first non-null, non-undefined values. |
 | `\|\|` | `...any` | `boolean` | This is an alias for `or`. |
 | `and` | `...any` | `boolean` | This will lazily evaluate its arguments and return false if any are not truthy or the last argument if all are truthy. |
 | `array` | `...any` | `array` | Returns the given values in an array. |
