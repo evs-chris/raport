@@ -672,6 +672,7 @@ export function stringifySchema(schema: Schema, noChecks?: boolean): string {
       break;
     default:
       fin = schema.ref || t || 'any';
+      if (schema.ref && t === 'array') fin += '[]';
       break;
   }
 

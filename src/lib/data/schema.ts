@@ -99,7 +99,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
   }
   let { checks } = _schema;
   const { type, fields, rest, types, literal } = _schema;
-  if (!checkType(value, type, literal)) return [{ error: `type mismatch for '${type}'`, actual: unparseSchema(inspect(value)), value, path, expected: unparseSchema(_schema, true) }];
+  if (!checkType(value, schema.type === 'array' ? 'array' : type, literal)) return [{ error: `type mismatch for '${type}'`, actual: unparseSchema(inspect(value)), value, path, expected: unparseSchema(_schema, true) }];
 
   if (_schema !== schema && schema.checks) {
     if (!checks) checks = schema.checks;
@@ -147,7 +147,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
       else if (!ok && legit) errs.push.apply(errs, legit);
     }
   } else if ((type === 'object' || type === 'object[]' || type === 'any') && fields || rest) {
-    const arr = ~type.indexOf('[]');
+    const arr = ~type.indexOf('[]') || schema.type === 'array';
     const val: object[] = arr ? value : [value];
     for (let i = 0; i < val.length; i++) {
       const v = val[i];

@@ -468,7 +468,7 @@ export function schema() {
   const value = map(str('string[]', 'number[]', 'boolean[]', 'date[]', 'any', 'string', 'number', 'boolean', 'date'), s => (s === 'any' ? undefined : { type: s } as Schema), { name: 'type', primary: true });
   const typedef = map(seq(str('type'), ws, name(ident, { name: 'type', primary: true }), ws, str('='), ws, type), ([, , name, , , , type]) => ({ name, type }));
   const typedefs = map(rep1sep(typedef, read1(' \t\n;'), 'disallow'), defs => defs.reduce((a, c) => (a[c.name] = c.type, a), {} as TypeMap));
-  const ref = map(ident, ref => ({ type: 'any', ref } as Schema), { name: 'type', primary: true });
+  const ref = map(seq(ident, opt(str('[]'))), ([ref, arr]) => ({ type: arr ? 'array' : 'any', ref } as Schema), { name: 'type', primary: true });
   const key = map(seq(name(ident, { name: 'key', primary: true }), opt(str('?')), ws, str(':'), ws, type), ([name, opt, , , , type]) => {
     const res: Field = type as Field;
     res.name = name;
