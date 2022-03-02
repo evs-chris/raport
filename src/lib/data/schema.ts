@@ -153,6 +153,10 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
     for (let i = 0; i < val.length; i++) {
       const v = val[i];
       const p = arr ? join(path, `${i}`) : path;
+      if (typeof v !== 'object' && typeof v !== 'function') {
+        errs.push({ error: 'expected an object', value: v, path: p, actual: unparseSchema(inspect(v), true) });
+        continue;
+      }
       if (fields) {
         for (const f of fields) {
           if (f.required && !(f.name in v)) errs.push({ error: `requried field ${f.name} is missing`, path: join(p, f.name) });
