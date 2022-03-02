@@ -1,7 +1,7 @@
 import { Schema, Field, Type, TypeMap } from './index';
 import { join } from './diff';
 import { parseSchema, unparseSchema } from './parse/schema';
-import { evalApply, Root } from './index';
+import { evalApply, Root, Context, safeGet, extend } from './index';
 
 const date = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 function isDate(v: any) {
@@ -83,17 +83,18 @@ export function validate(value: any, schema: Schema|string, mode?: 'strict'|'mis
   }
 
   if (!schema) schema = { type: 'any' };
-  return _validate(value, schema, mode, '', schema.defs || {});
+  const ctx = new Root(value, { special: { types: schema.defs || {} } });
+  return _validate(value, schema, mode, '', ctx);
 }
 
-function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose', path: string, map: TypeMap): ValidationResult {
+function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose', path: string, ctx: Context): ValidationResult {
   schema = schema || {};
   let _schema = schema;
   const errs: ValidationError[] = [];
   const miss = mode === 'strict' || mode === 'missing';
   if (_schema.ref) {
     let s = _schema;
-    while (s && s.ref) s = map[s.ref];
+    while (s && s.ref) s = safeGet(ctx, `@types.${s.ref}`);
     if (s) _schema = s;
     else if (miss) errs.push({ error: `missing type definition '${_schema.ref}'`, type: 'missing' });
   }
@@ -121,7 +122,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
         errs.push({ error: `missing ${diff} field${diff > 1 ? 's' : ''} in tuple`, path: p, expected: unparseSchema({ type: 'tuple', types }) });
       } else {
         for (let i = 0; i < types.length; i++) {
-          if ((tmp = _validate(v[i], types[i], mode, join(p, `${i}`), map)) !== true) errs.push.apply(errs, tmp);
+          if ((tmp = _validate(v[i], types[i], mode, join(p, `${i}`), extend(ctx, { value: v[i], path: join(p, `${i}`) }))) !== true) errs.push.apply(errs, tmp);
         }
 
         if (mode === 'strict' && v.length > types.length) errs.push({ error: `too many values for tuple`, type: 'strict', path: p, expected: unparseSchema({ type: 'tuple', types }) });
@@ -136,7 +137,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
       let ok = false;
       let legit: ValidationError[];
       for (const u of types) {
-        if ((tmp = _validate(v, u, mode, p, map)) === true) {
+        if ((tmp = _validate(v, u, mode, p, ctx)) === true) {
           ok = true;
           break;
         } else if (miss && tmp.find(e => e.type === 'missing') || tmp.find(e => e.type === 'check')) {
@@ -155,13 +156,13 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
       if (fields) {
         for (const f of fields) {
           if (f.required && !(f.name in v)) errs.push({ error: `requried field ${f.name} is missing`, path: join(p, f.name) });
-          else if (f.name in v && (tmp = _validate(v[f.name], f, mode, join(p, f.name), map)) !== true) errs.push.apply(errs, tmp);
+          else if (f.name in v && (tmp = _validate(v[f.name], f, mode, join(p, f.name), extend(ctx, { value: v[f.name], path: join(p, f.name) }))) !== true) errs.push.apply(errs, tmp);
         }
       }
       if (rest) {
         for (const k in v) {
           if (fields && fields.find(f => f.name === k)) continue;
-          if (v[k] != null && (tmp = _validate(v[k], rest, mode, join(p, k), map)) !== true) errs.push.apply(errs, tmp);
+          if (v[k] != null && (tmp = _validate(v[k], rest, mode, join(p, k), extend(ctx, { value: v[k], path: join(p, k) }))) !== true) errs.push.apply(errs, tmp);
         }
       } else if (mode === 'strict') {
         for (const k in v) if (v[k] != null && !fields || !fields.find(f => f.name === k)) errs.push({ error: `unknown field ${k}`, path: p, type: 'strict', value: v[k] });
@@ -171,10 +172,9 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
 
   if (!errs.length && checks && checks.length) {
     let tmp: any;
-    const root = new Root({});
     for (let i = 0; i < checks.length; i++) {
       const c = checks[i];
-      tmp = evalApply(root, c, [value]);
+      tmp = evalApply(ctx, c, [value]);
       if (!tmp || typeof tmp == 'string') errs.push({ error: typeof tmp !== 'string' || !tmp ? `check ${i + 1} failed` : tmp, path, value, type: 'check', expected: unparseSchema(schema, true) });
     }
   }

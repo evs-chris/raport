@@ -668,13 +668,14 @@ export interface ExtendOptions {
   special?: any;
   locals?: ParameterMap,
   parser?: (txt: string) => Value;
+  path?: string;
 }
 
 export function extend(context: Context, opts: ExtendOptions): Context {
   return {
     parent: context,
     root: context.root,
-    path: '',
+    path: opts.path || '',
     value: 'value' in opts ? opts.value : context.value,
     special: opts.special || {},
     parser: opts.parser,
