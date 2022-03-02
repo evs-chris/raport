@@ -290,13 +290,21 @@ export function applySource(context: RootContext, source: ReportSource, sources:
 
 function runDelimited(report: Delimited, context: Context): string {
   const source = context.root.sources[report.source ? report.source : (report.sources[0].name || report.sources[0].source)];
-  let res = '';
-  if (report.headers) res += report.headers.map(h => `${report.quote || ''}${evaluate(context, h)}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
   const values = Array.isArray(source.value) ? source.value : [source.value];
+  let fields = report.fields;
+  let headers = report.headers;
+
+  if (!fields || !fields.length && values.length) {
+    fields = Object.keys(values[0]);
+    if (!headers || !headers.length) headers = Object.keys(values[0]).map(k => `'${k.replace(/'/g, '\\\'')}'`);
+  }
+
+  let res = '';
+  if (headers) res += headers.map(h => `${report.quote || ''}${evaluate(context, h)}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
   const unquote: RegExp = report.quote ? new RegExp(report.quote, 'g') : undefined;
   for (const value of values) {
     const c = extend(context, { value });
-    res += report.fields.map(f => {
+    res += fields.map(f => {
       let val = `${evaluate(c, f)}`;
       if (unquote) val = val.replace(unquote, report.quote + report.quote);
       return `${report.quote || ''}${val}${report.quote || ''}`;
