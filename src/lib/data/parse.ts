@@ -461,11 +461,9 @@ export const parse = parseBlock;
 export default parse;
 
 export function schema() {
-  const ident = read1To(' \r\n\t():{}[]<>,"\'`\\;&#.+/*|^%=!?', true);
-
   const type: Parser<Schema> = {};
   const conditions = opt(seq(ws, rep1sep(map(seq(name(str('?'), { name: 'condition', primary: true }), ws, application), ([, , a]) => a), rws, 'disallow')));
-  const value = map(str('string[]', 'number[]', 'boolean[]', 'date[]', 'any', 'string', 'number', 'boolean', 'date'), s => (s === 'any' ? undefined : { type: s } as Schema), { name: 'type', primary: true });
+  const value = map(seq(str('string[]', 'number[]', 'boolean[]', 'date[]', 'any', 'string', 'number', 'boolean', 'date'), not(read1To(endRef))), ([s]) => ({ type: s } as Schema), { name: 'type', primary: true });
   const typedef = map(seq(str('type'), ws, name(ident, { name: 'type', primary: true }), ws, str('='), ws, type), ([, , name, , , , type]) => ({ name, type }));
   const typedefs = map(rep1sep(typedef, read1(' \t\n;'), 'disallow'), defs => defs.reduce((a, c) => (a[c.name] = c.type, a), {} as TypeMap));
   const ref = map(seq(ident, opt(str('[]'))), ([ref, arr]) => ({ type: arr ? 'array' : 'any', ref } as Schema), { name: 'type', primary: true });
