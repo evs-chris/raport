@@ -152,7 +152,8 @@ function stringifyBinopArg(op: string, arg: ValueOrExpr, pos: 1|2): string {
   if (op === '**' && pos === 1 && typeof arg !== 'string' && 'op' in arg && arg.op === '**') res = `(${_stringify(arg)})`;
   if (typeof arg !== 'string' && 'op' in arg) {
     if (binops.includes(arg.op) && precedence[arg.op] > precedence[op]) res = `(${_stringify(arg)})`;
-    if (arg.op === 'if' || arg.op === 'unless' || arg.op === 'case' || arg.op === 'fmt' || arg.op === 'format') res = `(${_stringify(arg)})`;
+    else if (arg.op === 'if' || arg.op === 'unless' || arg.op === 'case' || arg.op === 'fmt' || arg.op === 'format') res = `(${_stringify(arg)})`;
+    else res = _stringify(arg);
   } else res = _stringify(arg);
   _noname = n;
   return res;
