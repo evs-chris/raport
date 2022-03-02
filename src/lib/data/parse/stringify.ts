@@ -146,12 +146,16 @@ function _stringify(value: ValueOrExpr): string {
 }
 
 function stringifyBinopArg(op: string, arg: ValueOrExpr, pos: 1|2): string {
-  if (op === '**' && pos === 1 && typeof arg !== 'string' && 'op' in arg && arg.op === '**') return `(${_stringify(arg)})`;
+  const n = _noname;
+  _noname = true;
+  let res: string;
+  if (op === '**' && pos === 1 && typeof arg !== 'string' && 'op' in arg && arg.op === '**') res = `(${_stringify(arg)})`;
   if (typeof arg !== 'string' && 'op' in arg) {
-    if (binops.includes(arg.op) && precedence[arg.op] > precedence[op]) return `(${_stringify(arg)})`;
-    if (arg.op === 'if' || arg.op === 'unless' || arg.op === 'case' || arg.op === 'fmt' || arg.op === 'format') return `(${_stringify(arg)})`;
-  }
-  return _stringify(arg);
+    if (binops.includes(arg.op) && precedence[arg.op] > precedence[op]) res = `(${_stringify(arg)})`;
+    if (arg.op === 'if' || arg.op === 'unless' || arg.op === 'case' || arg.op === 'fmt' || arg.op === 'format') res = `(${_stringify(arg)})`;
+  } else res = _stringify(arg);
+  _noname = n;
+  return res;
 }
 
 function findNestedStringOpL(op: string, value: Operation): boolean {
