@@ -1,3 +1,19 @@
+## 0.10.2
+
+2022-03-02
+
+### Data
+
+* The `in` operator can now check for keys in objects.
+* Checks in schemas now get access to a full context of the check, so the application can access other parts of the object tree being checked.
+* Schemas can now declare named types, which can be used anywhere a primitive type could be used, including as arrays. Type declarations must come before the schema definition in a literal. Conditional checks can be used at both declaration and use sites.
+
+### Parser
+
+* __BUG:__ Stringifying a binary op will no longer drop arguments.
+* Individual elements of a schema union can now have conditional checks.
+
+
 ## 0.10.1
 
 2022-03-02
