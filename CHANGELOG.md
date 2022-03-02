@@ -1,3 +1,30 @@
+## 0.10.1
+
+2022-03-02
+
+### Data
+
+* __BUG:__ Binary operations that have an object for a second argument will no longer stringify it as named args.
+* __BUG?:__ Postfix `get` on an operation will now stringify correctly.
+* There are now `diff` and `deepEqual` functions exported by the main library. `Diff`s are a map of keypaths to a tuple of left value to right value for primitives that don't match.
+  * `diff` is exposed as a default expression operator.
+  * `deepEqual` is also exposed as `===` and `deep-is`, with the negated versions `!==` and `deep-is-not`.
+* Add support for schema literals and a `validate` function that will check a value against a schema, which can include primitives, arrays, objects as interfaces, tuples, and type unions. There is also support for additional checks on types in the form of an applicative that can perform more specific checks at runtime.
+  * `validate` returns `true` if there are no mismatches, or an array of error objects if there are.
+  * There is a strict mode that will validate that no extra key or tuple values are in the checked value.
+  * `validate` is exposed as an expression operator, and there's a boolean-only version exposed as `valid`.
+  * There are `parseSchema` and `unparseSchema` functions exported by the library, and the `parse` and `unparse` expression operators can now be passed a `schema` flag.
+* Application can now be called as operators if they are uniquely named in the data e.g. `let foo = |l r|=>l + r; foo(10 10)`.
+* There is now a nullish coalescing operator `??` that will return the first non-null/non-undefined argument.
+
+### Designer
+
+* __BUG__: Alignment within expression viewers in widgets renders correctly again.
+* ctrl+enter in the evaluation window will execute the expression.
+* Highlighting for `let` and `set` match reference highlighting.
+* There is now a compact format option that will turn on `noIndent` and set `listWrap` to `0` when formatting expressions.
+
+
 ## 0.10.0
 
 2022-02-21
