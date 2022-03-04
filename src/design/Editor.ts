@@ -198,6 +198,7 @@ Ractive.extendWith(Viewer, {
       pre { margin: 0; white-space: pre-wrap; font-size: 0.9em; }
       .syntax-editor code { padding: 0; flex-grow: 1; }
       .syntax-editor { max-height: 100%; overflow: auto; }
+      .syntax-editor code { font-size: inherit; line-height: 1em; }
       `,
   },
   partials: {
