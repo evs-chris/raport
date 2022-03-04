@@ -43,7 +43,7 @@
 
 <template id="widget">
   {{#with @.calcWidthWithMargin(., @context) as widthMargin, @.calcHeightWithMargin(.) as heightMargin}}
-  <div as-widget=.type style="width: {{widthMargin}}; {{#if (.height && .height !== 'auth') || .type !== 'container'}}{{.type === 'container' ? 'min-' : ''}}height: {{heightMargin}};{{/if}}"
+  <div as-widget=.type style="{{#if label !== 'page footer'}}width: {{widthMargin}};{{else}}position: absolute; width: auto; left: {{~/pageSize.margin[1] || 0}}rem; right: {{~/pageSize.margin[1] || 0}}rem; bottom: {{~/pageSize.margin[0] || 0}}rem;{{/if}} {{#if (.height && .height !== 'auth') || .type !== 'container'}}{{.type === 'container' ? 'min-' : ''}}height: {{heightMargin}};{{/if}}"
     {{#if Array.isArray(^^/layout)}}
       style="{{@.calcManualLayout(^^/layout[@index], widthMargin, heightMargin)}}"
       {{#if ~/temp.widget === @keypath}}as-moveable{{/if}}

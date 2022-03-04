@@ -95,6 +95,7 @@ export class Designer extends Ractive {
 
           body {
             background-color: ${this.get('@style.dark')};
+            padding-top: 2em;
           }
           .page-back {
             color: ${this.get('@style.fg')};
@@ -120,17 +121,13 @@ export class Designer extends Ractive {
   }
 
   paperSize(): string {
+    const size = this.get('pageSize');
     const type = this.get('report.type');
     if (type === 'flow') {
-      const width: number = this.get('report.width');
-      if (width) return `width: ${width}rem;`;
+      if (size.width) return `width: ${size.width}rem;`;
     }
-    const size: PageSize = this.get('report.size');
-    const orientation: PageOrientation = this.get('report.orientation') || 'landscape';
     if (size) {
-      const w = orientation === 'landscape' ? size.height : size.width;
-      const margin: [number, number] = [((size.margin || [])[0] || 0), ((size.margin || [])[1]) || 0];
-      return `width: ${w}rem; box-sizing: border-box; margin: 3rem auto; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem; min-height: ${orientation === 'landscape' ? size.width : size.height}rem; background-size: 1rem 1rem; background-position: ${10.5 - margin[0]}rem ${10.5 - margin[1]}rem; background-image: radial-gradient(circle, ${this.get('@style.dark')} 1px, transparent 1px);`;
+      return `width: ${size.width}rem; box-sizing: border-box; margin: 3rem auto; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${size.margin[0]}rem ${size.margin[1]}rem; min-height: ${size.height}rem; background-size: 1rem 1rem; background-position: ${10.5 - size.margin[0]}rem ${10.5 - size.margin[1]}rem; background-image: radial-gradient(circle, ${this.get('@style.dark')} 1px, transparent 1px);`;
     }
     return '';
   }
@@ -1033,6 +1030,23 @@ Ractive.extendWith(Designer, {
     },
     inOverlay() {
       return /^report.overlay/.test(this.get('temp.widget'));
+    },
+    pageSize() {
+      const type = this.get('report.type');
+      if (type === 'flow') {
+        const width: number = this.get('report.width');
+        if (width) return { width };
+      }
+      const size: PageSize = this.get('report.size');
+      const orientation: PageOrientation = this.get('report.orientation') || 'landscape';
+      if (size) {
+        const margin: [number, number] = [((size.margin || [])[0] || 0), ((size.margin || [])[1]) || 0];
+        return {
+          width: orientation === 'landscape' ? size.height : size.width,
+          height: orientation === 'landscape' ? size.width : size.height,
+          margin
+        };
+      }
     },
   },
   observe: {

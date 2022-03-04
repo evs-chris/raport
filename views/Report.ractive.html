@@ -403,7 +403,6 @@
     height: min-content;
     width: calc(100% + 3px);
     left: -1.5px;
-    background-image: radial-gradient(circle, {{@style.dark}} 1px, transparent 1px);
     background-position: 1.5rem 1.5rem;
     background-size: 1rem 1rem;
   }
@@ -428,9 +427,6 @@
     cursor: move;
   }
 
-  div.widgets {
-    background-color: {{@style.bg}};
-  }
   div.widget:hover {
     z-index: 1000;
   }
@@ -442,17 +438,16 @@
     user-select: none;
     z-index: 999;
   }
-  div.active-widget > .widgets {
+  div.active-widget > .widgets,
+  div.hover-widget > .widgets {
     background-image: linear-gradient(to top, {{@style.active}}20, {{@style.active}}20), radial-gradient(circle, {{@style.dark}} 1px, transparent 1px);
+    background-color: {{@style.bg}};
   }
 
   div.hover-widget {
     border-color: {{@style.hover}};
     border-style: solid;
     background-color: {{@style.hover}}20;
-  }
-  div.hover-widget > .widgets {
-    background-image: linear-gradient(to top, {{@style.hover}}20, {{@style.hover}}20), radial-gradient(circle, {{@style.dark}} 1px, transparent 1px);
   }
 
   .active-widget > .bar, .bar.active {
