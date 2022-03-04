@@ -12,8 +12,8 @@
       </select>
       <button on-click="@.addWidget(~/add)" class=add>+</button>
     {{/if}}
-    {{#if ~/reparent}}<button class-ico on-click="@.set('reparent', undefined)" title="Cancel move">{{>reparent, true as cancel}}</button>{{/if}}
-    <button class-ico on-click="@.treeScrollToActive()" title="Scroll active widget into view">{{>scrollto}}</button>
+    {{#if ~/reparent}}<button class="ico large" on-click="@.set('reparent', undefined)" title="Cancel move">{{>reparent, true as cancel}}</button>{{/if}}
+    <button class="ico large" on-click="@.treeScrollToActive()" title="Scroll active widget into view">{{>scrollto}}</button>
   </div>
   <div class="shrinky scrolled-wrapper">
     <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">

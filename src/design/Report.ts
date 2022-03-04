@@ -1304,6 +1304,7 @@ Ractive.extendWith(Designer, {
         sz = sizer ? sizer.offsetHeight : 12;
         document.body.addEventListener('mousemove', move);
         document.body.addEventListener('mouseup', up);
+        document.body.addEventListener('keydown', esc);
       });
       function move(ev: MouseEvent) {
         cx = ev.clientX - x;
@@ -1317,6 +1318,14 @@ Ractive.extendWith(Designer, {
       function up() {
         document.body.removeEventListener('mousemove', move);
         document.body.removeEventListener('mouseup', up);
+        document.body.removeEventListener('keydown', esc);
+      }
+      function esc(ev: KeyboardEvent) {
+        if (ev.key === 'Escape') {
+          up();
+          ctx.set({ [`^^/layout.${idx}.0`]: sx, [`^^/layout.${idx}.1`]: sy });
+          console.log('ESCAPE!');
+        }
       }
       return {
         teardown() {
