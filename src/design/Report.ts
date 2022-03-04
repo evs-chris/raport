@@ -986,7 +986,7 @@ export class Designer extends Ractive {
 
   colorMode(mode: 'dark'|'light') {
     if (mode === 'dark') {
-      Ractive.styleSet({ fg: '#eee', bg: '#222', border: '#555', highlight: '#fff', dark: '#444', active: '#4596ff', hover: '#26bf10', error: '#8b0000', btntxt: '#fff', code: { c1: '#ccc', c2: '#eee', c3: '#1b7', c4: '#e81', c5: '#f32', c6: '#e78', c7: '#6c3', c8: '#e82', c9: '#67f', c10: '#89d', c11: '#4bc', c12: '#1de', c13: '#29c', c20: '#f00', }, });
+      Ractive.styleSet({ fg: '#ccc', bg: '#222', border: '#555', highlight: '#ddd', dark: '#444', active: '#265189', hover: '#167808', error: '#710202', btntxt: '#ddd', code: { c1: '#ccc', c2: '#ccc', c3: '#1ca', c4: '#e81', c5: '#2a0', c6: '#e78', c7: '#6c3', c8: '#e82', c9: '#67f', c10: '#89d', c11: '#4bc', c12: '#1de', c13: '#29c', c20: '#f00', }, });
     } else {
       Ractive.styleSet({ fg: '#222', bg: '#fff', border: '#ddd', highlight: '#000', dark: '#999', active: '#4596ff', hover: '#26bf10', error: '#8b0000', btntxt: '#fff', code: { c1: '#555', c2: '#222', c3: '#164', c4: '#951', c5: '#a11', c6: '#708', c7: '#371', c8: '#630', c9: '#45c', c10: '#239', c11: '#167', c12: '#189', c13: '#145', c20: '#f00', }, });
     }
