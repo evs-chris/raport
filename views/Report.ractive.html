@@ -357,9 +357,18 @@
     box-sizing: border-box;
     padding: 0 0.25rem;
     user-select: none;
-    transition: background-color 0.2s ease-in-out;
+    transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    top: -2rem;
+    height: 2rem;
+    left: 0;
   }
 
+  .active-widget > .bar,  .hover-widget > .bar, .bar.active, .bar.hover {
+    opacity: 1;
+  } 
   .bar * {
     margin: 0 0.5em 0 0;
   }
@@ -448,6 +457,7 @@
 
   .active-widget > .bar, .bar.active {
     background-color: {{@style.active}};
+    z-index: 999;
   }
 
   .hover-widget > .bar, .bar.hover {
@@ -482,11 +492,8 @@
     width: 100%;
     height: 100%;
   }
-  .widget > .btn > svg path, .widget > .btn > svg circle {
-    fill: {{@style.fg}};
-  }
 
-  .widget:hover > .btn {
+  .hover-widget > .btn {
     opacity: 1;
   }
 

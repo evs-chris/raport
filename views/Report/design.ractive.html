@@ -105,6 +105,7 @@
   .paper {
     background-color: {{@style.bg}};
     color: {{@style.fg}};
+    position: relative;
   }
 
   .delimited.paper {
@@ -143,4 +144,16 @@
     border-color: {{@style.hover}};
   }
 
+  .widget span.btn {
+    background-color: {{@style.fg}};
+    color: {{@style.bg}};
+  }
+  .widget span.btn svg {
+    fill: {{@style.bg}};
+  }
+
+  .widget .bar span.btn {
+    background-color: transparent;
+    color: {{@style.btntxt}};
+  }
 </style>
