@@ -167,6 +167,7 @@ export class Designer extends Ractive {
   calcWidthWithMargin(w: Widget, context: ContextHelper): string {
     if (/^report\.widgets\.\d+$/.test(context.resolve())) return '100%';
     const width = this.calcWidth(w, context);
+    if (!w.margin && w.font && w.font.right) return `calc(${width} + ${w.font.right}rem)`;
     if (!w.margin || isComputed(w.margin)) return ~width.indexOf('(') ? `calc${width}` : width;
     if (typeof w.margin === 'number') return `calc(${width} + ${2 * w.margin}rem)`;
     else if (w.margin.length === 2) return `calc(${width} + ${2 * w.margin[1]}rem)`;
@@ -1153,9 +1154,6 @@ Ractive.extendWith(Designer, {
         }
       }, 1000);
     },
-    'show.bottom'() {
-      setTimeout(() => this.resetScrollers());
-    },
     'report.defaultParams'(v) {
       this.set('params', Object.assign({}, v));
     },
@@ -1167,6 +1165,7 @@ Ractive.extendWith(Designer, {
       strict: true,
     },
     'show.bottom'(v: boolean) {
+      setTimeout(() => this.resetScrollers());
       if (v) setTimeout(() => this.set('show.pad', true), 300);
       else this.set('show.pad', false);
     }
