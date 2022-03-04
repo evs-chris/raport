@@ -37,7 +37,7 @@ export interface PlainSource {
 
 let autosizeTm: any;
 
-const binops = ['**', '*', '/%', '/', '%', '+', '-', '>=', '>', '<=', '<', 'gt', 'gte', 'lt', 'lte', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'and', '&&', 'or', '||'];
+const binops = ['**', '*', '/%', '/', '%', '+', '-', '>=', '>', '<=', '<', '??', 'gt', 'gte', 'lt', 'lte', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', '===', '!==', 'strict-is', 'strict-is-not', 'deep-is', 'deep-is-not', 'and', '&&', 'or', '||'];
 
 const form_els = ['INPUT', 'TEXTAREA', 'SELECT'];
 
