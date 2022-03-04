@@ -336,7 +336,7 @@ export class Designer extends Ractive {
     this.set('show.bottom', true);
 
     const el = document.getElementById(`expr-${html ? 'html' : 'text'}`);
-    if (el) el.focus();
+    if (el) setTimeout(() => el.focus(), 500);
 
     const parent = Ractive.joinKeys(...Ractive.splitKeypath(path).slice(0, -1));
     let watch: ObserverHandle;
