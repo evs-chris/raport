@@ -237,6 +237,7 @@
     width: 100%;
     height: 100%;
     border-radius: 0.2rem;
+    transition: transform 0.2s ease-in-out 0.3s;
   }
   .line button.ico svg {
     fill: #fff;
@@ -252,5 +253,11 @@
 
   button.ico.up-arrow svg {
     transform: rotate(180deg);
+  }
+  button.ico.left-arrow svg {
+    transform: rotate(90deg);
+  }
+  button.ico.right-arrow svg {
+    transform: rotate(270deg);
   }
 </style>

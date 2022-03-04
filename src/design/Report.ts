@@ -333,7 +333,7 @@ export class Designer extends Ractive {
 
     this.link(path, 'expr');
     this.set('temp.expr.str', val);
-    this.set('temp.bottom.pop', true);
+    this.set('show.bottom', true);
 
     const el = document.getElementById(`expr-${html ? 'html' : 'text'}`);
     if (el) el.focus();
@@ -348,7 +348,7 @@ export class Designer extends Ractive {
 
   editParam(ctx: ContextHelper) {
     const path = ctx.resolve();
-    this.set('temp.bottom.pop', true);
+    this.set('show.bottom', true);
     this.set('temp.bottom.param', path);
     this.set('temp.bottom.tab', 'param');
     this.link(path, 'param');
@@ -356,7 +356,7 @@ export class Designer extends Ractive {
 
   editReportSrc(ctx: ContextHelper, key?: string) {
     const path = ctx.resolve(key || undefined);
-    this.set('temp.bottom.pop', true);
+    this.set('show.bottom', true);
     this.set('temp.bottom.source', path);
     this.set('temp.bottom.tab', 'source');
     this.link(path, 'source');
@@ -1153,7 +1153,7 @@ Ractive.extendWith(Designer, {
         }
       }, 1000);
     },
-    'temp.bottom.pop'() {
+    'show.bottom'() {
       setTimeout(() => this.resetScrollers());
     },
     'report.defaultParams'(v) {
@@ -1166,6 +1166,10 @@ Ractive.extendWith(Designer, {
       init: false,
       strict: true,
     },
+    'show.bottom'(v: boolean) {
+      if (v) setTimeout(() => this.set('show.pad', true), 300);
+      else this.set('show.pad', false);
+    }
   },
   on: {
     init() {
@@ -1377,8 +1381,8 @@ Ractive.extendWith(Designer, {
         teardown() {
           window.removeEventListener('keydown', listener, { capture: true });
         }
-      }
-    }
+      };
+    },
   },
 });
 

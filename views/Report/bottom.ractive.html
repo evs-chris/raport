@@ -1,14 +1,14 @@
 <div class-top class-actions>
-  {{#if ~/report.parameters.length}}<span class-tab class-active="~/temp.bottom.tab === 'params'" on-click="@.set('temp.bottom.tab', 'params'), @.set('temp.bottom.pop', true)">Parameters</span>{{/if}}
-  <span class-tab class-active="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'" on-click="@.set('temp.bottom.tab', 'expr'), @.set('temp.bottom.pop', true)">{{#if ~/temp.expr.path}}Expression{{else}}Evaluate{{/if}}</span>
-  {{#if ~/temp.bottom.param}}<span class-tab class-active="~/temp.bottom.tab === 'param'" on-click="@.set('temp.bottom.tab', 'param'), @.set('temp.bottom.pop', true)">Parameter</span>{{/if}}
-  {{#if ~/temp.bottom.source}}<span class-tab class-active="~/temp.bottom.tab === 'source'" on-click="@.set('temp.bottom.tab', 'source'), @.set('temp.bottom.pop', true)">Source</span>{{/if}}
+  {{#if ~/report.parameters.length}}<span class-tab class-active="~/temp.bottom.tab === 'params'" on-click="@.set('temp.bottom.tab', 'params'), @.set('show.bottom', true)">Parameters</span>{{/if}}
+  <span class-tab class-active="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'" on-click="@.set('temp.bottom.tab', 'expr'), @.set('show.bottom', true)">{{#if ~/temp.expr.path}}Expression{{else}}Evaluate{{/if}}</span>
+  {{#if ~/temp.bottom.param}}<span class-tab class-active="~/temp.bottom.tab === 'param'" on-click="@.set('temp.bottom.tab', 'param'), @.set('show.bottom', true)">Parameter</span>{{/if}}
+  {{#if ~/temp.bottom.source}}<span class-tab class-active="~/temp.bottom.tab === 'source'" on-click="@.set('temp.bottom.tab', 'source'), @.set('show.bottom', true)">Source</span>{{/if}}
   <span class-which>
     {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button class-ico on-click="@.checkLink('expr')">{{>times}}</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
     {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button class-ico on-click="@.checkLink('param')">{{>times}}</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
     {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button class-ico on-click="@.checkLink('source')">{{>times}}</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
   </span>
-  <button on-click="@.toggle('temp.bottom.pop')" class-ico style-height="2.5rem" class="{{#if ~/temp.bottom.pop}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>
+  <button on-click="@.toggle('show.bottom')" class-ico style-height="2.5rem" class="{{#if ~/show.bottom}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>
 </div>
 <div class-bottom>
   <div class-tab class-active-tab="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'">

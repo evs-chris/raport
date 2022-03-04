@@ -1,4 +1,7 @@
-<div class-properties>
+<div class-properties class-popped="~/show.props">
+  <div class=properties-pull on-click="@.toggle('~/show.props')">
+    <button class="ico large {{~/show.props ? 'left' : 'right'}}-arrow">{{>arrow}}</button>
+  </div>
   <div class-header style-height=3rem>
     <h3>{{#if ~/reparent}}Moving...{{else}}Widgets{{/if}}</h3>
     {{#if ~/report.type !== 'delimited' && (~/widget.type === 'container' || ~/temp.widget === 'report')}}
@@ -15,7 +18,7 @@
     {{#if ~/reparent}}<button class="ico large" on-click="@.set('reparent', undefined)" title="Cancel move">{{>reparent, true as cancel}}</button>{{/if}}
     <button class="ico large" on-click="@.treeScrollToActive()" title="Scroll active widget into view">{{>scrollto}}</button>
   </div>
-  <div class="shrinky scrolled-wrapper">
+  <div class="shrinky scrolled-wrapper widget-tree">
     <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
       {{#with report}}
       <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : @.selectWidget('report')"><span class-line on-mouseover="@.set('temp.hover', 'report'), false">Report</span>
@@ -174,16 +177,22 @@
 
 <style rel=ractive>
   .properties {
-    width: 20em;
-    min-width: 18vw;
+    width: 28em;
     flex-grow: 0;
     flex-shrink: 0;
-    overflow-y: auto;
     border: 1px solid {{@style.border}};
     color: {{@style.fg}};
     background-color: {{@style.bg}};
     display: flex;
     flex-direction: column;
+  }
+
+  .properties-pull {
+    display: none;
+  }
+
+  .properties .widget-tree {
+    max-height: 33%;
   }
 
   .placeholder {
