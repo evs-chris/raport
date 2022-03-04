@@ -192,11 +192,14 @@ export class Viewer extends Ractive {
 
 Ractive.extendWith(Viewer, {
   template: { v: template.v, t: template.p.viewer }, cssId: 'raport-ast-view',
-  css: css + `
-  pre { margin: 0; white-space: pre-wrap; }
-  .syntax-editor code { padding: 0; flex-grow: 1; }
-  .syntax-editor { max-height: 100%; overflow: auto; }
-  `,
+  css,
+  cssData: {
+    extra: `
+      pre { margin: 0; white-space: pre-wrap; font-size: 0.9em; }
+      .syntax-editor code { padding: 0; flex-grow: 1; }
+      .syntax-editor { max-height: 100%; overflow: auto; }
+      `,
+  },
   partials: {
     'ast-node': template.p['ast-node'],
   },

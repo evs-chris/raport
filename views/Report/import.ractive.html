@@ -45,7 +45,7 @@
   </div>
 </div>
 
-<style>
+<style rel=ractive>
   .tab.data-import {
     display: flex;
     flex-direction: column;
@@ -85,7 +85,9 @@
     padding: 0.5rem;
     box-sizing: border-box;
     margin: 0;
-    border: 1px solid #ddd;
+    border: 1px solid {{@style.border}};
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
     border-radius: 0;
   }
   label.area {
@@ -103,9 +105,11 @@
     width: 100%;
     padding: 0.5rem;
     box-sizing: border-box;
-    border: 1px solid #ddd;
+    border: 1px solid {{@style.border}};
     margin: 0;
     border-radius: 0;
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
   }
   label.area.grow textarea {
     flex-grow: 1;

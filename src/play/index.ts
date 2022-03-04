@@ -11,6 +11,78 @@ class App extends Ractive {
   }
 }
 
+Ractive.perComponentStyleElements = true;
+
+const colorMode = window.matchMedia('(prefers-color-scheme: dark)');
+const setColorMode = () => {
+  if (colorMode.matches) {
+    Ractive.styleSet({ fg: '#eee', bg: '#222', border: '#555', highlight: '#fff', dark: '#444', active: '#4596ff', hover: '#26bf10', error: '#8b0000', btntxt: '#fff', code: { c1: '#ccc', c2: '#eee', c3: '#1b7', c4: '#e81', c5: '#f32', c6: '#e78', c7: '#6c3', c8: '#e82', c9: '#67f', c10: '#89d', c11: '#4bc', c12: '#1de', c13: '#29c', c20: '#f00', }, });
+  } else {
+    Ractive.styleSet({ fg: '#222', bg: '#fff', border: '#ddd', highlight: '#000', dark: '#999', active: '#4596ff', hover: '#26bf10', error: '#8b0000', btntxt: '#fff', code: { c1: '#555', c2: '#222', c3: '#164', c4: '#951', c5: '#a11', c6: '#708', c7: '#371', c8: '#630', c9: '#45c', c10: '#239', c11: '#167', c12: '#189', c13: '#145', c20: '#f00', }, });
+  }
+};
+colorMode.addEventListener('change', setColorMode);
+setColorMode();
+
+/*
+// dark mode
+Ractive.styleSet({
+  fg: '#eee',
+  bg: '#222',
+  border: '#555',
+  highlight: '#fff',
+  dark: '#444',
+  active: '#4596ff',
+  hover: '#26bf10',
+  error: '#8b0000',
+  btntxt: '#fff',
+  code: {
+    c1: '#ccc', // gen/extra
+    c2: '#eee', // refs
+    c3: '#1b7', // primitives
+    c4: '#e81', // fmt
+    c5: '#f32', // string
+    c6: '#e78', // ops
+    c7: '#6c3', // type
+    c8: '#e82', // type key
+    c9: '#67f', // type type
+    c10: '#89d', // type literal
+    c11: '#4bc', // each
+    c12: '#1de', // conditional
+    c13: '#29c', // with
+    c20: '#f00', // fail
+  },
+});
+
+// light mode
+Ractive.styleSet({
+  fg: '#222',
+  bg: '#fff',
+  border: '#ddd',
+  highlight: '#000',
+  dark: '#777',
+  active: '#4596ff',
+  hover: '#26bf10',
+  error: '#8b0000',
+  btntxt: '#fff',
+  code: {
+    c1: '#555', // gen/extra
+    c2: '#222', // refs
+    c3: '#164', // primitives
+    c4: '#951', // fmt
+    c5: '#a11', // string
+    c6: '#708', // ops
+    c7: '#371', // type
+    c8: '#630', // type key
+    c9: '#45c', // type type
+    c10: '#239', // type literal
+    c11: '#167', // each
+    c12: '#189', // conditional
+    c13: '#145', // with
+    c20: '#f00', // fail
+  },
+});*/
+
 Ractive.extendWith(App, {
   template: '#template',
   data() {

@@ -3,7 +3,7 @@
     <div class="delimited paper">
       <div class-widget>
         <div class-bar>
-          Report
+          <span class-name>Report</span>
           {{#if !report.headers}}
             <span class-btn on-click="@.addHeader()">Add Header</span>
           {{else}}
@@ -14,7 +14,7 @@
           {{#if !!~/report.headers}}
             <div class-widget>
               <div class-bar>
-                Header
+                <span class-name>Header</span>
                 <button class-ico class-large on-click="@.push('report.headers', ''), @.push('report.fields', '')">+</button>
               </div>
               <div class-children class-fields>
@@ -26,7 +26,7 @@
           {{/if}}
           <div class-widget>
             <div class-bar>
-              Row
+              <span class-name>Row</span>
               <button class-ico class-large on-click="@.push('report.fields', ''), ~/report.headers && @.push('report.headers', '')">+</button>
             </div>
             <div class-children class-fields>
@@ -43,7 +43,7 @@
   <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
     <div class="paper" style="{{@.paperSize()}}" on-click="@event.target === @node ? @.selectWidget('report') : true">
       <div class=bar style-cursor=pointer on-click="@.unlink('widget'), @.unlink('expr'), @.set('temp', { name: 'report ', widget: 'report' })" class-active="temp.widget === 'report' || temp.widget === 'report.watermark' || temp.widget === 'report.overlay'" class-hover="temp.hover === 'report' || temp.hover === 'report.watermark' || temp.hover === 'report.overlay'" on-mouseover="@.set('temp.hover', ~/inWatermark ? 'report.watermark' : ~/inOverlay ? 'report.overlay' : 'report'), false" on-mouseout="@.set('temp.hover', ''), false">
-        <span>
+        <span class-name>
           {{#if ~/inWatermark}}Watermark
           {{elseif ~/inOverlay}}Overlay
           {{else}}Report{{/if}}
@@ -101,14 +101,17 @@
   </div></div>
 {{/if}}
 
-<style>
+<style rel=ractive>
   .paper {
-    background-color: #fff;
+    background-color: {{@style.bg}};
+    color: {{@style.fg}};
   }
 
   .delimited.paper {
     margin: 0.5rem;
     padding: 0.5rem;
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
   }
 
   .delimited .children.fields {
@@ -118,7 +121,7 @@
 
   .field {
     display: flex;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid {{@style.border}};
     margin: 0.25rem;
     padding: 0.25rem;
   }
@@ -132,12 +135,12 @@
     overflow: hidden;
   }
   .field.active-expr {
-    background-color: #4596ff20;
-    border-color: #4596ff;
+    background-color: {{@style.active}}20;
+    border-color: {{@style.active}};
   }
   .field.hover-expr {
-    background-color: #26bf1017;
-    border-color: #26bf10;
+    background-color: {{@style.hover}}20;
+    border-color: {{@style.hover}};
   }
 
 </style>

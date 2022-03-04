@@ -10,7 +10,7 @@
         <button class-plain title="Import this project definition from a file" on-click="@.importProject()">Import Project</button>
         <button class-plain title="Create a new empty project" on-click="@.makeProject(true)">New Project</button>
         <br /><br />
-        <button class-plain title="Delete this project from browser storage" style-background=darkred on-click="@.removeProject()">Delete Project</button>
+        <button class-plain title="Delete this project from browser storage" style-background={{@style.error}} on-click="@.removeProject()">Delete Project</button>
         <br /><br />
         <button class-plain title="Export this project as text to the below text field" on-click="@.set('projectText', @.stringifyProject())">Refresh Text</button>
       </div>
@@ -31,7 +31,7 @@
   </div>
 </div>
 
-<style>
+<style rel=ractive>
   .project {
     display: flex;
     flex-grow: 1;
@@ -52,7 +52,7 @@
 
   .project-list {
     flex-grow: 1;
-    border: 1px solid #ddd;
+    border: 1px solid {{@style.border}};
     overflow-y: auto;
   }
 
@@ -63,6 +63,7 @@
   }
 
   .active-project {
-    background-color: #eee;
+    background-color: {{@style.border}};
+    color: {{@style.fg}};
   }
 </style>

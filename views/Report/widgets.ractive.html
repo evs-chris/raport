@@ -64,7 +64,7 @@
 <template id="container">
   {{#with @local as ctx}}
   <div class=bar on-mouseover="@.set('temp.hover', @keypath), false" on-mouseout="@.set('temp.hover', ''), false">
-    <span>{{label || 'container'}}</span>
+    <span class-name>{{label || 'container'}}</span>
     {{#if ctx.layout}}{{@context.set('ctx.layout', .layout === 'row' || !.layout ? 'auto' : 'manual') && ''}}{{/if}}
     <select value="{{ctx.layout}}" on-change="@node.value === 'auto' ? @context.set('.layout', undefined) : @context.set('.layout', [])">
       <option value="auto">Auto Layout</option>
@@ -116,7 +116,7 @@
 
 <template id="repeater">
   <div class=bar {{#unless ~/reparent}}on-mouseover="@.set('temp.hover', @keypath), false"{{/unless}} on-mouseout="@.set('temp.hover', ''), false">
-    <span>Repeater</span>
+    <span class-name>Repeater</span>
 
     {{#if .group}}
       <span class-btn on-click="@context.set('.group', undefined), @context.set('.groupEnds', [true]), @.unlink('widget'), @.set('temp.widget', undefined)">Remove Group</span>
@@ -194,8 +194,8 @@
 </template>
 
 <template id="pencil">
-  <svg viewBox="0 0 16 16">
-    <path fill=none stroke="#000" d="m 10.574807,3.7181493 1.230348,-1.230348 c 0.786061,-0.1047571 2.169305,1.3270952 2.115927,2.0909526 l -1.24767,1.2476704 z m 0,0 L 12.677529,5.825142 5.136945,13.365724 3.5226704,13.820162 1.9083957,14.2746 2.5400804,12.67292 3.1717651,11.07124 10.574806,3.718149 Z" />
+  <svg viewBox="0 0 16 16" class=pencil>
+    <path d="m 10.574807,3.7181493 1.230348,-1.230348 c 0.786061,-0.1047571 2.169305,1.3270952 2.115927,2.0909526 l -1.24767,1.2476704 z m 0,0 L 12.677529,5.825142 5.136945,13.365724 3.5226704,13.820162 1.9083957,14.2746 2.5400804,12.67292 3.1717651,11.07124 10.574806,3.718149 Z" />
   </svg>
 </template>
 

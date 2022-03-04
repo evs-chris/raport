@@ -172,15 +172,16 @@
 
 <template id="widget-tree" src="./widgets.ractive.html" />
 
-<style>
+<style rel=ractive>
   .properties {
     width: 20em;
     min-width: 18vw;
     flex-grow: 0;
     flex-shrink: 0;
     overflow-y: auto;
-    border: 1px solid #ddd;
-    background-color: #fafafa;
+    border: 1px solid {{@style.border}};
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
     display: flex;
     flex-direction: column;
   }
@@ -217,26 +218,28 @@
   .properties .tree .children {
     margin-left: 0.5em;
     padding-left: 0.5em;
-    border-left: 1px dotted #ddd;
+    border-left: 1px dotted {{@style.border}};
   }
 
   .properties .tree .node {
-    color: #222;
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
     cursor: pointer;
     position: relative;
+    transition: background-color 0.2s ease-in-out;
   }
 
   .properties .tree .node.active > .line {
-    background-color: #4596ff;
-    color: #fff;
+    background-color: {{@style.active}};
+    color: {{@style.btntxt}};
   }
 
   .properties .tree .node.active {
-    background-color: #4596ff20;
+    background-color: {{@style.active}}20;
   }
 
   .properties .tree .node.hover > .children > .node {
-    background-color: #26bf1017;
+    background-color: {{@style.hover}}20;
   }
 
   .properties .tree .node .line {
@@ -245,6 +248,7 @@
     padding: 0.1rem 0.25rem;
     margin: 0.1rem;
     min-height: 2rem;
+    transition: background-color 0.2s ease-in-out;
   }
 
   .properties .tree .node.hover > .line {
@@ -294,7 +298,7 @@
     vertical-align: middle;
     border-style: solid;
     border-width: 1px 0;
-    border-color: #ddd;
+    border-color: {{@style.border}};
   }
 
   .properties .sheet > label > *:first-of-type {
@@ -310,12 +314,12 @@
     padding: 0;
     margin: 0;
     width: 100%;
-    background-color: transparent;
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
     outline: none;
   }
 
   .properties .sheet textarea {
-    background: transparent;
     border: none;
     width: 100%;
     height: 100%;
@@ -326,22 +330,23 @@
   }
 
   .properties .sheet label:focus-within {
-    background-color: #efefef;
+    background-color: transparent;
+    color: {{@style.fg}};
   }
 
   .parameter, .src {
     display: flex;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid {{@style.border}};
   }
   .parameter:focus-within, .src:focus-within {
-    background-color: #efefef;
+    background-color: {{@style.border}};
   }
   .parameter.head, .src.head {
-    border-top: 1px solid #ccc;
+    border-top: 1px solid {{@style.border}};
     font-weight: bold;
   }
   .parameter > *, .src > * {
-    border-left: 1px solid #ccc;
+    border-left: 1px solid {{@style.border}};
     padding: 0.2rem;
     flex-grow: 0;
     flex-shrink: 0;
@@ -355,6 +360,7 @@
     height: 100%;
     border: none;
     background: transparent;
+    color: {{@style.fg}};
   }
   .param-name {
     width: 40%;

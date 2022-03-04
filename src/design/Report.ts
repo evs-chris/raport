@@ -92,6 +92,14 @@ export class Designer extends Ractive {
           html:after { bottom: -5px; }
           html.scrolled-top:before { opacity: 0; }
           html.scrolled-bottom:after { opacity: 0; }
+
+          body {
+            background-color: ${this.get('@style.dark')};
+          }
+          .page-back {
+            color: ${this.get('@style.fg')};
+            background-color: ${this.get('@style.bg')};
+          }
         }
       </style>
       <script>
@@ -122,7 +130,7 @@ export class Designer extends Ractive {
     if (size) {
       const w = orientation === 'landscape' ? size.height : size.width;
       const margin: [number, number] = [((size.margin || [])[0] || 0), ((size.margin || [])[1]) || 0];
-      return `width: ${w}rem; box-sizing: border-box; margin: 1rem auto; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem; min-height: ${orientation === 'landscape' ? size.width : size.height}rem; background-size: 1rem 1rem; background-position: ${10.5 - margin[0]}rem ${10.5 - margin[1]}rem; background-image: radial-gradient(circle, #ccc 1px, transparent 1px);`;
+      return `width: ${w}rem; box-sizing: border-box; margin: 1rem auto; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem; min-height: ${orientation === 'landscape' ? size.width : size.height}rem; background-size: 1rem 1rem; background-position: ${10.5 - margin[0]}rem ${10.5 - margin[1]}rem; background-image: radial-gradient(circle, ${this.get('@style.dark')} 1px, transparent 1px);`;
     }
     return '';
   }
@@ -180,9 +188,10 @@ export class Designer extends Ractive {
   calcBorder(w: Widget): string {
     const b = w.border;
     if (!b) return '';
-    if (typeof b === 'number') return `border-bottom: ${b * 0.0625}rem solid;`;
+    const color = this.get('@style.border');
+    if (typeof b === 'number') return `border-bottom: ${b * 0.0625}rem solid ${color};`;
     else if (Array.isArray(b)) {
-      if (b.length === 1) return `border: ${b[0] * 0.0625}rem solid;`;
+      if (b.length === 1) return `border: ${b[0] * 0.0625}rem solid ${color};`;
       else if (b.length === 2) return `border-style: solid; border-width: ${b[0] * 0.0625}rem ${b[1] * 0.0625}rem`;
       else if (b.length === 4) return `border-style: solid; border-width: ${b[0] * 0.0625}rem ${b[1] * 0.0625}rem ${b[2] * 0.0625}rem ${b[3] * 0.0625}rem`;
     } else if (typeof b === 'string') {
@@ -976,6 +985,14 @@ export class Designer extends Ractive {
     this._undo.unshift(JSON.stringify(v));
     if (this.undo.length > 40) this._undo = this._undo.slice(0, 40);
     this._redo = [];
+  }
+
+  colorMode(mode: 'dark'|'light') {
+    if (mode === 'dark') {
+      Ractive.styleSet({ fg: '#eee', bg: '#222', border: '#555', highlight: '#fff', dark: '#444', active: '#4596ff', hover: '#26bf10', error: '#8b0000', btntxt: '#fff', code: { c1: '#ccc', c2: '#eee', c3: '#1b7', c4: '#e81', c5: '#f32', c6: '#e78', c7: '#6c3', c8: '#e82', c9: '#67f', c10: '#89d', c11: '#4bc', c12: '#1de', c13: '#29c', c20: '#f00', }, });
+    } else {
+      Ractive.styleSet({ fg: '#222', bg: '#fff', border: '#ddd', highlight: '#000', dark: '#999', active: '#4596ff', hover: '#26bf10', error: '#8b0000', btntxt: '#fff', code: { c1: '#555', c2: '#222', c3: '#164', c4: '#951', c5: '#a11', c6: '#708', c7: '#371', c8: '#630', c9: '#45c', c10: '#239', c11: '#167', c12: '#189', c13: '#145', c20: '#f00', }, });
+    }
   }
 }
 

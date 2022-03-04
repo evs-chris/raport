@@ -20,11 +20,11 @@
   </div>
 </template>
 
-<style>
+<style rel=ractive>
   .syntax-editor {
     position: relative;
     min-height: 99%;
-    color: #555;
+    color: {{@style.code.c1}};
     display: flex;
   }
 
@@ -35,10 +35,10 @@
     font-family: monospace;
     font-size: 0.85rem !important;
     line-height: 1rem !important;
-    background-color: #f9f9f9;
     padding: 0.5rem !important;
-    color: #222;
-    border-right: 1px solid #999;
+    color: {{@style.fg}};
+    background-color: {{@style.border}};
+    border-right: 1px solid {{@style.dark}};
     text-align: right;
   }
 
@@ -49,7 +49,7 @@
   }
 
   .ast-extra {
-    color: #555;
+    color: {{@style.code.c1}};
   }
 
   .syntax-editor textarea {
@@ -58,7 +58,7 @@
     font-family: monospace;
     color: transparent;
     background: transparent;
-    caret-color: black;
+    caret-color: {{@style.fg}};
     min-height: 99%;
     overflow: hidden;
     resize: none;
@@ -90,7 +90,7 @@
   }
 
   .ast-nodes .reference {
-    color: #222;
+    color: {{@style.code.c2}};
     font-weight: 500;
   }
 
@@ -98,17 +98,17 @@
   .ast-nodes .number,
   .ast-nodes .date,
   .ast-nides .timespan {
-    color: #164;
+    color: {{@style.code.c3}};
     font-weight: 500;
   }
 
   .ast-nodes .format-op {
-    color: #951;
+    color: {{@style.code.c4}};
   }
 
   .ast-nodes .string,
   .ast-nodes .string > .ast-extra {
-    color: #a11;
+    color: {{@style.code.c5}};
   }
 
   .ast-nodes .string > .string-interpolation {
@@ -117,27 +117,27 @@
 
   .ast-nodes .binary-op > .ast-extra,
   .ast-nodes .conditional > .ast-extra {
-    color: #708;
+    color: {{@style.code.c6}};
   }
 
   .ast-nodes .typelit,
   .ast-nodes .typelit > .ast-extra {
-    color: #371;
-  }
-
-  .ast-nodes .typelit .key {
-    color: #630;
+    color: {{@style.code.c7}};
   }
 
   .ast-nodes .typelit .type {
-    color: #45c;
+    color: {{@style.code.c9}};
     font-weight: 500;
   }
 
   .ast-nodes .typelit .key,
   .ast-nodes .typelit .literal {
     font-weight: 500;
-    color: #239;
+    color: {{@style.code.c10}};
+  }
+
+  .ast-nodes .typelit .key {
+    color: {{@style.code.c8}};
   }
 
   .ast-nodes .typelit .condition {
@@ -145,7 +145,7 @@
   }
 
   .ast-nodes .ast-fail {
-    color: #f00;
+    color: {{@style.code.c20}};
   }
 
   .ast-nodes .interpolator,
@@ -158,16 +158,18 @@
   }
 
   .ast-nodes .each-block > .ast-extra {
-    color: #167;
+    color: {{@style.code.c11}};
   }
 
   .ast-nodes .case-block > .ast-extra,
   .ast-nodes .unless-block > .ast-extra,
   .ast-nodes .if-block > .ast-extra {
-    color: #189;
+    color: {{@style.code.c12}};
   }
 
   .ast-nodes .with-block > .ast-extra {
-    color: #145;
+    color: {{@style.code.c13}};
   }
+
+  {{extra || ''}}
 </style>

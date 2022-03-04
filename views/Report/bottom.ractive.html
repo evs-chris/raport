@@ -114,7 +114,7 @@
         </div>
         <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
           {{#if ~/temp.expr.result === undefined}}
-            <span style="color: blue;">undefined</span>
+            <span style="color: {{@style.code.c12}};">undefined</span>
           {{else}}
             {{#if ~/temp.expr.resulttype === 'html'}}
               {{{~/temp.expr.result}}}
@@ -319,7 +319,7 @@
 
 <template id="bottom-parameters" src="./params.ractive.html" />
 
-<style>
+<style rel=ractive>
   .bottom-pane pre {
     margin: 0;
   }
@@ -339,7 +339,7 @@
     flex-grow: 1;
     flex-shrink: 1;
     overflow: hidden;
-    border: 1px solid #ddd;
+    border: 1px solid {{@style.border}};
   }
 
   .bottom-pane .bottom > .tab {
@@ -364,7 +364,7 @@
   }
 
   .bottom-pane .context .panel, .bottom-pane .ops .panel {
-    border: 1px solid #ddd;
+    border: 1px solid {{@style.border}};
     flex-grow: 1;
   }
 
@@ -394,8 +394,17 @@
     font-size: 1em;
   }
 
+  .bottom-pane .properties textarea, .bottom-pane .properties select, .bottom-pane .properties input {
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
+    border: 1px solid {{@style.border}};
+  }
+  .bottom-pane .properties textarea {
+    min-height: 7em;
+  }
+
   .bottom-pane .active-tab {
-    border: 1px solid #ddd;
+    border: 1px solid {{@style.border}};
   }
 
   .bottom-pane .editor .tab {
@@ -408,7 +417,7 @@
     word-break: break-all;
   }
   .bottom-pane .ast.tab.error {
-    border-color: red;
+    border-color: {{@style.error}};
   }
 
   .bottom-pane .tab.html .scrolled {
@@ -429,7 +438,7 @@
     display: flex;
     flex-shrink: 0;
     padding: 0.2rem;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid {{@style.border}};
   }
 
   .bottom-pane .tab.html button {
@@ -440,7 +449,7 @@
     outline: none;
   }
   .bottom-pane .tab.html button:hover {
-    color: #4596ff;
+    color: {{@style.active}};
   }
   .bottom-pane .tab.html button.skip {
     margin-left: 1rem;
@@ -467,7 +476,8 @@
   }
   .bottom-pane .properties > label {
     width: 20em;
-    margin: 0.5rem;
+    margin: 0 0.5rem;
+    padding: 0.5rem 0;
   }
   .bottom-pane .options label {
     display: inline-block;
@@ -479,15 +489,10 @@
     font-size: 0.8rem;
     display: flex;
   }
-  .bottom-pane .properties input, .bottom-pane .properties select {
-    border: none;
-    background-color: transparent;
-    border: 1px solid #ddd;
-  }
   .bottom-pane .options {
     box-sizing: border-box;
     padding: 0.5rem;
-    border: 1px solid #ddd;
+    border: 1px solid {{@style.border}};
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -519,8 +524,8 @@
   }
 
   .ast-active-node {
-    background-color: #4596ff20;
-    border: 1px solid #4596ff;
+    background-color: {{@style.active}}20;
+    border: 1px solid {{@style.active}};
     cursor: default;
   }
 
@@ -543,7 +548,7 @@
   }
 
   .entry-type {
-    opacity: 0.5;
+    opacity: 0.6;
     padding: 0 0.5em;
   }
 
@@ -554,12 +559,15 @@
     border: none;
     margin: 0;
     font-size: 1rem;
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
   }
 
   .entry-details button.expand {
     margin-left: -1em;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
+    border: 1px solid {{@style.border}};
     width: 1em;
     height: 1em;
     text-align: center;
@@ -568,7 +576,7 @@
 
   .context-entry {
     padding-left: 0.5em;
-    border-left: 1px dotted rgba(0, 0, 0, 0.2);
+    border-left: 1px dotted {{@style.border}};
     margin-left: 1em;
   }
   .context-entry .context-entry {
@@ -585,7 +593,7 @@
     cursor: pointer;
   }
 
-  .expr-operator {
+  .entry-details .expr-operator {
     padding: 0 0.5em;
   }
 
@@ -597,7 +605,8 @@
   }
 
   .label-part code {
-    background-color: #f5f5f5;
+    background-color: {{@style.bg}};
+    color: {{@style.fg}};
   }
 
   .label-part input, .label-part label, .label-part select {
@@ -606,7 +615,7 @@
     border-radius: 0.2rem;
     margin: 0.25em;
     vertical-align: middle;
-    border: 1px solid #eee;
+    border: 1px solid {{@style.border}};
   }
   .label-part input[type=number] {
     width: 8rem;

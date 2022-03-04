@@ -1,7 +1,7 @@
 <div class-raport-report as-trackfocus>
   {{>left}}
   <div class=layout on-keys('z', { ctrl: true })="@.undo(), true" on-keys('Z', { ctrl: true, shift: true })="@.redo(), true">
-    <div class-actions>
+    <div class="design actions">
       <button disabled="{{report.type === 'delimited' && report.sources.length !== 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>{{>play}}</button>
       <button on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">Designer</button>
       {{#if result}}
@@ -68,7 +68,7 @@
 
 <template id="widget-props" src="./Report/widget-props.ractive.html" />
 
-<style>
+<style rel=ractive>
   h3 {
     padding: 0.5rem;
     margin: 0;
@@ -90,8 +90,8 @@
     transition-property: box-shadow, opacity, background-color;
     font-size: 0.7em;
     line-height: 1.5em;
-    background-color: #07e;
-    color: #fff;
+    background-color: {{@style.active}};
+    color: {{@style.btntxt}};
     vertical-align: middle;
     min-height: 2.25em;
     outline: 0;
@@ -100,6 +100,9 @@
     overflow: hidden;
     -webkit-tap-highlight-color: transparent;
     font-family: inherit;
+  }
+  button.plain:hover {
+    background-color: {{@style.hover}};
   }
 
   button.ico {
@@ -111,6 +114,11 @@
     height: 1.2em;
     margin-left: 0.1rem;
     box-sizing: content-box;
+    color: {{@style.fg}};
+  }
+
+  button.ico svg {
+    fill: {{@style.fg}};
   }
 
   button.ico.text {
@@ -126,10 +134,19 @@
   }
 
   button.ico:hover svg {
-    fill: #4596ff;
+    fill: {{@style.hover}};
   }
   button.ico:hover {
-    color: #4596ff;
+    color: {{@style.hover}};
+  }
+
+  button.ico svg.pencil {
+    stroke: {{@style.fg}};
+    fill: none;
+  }
+  button.ico:hover svg.pencil {
+    stroke: {{@style.hover}};
+    fill: none;
   }
 
   button.ico.large {
@@ -143,7 +160,7 @@
   }
 
   button.ico:disabled {
-    color: #ccc;
+    color: {{@style.border}};
     cursor: default;
   }
 
@@ -161,7 +178,10 @@
     font-family: sans-serif;
     height: 100%;
     width: 100%;
-    color: #222;
+    box-sizing: border-box;
+    padding: 0.5em;
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
   }
 
   button.add {
@@ -170,12 +190,16 @@
     line-height: 1em;
     text-align: center;
     border-radius: 2rem;
-    background-color: #4596ff;
-    color: #fff;
+    background-color: {{@style.active}};
+    color: {{@style.btntxt}};
     margin: 0.5rem;
     border: none;
     cursor: pointer;
     font-size: 1.5em;
+    transition: background-color 0.2s ease-in-out;
+  }
+  button.add:hover {
+    background-color: {{@style.hover}};
   }
 
   select {
@@ -183,6 +207,7 @@
     border-style: solid;
     border-width: 0 0 1px 0;
     background: none;
+    color: {{@style.fg}};
   }
 
   .layout {
@@ -196,7 +221,7 @@
   }
 
   .layout > .tab {
-    background-color: #999;
+    background-color: {{@style.dark}};
   }
 
   .editor > .tab, .layout > .tab {
@@ -229,14 +254,14 @@
     box-sizing: border-box;
     padding: 0.5em;
     margin: 0 0.5em;
-    background-color: #eee;
-    color: #777;
+    background-color: {{@style.border}};
+    color: {{@style.fg}};
     border-style: solid;
     border-width: 1px 1px 0 1px;
     font-weight: bold;
     cursor: pointer;
     outline: none;
-    border-color: #ddd;
+    border-color: {{@style.border}};
   }
   .layout .actions .tab:first-of-type {
     margin-left: 0;
@@ -245,11 +270,17 @@
   .layout .actions .tab.right {
     margin-left: auto;
   }
+  .layout .actions.design .tab {
+    background-color: {{@style.bg}};
+    border-color: {{@style.border}};
+    color: {{@style.fg}};
+  }
 
   .layout .actions .tab.active {
-    background-color: #999;
-    color: #fff;
+    background-color: {{@style.dark}};
+    color: {{@style.btntxt}};
     border: none;
+    border-top: 2px solid {{@style.highlight}};
     margin-bottom: -1px;
   }
 
@@ -258,23 +289,31 @@
   }
  
   .layout .bottom-pane .actions .tab.active {
-    background-color: #fff;
-    border-color: #ddd;
-    color: #222;
+    background-color: {{@style.bg}};
+    border-color: {{@style.border}};
+    color: {{@style.fg}};
     margin-bottom: -2px;
     border-style: solid;
     border-width: 1px;
-    border-bottom-color: #fff;
+    border-bottom-color: {{@style.bg}};
   }
 
-  .layout .bottom-pane .actions .tab.error, .layout .bottom-pane .error {
-    border-color: red;
-    color: red;
+  .layout .bottom-pane .actions button.error {
+    color: {{@style.error}};
+  }
+  .layout .bottom-pane .actions button.error svg {
+    fill: {{@style.error}};
+  }
+  .layout .bottom-pane .actions .tab.error {
+    border-color: {{@style.error}};
+    color: {{@style.fg}};
+    background-color: {{@style.error}};
   }
 
   .layout .bottom-pane .actions .tab.active.error {
-    background-color: #fafafa;
-    border-bottom-color: #fafafa;
+    background-color: {{@style.bg}};
+    color: {{@style.error}};
+    border-bottom-color: {{@style.bg}};
   }
 
   .layout .bottom-pane {
@@ -290,14 +329,16 @@
 
   .layout .bottom-pane.active {
     height: 33vh;
-    border-top: 1px solid #ddd;
-    background-color: #fff;
+    border-top: 1px solid {{@style.border}};
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
   }
 
   .result {
     display: flex;
     flex-grow: 2;
-    background-color: #fff;
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
   }
 
   iframe {
@@ -307,19 +348,24 @@
 
   .bar {
     height: 2rem;
-    background-color: #555;
-    color: #fff;
+    background-color: {{@style.dark}};
+    color: {{@style.fg}};
     display: flex;
     align-items: center;
     font-size: 0.75rem;
-    border-bottom: 1px solid;
+    border-bottom: 1px solid {{@style.border}};
     box-sizing: border-box;
     padding: 0 0.25rem;
     user-select: none;
+    transition: background-color 0.2s ease-in-out;
   }
 
   .bar * {
     margin: 0 0.5em 0 0;
+  }
+
+  .bar .name {
+    color: {{@style.btntxt}};
   }
 
   .bar button, .bar .btn {
@@ -348,7 +394,7 @@
     height: min-content;
     width: calc(100% + 3px);
     left: -1.5px;
-    background-image: radial-gradient(circle, #999 1px, transparent 1px);
+    background-image: radial-gradient(circle, {{@style.dark}} 1px, transparent 1px);
     background-position: 1.5rem 1.5rem;
     background-size: 1rem 1rem;
   }
@@ -374,38 +420,38 @@
   }
 
   div.widgets {
-    background-color: #fff;
+    background-color: {{@style.bg}};
   }
   div.widget:hover {
     z-index: 1000;
   }
 
   div.active-widget {
-    border-color: #4596ff;
+    border-color: {{@style.active}};
     border-style: solid;
-    background-color: #4596ff20;
+    background-color: {{@style.active}}20;
     user-select: none;
     z-index: 999;
   }
   div.active-widget > .widgets {
-    background-image: linear-gradient(to top, #4596ff20, #4596ff20), radial-gradient(circle, #999 1px, transparent 1px);
+    background-image: linear-gradient(to top, {{@style.active}}20, {{@style.active}}20), radial-gradient(circle, {{@style.dark}} 1px, transparent 1px);
   }
 
   div.hover-widget {
-    border-color: #26bf10;
+    border-color: {{@style.hover}};
     border-style: solid;
-    background-color: #26bf1017;
+    background-color: {{@style.hover}}20;
   }
   div.hover-widget > .widgets {
-    background-image: linear-gradient(to top, #26bf1017, #26bf1017), radial-gradient(circle, #999 1px, transparent 1px);
+    background-image: linear-gradient(to top, {{@style.hover}}20, {{@style.hover}}20), radial-gradient(circle, {{@style.dark}} 1px, transparent 1px);
   }
 
   .active-widget > .bar, .bar.active {
-    background-color: #4596ff;
+    background-color: {{@style.active}};
   }
 
   .hover-widget > .bar, .bar.hover {
-    background-color: #26bf10;
+    background-color: {{@style.hover}};
   }
 
   .widget > .btn {
@@ -437,7 +483,7 @@
     height: 100%;
   }
   .widget > .btn > svg path, .widget > .btn > svg circle {
-    fill: #fff;
+    fill: {{@style.fg}};
   }
 
   .widget:hover > .btn {
@@ -483,13 +529,13 @@
     display: inline-block;
     margin: 0.1em;
     line-height: 0.8rem;
-    color: rgba(0, 0, 0, 0.5);
+    color: {{@style.fg}};
     cursor: pointer;
   }
 
   .toggle.active {
     border: 1px solid;
-    color: #222;
+    color: {{@style.highlight}};
   }
 
   .sides {
@@ -503,12 +549,14 @@
     width: 3rem;
     margin: 0.5rem 0.5rem;
     box-sizing: border-box;
+    color: {{@style.fg}};
+    background: transparent;
   }
   
   .sides .square {
     width: 4rem;
     height: 4rem;
-    background-color: #4596ff;
+    background-color: {{@style.active}};
     border: 1px solid;
     box-sizing: border-box;
   }
