@@ -27,7 +27,7 @@
       {{>data-import}}
     </div>
     <div class-result class-tab class-active-tab="tab === 'result'">
-      <iframe id=result srcdoc="{{~/report.type === 'delimited' ? '<style>pre { margin: 1rem; background-color: #fff; padding: 0.5rem; }</style><code><pre>' + result + '</pre></code>' + @.frameExtra() : result}}"></iframe>
+<iframe id=result srcdoc="{{~/report.type === 'delimited' ? `<style>pre { padding: 0.5rem; } code { display: block; color: ${@style.out.fg || @style.fg}; background-color: ${@style.out.bg || @style.bg}; }</style><code><pre>` + result + '</pre></code>' + @.frameExtra() : result}}"></iframe>
     </div>
     {{#if ~/showProjects}}
       <div class-project class-tab class-active-tab="tab === 'project'">
@@ -376,6 +376,27 @@
     top: -2rem;
     height: 2rem;
     left: 0;
+  }
+
+  .delimited.paper .bar {
+    opacity: 1;
+  }
+
+  .delimited.paper .active-widget {
+    border: none;
+    background-color: {{@style.bg}};
+  }
+
+  .delimited.paper .active-widget > .bar {
+    top: -4.5rem;
+    left: -0.5rem;
+    right: -0.5rem;
+    width: auto;
+  }
+
+  .delimited.paper .hover-widget {
+    margin-top: 2.5rem;
+    background-color: {{@style.bg}};
   }
 
   .active-widget > .bar,  .hover-widget > .bar, .bar.active, .bar.hover {

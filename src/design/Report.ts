@@ -94,12 +94,12 @@ export class Designer extends Ractive {
           html.scrolled-bottom:after { opacity: 0; }
 
           body {
-            background-color: ${this.get('@style.dark')};
-            padding-top: 2em;
+            background-color: ${this.get('@style.out.dark') || this.get('@style.dark')};
+            padding: 2em;
           }
           .page-back {
-            color: ${this.get('@style.fg')};
-            background-color: ${this.get('@style.bg')};
+            color: ${this.get('@style.out.fg') || this.get('@style.fg')};
+            background-color: ${this.get('@style.out.bg') || this.get('@style.bg')};
           }
         }
       </style>

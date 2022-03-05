@@ -1,7 +1,7 @@
 {{#if report.type === 'delimited'}}
   <div class-scrolled-wrapper style-flex-grow=1><div as-scrolled>
     <div class="delimited paper">
-      <div class-widget>
+      <div class="widget active-widget">
         <div class-bar>
           <span class-name>Report</span>
           {{#if !report.headers}}
@@ -12,7 +12,7 @@
         </div>
         <div class-children>
           {{#if !!~/report.headers}}
-            <div class-widget>
+            <div class="widget hover-widget">
               <div class-bar>
                 <span class-name>Header</span>
                 <button class-ico class-large on-click="@.push('report.headers', ''), @.push('report.fields', '')">+</button>
@@ -24,7 +24,7 @@
               </div>
             </div>
           {{/if}}
-          <div class-widget>
+          <div class="widget hover-widget">
             <div class-bar>
               <span class-name>Row</span>
               <button class-ico class-large on-click="@.push('report.fields', ''), ~/report.headers && @.push('report.headers', '')">+</button>
@@ -109,7 +109,7 @@
   }
 
   .delimited.paper {
-    margin: 0.5rem;
+    margin: 3rem 2rem;
     padding: 0.5rem;
     color: {{@style.fg}};
     background-color: {{@style.bg}};
