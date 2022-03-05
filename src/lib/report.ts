@@ -290,7 +290,11 @@ export function applySource(context: RootContext, source: ReportSource, sources:
 
 function runDelimited(report: Delimited, context: Context): string {
   const source = context.root.sources[report.source ? report.source : (report.sources[0].name || report.sources[0].source)];
-  const values = Array.isArray(source.value) ? source.value : [source.value];
+  const values = Array.isArray(source.value) ?
+    source.value :
+    typeof source.value === 'object' && 'grouped' in source.value && Array.isArray(source.value.all) ? // watch out for grouped sources
+      source.value.all :
+      [source.value];
   let fields = report.fields;
   let headers = report.headers;
 
