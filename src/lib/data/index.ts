@@ -344,8 +344,10 @@ function mungeSort(context: Context, sorts: Sort[]|ValueOrExpr): Sort[] {
   }
 
   if (sortArr) {
+    let el: any;
     for (let i = 0; i < sortArr.length; i++) {
-      const by = sortArr[i];
+      el = sortArr[i];
+      const by = isLiteral(el) ? el.v : el;
       if (typeof by === 'string') {
         if (by[0] === '-') sortArr[i] = { by: by.substr(1), desc: true };
         else sortArr[i] = { by: by[0] === '+' ? by.substr(1) : by, desc: false };
@@ -508,6 +510,10 @@ export interface Keypath {
 
 export function isKeypath(v: any): v is string|Keypath {
   return typeof v === 'string' || (typeof v === 'object' && Array.isArray(v.k));
+}
+
+export function isLiteral(v: any): v is Literal {
+  return typeof v === 'object' && 'v' in v;
 }
 
 export interface Reference { r: string|Keypath };
