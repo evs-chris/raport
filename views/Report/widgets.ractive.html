@@ -7,7 +7,7 @@
             <button class="ico up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context), @.moveUp(@context, '^^/groupEnds'), false" title="Move up">{{>arrow}}</button>
             <button class="ico down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context), @.moveDown(@context, '^^/groupEnds'), false" title="Move down">{{>arrow}}></button>
           </span>
-          <button class-ico on-click="@.removeWidget(@context), false" title="Remove">{{>times}}</button>
+          <button class="ico remove" on-click="@.removeWidget(@context), false" title="Remove">{{>times}}</button>
         </span>
         {{>widget-tree}}
       </div>
@@ -18,7 +18,7 @@
       <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : @.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
         <span class-line>
           <span>{{@key}}</span>
-          {{#if @key !== 'row' || ../type !== 'repeater'}}<button class-ico on-click="@.removeWidget(@context), false">{{>times}}</button>{{/if}}
+          {{#if @key !== 'row' || ../type !== 'repeater'}}<button class="ico remove" on-click="@.removeWidget(@context), false">{{>times}}</button>{{/if}}
         </span>
         {{>widget-tree}}
       </div>
@@ -33,7 +33,7 @@
             <button class="ico up-arrow" title="Move up" disabled="{{@index === 0}}" on-click="@.moveUp(@context), Array.isArray(^^/layout) ? @.moveUp(@context, '^^/layout') : false, false">{{>arrow}}</button>
             <button class="ico down-arrow" title="Move down" disabled="{{@index === @last}}" on-click="@.moveDown(@context), Array.isArray(^^/layout) ? @.moveDown(@context, '^^/groupEnds') : false, false">{{>arrow}}</button>
           </span>
-          <button class-ico on-click="@.removeWidget(@context), false">{{>times}}</button>
+          <button class="ico remove" on-click="@.removeWidget(@context), false">{{>times}}</button>
         {{/if}}
         </span>
         {{>widget-tree}}
@@ -224,7 +224,7 @@
   </svg>
 </template>
 
-<style>
+<style rel=ractive>
   .line .actions {
     display: none;
     position: absolute;
@@ -239,11 +239,25 @@
     border-radius: 0.2rem;
     transition: transform 0.2s ease-in-out 0.3s;
   }
-  .line button.ico svg {
-    fill: #fff;
+
+  .line button.ico svg,
+  .line button.ico.remove:hover svg,
+  .hover .line .actions button.ico svg {
+    fill: {{@style.bg}};
   }
+  .line button.ico.field svg,
+  .line button.ico.remove svg {
+    fill: {{@style.fg}};
+  }
+  .line button.ico.field[disabled] svg {
+    fill: {{@style.dark}};
+  }
+  .line button.ico.field:hover svg {
+    fill: {{@style.bg}};
+  }
+  .hover .line .actions button.ico:hover svg,
   .line button.ico:hover svg {
-    fill: #5010bf;
+    fill: {{@style.fg}};
   }
 
   button.ico[disabled] svg,

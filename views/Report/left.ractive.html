@@ -163,11 +163,11 @@
 <template id="delimited-fields">
   <div class="delimited children">
     {{#each .fields}}
-      <div class-node class-active="@keypath === ~/temp.expr.path" on-click="@.editExpr(@context)">
-        <span class-line on-mouseover="@.set('temp.expr.hover', @keypath), false" on-mouseout="@.set('temp.expr.hover', ''), false"><span>{{@index}}. {{.}}</span>
-          <button class-ico class-up-arrow disabled="{{@index === 0}}" on-click="@.moveUp(@context, '../', @index), ~/report.header && @.moveUp(@context, '~/report.header', @index), false">{{>arrow}}</button>
-          <button class-ico class-down-arrow disabled="{{@index === @last}}" on-click="@.moveDown(@context, '../', @index), ~/report.header && @.moveDown(@context, '~/report.header', @index), false">{{>arrow}}</button>
-          <button class-ico on-click="@.checkLink('expr', @keypath), @context.splice('../', @index, 1), ~/report.header && @context.splice('~/report.header', @index, 1), @.checkExpr(), false">{{>times}}</button>
+      <div class-node class-active="@keypath === ~/temp.expr.path" class-hover="@keypath === ~/temp.expr.hover" on-click="@.editExpr(@context)">
+        <span class-line on-mouseover="@.set('temp.expr.hover', @keypath), false" on-mouseout="@.set('temp.expr.hover', ''), false"><span>{{@index + 1}}. {{.}}</span>
+          <button class="ico field up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context, '../', @index), ~/report.header && @.moveUp(@context, '~/report.header', @index), false">{{>arrow}}</button>
+          <button class="ico field down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context, '../', @index), ~/report.header && @.moveDown(@context, '~/report.header', @index), false">{{>arrow}}</button>
+          <button class="ico field remove" on-click="@.removeWidget(@context)">{{>times}}</button>
         </span>
     {{/each}}
   </div>

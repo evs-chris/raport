@@ -1190,10 +1190,11 @@ Ractive.extendWith(Designer, {
     }
   },
   decorators: {
-    expr(node, path?: string) {
+    expr(node, header?: boolean) {
       const ctx = this.getContext(node);
       function change(v: string) {
-        if (v === ctx.resolve(path || '.')) {
+        if (header) v = v.replace(/\.fields\./, '.headers.');
+        if (v === ctx.resolve('.')) {
           node.classList.add('hover-expr');
         } else {
           node.classList.remove('hover-expr');
@@ -1202,7 +1203,11 @@ Ractive.extendWith(Designer, {
       const observer = ctx.observe('~/temp.expr.hover', change);
       const listeners = [
         ctx.listen('click', () => this.fire('expr', ctx)),
-        ctx.listen('mouseover', () => ctx.set('~/temp.expr.hover', path || ctx.resolve())),
+        ctx.listen('mouseover', () => {
+          let p = ctx.resolve();
+          if (header) p = p.replace(/\.headers\./, '.fields.');
+          ctx.set('~/temp.expr.hover', p);
+        }),
         ctx.listen('mouseout', () => ctx.set('~/temp.expr.hover', '')),
       ];
       return {
