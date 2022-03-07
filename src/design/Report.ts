@@ -1209,6 +1209,7 @@ Ractive.extendWith(Designer, {
         this.set('', save, { deep: true });
       }
       this._inited = true;
+      this.applySettings();
     },
     expr(ctx, path?: string) {
       const p = path || ctx.resolve();
