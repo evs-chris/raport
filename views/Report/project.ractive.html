@@ -1,53 +1,110 @@
-<div class="delimited paper project">
-  <div class-project-pane>
-    {{#if ~/project != null}}
-      <div>
-        <input type="file" style="display: none;" id="project-file" accept="application/json" />
-        <label class-input style-width=20rem>Project Name<input value="{{~/project.name}}" /></label>
-        <button class-plain title="Save all projects to browser storage" on-click="@.saveProjects()">Save Projects</button>
-        <button class-plain title="Export this project to a file" on-click="@.download(~/project.name + '.json', @.stringifyProject())">Export Project</button>
-        <button class-plain title="Create a copy of this project" on-click="@.cloneProject()">Clone Project</button>
-        <button class-plain title="Import this project definition from a file" on-click="@.importProject()">Import Project</button>
-        <button class-plain title="Create a new empty project" on-click="@.makeProject(true)">New Project</button>
-        <br /><br />
-        <button class-plain title="Delete this project from browser storage" style-background={{@style.error}} on-click="@.removeProject()">Delete Project</button>
-        <br /><br />
-        <button class-plain title="Export this project as text to the below text field" on-click="@.set('projectText', @.stringifyProject())">Refresh Text</button>
+<div class-scrolled-wrapper style-flex-grow=1><div as-scrolled>
+  <div class="delimited paper project">
+    <div class=settings-pane>
+      <div class=settings-pane-inner>
+        <h3>Settings</h3>
+        <label class="input">Theme<br/><select value="{{~/settings.theme}}">
+          <option value="{{undefined}}">Auto</option>
+          <option value=dark>Dark</option>
+          <option value=light>Light</option>
+        </select></label>
+        <label class="input">Output Theme<br/><select value="{{~/settings.outTheme}}">
+          <option value="{{undefined}}">Follow Designer</option>
+          <option value=dark>Dark</option>
+          <option value=light>Light</option>
+        </select></label>
+        <label class="check"><input type=checkbox checked="{{~/settings.autosave}}" /> Auto save on leave?</label>
       </div>
-      <label class-grow class-area>Project Definition<textarea twoway=false on-change="@.importProject(@node.value)">{{projectText}}</textarea></label>
-    {{else}}
-      <div>
-        <button class-plain title="Convert the current definition to a project" on-click="@.makeProject()">Make Project</button>
+    </div>
+    {{#if ~/showProjects}}
+    <div class-project-pane>
+      <div class-project-pane-left>
+        {{#if ~/project != null}}
+          <div>
+            <input type="file" style="display: none;" id="project-file" accept="application/json" />
+            <label class-input style-width=20rem>Project Name<input value="{{~/project.name}}" /></label>
+            <button class-plain title="Save all projects to browser storage" on-click="@.saveProjects()">Save Projects</button>
+            <button class-plain title="Export this project to a file" on-click="@.download(~/project.name + '.json', @.stringifyProject())">Export Project</button>
+            <button class-plain title="Create a copy of this project" on-click="@.cloneProject()">Clone Project</button>
+            <button class-plain title="Import this project definition from a file" on-click="@.importProject()">Import Project</button>
+            <button class-plain title="Create a new empty project" on-click="@.makeProject(true)">New Project</button>
+            <br /><br />
+            <button class-plain title="Delete this project from browser storage" style-background={{@style.error}} on-click="@.removeProject()">Delete Project</button>
+            <br /><br />
+            <button class-plain title="Export this project as text to the below text field" on-click="@.set('projectText', @.stringifyProject())">Refresh Text</button>
+          </div>
+          <label class-grow class-area>Project Definition<textarea twoway=false on-change="@.importProject(@node.value)">{{projectText}}</textarea></label>
+        {{else}}
+          <div>
+            <button class-plain title="Convert the current definition to a project" on-click="@.makeProject()">Make Project</button>
+          </div>
+        {{/if}}
       </div>
+      <div class-project-pane-right>
+        Projects
+        <div class-project-list>
+          {{#each ~/projects}}
+            <div class-project-item title="Load {{.name}}, discarding any unsaved changes in the current project or definitions" class-active-project=". === ~/project" on-click="@.linkProject(@keypath)">{{.name}}</div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
     {{/if}}
   </div>
-  <div class-project-pane-right>
-    Projects
-    <div class-project-list>
-      {{#each ~/projects}}
-        <div class-project-item title="Load {{.name}}, discarding any unsaved changes in the current project or definitions" class-active-project=". === ~/project" on-click="@.linkProject(@keypath)">{{.name}}</div>
-      {{/each}}
-    </div>
-  </div>
-</div>
+</div></div>
 
 <style rel=ractive>
   .project {
     display: flex;
     flex-grow: 1;
+    flex-direction: column;
+  }
+  .active-tab .project {
+    min-height: 75vh;
+  }
+
+  .settings-pane {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
+
+  .settings-pane-inner {
+    padding: 0.5rem;
+    margin-bottom: 1em;
+    border-bottom: 1px solid;
   }
 
   .project-pane {
+    display: flex;
     flex-grow: 1;
+    padding: 0.5rem;
+    position: relative;
+    flex-wrap: wrap;
+  }
+
+  .project-pane-left {
+    flex-grow: 1;
+    flex-shrink: 1;
     padding-right: 1rem;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  @media screen and (min-width: 48rem) {
+    .project-pane-left {
+      max-width: calc(100% - 15rem);
+    }
   }
 
   .project-pane-right {
     width: 15rem;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
+    margin-top: 0.5rem;
   }
 
   .project-list {
@@ -65,5 +122,9 @@
   .active-project {
     background-color: {{@style.border}};
     color: {{@style.fg}};
+  }
+
+  label.input {
+    display: inline-block;
   }
 </style>

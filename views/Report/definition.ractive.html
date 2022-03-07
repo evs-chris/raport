@@ -1,7 +1,7 @@
 <div class="delimited paper">
   <input type="file" style="display: none;" id="definition-file" accept="application/json" />
   <div class-definition>
-    <div class-actions>
+    <div class-actions style-flex-wrap=wrap>
       <button class="ico text" on-click="@.loadReportFile()" title="Load report definition from a file">Load</button>
       <button class="ico text" class-spacer on-click="@.download((~/report.name || 'report') + '.js' + (~/tmp.js ? '' : 'on'), @.reportToString(true, ~/tmp.js, ~/tmp.strings))" title="Save report definition to a file">Save</button>
       <label class-spacer><input type="checkbox" checked="{{~/tmp.compact}}" style="vertical-align: middle;" /> Compact?</label>
