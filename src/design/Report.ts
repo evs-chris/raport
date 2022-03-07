@@ -205,7 +205,6 @@ export class Designer extends Ractive {
   calcFont(w: Widget): string {
     const f = w.font;
     let res = '';
-    if (f.pre) res += 'white-space: pre-wrap;';
     if (f.size) res += `font-size: ${f.size}rem;`;
     if (f.line) res += `line-height: ${f.line}rem;`;
     if (f.align) res += `text-align: ${f.align};`;
