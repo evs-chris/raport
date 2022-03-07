@@ -15,7 +15,10 @@
         <span class-which><button class="ico" on-click="@.checkLink('import')">{{>times}}</button> Close Import</span>
       {{/if}}
       {{#if tab === 'result'}}<button class="ico text" on-click="@.download((~/report.name || 'report') + (~/report.type === 'delimited' ? '.csv' : '.html'), ~/result, ~/report.type === 'delimited' ? 'text/csv' : 'text/html')" title="Save output to a file">Save Output</button>{{/if}}
-      <button on-click="@.set('tab', 'project')" class-tab class-right class-active="tab === 'project'">{{~/showProjects ? 'Project' : 'Settings'}}</button>
+      <div class=right>
+        {{#if ~/projectChanged}}<span class="ico error" title="There are unsaved changes to this project ({{~/project.name}})">{{>warning}}</span>{{/if}}
+        <button on-click="@.set('tab', 'project')" class-tab class-active="tab === 'project'">{{~/showProjects ? 'Project' : 'Settings'}}</button>
+      </div>
     </div>
     <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">
       {{>design}}
@@ -103,7 +106,9 @@
     background-color: {{@style.hover}};
   }
 
+  span.ico,
   button.ico {
+    display: inline-block;
     border: none;
     background-color: transparent;
     cursor: pointer;
@@ -115,8 +120,14 @@
     color: {{@style.fg}};
   }
 
+  span.ico svg,
   button.ico svg {
     fill: {{@style.fg}};
+  }
+
+  span.ico.error svg,
+  button.ico.error svg {
+    fill: {{@style.error}};
   }
 
   button.ico.text {
@@ -269,7 +280,11 @@
     margin-left: 0;
   }
 
-  .actions .tab.right {
+  .actions span.ico {
+    vertical-align: middle;
+  }
+
+  .actions .right {
     margin-left: auto;
   }
   .actions.design .tab {

@@ -30,6 +30,7 @@
             <button class-plain title="Create a new empty project" on-click="@.makeProject(true)">New Project</button>
             <br /><br />
             <button class-plain title="Delete this project from browser storage" style-background={{@style.error}} on-click="@.removeProject()">Delete Project</button>
+            {{#if ~/projectChanged}}<button class-plain style-background={{@style.error}}  title="Discard changes to this project" on-click="@.resetProject()">Discard Project Changes</button>{{/if}}
             <br /><br />
             <button class-plain title="Export this project as text to the below text field" on-click="@.set('projectText', @.stringifyProject())">Refresh Text</button>
           </div>

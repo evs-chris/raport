@@ -35,7 +35,7 @@ export interface PlainSource {
   data?: any;
 }
 
-export const darkTheme = { fg: '#ccc', bg: '#222', border: '#555', highlight: '#ddd', dark: '#444', active: '#265189', hover: '#167808', error: '#710202', btntxt: '#ddd', code: { c1: '#ccc', c2: '#ccc', c3: '#1ca', c4: '#e81', c5: '#2a0', c6: '#e78', c7: '#6c3', c8: '#e82', c9: '#67f', c10: '#89d', c11: '#4bc', c12: '#1de', c13: '#29c', c20: '#f00', }, };
+export const darkTheme = { fg: '#ccc', bg: '#222', border: '#555', highlight: '#ddd', dark: '#444', active: '#265189', hover: '#167808', error: '#a00', btntxt: '#ddd', code: { c1: '#ccc', c2: '#ccc', c3: '#1ca', c4: '#e81', c5: '#2a0', c6: '#e78', c7: '#6c3', c8: '#e82', c9: '#67f', c10: '#89d', c11: '#4bc', c12: '#1de', c13: '#29c', c20: '#f00', }, };
 export const lightTheme = { fg: '#222', bg: '#fff', border: '#ddd', highlight: '#000', dark: '#999', active: '#4596ff', hover: '#26bf10', error: '#8b0000', btntxt: '#fff', code: { c1: '#555', c2: '#222', c3: '#164', c4: '#951', c5: '#a11', c6: '#708', c7: '#371', c8: '#630', c9: '#45c', c10: '#239', c11: '#167', c12: '#189', c13: '#145', c20: '#f00', }, };
 
 let autosizeTm: any;
@@ -835,10 +835,16 @@ export class Designer extends Ractive {
       if ('type' in p && p.type === 'fetch') delete (p as any).data;
     }
     window.localStorage.setItem('projects', JSON.stringify(this.get('projects') || []));
+    const project = this.get('project');
+    if (project) this.set('projectSaved', JSON.stringify(project));
   }
 
   loadProjects() {
     this.set('projects', JSON.parse(window.localStorage.getItem('projects') || '[]'));
+  }
+
+  resetProject() {
+    this.set('project', JSON.parse(this.get('projectSaved')));
   }
 
   makeProject(clean?: true) {
@@ -939,6 +945,7 @@ export class Designer extends Ractive {
     this.link(path, 'project');
     this.link('project.report', 'report');
     this.link('project.sources', 'sources');
+    this.set('projectSaved', JSON.stringify(this.get(path)));
     this.resetUndo();
   }
 
@@ -1186,13 +1193,21 @@ Ractive.extendWith(Designer, {
       this.applySettings();
       window.localStorage.setItem('settings', JSON.stringify(v));
     },
+    'project projectSaved': {
+      handler: debounce(function() {
+        const project = this.get('project');
+        const saved = this.get('projectSaved');
+        if (!project) this.set('projectChanged', false);
+        else if (JSON.stringify(project) !== saved) this.set('projectChanged', true);
+        else this.set('projectChanged', false);
+      }, 1000),
+    },
   },
   on: {
     init() {
       this.resetUndo();
       this.command('styleWithCSS', false, 'true');
       this._undoWatch = this.observe('report', debounce(this._onChange, 2000), { defer: true, init: true });
-      setTimeout(() => this.loadProjects(), 500);
       const settings = JSON.parse(window.localStorage.getItem('settings') || '{}');
       this.set('settings', settings);
       window.addEventListener('beforeunload', () => {
@@ -1200,12 +1215,29 @@ Ractive.extendWith(Designer, {
           window.localStorage.setItem('autosave', JSON.stringify({
             report: this.get('report'),
             show: this.get('show'),
+            tmp: this.get('tmp'),
+            tab: this.get('tab'),
+            'temp.expr.tab': this.get('temp.expr.tab'),
+            'temp.bottom.tab': this.get('temp.bottom.tab'),
+            projectName: this.get('project.name'),
           }));
+        } else {
+          if (!window.confirm(`Leaving this page will lose any unsaved changes. Are you sure you want to leave?`)) {
+            return false;
+          }
         }
       });
+      this.loadProjects();
       if (settings.autosave) {
-        let save = window.localStorage.getItem('autosave');
+        let save: any = window.localStorage.getItem('autosave');
         if (save) save = JSON.parse(save);
+
+        const name = save && save.projectName;
+        if (name) {
+          const projects = this.get('projects');
+          const idx = projects.findIndex((p: AvailableSource) => p.name === name);
+          if (~idx) this.linkProject(`projects.${idx}`);
+        }
         this.set('', save, { deep: true });
       }
       this._inited = true;
