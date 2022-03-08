@@ -1,5 +1,5 @@
 {{#if report.type === 'delimited'}}
-  <div class-scrolled-wrapper style-flex-grow=1><div as-scrolled>
+  <div class-scrolled-wrapper style-flex-grow=1><div as-scrolled><div style="padding: 3rem; min-width: min-content;">
     <div class="delimited paper">
       <div class="widget active-widget">
         <div class-bar>
@@ -38,9 +38,9 @@
         </div>
       </div>
     </div>
-  </div></div>
+  </div></div></div>
 {{else}}
-  <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
+  <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled><div style="padding: 3rem; min-width: min-content;">
     <div class="paper" style="{{@.paperSize()}}" on-click="@event.target === @node ? @.selectWidget('report') : true">
       <div class=bar style-cursor=pointer on-click="@.unlink('widget'), @.unlink('expr'), @.set('temp', { name: 'report ', widget: 'report' })" class-active="temp.widget === 'report' || temp.widget === 'report.watermark' || temp.widget === 'report.overlay'" class-hover="temp.hover === 'report' || temp.hover === 'report.watermark' || temp.hover === 'report.overlay'" on-mouseover="@.set('temp.hover', ~/inWatermark ? 'report.watermark' : ~/inOverlay ? 'report.overlay' : 'report'), false" on-mouseout="@.set('temp.hover', ''), false">
         <span class-name>
@@ -98,7 +98,7 @@
       {{/if}}
       {{#if ~/report.type === 'page' && ~/report.footer}}{{>widget ~/report.footer, 'page footer' as label}}{{/if}}
     </div>
-  </div></div>
+  </div></div></div>
 {{/if}}
 
 <style rel=ractive>
@@ -109,10 +109,14 @@
   }
 
   .delimited.paper {
-    margin: 3rem 2rem;
     padding: 0.5rem;
     color: {{@style.fg}};
     background-color: {{@style.bg}};
+  }
+  @media screen and (min-width: 48rem) {
+    .delimited.paper {
+      margin: 1rem;
+    }
   }
 
   .delimited .children.fields {
