@@ -1,6 +1,8 @@
-## 0.10.4
+## 0.10.5
 
 2022-03-09
+
+`0.10.4` was not fully built when published, so let's pretend that didn't happen.
 
 ### Data
 
