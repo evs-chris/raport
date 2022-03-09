@@ -754,7 +754,7 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
     }
   } else if (Array.isArray(rel.f)) {
     const v = rel.f.slice();
-    from = new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
+    from = v[7] != null ? new Date(Date.UTC(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0)) : new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
     for (let i = 1; i < 7; i++) {
       if (v[i] == null) {
         v[i - 1]++;
@@ -762,7 +762,7 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
       }
     }
     if (v[6] != null) v[6]++;
-    to = new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
+    to = v[7] != null ? new Date(Date.UTC(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0)) : new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
     to.setMilliseconds(to.getMilliseconds() - 1);
     if (v[7] != null) tz = v[7];
   }
