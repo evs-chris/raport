@@ -1,3 +1,28 @@
+## 0.10.4
+
+2022-03-09
+
+### Data
+
+* __BUG:__ The `date` operator will now properly convert a relative date with a timezone.
+* A delimited report with no defined fields will output all data.
+* Sorts can now specify a descending operation as a string e.g. `['-=>some-expr' '-=>other-expr']`.
+* Delimited reports with a grouped source will now ignore the group and use the ungrouped data.
+
+### Designer
+
+* There is now a dark mode that will automatically follow browser settings.
+* Widgets will once again use the set font size.
+* The designer now renders as more representative of the output by moving container control bars outside of the widget and hiding them when they aren't focused.
+* Page footers in the designer are now placed where they will be in the output.
+* The designer is now less mobile-hostile.
+* Right-padded labels now render more accurately in the designer.
+* There are now settings for the designer that control the theme, report output theme, and whether autosave is enabled.
+  * Enabling autosave will save most of the relevant state of the designer before the designer unloads and load it back when the designer is loaded again. Autosave is also project-aware.
+* There is now a project change indicator if a project is loaded.
+* `pre` label widgets no longer render in the designer with a leading blank line.
+
+
 ## 0.10.3
 
 2022-03-02
