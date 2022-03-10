@@ -719,48 +719,49 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
 
   let from = new Date();
   let to: Date = 'd' in rel && rel.d ? new Date() : undefined;
-  from.setHours(0, 0, 0, 0);
+  from.setUTCHours(0, 0, 0, 0);
   let tz: number = 'z' in rel && rel.z != null ? rel.z : null;
 
-  if (rel.f === 'n') {
+  if (rel.f === 'n') { // DateRelSpan (MS or Full)
     from = typeof rel.o === 'number' ? new Date(+new Date() + rel.o) : dateAndTimespan(new Date(), { d: rel.o }, 'd' in rel ? rel.d : 1);
     to = from;
-  } else if (rel.f === 'd') {
-    from.setDate(from.getDate() + rel.o);
+    tz = undefined;
+  } else if (rel.f === 'd') { // DateRelRange - day
+    from.setUTCDate(from.getUTCDate() + rel.o);
     if (!to) to = new Date(from);
-    if ('t' in rel) {
+    if ('t' in rel) { // DateRelTimeRange
       const t = rel.t;
-      from.setHours(t[0], t[1] || 0, t[2] || 0, t[3] || 0);
-      to.setHours(t[0], t[1] == null ? 59 : t[1], t[2] == null ? 59 : t[2], t[3] == null ? 999 : t[3]);
+      from.setUTCHours(t[0], t[1] || 0, t[2] || 0, t[3] || 0);
+      to.setUTCHours(t[0], t[1] == null ? 59 : t[1], t[2] == null ? 59 : t[2], t[3] == null ? 999 : t[3]);
       if (t[4] != null) tz = t[4];
     }
-  } else if (rel.f === 'w') {
-    from.setDate(from.getDate() - (from.getDay() + (rel.o === -1 ? 7 : rel.o === 1 ? -7 : 0)));
+  } else if (rel.f === 'w') { // DateRelRange - week
+    from.setUTCDate(from.getUTCDate() - (from.getUTCDay() + (rel.o === -1 ? 7 : rel.o === 1 ? -7 : 0)));
     if (!to) {
       to = new Date(from);
-      to.setDate(from.getDate() + 6);
+      to.setDate(from.getUTCDate() + 6);
     }
     if ('z' in rel && rel.z != null) tz = rel.z;
-  } else if (rel.f === 'm') {
-    from.setDate(1);
-    from.setMonth(from.getMonth() + rel.o);
+  } else if (rel.f === 'm') { // DateRelRange - month
+    from.setUTCDate(1);
+    from.setUTCMonth(from.getUTCMonth() + rel.o);
     if (!to) {
       to = new Date(from);
-      to.setMonth(from.getMonth() + 1);
-      to.setDate(0);
+      to.setUTCMonth(from.getUTCMonth() + 1);
+      to.setUTCDate(0);
     }
-  } else if (rel.f === 'y') {
-    from.setDate(1);
-    from.setMonth(0);
-    from.setDate(1);
+  } else if (rel.f === 'y') { // DateRelRange - year
+    from.setUTCDate(1);
+    from.setUTCMonth(0);
+    from.setUTCDate(1);
     if (!to) {
       to = new Date(from);
-      to.setFullYear(from.getFullYear() + 1);
-      to.setDate(0);
+      to.setUTCFullYear(from.getUTCFullYear() + 1);
+      to.setUTCDate(0);
     }
-  } else if (Array.isArray(rel.f)) {
+  } else if (Array.isArray(rel.f)) { // DateExactRange
     const v = rel.f.slice();
-    from = v[7] != null ? new Date(Date.UTC(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0)) : new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
+    from = new Date(Date.UTC(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0));
     for (let i = 1; i < 7; i++) {
       if (v[i] == null) {
         v[i - 1]++;
@@ -768,17 +769,22 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
       }
     }
     if (v[6] != null) v[6]++;
-    to = v[7] != null ? new Date(Date.UTC(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0)) : new Date(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0);
-    to.setMilliseconds(to.getMilliseconds() - 1);
+    to = new Date(Date.UTC(v[0], v[1] || 0, v[2] || 1, v[3] || 0, v[4] || 0, v[5] || 0, v[6] || 0));
+    to.setUTCMilliseconds(to.getUTCMilliseconds() - 1);
     if (v[7] != null) tz = v[7];
   }
 
-  if (rel.f === 'd' || rel.f === 'w' || rel.f === 'm' || rel.f === 'y') to.setHours(23, 59, 59, 999);
+  if (rel.f === 'd' || rel.f === 'w' || rel.f === 'm' || rel.f === 'y') to.setUTCHours(23, 59, 59, 999);
 
-  if (tz != null) {
-    const offset = tz + from.getTimezoneOffset();
-    from.setMinutes(from.getMinutes() + offset);
-    if (from !== to) to.setMinutes(to.getMinutes() + offset);
+  if (tz !== undefined) {
+    if (tz != null) {
+      from.setUTCMinutes(from.getUTCMinutes() - tz);
+      if (from !== to) to.setUTCMinutes(to.getUTCMinutes() - tz);
+    } else {
+      const offset = from.getTimezoneOffset();
+      from.setUTCMinutes(from.getUTCMinutes() + offset);
+      if (from !== to) to.setUTCMinutes(to.getUTCMinutes() + offset);
+    }
   }
 
   return [from, to];
