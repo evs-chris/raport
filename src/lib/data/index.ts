@@ -358,21 +358,26 @@ function mungeSort(context: Context, sorts: Sort[]|ValueOrExpr): Sort[] {
   return sortArr;
 }
 
-export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context): DataSet {
-  if (!ds || !Array.isArray(ds.value)) return ds;
-  if (!context) context = new Root(ds.value, { special: { source: ds } });
-  else context = extend(context, { special: { source: ds.value } });
-  const values = filter ? [] : ds.value.slice();
+export function filter(arr: any[], filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context|any): any[];
+export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context|any): DataSet;
+export function filter(ds: DataSet|any[], filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context|any): DataSet|any[] {
+  const _ds = Array.isArray(ds) ? { value: ds } : ds;
+  if (!_ds || !Array.isArray(_ds.value)) return _ds;
+  let _context: Context;
+  if (!context) _context = new Root(_ds.value, { special: { source: _ds } });
+  else if (isContext(context)) _context = extend(context, { special: { source: _ds.value } });
+  else _context = new Root(context);
+  const values = filter ? [] : _ds.value.slice();
 
   if (filter) {
     let flt: Value = typeof filter === 'string' ? parse(filter) : filter;
     if ('m' in flt) flt = { v: true };
-    ds.value.forEach((row, index) => {
-      if (!!evalApply(extend(context, { value: row, special: { value: row, index } }), flt, [row, index])) values.push(row);
+    _ds.value.forEach((row, index) => {
+      if (!!evalApply(extend(_context, { value: row, special: { value: row, index } }), flt, [row, index])) values.push(row);
     });
   }
 
-  const sortArr = mungeSort(context, sorts);  
+  const sortArr = mungeSort(_context, sorts);  
 
   if (sortArr && sortArr.length) {
     const dirs: boolean[] = sortArr.map(s => {
@@ -380,10 +385,10 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
         if ('by' in s) {
           if ('desc' in s) {
             if (typeof s.desc === 'boolean') return s.desc;
-            return evalParse(context, s.desc);
+            return evalParse(_context, s.desc);
           } else if ('dir' in s) {
             const lower = typeof s.dir === 'string' ? s.dir.toLowerCase() : s.dir;
-            const dir = lower === 'asc' || lower === 'desc' ? lower : evalParse(context, s.dir);
+            const dir = lower === 'asc' || lower === 'desc' ? lower : evalParse(_context, s.dir);
             const val = typeof dir === 'string' ? dir.toLowerCase() : dir;
             if (val === 'desc') return true;
           }
@@ -398,8 +403,8 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
         const s = sortArr[i];
         const desc = dirs[i];
         const by: ValueOrExpr = typeof s === 'string' ? s : s && (s as any).by ? (s as any).by : s;
-        const l = evalApply(context, by, [a]);
-        const r = evalApply(context, by, [b]);
+        const l = evalApply(_context, by, [a]);
+        const r = evalApply(_context, by, [b]);
         const cmp = l == null && r != null ? -1 
           : l != null && r == null ? 1
           : (l < r) === (r < l) ? 0
@@ -412,13 +417,14 @@ export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOr
     });
   }
 
-  if (!Array.isArray(groups)) groups = evalParse(context, groups);
+  if (!Array.isArray(groups)) groups = evalParse(_context, groups);
 
   if (Array.isArray(groups) && groups.length) {
-    return { value: { schema: ds.schema, grouped: groups.length, level: 0, value: group(values, groups, context, 1), all: values } };
+    return { value: { schema: _ds.schema, grouped: groups.length, level: 0, value: group(values, groups, _context, 1), all: values } };
   }
 
-  return { schema: ds.schema, value: values };
+  if (Array.isArray(ds)) return values;
+  else return { schema: _ds.schema, value: values };
 }
 
 interface GroupCache {
