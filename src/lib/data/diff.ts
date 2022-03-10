@@ -102,3 +102,51 @@ function _deepEqual(v1: any, v2: any, equal: (v1: any, v2: any) => boolean): boo
 
   return true;
 }
+
+export interface LabelOptions {
+  /** Omit keys in the original diff that aren't in the label. */
+  omit?: boolean;
+}
+
+export function labelDiff(diff: Diff, label: any, opts?: LabelOptions): Diff {
+  const out: Diff = opts.omit ? {} : Object.assign({}, diff);
+  _labelDiff(diff, label, '', '', out, opts);
+  return out;
+}
+
+const num = /^\d+/;
+function _labelDiff(diff: Diff, label: any, path: string, str: string, out: Diff, opts?: LabelOptions) {
+  for (const k in label) {
+    if (k.slice(-2) === '[]') {
+      const p = `${path}${path && '.'}${k.slice(0, -2)}`;
+      const l = Array.isArray(label[k]) ? label[k] : [label[k]];
+      const all = Object.keys(diff);
+      const nums: string[] = [];
+      for (const k of all) {
+        if (k.indexOf(p) === 0 && num.test(k.substr(p.length + 1))) {
+          const idx = k.indexOf('.', p.length + 1);
+          const num = k.substring(p.length + 1, ~idx ? idx : undefined);
+          if (!~nums.indexOf(num)) nums.push(num)
+        }
+      }
+      const lbl = `${str}${str && ' '}${l[0]}`;
+      for (const num of nums) {
+        const pp = `${p}${p && '.'}${num}`;
+        if (pp in diff) {
+          out[`${lbl}${lbl && ' '}${+num + 1}`] = diff[pp];
+          if (opts.omit) delete out[pp];
+        }
+        if (l[1]) _labelDiff(diff, l[1], pp, `${lbl}${lbl && ' '}${+num + 1}`, out, opts);
+      }
+    } else {
+      const p = `${path}${path && '.'}${k}`;
+      let l = Array.isArray(label[k]) ? label[k] : [label[k]];
+      const lbl = `${str}${str && ' '}${l[0]}`;
+      if (p in diff) {
+        out[lbl] = diff[p];
+        if (opts.omit) delete out[p];
+      }
+      if (l[1]) _labelDiff(diff, l[1], p, lbl, out, opts);
+    }
+  }
+}

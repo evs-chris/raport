@@ -5,7 +5,7 @@ import { parse as parseTemplate } from './parse/template';
 import { parseSchema, unparseSchema } from './parse/schema';
 import { stringify } from './parse/stringify';
 import { validate } from './schema';
-import { diff, deepEqual } from './diff';
+import { diff, deepEqual, labelDiff } from './diff';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
   return {
@@ -483,6 +483,9 @@ registerOperator(
       equal = (l: any, r: any) => evalApply(ctx, eq, [l, r]);
     }
     return diff(left, right, equal);
+  }),
+  simple(['label-diff'], (_, [diff, label, opts]) => {
+    return labelDiff(diff, label, opts);
   }),
 );
 
