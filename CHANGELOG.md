@@ -1,3 +1,15 @@
+## 0.10.6
+
+2022-03-11
+
+### Data
+
+* __BUG__: The `date` operator, or more precisely the underlying function that converts a relative date to an ES `Date`, now handles timezones more consistently.
+* The `filter` exported method will now operate directly on arrays and accept a non-`Context` context.
+* The `diff` exported function can now be told to treat specific arrays as sets by providing an identity function for the arrays' members, with identity functions for specific arrays specified by keypath. The identity function can be `true`, a string, or a function. If `true`, the value itself is used. If a string, that key on each object is used e.g. `item[string]`. IF a function, the result of calling the function with the value is used.
+* There is now a `diff-label` function that will take a `Diff` and a tree of labels and replace the keypaths in the diff with the matching label.
+
+
 ## 0.10.5
 
 2022-03-09
