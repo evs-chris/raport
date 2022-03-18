@@ -19,6 +19,8 @@ const spanMap = {
   d: [2, 24],
 };
 
+const hasNum = /^[^\d]*(\d+(?:\.\d*)?)/;
+
 const space = /^\s*$/;
 function isNum(v: any): v is number {
   return !isNaN(v) && !space.test(v);
@@ -506,6 +508,11 @@ registerOperator(
     } else {
       return values.reduce((a, c) => a + (c === undefined || c === null ? '' : c), '');
     }
+  }),
+  simple(['num'], (_name: string, [v]) => {
+    let match: string[];
+    if (match = hasNum.exec(v)) return +match[1];
+    return parseInt(v);
   }),
   simple(['-'], (_name: string, values: any[]): number => {
     const first = values.shift();

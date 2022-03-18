@@ -277,6 +277,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `not-in` | `any\|array, array\|string` | `boolean` | `in`, but negated. |
 | `not-like` | `string\|array, string\|array, 'free'\|{free?:boolean}` | `boolean` | `like`, but negated. |
 | `nth` | aggregate | `number` | This will return the nth application in the given source, using the 1-based index specified by the parameter. |
+| `num` | `string` | `number` | This will return the first positive number from the given string, including an option decimal. |
 | `object` | `...(key: string, value: any)` | `any` | Creates an object from the given values where the odd-numbered args are keys and their subsequent event-numbered args are values e.g. `(object 'foo' true 'bar' 3.14159)` is `{ foo: true, bar: 3.14159 }`. |
 | `or` | `...any` | `boolean` | This will lazily evaluate its arguments and return the first truthy value or `false` if there aren't any. |
 | `overlap` | `string, string, number = 0.5` | `string` | Finds the first overlapping substring within the two given strings that is at least a certain percentage of the smallest string's length long (3rd argument, defaults to 50%) using the `similar` operator. |
