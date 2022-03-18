@@ -1,3 +1,12 @@
+## 0.10.7
+
+2022-03-18
+
+### Data
+
+* There is now a `num` operator that will return the first positive number from a string, including an optional decimal.
+
+
 ## 0.10.6
 
 2022-03-11
