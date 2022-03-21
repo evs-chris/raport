@@ -1,3 +1,12 @@
+## 0.10.9
+
+Unreleased
+
+### Lib
+
+* Export `labelDiff` in root module.
+
+
 ## 0.10.8
 
 2022-03-18
