@@ -1,3 +1,12 @@
+## 0.10.10
+
+Unreleased
+
+### Data
+
+* __BUG:__ `diff` will no longer try to read properies of an `undefined` object in some scenarios.
+
+
 ## 0.10.9
 
 2022-03-21

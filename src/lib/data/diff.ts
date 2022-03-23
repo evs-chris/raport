@@ -63,12 +63,14 @@ function _diff(v1: any, v2: any, path: string, diff: Diff, equal: (v1: any, v2: 
       diff[join(path, `${i + found.length}`)] = [undefined, v2[i]];
     }
   } else {
-    const ks = Object.keys(v1 || {});
-    for (const k of Object.keys(v2 || {})) if (!~ks.indexOf(k)) ks.push(k);
+    const _v1 = v1 || {};
+    const _v2 = v2 || {};
+    const ks = Object.keys(_v1);
+    for (const k of Object.keys(_v2)) if (!~ks.indexOf(k)) ks.push(k);
 
     for (const k of ks) {
-      const vv1 = v1[k];
-      const vv2 = v2[k];
+      const vv1 = _v1[k];
+      const vv2 = _v2[k];
 
       if (vv1 === vv2) continue;
       else if (typeof vv1 === 'object' && typeof vv2 === 'object') _diff(vv1, vv2, join(path, k), diff, equal, ident);
