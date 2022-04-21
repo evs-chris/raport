@@ -956,7 +956,14 @@ export function dateAndTimespan(l: Date, r: TimeSpan, m: 1|-1): Date {
   else {
     let d = new Date(l);
     if (r.d[0]) d.setFullYear(d.getFullYear() + r.d[0] * m);
-    if (r.d[1]) d.setMonth(d.getMonth() + r.d[1] * m);
+    if (r.d[1]) {
+      const dd = d.getDate();
+      d.setDate(1);
+      d.setMonth(d.getMonth() + r.d[1] * m);
+      const mm = d.getMonth();
+      d.setDate(dd);
+      if (mm !== d.getMonth()) d.setDate(0);
+    }
     if (r.d[2]) d.setDate(d.getDate() + r.d[2] * m);
     if (r.d[3]) d.setHours(d.getHours() + r.d[3] * m);
     if (r.d[4]) d.setMinutes(d.getMinutes() + r.d[4] * m);
