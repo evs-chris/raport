@@ -718,9 +718,11 @@ registerOperator(
 
       if (t) {
         if (res === v) {
-          const dt = parseDate(v);
-          if (dt && isDateRel(dt)) res = dateRelToDate(dt);
-          else res = new Date(v);
+          if (typeof v === 'string') {
+            const dt = parseDate(v);
+            if (dt && isDateRel(dt)) res = dateRelToDate(dt);
+            else res = new Date(v);
+          } else res = new Date(v);
         }
 
         if (typeof t === 'string') t = parseTime(t);
