@@ -691,9 +691,29 @@ registerOperator(
         res = rel;
       }
     } else {
+      const rdt = res as Date;
+      if ('y' in opts && !isNaN(opts.y)) rdt.setFullYear(opts.y);
+      const y = rdt.getFullYear();
+      if ('m' in opts && !isNaN(opts.m)) {
+        rdt.setMonth(+opts.m - 1);
+        if (opts.clamp && rdt.getFullYear() !== y) {
+          rdt.setFullYear(y);
+          rdt.setMonth(11);
+        }
+      }
+      const m = rdt.getMonth();
+      if ('d' in opts && !isNaN(opts.d)) {
+        rdt.setDate(opts.d);
+        if (opts.clamp && (rdt.getMonth() !== m || rdt.getFullYear() !== y)) {
+          rdt.setDate(1);
+          rdt.setFullYear(y);
+          rdt.setMonth(m + 1);
+          rdt.setDate(0);
+        }
+      }
+
       if (t) {
         if (res === v) res = new Date(v);
-        const rdt = res as Date;
 
         if (typeof t === 'string') t = parseTime(t);
         if (Array.isArray(t)) {
