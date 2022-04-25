@@ -1,3 +1,12 @@
+## 0.10.12
+
+2022-04-25
+
+### Data
+
+* __BUG__: The `date` operator will no longer try to parse `Date` objects.
+
+
 ## 0.10.11
 
 2022-04-25
