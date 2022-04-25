@@ -950,29 +950,37 @@ registerOperator({
   value: true,
 });
 
+function fmtDate(n: any, fmt: string): string {
+  if (typeof n === 'string') {
+    const d = parseDate(n);
+    if (d) n = d;
+  }
+  return date(isDateRel(n) ? dateRelToExactRange(n) : n, fmt);
+}
+
 // basic formats
 registerFormat('dollar', (n, [dec, sign]) => {
   return dollar(n, undefined, dec, sign);
 });
 
 registerFormat('date', (n, [fmt]) => {
-  return date(isDateRel(n) ? dateRelToExactRange(n) : n, fmt);
+  return fmtDate(n, fmt);
 });
 
 registerFormat('time', n => {
-  return date(isDateRel(n) ? dateRelToExactRange(n) : n, 'HH:mm:ss');
+  return fmtDate(n, 'HH:mm:ss');
 });
 
 registerFormat('timestamp', n => {
-  return date(isDateRel(n) ? dateRelToExactRange(n) : n, 'yyyy-MM-dd HH:mm:ss');
+  return fmtDate(n, 'yyyy-MM-dd HH:mm:ss');
 });
 
 registerFormat('timestamptz', n => {
-  return date(isDateRel(n) ? dateRelToExactRange(n) : n, 'yyyy-MM-dd HH:mm:sszzz');
+  return fmtDate(n, 'yyyy-MM-dd HH:mm:sszzz');
 });
 
 registerFormat('iso8601', n => {
-  return date(isDateRel(n) ? dateRelToExactRange(n) : n, 'yyyy-MM-ddTHH:mm:sszzz');
+  return fmtDate(n, 'yyyy-MM-ddTHH:mm:sszzz');
 });
 
 registerFormat(['integer', 'int'], (n, [group]) => {
