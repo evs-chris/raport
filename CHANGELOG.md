@@ -1,3 +1,13 @@
+## 0.10.11
+
+2022-04-25
+
+### Data
+
+* The `date` operator and formatter will now parse string dates using the built-in date parser if possible, so that the resulting date is in local time rather than whatever `Date.parse` decides it should be in.
+* The `date` operator, when used in non-relative/parse mode, can now set the year, month, and date when called and passed optional `y`, `m`, and `d` named arguments. The `m` month argument is calendar-based rather than 0-based. There is also a named argument `clamp` that will prevent `date('2020-02-01' d:31)` from resulting in `2020-03-02` and result in `2020-02-29` when truthy instead. The same applies to months e.g. `2020-13-31` will become `2021-01-31` without `clamp`, but with will result in `2020-12-31`.
+
+
 ## 0.10.10
 
 2022-03-23
