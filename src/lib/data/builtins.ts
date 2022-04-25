@@ -655,12 +655,16 @@ registerOperator(
       if (isDateRel(v)) res = dateRelToDate(v);
       else if (typeof v === 'string') {
         let dt = parseDate(v);
-        if (!dt) dt = new Date(v);
-        if (isNaN(dt as any)) {
-          let val = evaluate(ctx, ~v.indexOf('#') ? v : `#${v}#`);
-          if (isDateRel(val)) {
-            if (opts.rel || opts.parse) res = val;
-            else res = dateRelToDate(val);
+        if (isDateRel(dt)) {
+          res = dt;
+        } else {
+          if (!dt) dt = new Date(v);
+          if (isNaN(dt as any)) {
+            let val = evaluate(ctx, ~v.indexOf('#') ? v : `#${v}#`);
+            if (isDateRel(val)) {
+              if (opts.rel || opts.parse) res = val;
+              else res = dateRelToDate(val);
+            }
           }
         }
       }
@@ -691,7 +695,7 @@ registerOperator(
         res = rel;
       }
     } else {
-      const rdt = res as Date;
+      const rdt = isDateRel(res) ? dateRelToDate(res) : res as Date;
       if ('y' in opts && !isNaN(opts.y)) rdt.setFullYear(opts.y);
       const y = rdt.getFullYear();
       if ('m' in opts && !isNaN(opts.m)) {
@@ -713,7 +717,11 @@ registerOperator(
       }
 
       if (t) {
-        if (res === v) res = new Date(v);
+        if (res === v) {
+          const dt = parseDate(v);
+          if (dt && isDateRel(dt)) res = dateRelToDate(dt);
+          else res = new Date(v);
+        }
 
         if (typeof t === 'string') t = parseTime(t);
         if (Array.isArray(t)) {
@@ -727,6 +735,8 @@ registerOperator(
           rdt.setMinutes(rdt.getMinutes() + offset);
         }
       }
+
+      res = rdt;
     }
 
     return res;
