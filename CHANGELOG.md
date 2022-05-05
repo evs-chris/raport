@@ -1,3 +1,12 @@
+## 0.10.13
+
+2022-05-05
+
+### Data
+
+* __BUG__: The `time-span` operator can now handling `unit::d` spans where the date in the target month doesn't exist e.g. days between `2022-01-31` and `2022-02-28` will result in `28` rather than `31`.
+
+
 ## 0.10.12
 
 2022-04-25
