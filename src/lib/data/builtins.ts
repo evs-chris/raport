@@ -316,8 +316,12 @@ registerOperator(
             from.setSeconds(0);
             from.setMilliseconds(0);
             const to = new Date(+from);
+            to.setDate(1);
             to.setFullYear(to.getFullYear() + span.d[0]);
-            to.setMonth(to.getMonth() + span.d[1]);
+            to.setMonth(from.getMonth() + span.d[1]);
+            const m = to.getMonth();
+            to.setDate(from.getDate());
+            if (to.getMonth() !== m) to.setDate(0);
             to.setDate(to.getDate() + span.d[2]);
             const dist = +to - +from;
             let d = Math.floor(dist / 86400000);
