@@ -1,11 +1,11 @@
 import { Schema, Field, Type, TypeMap } from './index';
 import { join } from './diff';
 import { parseSchema, unparseSchema } from './parse/schema';
-import { evalApply, Root, Context, safeGet, extend } from './index';
+import { evalApply, Root, Context, safeGet, extend, isDateRel } from './index';
 
 const date = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/;
 function isDate(v: any) {
-  if (typeof v === 'object' && v instanceof Date) return true;
+  if (typeof v === 'object') return isDateRel(v);
   else if (typeof v === 'string' && date.test(v)) return true;
   return false;
 }
@@ -21,7 +21,7 @@ export function inspect(base: any, flat?: true): Schema {
       else fields.push({ type: val.type, name: '0' });
     }
     return { type: root, fields };
-  } else if (typeof base === 'object') {
+  } else if (typeof base === 'object' && !isDate(base)) {
     const fields: Field[] = [];
     for (const k in base) {
       fields.push(getField(k, base[k], flat));
@@ -60,7 +60,7 @@ function getType(v: any): Type {
     else if (typeof v[0] === 'object') return 'object[]';
     else return 'array';
   } else if (typeof v === 'object') {
-    if (v instanceof Date) return 'date';
+    if (isDate(v)) return 'date';
     else return 'object';
   } else return 'any';
 }
