@@ -4,7 +4,7 @@ import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseE
 import { parse as parseTemplate } from './parse/template';
 import { parseSchema, unparseSchema } from './parse/schema';
 import { stringify } from './parse/stringify';
-import { validate } from './schema';
+import { validate, inspect } from './schema';
 import { diff, deepEqual, labelDiff } from './diff';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
@@ -482,6 +482,10 @@ registerOperator(
     const res = validate(left, right, mode);
     if (name === 'valid') return res === true;
     else return res;
+  }),
+  simple(['inspect'], (_name, [v, mode]) => {
+    if (mode === 'schema') return unparseSchema(inspect(v));
+    else return inspect(v);
   }),
   simple(['diff'], (_, [left, right, equal], ctx) => {
     if (equal && isApplication(equal)) {
