@@ -4,6 +4,21 @@ import { Schema } from '../index';
 
 const checkIdent = new RegExp(`[${endRef.split('').map(v => `\\${v}`).join('')}]`);
 
+export interface ListOverride {
+  base: boolean|number;
+  array?: boolean|number;
+  union?: boolean|number;
+  args?: boolean|number;
+  keys?: boolean|number;
+}
+
+interface _ListOverride {
+  array: number;
+  union: number;
+  args: number;
+  keys: number;
+}
+
 export type StringifyOpts = SimpleStringifyOpts | SExprStringifyOpts;
 export interface BaseStringifyOpts {
   /** Disable the use of symbol style :strings. */
@@ -13,7 +28,7 @@ export interface BaseStringifyOpts {
   /** Enable comma separators in lists of values. */
   listCommas?: boolean;
   /** Whether to wrap lists of items. `true` wraps every item. A number targets that many characters in the output to cause a wrap. The default is 60 chars. */
-  listWrap?: boolean|number;
+  listWrap?: boolean|number|ListOverride;
   /** Output template formatted expressions. */
   template?: boolean;
   /** Output unindented single line expressions. */
@@ -47,13 +62,14 @@ let _noobj: boolean = false;
 let _tpl: boolean = false;
 let _tplmode: boolean = false;
 let _noindent: boolean = false;
-let _listwrap: number = 60;
+let _listwrap: _ListOverride = { array: 60, union: 60, args: 60, keys: 60 };
 let _lastarg: boolean = false;
 let _noname: boolean = false;
 let _html: boolean = false;
 let _nochecks: boolean = false;
 
 let _level = 0;
+let _first = false;
 
 const deepops = ['===', '!==', 'deep-is', 'deep-is-not'];
 const binops = deepops.concat(['**', '*', '/%', '/', '%', '+', '-', '>=', 'gte', '>', 'gt', '<=', 'lte', '<', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'strict-is', 'strict-is-not', 'and', '&&', 'or', '||', '??']);
@@ -81,7 +97,21 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
   _tpl = _tplmode = opts.template;
   _noindent = opts.noIndent;
   _level = 0;
-  _listwrap = 'listWrap' in opts ? (!opts.listWrap ? 0 : opts.listWrap === true ? 1 : opts.listWrap) : 60;
+  _first = true;
+  if ('listWrap' in opts) {
+    const o = opts.listWrap;
+    if (typeof o === 'boolean') _listwrap = !o ? { array: 0, union: 0, args: 0, keys: 0 } : { array: 1, union: 1, args: 1, keys: 1 };
+    else if (typeof o === 'number') _listwrap = { array: o, union: o, args: o, keys: o };
+    else {
+      const b = !o.base ? 0 : o.base === true ? 1 : o.base;
+      _listwrap = {
+        array: 'array' in o ? (!o.array ? 0 : o.array === true ? 1 : o.array) : b,
+        union: 'union' in o ? (!o.union ? 0 : o.union === true ? 1 : o.union) : b,
+        args: 'args' in o ? (!o.args ? 0 : o.args === true ? 1 : o.args) : b,
+        keys: 'keys' in o ? (!o.keys ? 0 : o.keys === true ? 1 : o.keys) : b,
+      };
+    }
+  } else _listwrap = { array: 60, union: 60, args: 60, keys: 60 };
   _noname = opts.noNamedArgs;
   _html = opts.htmlSafe;
   _nochecks = opts.noChecks;
@@ -107,46 +137,51 @@ function fill(char: string, len: number): string {
 function _stringify(value: ValueOrExpr): string {
   if (value == null) return '';
   if (typeof value === 'string') return value;
+  let stringed: string;
   if (_tpl && ('op' in value || 'r' in value)) {
     if ('op' in value) {
       if (value.op === 'if' || value.op === 'with' || value.op === 'unless' || value.op === 'each') {
-        return stringifyTemplateBlock(value);
+        stringed = stringifyTemplateBlock(value);
       } else if (value.op === 'case') {
-        return stringifyTemplateCase(value);
+        stringed = stringifyTemplateCase(value);
       } else if (value.op) {
         if (value.op === '+') return value.args.map(a => _stringify(a)).join('');
         else {
           _tpl = false;
           const res = `{{${_stringify(value.op === 'string' ? value.args[0] : value)}}}`;
           _tpl = true;
-          return res;
+          stringed = res;
         }
       }
     } else {
       _tpl = false;
       const res = `{{${_stringify(value)}}}`;
       _tpl = true;
-      return res;
+      stringed = res;
     }
   } else if ('r' in value) {
-    if (typeof value.r === 'string') return /^[0-9]/.test(value.r) ? `.${value.r}` : value.r;
+    if (typeof value.r === 'string') stringed = /^[0-9]/.test(value.r) ? `.${value.r}` : value.r;
     else {
       const r = value.r;
-      return `${fill('^', r.u || 0)}${r.p || ''}${r.k.map((p, i) => typeof p === 'string' || typeof p === 'number' ? `${i ? '.' : ''}${p}` : `[${_stringify(p)}]`).join('')}`;
+      stringed = `${fill('^', r.u || 0)}${r.p || ''}${r.k.map((p, i) => typeof p === 'string' || typeof p === 'number' ? `${i ? '.' : ''}${p}` : `[${_stringify(p)}]`).join('')}`;
     }
   } else if ('op' in value) {
-    return stringifyOp(value);
+    stringed = stringifyOp(value);
   } else if ('a' in value) {
     const arrow = ((_tplmode && _html !== false) || _html) ? '\\' : '>';
-    if ('n' in value) return `|${value.n.join(_listcommas ? ', ' : ' ')}| =${arrow} ${_stringify(value.a)}`;
-    else return `=${arrow}${_stringify(value.a)}`;
+    if ('n' in value) stringed = `|${value.n.join(_listcommas ? ', ' : ' ')}| =${arrow} ${_stringify(value.a)}`;
+    else stringed = `=${arrow}${_stringify(value.a)}`;
   } else if ('v' in value) {
-    return stringifyLiteral(value);
+    stringed = stringifyLiteral(value);
   } else if (isDateRel(value)) {
-    return stringifyDate(value);
+    stringed = stringifyDate(value);
   } else if (isTimespan(value)) {
-    return stringifyTimespan(value);
+    stringed = stringifyTimespan(value);
   }
+
+  if ('c' in value && value.c.length) stringed = (_first ? '' : '\n') + value.c.map(c => `${padl('', '  ', _level)}// ${c}\n`).join('') + `${padl('', '  ', _level)}${stringed}`;
+
+  return stringed;
 }
 
 function stringifyBinopArg(op: string, arg: ValueOrExpr, pos: 1|2): string {
@@ -230,7 +265,9 @@ function stringifyOp(value: Operation): string {
     if (!value.args || !value.args.length) return '';
 
     _level++;
-    const parts = value.args.map(a => _stringify(a));
+    const _f = _first;
+    const parts = value.args.map((a, i) => (_first = i === 0, _stringify(a)));
+    _first = _f;
     let split = _noindent ? '' : `\n${padl('', '  ', _level)}`;
     _level--;
     if (parts.length === 1 && !~parts[0].indexOf('\n')) return `{ ${parts[0]} }`;
@@ -255,7 +292,7 @@ function stringifyOp(value: Operation): string {
 
 function stringifyRootBlock(block: Operation): string {
   if (!block.args || !block.args.length) return '';
-  return block.args.map(a => _stringify(a)).join('\n');
+  return block.args.map((a, i) => (_first = i === 0, _stringify(a))).join('\n');
 }
 
 function stringifyLiteral(value: Literal): string {
@@ -419,6 +456,7 @@ function indentAll(amount: string, str: string): string {
 function wrapArgs(open: string, args: ValueOrExpr[], close: string, keyMod?: number, call?: boolean): string {
   if (!args || !args.length) return `${open}${close}`;
   _level++;
+  const _f = _first;
   let parts: string[];
   if (keyMod) {
     parts = [];
@@ -429,6 +467,7 @@ function wrapArgs(open: string, args: ValueOrExpr[], close: string, keyMod?: num
         _key = false;
       } else {
         _level++;
+        _first = i === 1;
         const res = _stringify(args[i]);
         if (res[0] === '\n')  parts[parts.length - 1] += ' ' + res.replace(leadingSpace, '');
         else parts[parts.length - 1] += res;
@@ -439,16 +478,18 @@ function wrapArgs(open: string, args: ValueOrExpr[], close: string, keyMod?: num
     const last = args.length - 1;
     const _la = _lastarg;
     parts = args.map((a, i) => {
+      _first = i === 0;
       if (call && i === last) _lastarg = true;
       return _stringify(a);
     });
     _lastarg = _la;
   }
   _level--;
+  _first = _f;
 
   let join = _listcommas ? ', ' : ' ';
   if (_noindent || (parts.length == 1 && !~parts[0].indexOf('\n'))) return `${open}${parts.join(join)}${close}`;
-  let wrap = _listwrap;
+  let wrap = _listwrap.args;
   const base = parts.join(_listcommas ? ', ' : ' ');
   if (!wrap && ~base.indexOf('\n')) wrap = 1;
   if (wrap === 1 && _listcommas) join = ',\n';
@@ -465,7 +506,7 @@ function wrapArgs(open: string, args: ValueOrExpr[], close: string, keyMod?: num
   for (let i = 0; i < parts.length; i++) {
     if (~parts[i].indexOf('\n')) {
       if (str) res += str;
-      res += `\n${level}  ${parts[i]}${i !== last ? join : ''}`;
+      res += `\n${parts[i][0] === ' ' ? '' : level + '  '}${parts[i]}${i !== last ? join : ''}`;
       str = '';
       continue;
     }
@@ -624,19 +665,21 @@ export function stringifySchema(schema: Schema, noChecks?: boolean): string {
 
   let strs: string[];
   let fin = '', open = '', close = '', join = '';
+  let wrap: number = _listwrap.array;
 
   switch (t) {
     case 'object':
     case 'object[]':
       const arr = !!~t.indexOf('[]');
-      if (!schema.fields && !schema.rest) {
+      if ((!schema.fields || !schema.fields.length) && !schema.rest) {
         fin = `{}${arr ? '[]' : ''}`;
         break;
       }
+      wrap = _listwrap.keys;
       _level++;
-      strs = schema.fields ? schema.fields.map(f => {
+      strs = schema.fields ? schema.fields.map((f, i) => {
         const str = stringifySchema(f);
-        return `${f.name}${f.required ? '' : '?'}: ${str}`;
+        return (f.desc && f.desc.length ? (i === 0 ? '' : `\n${padl('', '  ', _level)}`) + f.desc.map(c => `// ${c}`).join(`\n${padl('', '  ', _level)}`) + `\n${padl('', '  ', _level)}` : '') + `${f.name}${f.required ? '' : '?'}: ${str}`;
       }) : [];
       if (schema.rest) strs.push(`...: ${stringifySchema(schema.rest)}`);
       _level--;
@@ -650,6 +693,7 @@ export function stringifySchema(schema: Schema, noChecks?: boolean): string {
       else if (schema.checks && schema.checks.length) open = '(', close = ')';
       if (open) _level++;
       strs = ts.map(u => stringifySchema(u));
+      wrap = _listwrap.union;
       join = strs.length > 6 || strs.find(s => ~s.indexOf('\n')) ? ' | ' : '|';
       if (open) _level--;
       break;
@@ -681,7 +725,10 @@ export function stringifySchema(schema: Schema, noChecks?: boolean): string {
 
   if (schema.defs) {
     const keys = Object.keys(schema.defs).sort();
-    defs = keys.map(k => `type ${k} = ${stringifySchema(schema.defs[k])}`).join(`\n${level}`);
+    defs = keys.map((k, i) => {
+      const def = schema.defs[k];
+      return (def.desc && def.desc.length ? (i === 0 ? '' : `\n${level}`) + def.desc.map(c => `// ${c}`).join(`\n${level}`) + `\n${level}` : '') + `type ${k} = ${stringifySchema(def)}`;
+    }).join(`\n${level}`);
   }
 
   if (!fin) {
@@ -689,8 +736,8 @@ export function stringifySchema(schema: Schema, noChecks?: boolean): string {
     const nl = _noindent ? '' : '\n';
     const lopen = open ? `${open}${nl}${l2}` : '';
     const lclose = close ? `${nl}${level}${close}` : '';
-    if (_listwrap === 0) fin = `${lopen}${strs.join(join)}${lclose}`;
-    else if (_listwrap === 1) fin = `${lopen}${strs.join(`${join}${nl}${l2}`)}${lclose}`;
+    if (wrap === 0) fin = `${lopen}${strs.join(join)}${lclose}`;
+    else if (wrap === 1) fin = `${lopen}${strs.join(`${join}${nl}${l2}`)}${lclose}`;
     else {
       let line = '';
       
@@ -698,15 +745,16 @@ export function stringifySchema(schema: Schema, noChecks?: boolean): string {
       for (let i = 0; i < strs.length; i++) {
         if (~strs[i].indexOf('\n')) {
           line = '';
-          fin += `${nl}${l2}` + strs[i] + (i !== last ? join : '');
+          fin += (i === 0 ? '' : '\n' + l2) + strs[i] + (i !== last ? join : '');
         } else {
           fin += strs[i], line += strs[i];
           if (i !== last) fin += join, line += join;
         }
 
-        if (line.length > _listwrap && i !== last && !~(strs[i + 1] || '').indexOf('\n')) {
+        if (line.length > wrap && i !== last && !~(strs[i + 1] || '').indexOf('\n')) {
           fin += `${nl}${l2}`;
           line = '';
+          if (~join.indexOf('|')) fin += '  ';
         }
       }
 
@@ -719,7 +767,7 @@ export function stringifySchema(schema: Schema, noChecks?: boolean): string {
     fin += ` ?${schema.checks.map(c => _stringify(c)).join(' ?')} `;
   }
 
-  if (defs) fin = `${defs}\n${level}${fin}`;
+  if (defs) fin = `${defs}\n${level}\n${level}${fin}`;
 
   return fin;
 }

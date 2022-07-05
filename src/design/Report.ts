@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { InitOpts, ContextHelper, ReadLinkResult, ObserverHandle } from 'ractive';
-import { Report, Literal, run, parse, stringify, initParameters, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap, Parameter } from 'raport/index';
+import { Report, Literal, run, parse, stringify, initParameters, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap, Parameter, StringifyOpts } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 import { Editor, Viewer } from './Editor';
@@ -35,8 +35,8 @@ export interface PlainSource {
   data?: any;
 }
 
-export const darkTheme = { fg: '#ccc', bg: '#222', border: '#555555', highlight: '#ddd', dark: '#444444', active: '#265189', hover: '#167808', error: '#a00', btntxt: '#ddd', code: { c1: '#ccc', c2: '#ccc', c3: '#1ca', c4: '#e81', c5: '#2a0', c6: '#e78', c7: '#6c3', c8: '#e82', c9: '#67f', c10: '#89d', c11: '#4bc', c12: '#1de', c13: '#29c', c20: '#f00', }, };
-export const lightTheme = { fg: '#222', bg: '#fff', border: '#cccccc', highlight: '#000', dark: '#999999', active: '#4596ff', hover: '#26bf10', error: '#8b0000', btntxt: '#fff', code: { c1: '#555', c2: '#222', c3: '#164', c4: '#951', c5: '#a11', c6: '#708', c7: '#371', c8: '#630', c9: '#45c', c10: '#239', c11: '#167', c12: '#189', c13: '#145', c20: '#f00', }, };
+export const darkTheme = { fg: '#ccc', bg: '#222', border: '#555555', highlight: '#ddd', dark: '#444444', active: '#265189', hover: '#167808', error: '#a00', btntxt: '#ddd', code: { c1: '#ccc', c2: '#ccc', c3: '#1ca', c4: '#e81', c5: '#2a0', c6: '#e78', c7: '#6c3', c8: '#e82', c9: '#67f', c10: '#89d', c11: '#4bc', c12: '#1de', c13: '#29c', c14: '#888', c20: '#f00', }, };
+export const lightTheme = { fg: '#222', bg: '#fff', border: '#cccccc', highlight: '#000', dark: '#999999', active: '#4596ff', hover: '#26bf10', error: '#8b0000', btntxt: '#fff', code: { c1: '#555', c2: '#222', c3: '#164', c4: '#951', c5: '#a11', c6: '#708', c7: '#371', c8: '#630', c9: '#45c', c10: '#239', c11: '#167', c12: '#189', c13: '#145', c14: '#888', c20: '#f00', }, };
 
 let autosizeTm: any;
 
@@ -753,13 +753,17 @@ export class Designer extends Ractive {
   fmt() {
     this._onChange(this.get('report'));
     const str = this.get('temp.expr.str');
-    this.set('temp.expr.str', fmt(str, this.get('temp.expr.html'), this.get('tmp.nowrap')));
+    const settings = this.get('~/settings.format');
+    const opts = { listWrap: { base: settings.wrap, array: settings.wrap_array, union: settings.wrap_union, args: settings.wrap_args, keys: settings.wrap_keys } };
+    this.set('temp.expr.str', fmt(str, this.get('temp.expr.html'), this.get('tmp.nowrap'), opts));
   }
 
   fmtAll() {
     const json = this.get('report');
     this._onChange(json);
-    this.set('report', fmtAll(json, this.get('tmp.nowrap')));
+    const settings = this.get('~/settings.format');
+    const opts = { listWrap: { base: settings.wrap, array: settings.wrap_array, union: settings.wrap_union, args: settings.wrap_args, keys: settings.wrap_keys } };
+    this.set('report', fmtAll(json, this.get('tmp.nowrap'), opts));
   }
 
   removeWidget(ctx: ContextHelper) {
@@ -1521,15 +1525,16 @@ function stripDefaults(json: any): any {
 }
 
 const fmtOpts = { throw: true, consumeAll: true };
-function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>, template?: boolean, compact?: boolean): Computed|ValueOrExpr|Array<ValueOrExpr|Span> {
+function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>, template?: boolean, compact?: boolean, stringifyOpts?: StringifyOpts): Computed|ValueOrExpr|Array<ValueOrExpr|Span> {
   if (typeof str !== 'string' && typeof str !== 'object') return str;
   const parser = template ? parseTemplate : parse;
   const opts = Object.assign(fmtOpts, { template });
   const listWrap = compact ? 0 : 40;
   const noIndent = compact;
+  const fopts = Object.assign({ listWrap, noIndent }, stringifyOpts, { template });
   if (typeof str === 'string') {
     try {
-      return stringify(parser(str, opts),  { template, listWrap, noIndent });
+      return stringify(parser(str, opts), fopts);
     } catch {
       return str;
     }
@@ -1537,46 +1542,46 @@ function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>, template?: boole
     return str.map(e => {
       if (typeof e === 'string') {
         try {
-          return stringify(parser(e, opts), { template, listWrap, noIndent });
+          return stringify(parser(e, opts), fopts);
         } catch {
           return e;
         }
       } else if ('text' in e && typeof e.text === 'string') {
         try {
-          return Object.assign({}, e, { text: stringify(parser(e.text, opts), { template, listWrap, noIndent }) });
+          return Object.assign({}, e, { text: stringify(parser(e.text, opts), fopts) });
         } catch {
           return e;
         }
       } else if (isValueOrExpr(e)) {
-        return stringify(e, { template, listWrap, noIndent });
+        return stringify(e, fopts);
       } else {
         return e;
       }
     });
   } else if ('x' in str && typeof str.x === 'string') {
     try {
-      return { x: stringify(parser(str.x, opts), { template, listWrap, noIndent }) };
+      return { x: stringify(parser(str.x, opts), fopts) };
     } catch {
       return str;
     }
   } else if (isValueOrExpr(str)) {
-    return stringify(str, { template, listWrap, noIndent });
+    return stringify(str, fopts);
   }
   return str;
 }
 
-function fmtAll(json: any, compact?: boolean): any {
+function fmtAll(json: any, compact?: boolean, fopts?: StringifyOpts): any {
   if (typeof json !== 'object') return json;
 
-  if (Array.isArray(json)) return json.map(j => fmtAll(j, compact));
+  if (Array.isArray(json)) return json.map(j => fmtAll(j, compact, fopts));
 
   const res = {};
 
   for (const k in json) {
     const v = json[k];
-    if (k === 'text' || k === 'width' || k === 'height' || k === 'hide' || k === 'br') res[k] = fmt(v, false, compact);
-    else if (k === 'name' || k === 'html') res[k] = fmt(v, true, compact);
-    else res[k] = fmtAll(v, compact);
+    if (k === 'text' || k === 'width' || k === 'height' || k === 'hide' || k === 'br') res[k] = fmt(v, false, compact, fopts);
+    else if (k === 'name' || k === 'html') res[k] = fmt(v, true, compact, fopts);
+    else res[k] = fmtAll(v, compact, fopts);
   }
 
   return res;

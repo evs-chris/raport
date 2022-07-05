@@ -8,6 +8,7 @@
     {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button class-ico on-click="@.checkLink('param')">{{>times}}</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
     {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button class-ico on-click="@.checkLink('source')">{{>times}}</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
   </span>
+  {{#if ~/show.bottom}}<button on-click="@.toggle('max.bottom')" class-ico style-height="2.5rem" class="{{#if ~/max.bottom}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>{{/if}}
   <button on-click="@.toggle('show.bottom')" class-ico style-height="2.5rem" class="{{#if ~/show.bottom}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>
 </div>
 <div class-bottom>

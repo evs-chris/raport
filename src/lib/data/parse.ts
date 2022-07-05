@@ -1,4 +1,4 @@
-import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name, not } from 'sprunge/lib';
+import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name, not, readTo, unwrap } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex, JString } from 'sprunge/lib/json';
 import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation, TimeSpanMS, Schema, Field, TypeMap } from './index';
 
@@ -29,6 +29,14 @@ export function timeSpanToNumber(v: TimeSpan): number {
 const space = ' \r\n\t';
 const endSym = space + '():{}[]<>,"\'`\\;&#';
 export const endRef = endSym + '.+/*|^%=!?';
+
+const _comment = map(seq(ws, str('//'), opt(str(' ')), readTo('\n'), str('\n')), ([, , , c]) => ({ c }), { name: 'comment', primary: true });
+function comment<T extends any>(prop: string, p: Parser<T>): Parser<T> {
+  return map(seq(rep(_comment), ws, p), ([c, , v]) => {
+    if (c && c.length) v[prop] = c.map(c => c.c);
+    return v;
+  });
+}
 
 export const rws = skip1(space, 'required-space');
 
@@ -441,7 +449,7 @@ block.parser = map(bracket(
   check(ws, str('}')),
 ), args => ({ op: 'block', args }), { primary: true, name: 'block' });
 
-value.parser = operation;
+value.parser = unwrap(comment('c', operation));
 
 const namedArg: Parser<[Value, Value]> = map(seq(ident, str(':'), ws, value), ([k, , , v]) => [{ v: k }, v], 'named-arg');
 application.parser = map(seq(opt(bracket(check(str('|'), ws), rep1sep(opName, read1(space + ','), 'allow'), str('|'))), ws, str('=>', '=\\'), ws, value), ([names, , , , value]) => (names ? { a: value, n: names } : { a: value }), { primary: true, name: 'application' });
@@ -464,8 +472,8 @@ export function schema() {
   const type: Parser<Schema> = {};
   const conditions = opt(seq(ws, rep1sep(map(seq(name(str('?'), { name: 'condition', primary: true }), ws, application), ([, , a]) => a), rws, 'disallow')));
   const value = map(seq(str('string[]', 'number[]', 'boolean[]', 'date[]', 'any', 'string', 'number', 'boolean', 'date'), not(read1To(endRef))), ([s]) => ({ type: s } as Schema), { name: 'type', primary: true });
-  const typedef = map(seq(str('type'), ws, name(ident, { name: 'type', primary: true }), ws, str('='), ws, type), ([, , name, , , , type]) => ({ name, type }));
-  const typedefs = map(rep1sep(typedef, read1(' \t\n;'), 'disallow'), defs => defs.reduce((a, c) => (a[c.name] = c.type, a), {} as TypeMap));
+  const typedef = comment('c', map(seq(str('type'), ws, name(ident, { name: 'type', primary: true }), ws, str('='), ws, type), ([, , name, , , , type]) => ({ name, type } as { name: string, type: Schema, c?: string[] })));
+  const typedefs = map(rep1sep(typedef, read1(' \t\n;'), 'disallow'), defs => defs.reduce((a, c) => (c.type.desc = c.c, a[c.name] = c.type, a), {} as TypeMap));
   const ref = map(seq(ident, opt(str('[]'))), ([ref, arr]) => ({ type: arr ? 'array' : 'any', ref } as Schema), { name: 'type', primary: true });
   const key = map(seq(name(ident, { name: 'key', primary: true }), opt(str('?')), ws, str(':'), ws, type), ([name, opt, , , , type]) => {
     const res: Field = type as Field;
@@ -485,7 +493,7 @@ export function schema() {
   const rest = map(seq(str('...'), ws, str(':'), ws, type), ([, , , , type]) => {
     return Object.assign({ name: '...' }, type) as Field;
   });
-  const object: Parser<Schema> = map(seq(str('{'), ws, repsep(alt(key, rest), read1(' \t\n,;'), 'allow'), ws, str('}'), opt(str('[]'))), ([, , keys, , , arr], fail) => {
+  const object: Parser<Schema> = map(seq(str('{'), ws, repsep(comment('desc', alt(key, rest)), read1(' \t\n,;'), 'allow'), ws, str('}'), opt(str('[]'))), ([, , keys, , , arr], fail) => {
     const rests = keys.filter(k => k.name === '...');
     if (rests.length > 1) fail('only one object rest can be specified');
     else {

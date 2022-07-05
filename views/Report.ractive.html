@@ -36,7 +36,7 @@
       {{>project}}
     </div>
   </div>
-  <div class-bottom-pane class-active="~/show.bottom">
+  <div class-bottom-pane class-active="~/show.bottom" class-max="~/max.bottom">
     {{>bottom}}
   </div>
   <div style="position: absolute; left: -1000px; width: 1rem; height: 1rem;" id="sizer" />
@@ -350,6 +350,11 @@
     background-color: {{@style.bg}};
     padding: 0.5rem;
     z-index: 1998;
+  }
+
+  .bottom-pane.max {
+    height: 90vh;
+    transform: translateY(calc(90vh - 2.25rem));
   }
 
   .bottom-pane.active {

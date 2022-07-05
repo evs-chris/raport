@@ -14,6 +14,12 @@
           <option value=light>Light</option>
         </select></label>
         <label class="check"><input type=checkbox checked="{{~/settings.autosave}}" /> Auto save on leave?</label>
+        <br/><br/>
+        <label class="input">Format Wrap<input type=number value="{{~/settings.format.wrap}}" /></label>
+        <label class="input">Array Wrap<input type=number value="{{~/settings.format.wrap_array}}" /></label>
+        <label class="input">Object Wrap<input type=number value="{{~/settings.format.wrap_keys}}" /></label>
+        <label class="input">Argument Wrap<input type=number value="{{~/settings.format.wrap_args}}" /></label>
+        <label class="input">Union Wrap<input type=number value="{{~/settings.format.wrap_union}}" /></label>
       </div>
     </div>
     {{#if ~/showProjects}}

@@ -24,6 +24,8 @@ export interface Schema {
   defs?: TypeMap;
   /** If the type is 'any', this may be a name in a type map */
   ref?: string;
+  /** Additional comments about the type */
+  desc?: string[];
 }
 
 export interface DataSource<T = any, R = any> {
@@ -67,6 +69,7 @@ export interface Field extends Schema {
 export interface Operation {
   op: string;
   args?: ValueOrExpr[];
+  c?: string[];
 }
 
 export type Sort = ValueOrExpr|SortBy;
@@ -522,9 +525,9 @@ export function isLiteral(v: any): v is Literal {
   return typeof v === 'object' && 'v' in v;
 }
 
-export interface Reference { r: string|Keypath };
-export interface Application { a: Value; n?: string[]; };
-export interface Literal { v: any; s?: 1 };
+export interface Reference { r: string|Keypath; c?: string[] };
+export interface Application { a: Value; n?: string[]; c?: string[] };
+export interface Literal { v: any; s?: 1; c?: string[] };
 
 export function isApplication(v: any): v is Application {
   return typeof v === 'object' && 'a' in v && typeof v.a === 'object';
