@@ -500,7 +500,7 @@ export function schema() {
       return type;
     }
   });
-  const tuple = map(seq(str('['), ws, repsep(type, read1(' \t\r\n,')), ws, str(']'), opt(str('[]'))), ([, , types, , , arr]) => {
+  const tuple = map(seq(str('['), ws, repsep(type, read1(' \t\r\n,'), 'allow'), ws, str(']'), opt(str('[]'))), ([, , types, , , arr]) => {
     return { type: arr ? 'tuple[]' : 'tuple', types } as Schema;
   });
   const maybe_union = map(rep1sep(seq(alt<Schema>(value, object, tuple, literal, ref), conditions), seq(ws, str('|'), ws), 'disallow'), list => {
