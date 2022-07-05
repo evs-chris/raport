@@ -87,7 +87,7 @@ export function validate(value: any, schema: Schema|string, mode?: 'strict'|'mis
   return _validate(value, schema, mode, '', ctx);
 }
 
-function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose', path: string, ctx: Context): ValidationResult {
+function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose', path: string, ctx: Context, required?: boolean): ValidationResult {
   schema = schema || {};
   let _schema = schema;
   const errs: ValidationError[] = [];
@@ -100,7 +100,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
   }
   let { checks } = _schema;
   const { type, fields, rest, types, literal } = _schema;
-  if (!checkType(value, schema.type === 'array' ? 'array' : type, literal)) return [{ error: `type mismatch for '${type}'`, actual: unparseSchema(inspect(value)), value, path, expected: unparseSchema(_schema, true) }];
+  if (!checkType(value, schema.type === 'array' ? 'array' : type, literal, required)) return [{ error: `type mismatch for${required ? ' required' : ''} '${type}'`, actual: unparseSchema(inspect(value)), value, path, expected: unparseSchema(_schema, true) }];
 
   if (_schema !== schema && schema.checks) {
     if (!checks) checks = schema.checks;
@@ -160,15 +160,15 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
       if (fields) {
         for (const f of fields) {
           if (f.required && !(f.name in v)) errs.push({ error: `requried field ${f.name} is missing`, path: join(p, f.name) });
-          else if (f.name in v && (tmp = _validate(v[f.name], f, mode, join(p, f.name), extend(ctx, { value: v[f.name], path: join(p, f.name) }))) !== true) errs.push.apply(errs, tmp);
+          else if (v && f.name in v && (tmp = _validate(v[f.name], f, mode, join(p, f.name), extend(ctx, { value: v[f.name], path: join(p, f.name) }), f.required)) !== true) errs.push.apply(errs, tmp);
         }
       }
-      if (rest) {
+      if (rest && v) {
         for (const k in v) {
           if (fields && fields.find(f => f.name === k)) continue;
           if (v[k] != null && (tmp = _validate(v[k], rest, mode, join(p, k), extend(ctx, { value: v[k], path: join(p, k) }))) !== true) errs.push.apply(errs, tmp);
         }
-      } else if (mode === 'strict') {
+      } else if (mode === 'strict' && v) {
         for (const k in v) if (v[k] != null && !fields || !fields.find(f => f.name === k)) errs.push({ error: `unknown field ${k}`, path: p, type: 'strict', value: v[k] });
       }
     }
@@ -187,7 +187,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
 }
 
 const values = ['string', 'number', 'boolean', 'object'];
-export function checkType(value: any, type?: Type, literal?: any): boolean {
+export function checkType(value: any, type?: Type, literal?: any, required?: boolean): boolean {
   switch (type || 'any') {
     case 'any':
     case 'union':
@@ -207,11 +207,11 @@ export function checkType(value: any, type?: Type, literal?: any): boolean {
     case 'number': return typeof value === 'number';
     case 'boolean': return typeof value === 'boolean';
     case 'date': return isDate(value);
-    case 'object': return !Array.isArray(value) && typeof value === 'object';
+    case 'object': return !Array.isArray(value) && typeof value === 'object' && (!required || value != null);
     case 'string[]': return Array.isArray(value) && value.reduce((a, c) => a && typeof c === 'string', true);
     case 'number[]': return Array.isArray(value) && value.reduce((a, c) => a && typeof c === 'number', true);
     case 'boolean[]': return Array.isArray(value) && value.reduce((a, c) => a && typeof c === 'boolean', true);
     case 'date[]': return Array.isArray(value) && value.reduce((a, c) => a && isDate(c), true);
-    case 'object[]': return Array.isArray(value) && value.reduce((a, c) => a && !Array.isArray(c) && typeof c === 'object', true);
+    case 'object[]': return Array.isArray(value) && value.reduce((a, c) => a && !Array.isArray(c) && typeof c === 'object' && (!required || c != null), true);
   }
 }
