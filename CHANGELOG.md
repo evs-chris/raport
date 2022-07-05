@@ -1,3 +1,25 @@
+## 0.10.14
+
+2022-07-05
+
+### Data
+
+* __BREAKING BUG__: The schema validator no longer considers a required object key to be valid if it is nullish, unless null is explicitly allowed in a type union.
+* __BUG__: Relative dates will now satisfy the schema validator when it requires a date.
+* `inspect` is now exposed as a built-in operator to allow generating a schema from an existing set of data.
+
+### Parser
+
+* __BREAKING BUG__: Built-in alpha operators and keywords are no longer considered valid reference names. This avoids strange parsing errors with what appears to be valid syntax.
+* __BUG__: Trailing separators are now allowed in tuples.
+* The parser now supports single-line-style comments before most expressions e.g. `// this is a comment`. Comments always apply to the succeeding expression, and the formatter makes this clear by adding a line before the comment.
+
+### Designer
+
+* The designer now supports more `fmt` options.
+* The eval pane can now be expanded up using the additional arrow to the left of the original to allow editing more complex expressions.
+
+
 ## 0.10.13
 
 2022-05-05
