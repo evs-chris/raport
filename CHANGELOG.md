@@ -1,3 +1,17 @@
+## 0.10.15
+
+2022-07-21
+
+### Data
+
+* There is a new built-in `pipe` operator that can automatically pipeline operaions. The first argument is evaluated, the result is passed to the second argument and evaluated, the result is passed to the next argument and evaluated, and so forth until the last argument, the result of which is the value returned from the pipe operation. Application arguments are automatically passed the piped value. Operations that don't reference the new special `@pipe` reference or its shorthand `_` will have their argument list prepended with a reference to `@pipe`, which allows things like `pipe(some-list filter(=>age > 18) map(=>'"{name}\n{address}\n{city}, {state} {zip}"') join(','))`.
+
+### Designer
+
+* The designer now supports editing report context and exposes the report context to evaluated expressions and report runs.
+* The designer will now persist the current report definition between reloads. It will also persist the current eval expression if it's not linked to something, like a widget or data source, and the bottom pane state (open, maximized). There is a half-second window before the state loads, and if the state is not loaded before a subsequent refresh, it will be cleared.
+
+
 ## 0.10.14
 
 2022-07-05
