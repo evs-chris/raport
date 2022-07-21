@@ -22,15 +22,39 @@
             report: index.ReportDesigner,
         },
         on: {
-            'report.init'(ctx) {
-                globalThis.cmp = ctx.component;
-            },
             'report.running'() {
                 console.time('run');
             },
             'report.run'() {
                 console.timeEnd('run');
-            }
+            },
+            init() {
+                setTimeout(() => {
+                    const json = window.sessionStorage.getItem('load') || '{}';
+                    try {
+                        const load = JSON.parse(json);
+                        if (load.report && (load.report.widgets.length || Object.keys(load.report.context).length))
+                            this.report.set('report', load.report);
+                        if (load.expr)
+                            this.report.set('temp.expr.str', load.expr);
+                        this.report.set('show.bottom', load.bottom);
+                        this.report.set('max.bottom', load.max);
+                        this.set('loaded', true);
+                    }
+                    catch (_a) { }
+                }, 500);
+                window.addEventListener('beforeunload', () => {
+                    if (this.get('loaded') && this.report) {
+                        const load = { report: this.report.get('report'), bottom: this.report.get('show.bottom'), max: this.report.get('max.bottom') };
+                        if (!this.report.get('temp.expr.path'))
+                            load.expr = this.report.get('temp.expr.str');
+                        window.sessionStorage.setItem('load', JSON.stringify(load));
+                    }
+                    else {
+                        window.sessionStorage.clear();
+                    }
+                });
+            },
         }
     });
     const app = globalThis.app = new App({
