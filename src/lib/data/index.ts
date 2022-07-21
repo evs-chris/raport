@@ -119,6 +119,13 @@ export interface Group<R = any> {
 }
 
 // eval
+export function getKeypath(ref: Reference): Keypath {
+  if (typeof ref.r === 'object') return ref.r;
+  const path = parsePath(ref.r);
+  if ('k' in path) return path;
+  else return { k: [] };
+}
+
 export function safeGet(root: Context, path: string|Keypath): any {
   if (!path) return root.value;
   const p = typeof path === 'string' ? parsePath(path) : path;
@@ -164,8 +171,10 @@ export function safeGet(root: Context, path: string|Keypath): any {
       }
     } else {
       const first = parts[0];
-      if (first === '_') idx++;
-      else if (typeof first === 'string') {
+      if (first === '_') {
+        if (ctx.special && ctx.special.pipe) o = ctx.special.pipe;
+        idx++;
+      } else if (typeof first === 'string') {
         let lctx = ctx;
         while (lctx && (!lctx.locals || !(first in lctx.locals))) lctx = lctx.parent;
         if (lctx && first in lctx.locals) {
@@ -454,14 +463,30 @@ function group(arr: any[], groups: Array<ValueOrExpr>, ctx: Context, level: numb
   return res;
 }
 
+function hasPipeRef(ref: Reference): boolean {
+  const path = getKeypath(ref);
+  return path.k[0] === '_' || path.p === '@' && path.k[0] === 'pipe';
+}
+
 function applyOperator(root: Context, operation: Operation): any {
   const op = opMap[operation.op];
 
-  // if the operator doesn't exist, try a local or skip
+  // if the operator doesn't exist, try a local, pipe, or skip
   if (!op) {
     const local = safeGet(root, operation.op);
     if (local && typeof local === 'object' && 'a' in local) {
       return evalApply(root, local, operation.args.map(a => evalParse(root, a)));
+    } else if (operation.op === 'pipe') { // handle the special built-in pipe operator
+      if (!operation.args || !operation.args.length) return true;
+      let v = evalParse(root, operation.args[0]);
+      for (let i = 1; i < operation.args.length; i++) {
+        let a = operation.args[i];
+        if (isOperation(a) && (!a.args || !a.args.find(a => isReference(a) && hasPipeRef(a)))) a = Object.assign({}, a, { args: [{ r: { k: ['pipe'], p: '@' } } as ValueOrExpr].concat(a.args || []) });
+        
+        if (isApplication(a)) v = evalApply(root, a, [v]);
+        else v = evalParse(extend(root, { special: { pipe: v } }), a);
+      }
+      return v;
     }
     return true;
   }
@@ -523,6 +548,14 @@ export function isKeypath(v: any): v is string|Keypath {
 
 export function isLiteral(v: any): v is Literal {
   return typeof v === 'object' && 'v' in v;
+}
+
+export function isReference(v: any): v is Reference {
+  return typeof v === 'object' && 'r' in v;
+}
+
+export function isOperation(v: any): v is Operation {
+  return typeof v === 'object' && typeof v.op === 'string';
 }
 
 export interface Reference { r: string|Keypath; c?: string[] };

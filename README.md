@@ -150,12 +150,14 @@ There are a number of special references that are context-specific:
 | `@value` | any | The value of the current context. This is useful for passing the whole value of a context as an argument. |
 | `_` | any | Sugar for `@value` |
 | `_` | case condition | Sugar for `@case` |
+| `_` | pipe arguments | Sugar for `@pipe` |
 | `@index` | repeater | The index of the nearest repeater iteration. |
 | `@group` | repeater | The nearest group by value, if any. |
 | `@level` | repeater | The nearest group level, if any. |
 | `@source` | repeater | The nearest repeater source, if any. |
 | `@values` | repeater | An object with keys pointing to an array of values collected from labels in the repeater ids mapping to keys. |
-| `@case` | case | The value that is being checked against the conditional branches. |
+| `@case` | case condition | The value that is being checked against the conditional branches. |
+| `@pipe` | pipe arguments | The value from the previous piped argument. |
 | `@sources` | any | The root context sources. |
 | `@parameters` | any | The root context parameters. |
 | `@local`| any | The locals for the immediate context. |
@@ -285,6 +287,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `padl` | `string, number, string?` | `string` | Pads the given string to the given number of characters by adding the last argument or a space to the left side if necessary. |
 | `padr` | `string, number, string?` | `string` | Pads the given string to the given number of characters by adding the last argument or a space to the right side if necessary. |
 | `parse` | `string, opts` | `any` | Parses the given string with a Raport parser, which can be controlled by the options given. If any of `date`, `template`, `time`, `expr`, or `schema` is truthy, then that parser will be used. Otherwise, the default Raport parser will be used, so to use the `schema` parser, you could call `parse('string|number' schema:1)`. |
+| `pipe` | `...any` | `any` | This is a special built-in operator that evaluates its first argument, supplies that as an input to the next argument, supplies that result as an input to the next argument, and so on until the result of the last argument evaluation is returned. If any argument is an operation that does not reference `@pipe` or `_` as one of its arguments, then `@pipe` will be added as the first argument of that operation. Arguments that are applications are automatically applied with the piped value. |
 | `pow` | `...number` | `number` | This is an alias for `**`. |
 | `rand` | `number?, number\|boolean?, number?` | `number` | Returns a random number. If one `number` param is passed, the result will be an integer between 1 and the given number, inclusive. If the second param is `true`, the number will be a float. If the second arg is a `number`, the result will be an integer between the first number and second number, inclusive. If two numbers and `true` are passed, the result will be a float. |
 | `reduce` | aggregate, `application, any` | `any` | This is equivalent to a JS array.reduce, where the application will probably use named locals e.g. `reduce([1 2 3] [sum num]=>sum + num 0)` which results in `6`. |
