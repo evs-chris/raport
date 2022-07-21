@@ -1,0 +1,24 @@
+<div class="delimited paper">
+  <input type="file" style="display: none;" id="context-file" accept="application/json" />
+  <div class-definition>
+    <div class-actions>
+      <button class="ico text" class-spacer on-click="@.loadContextFile()" title="Import context from a file">Load</button>
+    </div>
+    <div class-json>
+      <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-input-invalidate="@.autosize(@node)" on-change="@.tryContext(@node.value)" as-tracked=`_contextText`></textarea></div></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .report-context .paper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tab.report-context {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

@@ -55,6 +55,7 @@ export class Designer extends Ractive {
   _redo: string[] = [];
   _undoWatch: ObserverHandle;
   _importText: HTMLTextAreaElement;
+  _contextText: HTMLTextAreaElement;
   _inited = false;
 
   addWidget(type: string) {
@@ -73,7 +74,7 @@ export class Designer extends Ractive {
 
   async run() {
     const report: Report = this.get('report');
-    const ctx = new Root({}, { parameters: this.get('params') });
+    const ctx = new Root(cloneDeep(report.context), { parameters: this.get('params') });
     const srcs = await this.buildSources();
     let text: string;
     this.fire('running');
@@ -446,8 +447,8 @@ export class Designer extends Ractive {
   }
 
   async buildRoot(): Promise<Root> {
-    const res = new Root({}, { parameters: this.get('params') });
     const report: Report = this.get('report');
+    const res = new Root(cloneDeep(report.context), { parameters: this.get('params') });
     const srcs = await this.buildSources();
     applySources(res, report.sources || [], srcs);
     for (const src of report.sources || []) {
@@ -725,6 +726,37 @@ export class Designer extends Ractive {
     } else {
       this.set('data.data', str);
     }
+  }
+
+  loadContextFile() {
+    const input: HTMLInputElement = this.find('#context-file') as any;
+    let load: () => void;
+    load = () => {
+      input.removeEventListener('change', load);
+      if (input.files.length) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = txt => this.tryContext(txt.target.result as string);
+        reader.readAsText(file);
+      }
+    }
+    input.addEventListener('change', load);
+    input.click();
+  }
+
+  tryContext(str: string) {
+    if (!str) return;
+    let ctx: any;
+    try {
+      ctx = JSON.parse(str);
+    } catch {
+      try {
+        ctx = evaluate({}, str);
+      } catch {
+        ctx = {};
+      }
+    }
+    this.set('report.context', ctx);
   }
 
   setHTMLFontSize() {
@@ -1205,6 +1237,18 @@ Ractive.extendWith(Designer, {
         else this.set('projectChanged', false);
       }, 1000),
     },
+    'report.context'(v: any) {
+      if (!this._contextText) return;
+      const target = JSON.stringify(v || {}, null, 2);
+      let str = this._contextText.value;
+      try {
+        str = JSON.stringify(JSON.parse(str), null, 2);
+      } catch {}
+      if (str !== target) {
+        this._contextText.value = target;
+        this.autosize(this._contextText);
+      }
+    },
   },
   on: {
     init() {
@@ -1462,6 +1506,14 @@ Ractive.extendWith(Designer, {
 function tryJSON(str: string): any {
   try {
     return JSON.parse(str);
+  } catch {
+    return {};
+  }
+}
+
+function cloneDeep(v: any): any {
+  try {
+    return JSON.parse(JSON.stringify(v));
   } catch {
     return {};
   }

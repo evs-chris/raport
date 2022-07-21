@@ -3,10 +3,11 @@
   <div class=layout on-keys('z', { ctrl: true })="@.undo(), true" on-keys('Z', { ctrl: true, shift: true })="@.redo(), true" class-pad-me="~/show.pad">
     <div class="design actions">
       <button disabled="{{report.type === 'delimited' && report.sources.length !== 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>{{>play}}</button>
-      <button on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">Designer</button>
+      <button on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'context' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">Designer</button>
       {{#if result}}
         <button on-click="@.set('tab', 'result')" class-tab class-active="tab === 'result'">Output</button>
       {{/if}}
+      <button on-click="@.set('tab', 'context')" class-tab class-active="tab === 'context'">Context</button>
       <button on-click="@.set('tab', 'definition')" class-tab class-active="tab === 'definition'">Definition</button>
       {{#if data && @.readLink('data')}}
         <button on-click="@.set('tab', 'import')" class-tab class-active="tab === 'import'">Import Data</button>
@@ -20,8 +21,11 @@
         <button on-click="@.set('tab', 'project')" class-tab class-active="tab === 'project'">{{~/showProjects ? 'Project' : 'Settings'}}</button>
       </div>
     </div>
-    <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">
+    <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'context' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">
       {{>design}}
+    </div>
+    <div class-tab class-report-context class-active-tab="tab === 'context'">
+      {{>context}}
     </div>
     <div class-tab class-report-definition class-active-tab="tab === 'definition'">
       {{>definition}}
@@ -47,6 +51,7 @@
 
 <template id="left" src="./Report/left.ractive.html" />
 <template id="design" src="./Report/design.ractive.html" />
+<template id="context" src="./Report/context.ractive.html" />
 <template id="definition" src="./Report/definition.ractive.html" />
 <template id="data-import" src="./Report/import.ractive.html" />
 <template id="project" src="./Report/project.ractive.html" />
