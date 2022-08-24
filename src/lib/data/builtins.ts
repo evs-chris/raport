@@ -655,7 +655,7 @@ registerOperator(
   }),
   simple(['date'], (_name: string, args: any[], ctx): Date|DateRel => {
     let [v, t] = args;
-    let opts = args.slice(-1)[0] || {};
+    let opts = (args.length > 1 ? args.slice(-1)[0] : false) || {};
     if (typeof opts !== 'object') opts = {};
 
     let res: Date|DateRel;
