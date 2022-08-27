@@ -1059,7 +1059,7 @@ registerFormat('trim', n => {
 
 {
   const space = /\s+/g;
-  const br = /\b\w/g;
+  const br = /[\s;,.:"]\w/g;
   const alphaNum = /[^a-zA-Z0-9]+([a-zA-Z0-9])/g;
   const alphaNumSpace = /[^\sa-zA-Z0-9]/g;
   const camelBreak = /([a-z])([A-Z])/g;
@@ -1083,6 +1083,7 @@ registerFormat('trim', n => {
       } else if (which === 'proper') {
         if (/[a-z]/.test(str)) str = str.trim().replace(br, m => m.toUpperCase());
         else str = str.toLowerCase().trim().replace(br, m => m.toUpperCase());
+        str = (str[0] || '').toUpperCase() + str.substr(1);
       }
     }
     return str;
