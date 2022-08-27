@@ -501,7 +501,7 @@ registerOperator(
 
 // math
 registerOperator(
-  simple(['+'], (_name: string, values: any[]): number|string => {
+  simple(['+', 'add'], (_name: string, values: any[]): any => {
     if (values.length === 1) {
       if (isDateRel(values[0])) return +dateRelToDate(values[0]);
       else if (!values[0]) return 0;
@@ -522,7 +522,7 @@ registerOperator(
     if (match = hasNum.exec(v)) return +match[1];
     return parseInt(v);
   }),
-  simple(['-'], (_name: string, values: any[]): number => {
+  simple(['-', 'subtract'], (_name: string, values: any[]): number => {
     const first = values.shift();
     if (isDateRel(first)) {
       if (values.reduce((a, c) => a && isDateRel(c), true)) return values.reduce((a, c) => a - +dateRelToDate(c), +dateRelToDate(first));
@@ -530,7 +530,7 @@ registerOperator(
     }
     return values.reduce((a, c) => a - (!isNum(c) ? 0 : +c), !isNum(first) ? 0 : +first);
   }),
-  simple(['*'], (_name: string, values: any[]): number|string => {
+  simple(['*', 'multiply'], (_name: string, values: any[]): number|string => {
     const first = values.shift();
     if (!isNum(first)) {
       if (typeof first === 'string' && values.length === 1 && isNum(values[0]) && +values[0] > 0) {
@@ -542,13 +542,13 @@ registerOperator(
     }
     return values.reduce((a, c) => a * (!isNum(c) ? 0 : +c), +first);
   }),
-  simple(['/', '/%'], (name: string, values: any[]): number => {
+  simple(['/', '/%', 'divide', 'intdiv'], (name: string, values: any[]): number => {
     const first = values.shift();
     if (isNaN(first)) return 0;
-    if (name.length > 1) return values.reduce((a, c) => Math.floor(a / (isNaN(c) ? 1 : +c)), +first);
+    if (name.length > 1 || name === 'intdiv') return values.reduce((a, c) => Math.floor(a / (isNaN(c) ? 1 : +c)), +first);
     else return values.reduce((a, c) => a / (isNaN(c) ? 1 : +c), +first);
   }),
-  simple(['%'], (_name: string, values: any[]): number => {
+  simple(['%', 'modulus'], (_name: string, values: any[]): number => {
     const first = values.shift();
     return values.reduce((a, c) => a % (isNaN(c) ? 1 : +c), isNaN(first) ? 0 : +first);
   }),
