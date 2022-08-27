@@ -1000,8 +1000,8 @@ function fmtDate(n: any, fmt: string): string {
 }
 
 // basic formats
-registerFormat('dollar', (n, [dec, sign]) => {
-  return dollar(n, undefined, dec, sign);
+registerFormat('dollar', (n, [dec, sign, neg]) => {
+  return dollar(n, undefined, dec, sign, neg);
 });
 
 registerFormat('date', (n, [fmt]) => {
@@ -1028,8 +1028,8 @@ registerFormat(['integer', 'int'], (n, [group]) => {
   return number(n, 0, group);
 });
 
-registerFormat(['number', 'num'], (n, [dec, group]) => {
-  return number(n, dec, group);
+registerFormat(['number', 'num'], (n, [dec, group, neg]) => {
+  return number(n, dec, group, neg);
 });
 
 registerFormat('ordinal', (n, [group]) => {

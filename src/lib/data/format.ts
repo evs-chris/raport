@@ -4,18 +4,20 @@ const decRE = /(\d)(?=(\d{3})+\.)/g;
 const intRE = /(\d)(?=(\d{3})+$)/g;
 const isNumRE = /^[-0-9\\.,]+$/;
 
-export function number(v: string|number, dec: number = 2, group: string = ','): string {
+export function number(v: string|number, dec: number = 2, group: string = ',', negative: 'sign'|'wrap'|'both' = 'sign'): string {
   v = typeof v !== 'number' ? parseFloat(v || '') : v;
   if (isNaN(v)) return '';
+  const neg = v < 0;
   v = v.toFixed(dec);
   if (dec === 0) v = v.replace(/\..*/, '');
+  if (neg && negative !== 'sign') v = `(${negative === 'both' ? v : v.substr(1)})`
   if (group) return v.replace(v.indexOf('.') === -1 ? intRE : decRE, `$1${group}`);
   else return v;
 }
 
-export function dollar(v: string, alt: string, dec: number = 2, group: string = ',', sign: string = '$'): string {
-  if (v && isNumRE.test(v)) {
-    if (+v > 0) return `${sign}${number(v, dec, group)}`;
+export function dollar(v: string, alt: string, dec: number = 2, group: string = ',', sign: string = '$', negative: 'sign'|'wrap'|'both' = 'sign'): string {
+  if (v != null && isNumRE.test(v)) {
+    if (!isNaN(+v)) return `${sign}${number(v, dec, group, negative)}`;
     else return alt !== undefined ? alt : v;
   } else {
     return alt !== undefined ? alt : v;
