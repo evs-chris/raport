@@ -145,7 +145,7 @@ export class Designer extends Ractive {
     else if (typeof w.height === 'object' && 'percent' in w.height && w.height.percent) return `${w.height.percent}%`;
     else if (w.type === 'label') {
       let n = 1;
-      if (w.font && w.font.size > n) n = w.font.size;
+      if (w.font && !isComputed(w.font.size) && w.font.size > n) n = w.font.size;
       if (Array.isArray(w.text)) {
         for (let i = 0; i < w.text.length; i++) {
           if (typeof w.text[0] === 'object' && w.text[0].font && w.text[0].font.size > n) n = w.text[0].font.size;
@@ -209,12 +209,12 @@ export class Designer extends Ractive {
   calcFont(w: Widget): string {
     const f = w.font;
     let res = '';
-    if (f.size) res += `font-size: ${f.size}rem;`;
-    if (f.line) res += `line-height: ${f.line}rem;`;
-    if (f.align) res += `text-align: ${f.align};`;
-    if (f.color) res += `color: ${f.color} !important;`;
-    if (f.family) res += `font-family: ${f.family};`;
-    if (f.weight) res += `font-weight: ${f.weight};`;
+    if (f.size && !isComputed(f.size)) res += `font-size: ${f.size}rem;`;
+    if (f.line && !isComputed(f.line)) res += `line-height: ${f.line}rem;`;
+    if (f.align && !isComputed(f.align)) res += `text-align: ${f.align};`;
+    if (f.color && !isComputed(f.color)) res += `color: ${f.color} !important;`;
+    if (f.family && !isComputed(f.family)) res += `font-family: ${f.family};`;
+    if (f.weight && !isComputed(f.weight)) res += `font-weight: ${f.weight};`;
     if (f.right) res += `padding-right: ${f.right}rem;`;
     return res;
   }
@@ -229,7 +229,6 @@ export class Designer extends Ractive {
     if (y < 0) res += `margin-top: calc(100% - ${height} - ${-y - 1}rem); margin-bottom: ${-y - 1}rem;`;
     else res += `margin-top: ${y}rem;`
     return res;
-    return `margin-left: ${x}rem; margin-top: ${y}rem; margin-right: calc(${-x}rem - ${width})`;
   }
 
   split(path: string, pop?: number, ...add: string[]): string[] {

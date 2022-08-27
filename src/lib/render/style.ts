@@ -1,5 +1,5 @@
 import { Borders, Font, Placement, Widget } from '../report';
-import { expandMargin, getHeightWithMargin, getWidth, getWidthWithMargin, getHeight, RenderContext } from './index';
+import { expandMargin, getHeightWithMargin, maybeComputed, getWidthWithMargin, getHeight, RenderContext } from './index';
 import { evaluate, ValueOrExpr } from '../data/index';
 
 export interface StyleOptions {
@@ -7,7 +7,6 @@ export interface StyleOptions {
   container?: boolean;
   lineSize?: boolean;
   font?: Font;
-
 }
 
 export function nextStyleId(ctx: RenderContext, prefix: string): number {
@@ -46,7 +45,10 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   if (opts && opts.container && opts.computedHeight) i = `height:${h}rem;`;
   else s += `height:${h}rem;`;
 
-  s += `${!opts || !opts.container || (w.font && w.font.line) ? `line-height:${(w.font && w.font.line || w.font && w.font.size) || getHeight(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize)}rem;` : ''}`;
+  const line = w.font && maybeComputed(w.font.size, context);
+  const size = w.font && maybeComputed(w.font.size, context);
+
+  s += `${!opts || !opts.container || line ? `line-height:${(line || size) || getHeight(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize)}rem;` : ''}`;
 
   if (w.margin) {
     const m = expandMargin(w, context, placement);
@@ -55,24 +57,32 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
     s += `padding-right:${w.font.right}rem;`;
   }
   
-  if ((opts && opts.font) || w.font) s += styleFont((opts && opts.font) || w.font);
+  if ((opts && opts.font) || w.font) s += styleFont((opts && opts.font) || w.font, context);
   if (w.border) s += styleBorder(w.border, context);
 
   return [s, i];
 }
 
-export function styleFont(f: Font): string {
+export function styleFont(f: Font, context: RenderContext): string {
   if (!f) return '';
+  let t: any;
+  let size: any;
   let s = '';
-  if (f.family) s += `font-family:${f.family};`;
-  if (f.color) s += `color:${f.color};`;
-  if (f.align) s += `text-align:${f.align};`;
-  if (f.line === 0) s += `line-height:initial;`;
-  else if (f.line == null && f.size) s += `line-height:${f.size}rem;`;
-  if (f.size) s += `font-size:${f.size}rem;`;
-  if (f.weight) s += `font-weight:${f.weight};`;
-  if (f.pre) s += `white-space:pre-wrap;`;
-  if (f.clamp) s += `white-space:nowrap;overflow:hidden;`;
+  if (t = maybeComputed(f.family, context)) s += `font-family:${t};`;
+  if (t = maybeComputed(f.color, context)) s += `color:${t};`;
+  if (t = maybeComputed(f.align, context)) s += `text-align:${t};`;
+  if (t = maybeComputed(f.size, context)) {
+    s += `font-size:${t}rem;`;
+    size = t;
+  }
+  if (t = maybeComputed(f.line, context)) {
+    if (t === 0) s += `line-height:initial;`;
+    else if (t != null) s += `line-height:${t}rem`;
+    else if (size) s += `line-height:${size}rem;`;
+  }
+  if (t = maybeComputed(f.weight, context)) s += `font-weight:${t};`;
+  if (t = maybeComputed(f.pre, context)) s += `white-space:pre-wrap;`;
+  if (t = maybeComputed(f.clamp, context)) s += `white-space:nowrap;overflow:hidden;`;
   return s;
 }
 

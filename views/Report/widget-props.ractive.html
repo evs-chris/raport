@@ -15,7 +15,7 @@
     {{/if}}
   </span>
 </label>
-<label><span title="Height of the {{.type}} in rem, if a number, a percentage of the parent, or an expression, fill/grow, default to{{#if type === 'label'}}the largest font size or{{/if}} 1">Height
+<label><span title="Height of the {{.type}} in rem, if a number, a percentage of the parent, or an expression, fill/grow, default to{{#if type === 'label'}}the largest font size or{{/if}} 1">Height <button class-hide />
     <button class-ico on-click="@context.set('.height', typeof .height === 'number' || .height  === undefined ? { percent: .height } : typeof .height === 'object' && 'percent' in .height ? { x: '' } : typeof .height === 'object' && 'x' in .height ? 'grow' : .height.percent)" title="{{typeof .height === 'number' || .height  === undefined ? 'Change to percent' : typeof .height === 'object' && 'percent' in .height ? 'Change to Expression' : typeof .height === 'object' && 'x' in .height ? 'Change to Fill/Grow' : 'Change to REM'}}">
       {{>switch}}
     </button>
@@ -38,10 +38,10 @@
     <label><span>X</span><span><input type="number" value="{{.layout[@.lastKey(~/temp.widget)][0]}}" /></span></label>
     <label><span>Y</span><span><input type="number" value="{{.layout[@.lastKey(~/temp.widget)][1]}}" /></span></label>
   {{else}}
-    <label><span title="Cause the next widget to start on the next line in an automatic layout">Break? <button class-ico on-click="@context.set('^^/br', typeof ^^/br === 'object' ? false : { x: ''})" title="{{typeof ^^/br === 'object' ? 'Change to Boolean' : 'Change to Expression'}}">
+    <label><span title="Cause the next widget to start on the next line in an automatic layout">Break? <button class-hide /><button class-ico on-click="@context.set('^^/br', typeof ^^/br === 'object' ? false : { x: ''})" title="{{typeof ^^/br === 'object' ? 'Change to Boolean' : 'Change to Expression'}}">
     {{>switch}}
-    {{#if typeof ^^/br === 'object' && 'x' in ^^/br}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('^^/br.x'), false">{{>pencil}}</button>{{/if}}
-  </button></span><span>
+    </button>{{#if typeof ^^/br === 'object' && 'x' in ^^/br}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('^^/br.x'), false">{{>pencil}}</button>{{/if}}
+  </span><span>
       {{#if typeof ^^/br !== 'object'}}
         <input type=checkbox checked="{{^^/br}}" />
       {{elseif typeof ^^/br === 'object'}}
@@ -50,12 +50,12 @@
     </span></label>
   {{/if}}
 {{/with}}
-<label><span title="If this evaluates to true, the widget will be hidden and not affect automatic layouts">Hidden <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')">{{>pencil}}</button></span><span>
+<label><span title="If this evaluates to true, the widget will be hidden and not affect automatic layouts">Hidden <button class-hide /><button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')">{{>pencil}}</button></span><span>
     <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.hide}} tabout /></div>
   </span></label>
 <label><span>
     Margin
-    {{#if typeof .margin === 'object' && 'x' in .margin}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.margin.x'), false">{{>pencil}}</button>{{/if}}
+    {{#if typeof .margin === 'object' && 'x' in .margin}}<button class-hide /><button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.margin.x'), false">{{>pencil}}</button>{{/if}}
   </span><span>
   <div class=toggles>
     <span class-toggle class-active="typeof .margin === 'undefined'" {{#if typeof .margin !== 'undefined'}}on-click="@context.set('.margin', undefined)"{{/if}}>None</span>
@@ -89,7 +89,7 @@
     <option value="expand">Expand</option>
   </select>
 </span></label>
-<label><span>Border {{#if typeof .border === 'string'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.border')">{{>pencil}}</button>{{/if}}</span><span>
+<label><span>Border {{#if typeof .border === 'string'}}<button class-hide /><button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.border')">{{>pencil}}</button>{{/if}}</span><span>
   <div class=toggles>
     <span class-toggle class-active="typeof .border === 'undefined'" {{#if typeof .border !== 'undefined'}}on-click="@context.set('.border', undefined)"{{/if}}>None</span>
     <span class-toggle class-active="typeof .border === 'number'" {{#if typeof .border !== 'number'}}on-click="@context.set('.border', 1)"{{/if}}>Bottom</span>
@@ -119,36 +119,96 @@
   {{/if}}
 </span></label>
 {{#if .type !== 'image'}}
-<label><span>Alignment</span><span>
-  <select value="{{.font.align}}">
-    <option value="{{undefined}}">(default)</option>
-    <option>left</option>
-    <option>center</option>
-    <option>right</option>
-  </select>
+<label><span>Alignment <button class-hide /><button class-ico on-click="@context.set('.font.align', typeof .font.align === 'object' ? undefined : { x: '' })" title="{{typeof .font.align === 'object' ? 'Change to value' : 'Change to Expression'}}">
+      {{>switch}}
+    </button>{{#if typeof .font.align === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.font.align.x')">{{>pencil}}</button>{{/if}}</span><span>
+  {{#if typeof .font.align === 'object'}}
+    <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.font.align.x}} tabout /></div>
+  {{else}}
+    <select value="{{.font.align}}">
+      <option value="{{undefined}}">(default)</option>
+      <option>left</option>
+      <option>center</option>
+      <option>right</option>
+    </select>
+  {{/if}}
 </span></label>
 {{/if}}
 {{#unless .type === 'measured' || .type === 'image'}}
-<label><span title="Display all whitespace, including newlines, within the content of the {{.type}}?">Significant Space?</span><span><input type=checkbox twoway=false checked="{{.font.pre}}" on-change="@context.set('.font.pre', @node.checked ? true : undefined)" /></span></label>
+<label><span title="Display all whitespace, including newlines, within the content of the {{.type}}?">Significant Space?  <button class-hide /><button class-ico on-click="@context.set('.font.pre', typeof .font.pre === 'object' ? undefined : { x: '' })" title="{{typeof .font.pre === 'object' ? 'Change to value' : 'Change to Expression'}}">
+      {{>switch}}
+    </button>{{#if typeof .font.pre === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.font.pre.x')">{{>pencil}}</button>{{/if}}</span><span>
+    {{#if typeof .font.pre === 'object'}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.font.pre.x}} tabout /></div>
+    {{else}}
+      <input type=checkbox twoway=false checked="{{.font.pre}}" on-change="@context.set('.font.pre', @node.checked ? true : undefined)" />
+    {{/if}}
+  </span></label>
 {{/unless}}
 {{#if .type !== 'image'}}
-<label><span>Prevent Overflow?</span><span><input type=checkbox twoway=false checked="{{.font.clamp}}" on-change="@context.set('.font.clamp', @node.checked ? true : undefined)" /></span></label>
-<label><span>Text Size</span><span><input type=number value="{{.font.size}}" /></span></label>
+<label><span>Prevent Overflow? <button class-hide /><button class-ico on-click="@context.set('.font.clamp', typeof .font.clamp === 'object' ? undefined : { x: '' })" title="{{typeof .font.clamp === 'object' ? 'Change to value' : 'Change to Expression'}}">
+      {{>switch}}
+    </button>{{#if typeof .font.clamp === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.font.clamp.x')">{{>pencil}}</button>{{/if}}</span><span>
+    {{#if typeof .font.clamp === 'object'}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.font.clamp.x}} tabout /></div>
+    {{else}}
+      <input type=checkbox twoway=false checked="{{.font.clamp}}" on-change="@context.set('.font.clamp', @node.checked ? true : undefined)" />
+    {{/if}}
+  </span></label>
+<label><span>Text Size <button class-hide /><button class-ico on-click="@context.set('.font.size', typeof .font.size === 'object' ? undefined : { x: '' })" title="{{typeof .font.size === 'object' ? 'Change to value' : 'Change to Expression'}}">
+      {{>switch}}
+    </button>{{#if typeof .font.size === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.font.size.x')">{{>pencil}}</button>{{/if}}</span><span>
+    {{#if typeof .font.size === 'object'}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.font.size.x}} tabout /></div>
+    {{else}}
+      <input type=number value="{{.font.size}}" />
+    {{/if}}
+  </span></label>
 {{/if}}
 {{#unless .type === 'measured' || .type === 'image'}}
-<label><span>Line Height</span><span><input type=number value="{{.font.line}}" /></span></label>
+<label><span>Line Height <button class-hide /><button class-ico on-click="@context.set('.font.line', typeof .font.line === 'object' ? undefined : { x: '' })" title="{{typeof .font.line === 'object' ? 'Change to value' : 'Change to Expression'}}">
+      {{>switch}}
+    </button>{{#if typeof .font.line === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.font.line.x')">{{>pencil}}</button>{{/if}}</span><span>
+    {{#if typeof .font.line === 'object'}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.font.line.x}} tabout /></div>
+    {{else}}
+      <input type=number value="{{.font.line}}" />
+    {{/if}}
+  </span></label>
 {{/unless}}
 {{#if .type !== 'image'}}
-<label><span>Font Family</span><span><input value="{{.font.family}}" /></span></label>
-<label><span>Text Color</span><span><input value="{{.font.color}}" /></span></label>
-<label><span>Weight</span><span>
-  <select value="{{.font.weight}}">
-    <option value="{{undefined}}">(default)</option>
-    <option value="400">light</option>
-    <option value="500">normal</option>
-    <option value="600">bold</option>
-    <option value="700">bolder</option>
-  </select>
+<label><span>Font Family <button class-hide /><button class-ico on-click="@context.set('.font.family', typeof .font.family === 'object' ? undefined : { x: '' })" title="{{typeof .font.family === 'object' ? 'Change to value' : 'Change to Expression'}}">
+      {{>switch}}
+    </button>{{#if typeof .font.family === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.font.family.x')">{{>pencil}}</button>{{/if}}</span><span>
+    {{#if typeof .font.family === 'object'}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.font.family.x}} tabout /></div>
+    {{else}}
+      <input value="{{.font.family}}" />
+    {{/if}}
+  </span></label>
+<label><span>Text Color <button class-hide /><button class-ico on-click="@context.set('.font.color', typeof .font.color === 'object' ? undefined : { x: '' })" title="{{typeof .font.color === 'object' ? 'Change to value' : 'Change to Expression'}}">
+      {{>switch}}
+    </button>{{#if typeof .font.color === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.font.color.x')">{{>pencil}}</button>{{/if}}</span><span>
+    {{#if typeof .font.color === 'object'}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.font.color.x}} tabout /></div>
+    {{else}}
+      <input value="{{.font.color}}" />
+    {{/if}}
+  </span></label>
+<label><span>Weight <button class-hide /><button class-ico on-click="@context.set('.font.weight', typeof .font.weight === 'object' ? undefined : { x: '' })" title="{{typeof .font.weight === 'object' ? 'Change to value' : 'Change to Expression'}}">
+      {{>switch}}
+    </button>{{#if typeof .font.weight === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.font.weight.x')">{{>pencil}}</button>{{/if}}</span><span>
+    {{#if typeof .font.weight === 'object'}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.font.weight.x}} tabout /></div>
+    {{else}}
+      <select value="{{.font.weight}}">
+        <option value="{{undefined}}">(default)</option>
+        <option value="400">light</option>
+        <option value="500">normal</option>
+        <option value="600">bold</option>
+        <option value="700">bolder</option>
+      </select>
+    {{/if}}
 </span></label>
 {{/if}}
 {{#if !.margin}}
@@ -211,7 +271,15 @@
   <label><span>Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text')">{{>pencil}}</button></span><span>
     <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.text}} tabout /></div>
   </span></label>
-  <label><span title="">Metric</span><span><input type="number" value="{{.font.metric}}" /></span></label>
+  <label><span title="">Metric <button class-hide /><button class-ico on-click="@context.set('.font.metric', typeof .font.metric === 'object' ? undefined : { x: '' })" title="{{typeof .font.metric === 'object' ? 'Change to value' : 'Change to Expression'}}">
+      {{>switch}}
+    </button>{{#if typeof .font.metric === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.font.metric.x')">{{>pencil}}</button>{{/if}}</span><span>
+    {{#if typeof .font.metric === 'object'}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.font.metric.x}} tabout /></div>
+    {{else}}
+      <input type="number" value="{{.font.metric}}" />
+    {{/if}}
+  </span></label>
 </template>
 
 <template id="repeater-props">

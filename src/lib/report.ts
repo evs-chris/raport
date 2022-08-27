@@ -122,15 +122,15 @@ export function pageOffset(num: number, size: PageSize): number {
 
 // Attributes
 export interface Font {
-  size?: number;
-  family?: string;
-  weight?: number;
-  color?: string;
-  align?: 'left'|'right'|'center';
-  line?: number;
+  size?: number|Computed;
+  family?: string|Computed;
+  weight?: number|Computed;
+  color?: string|Computed;
+  align?: 'left'|'right'|'center'|Computed;
+  line?: number|Computed;
   right?: number;
-  pre?: boolean;
-  clamp?: boolean;
+  pre?: boolean|Computed;
+  clamp?: boolean|Computed;
 }
 
 export interface Placement {
@@ -216,19 +216,18 @@ export interface Repeater extends Widget {
 
 export interface MeasureFont {
   /** The font family for the label. The built-in estimator only works with sans, serif, narrow, and mono fonts, which should be relatively metric-compatible with Arial, Times New Roman, Arial Narrow, and, well, any fixed-width font. */
-  family?: 'sans'|'serif'|'narrow'|'mono'|string;
+  family?: 'sans'|'serif'|'narrow'|'mono'|string|Computed;
   /** Font size in rem, where 1rem is 16px or 12pt based on the report html element style */
-  size?: number;
+  size?: number|Computed;
   /** The line-height of the rendered font in rem */
-  line?: number;
+  line?: number|Computed;
   /** Average width in px at font-size 16px. If this is supplied, it won't be guessed based on the font name. */
-  metric?: number;
+  metric?: number|Computed;
 }
 
 export interface MeasuredLabel extends Widget {
   font?: MeasureFont;
   text: ValueOrExpr;
-  metric?: number;
 }
 
 // execution
@@ -410,7 +409,7 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
   });
 
   return `<html style="font-size:100%;margin:0;padding:0;"><head><style>
-    .page { width: ${size.width - 2 * size.margin[1]}rem; height: ${size.height - 2 * size.margin[0]}rem; position: absolute; overflow: hidden; left: ${size.margin[1]}rem; top: ${size.margin[0]}rem; ${report.font ? styleFont(report.font) : ''} }
+    .page { width: ${size.width - 2 * size.margin[1]}rem; height: ${size.height - 2 * size.margin[0]}rem; position: absolute; overflow: hidden; left: ${size.margin[1]}rem; top: ${size.margin[0]}rem; ${report.font ? styleFont(report.font, ctx) : ''} }
     .page-back { width: ${size.width}rem; height: ${size.height}rem; }
     body { font-size: 0.83rem; }
     @media screen {
@@ -475,7 +474,7 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
   return `<html><head><style>
     html { font-size: 100%; margin: 0; padding: 0; }
     body { font-size: 0.83rem; padding: 0; margin: 0;${width ? ` width: ${width}rem;` : ''} }
-    #wrapper { height:${maxY}rem; position: relative; ${report.font ? styleFont(report.font) : ''} }
+    #wrapper { height:${maxY}rem; position: relative; ${report.font ? styleFont(report.font, ctx) : ''} }
     .watermark { z-index: 0; }
     .main { z-index: 5; }
     .overlay { z-index: 10; }

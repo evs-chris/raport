@@ -25,6 +25,11 @@ export function isComputed(v: any): v is Computed {
   return typeof v === 'object' && isValueOrExpr(v.x);
 }
 
+export function maybeComputed<V, T = Exclude<V, Computed>>(v: V, context: RenderContext): T {
+  if (!isComputed(v)) return v as any;
+  else if (v.x) return evaluate(context, v.x);
+}
+
 export interface ExtendOptions extends ContextExtendOptions {}
 
 export function extend(context: RenderContext, opts: ExtendOptions): RenderContext {
@@ -54,10 +59,10 @@ const avgs = {
 /** Text height measurement function for the given text, font, available width in rem, and line height in rem.
  * The text is assumed to be rendered as white-space: pre-wrap.
  */
-export function measureEstimate(text: string, width: number, font?: MeasureFont): number {
-  const family = (font && font.family) || 'sans';
-  const size = (font && font.size) || 0.83;
-  const avg = (((font && font.metric) || ((family === 'mono' || /fixed|mono/i.test(family) ? avgs.mono :
+export function measureEstimate(text: string, width: number, context: RenderContext, font?: MeasureFont): number {
+  const family = (font && maybeComputed(font.family, context)) || 'sans';
+  const size = (font && maybeComputed(font.size, context)) || 0.83;
+  const avg = (((font && maybeComputed(font.metric, context)) || ((family === 'mono' || /fixed|mono/i.test(family) ? avgs.mono :
     family === 'narrow' || /narrow|condensed/i.test(family) ? avgs.narrow :
       family === 'sans' || /sans|arial|helvetica/i.test(family) ? avgs.sans :
         avgs.serif))) * size) / 16;
@@ -81,7 +86,7 @@ export function measureEstimate(text: string, width: number, font?: MeasureFont)
 /** Text height measurement function for the given text, font, available width in rem, and line height in rem.
  * The text is assumed to be rendered as white-space: pre-wrap.
  */
-export let measure: (text: string, width: number, font?: MeasureFont) => number = measureEstimate;
+export let measure: (text: string, width: number, context: RenderContext, font?: MeasureFont) => number = measureEstimate;
 
 export interface RenderContinuation<T = any> {
   output: string;

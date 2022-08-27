@@ -20,7 +20,7 @@ registerRenderer<Label>('label', (w, ctx, placement) => {
     }
     str += val;
     sval = val;
-    if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font), ''])}>${val}</span>`;
+    if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font, ctx), ''])}>${val}</span>`;
     else return val;
   }).join('');
   if (w.id) {
@@ -188,7 +188,7 @@ registerRenderer<Image>('image', (w, ctx, placement) => {
 registerRenderer<MeasuredLabel>('measured', (w, ctx, placement, state) => {
   addStyle(ctx, 'measured', `.measured {position:absolute;box-sizing:border-box;white-space:pre-wrap;font-family:serif;font-size:0.83rem}`);
   const text = evaluate(ctx, w.text);
-  const height = measure(text, getWidth(w, placement, ctx) || placement.availableX, w.font);
+  const height = measure(text, getWidth(w, placement, ctx) || placement.availableX, ctx, w.font);
   
   if (!state && height > placement.availableY) {
     return { output: '', height: 0, continue: { state: {}, offset: 0 } };
