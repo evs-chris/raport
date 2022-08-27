@@ -34,7 +34,7 @@ export function extend(context: RenderContext, opts: ExtendOptions): RenderConte
 const htmlChars = /\>\<\&/g;
 const htmlReplace = { '<': '&lt;', '>': '&gt;', '&': '&amp;' };
 export function escapeHTML(html: string): string {
-  return html.replace(htmlChars, m => htmlReplace[m] || '');
+  return ('' + html).replace(htmlChars, m => htmlReplace[m] || '');
 }
 
 const renderers: { [type: string]: Renderer } = {};
