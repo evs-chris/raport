@@ -153,6 +153,7 @@ There are a number of special references that are context-specific:
 | `_` | pipe arguments | Sugar for `@pipe` |
 | `@index` | repeater | The index of the nearest repeater iteration. |
 | `@group` | repeater | The nearest group by value, if any. |
+| `@grouped` | repeater | Whether the current context is within a group. |
 | `@level` | repeater | The nearest group level, if any. |
 | `@source` | repeater | The nearest repeater source, if any. |
 | `@values` | repeater | An object with keys pointing to an array of values collected from labels in the repeater ids mapping to keys. |
