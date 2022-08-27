@@ -538,8 +538,8 @@ export class Designer extends Ractive {
       if (req.method === 'POST' || req.method === 'PUT') req.body = this.evalExpr(data.body, true, ctx);
       const res = await fetch(url, req);
       const txt = await res.text();
-      if (set) this.set('data.data', await res.text());
-       return res.text();
+      if (set) this.set('data.data', txt);
+      return txt;
     }  catch {}
   }
 
