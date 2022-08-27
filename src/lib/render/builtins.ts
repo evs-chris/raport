@@ -94,7 +94,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   }
 
   if (group && (!state || !state.state || state.state.part === 'group')) {
-    if (groupNo !== false) r = renderWidget(w.group[groupNo], extend(ctx, { value: group, special: { group: group.group, level: group && group.level } }), { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
+    if (groupNo !== false) r = renderWidget(w.group[groupNo], extend(ctx, { value: group, special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: true, group: group.group } }), { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
 
     if (r) {
       if (r.height > availableY) return { output: '', height: 0, continue: { offset: 0, state: { part: 'group', src, current: 0 } } }
@@ -115,7 +115,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
     y += r.height;
   }
 
-  let rctx: RenderContext = state && state.state && state.state.context || extend(ctx, { special: { level: group && group.level, group: group && group.group, values: {} } });
+  let rctx: RenderContext = state && state.state && state.state.context || extend(ctx, { special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: groupNo !== false, group: group && group.group, values: {} } });
   if (!state || !state.state || state.state.part !== 'footer') {
     let usedX = 0;
     let usedY = 0;
