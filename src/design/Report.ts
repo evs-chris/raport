@@ -1554,6 +1554,7 @@ function stripDefaults(json: any): any {
   }
   if (res.type === 'page' || res.type === 'flow' || res.type === 'delimited') {
     if (res.context && !Object.keys(res.context).length) delete res.context;
+    if (!res.extraContext) delete res.extraContext;
     if (res.defaultParams && !Object.keys(res.defaultParams).length) delete res.defaultParams;
     if (res.sources && !res.sources.length) delete res.sources;
     if (res.parameters && !res.parameters.length) delete res.parameters;

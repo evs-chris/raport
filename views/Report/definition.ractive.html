@@ -34,7 +34,7 @@
     flex-grow: 1;
   }
 
-  .definition .json {
+  .definition .json, .definition .extra-context {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -42,19 +42,22 @@
     border: 1px solid {{@style.border}};
   }
 
-  .definition .json > * {
+  .definition .json > *, .definition .extra-context > * {
     flex-grow: 1;
   }
 
-  .definition .json textarea {
+  .definition .json textarea, .definition .extra-context textarea {
     flex-shrink: 0;
     flex-grow: 1;
     width: 100%;
     box-sizing: border-box;
     min-height: 99%;
-    color: {{@style.fg}};
-    background-color: {{@style.bg}};
     border: none;
     outline: none;
+  }
+
+  .definition .json textarea {
+    color: {{@style.fg}};
+    background-color: {{@style.bg}};
   }
 </style>

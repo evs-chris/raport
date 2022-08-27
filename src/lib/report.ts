@@ -35,7 +35,10 @@ interface BaseReport<T = {}> {
   name?: string;
   parameters?: Parameter<T>[];
   sources?: ReportSource[];
+  /** An initial value for the root context. */
   context?: ParameterMap;
+  /** An additional context expression to be merged with any fixed context just before the report is run. */
+  extraContext?: ValueOrExpr;
   classifyStyles?: boolean;
   defaultParams?: ParameterMap;
 }
@@ -261,6 +264,11 @@ export function run(report: Report, sources: SourceMap, parameters?: ParameterMa
 
   if (report.sources) applySources(ctx, report.sources, sources);
   ctx.parameters = Object.assign({}, initParameters(report, sources), ctx.parameters);
+
+  if (report.extraContext) {
+    const res = evaluate(ctx, report.extraContext);
+    if (res && typeof res === 'object') ctx.value = Object.assign(ctx.value, res);
+  }
 
   if (report.type === 'delimited') return runDelimited(report, ctx);
   else if (report.type === 'flow') return runFlow(report, ctx, extra);
