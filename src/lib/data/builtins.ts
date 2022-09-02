@@ -423,11 +423,12 @@ registerOperator(
     if (name === 'unparse') opts = Object.assign({}, opts, { raport: 1 });
     if (opts.raport && opts.tpl) opts.template = 1;
     if (value === null || value === undefined) return '';
-    if (Array.isArray(value)) return value.join(', ');
 
     if (typeof opts === 'object' && opts.json) return JSON.stringify(value);
     if (typeof opts === 'object' && opts.schema) return unparseSchema(value);
     else if (typeof opts === 'object' && opts.raport) return stringify(value, opts);
+
+    if (Array.isArray(value)) return value.join(', ');
 
     let res = `${value}`;
     if (res.slice(0, 7) === '[object') return JSON.stringify(value);
