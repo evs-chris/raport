@@ -18,7 +18,7 @@
     {{#if ~/reparent}}<button class="ico large" on-click="@.set('reparent', undefined)" title="Cancel move">{{>reparent, true as cancel}}</button>{{/if}}
     <button class="ico large" on-click="@.treeScrollToActive()" title="Scroll active widget into view">{{>scrollto}}</button>
   </div>
-  <div class="shrinky scrolled-wrapper widget-tree">
+  <div class="scrolled-wrapper widget-tree">
     <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
       {{#with report}}
       <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : @.selectWidget('report')"><span class-line on-mouseover="@.set('temp.hover', 'report'), false">Report</span>
@@ -32,11 +32,12 @@
     </div>
   </div>
   {{#if ~/temp.widget}}
+  <div class="scrolled-wrapper"><div as-scrolled>
     <div class=header>
       <h3>{{~/temp.name[0].toUpperCase()}}{{~/temp.name.substr(1)}}Properties</h3>
     </div>
     {{#if ~/temp.widget === 'report'}}
-      <div class="growy scrolled-wrapper"><div as-scrolled>
+      <div class="growy">
         <div class=sheet>
           <label><span>Name <button class-ico on-click="@.editExpr('report.name', { template: true }), false">{{>pencil}}</button></span><span>
             <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src="{{report.name}}" tabout template /></div>
@@ -74,7 +75,7 @@
             <label><span>Quote</span><span><input value="{{temp.quote}}" /></span></label>
           {{/if}}
         </div>
-      </div></div>
+      </div>
       <div class=header>
         <h3>Parameters</h3>
         <button on-click="@.push('report.parameters', {})" class=add>+</button>
@@ -86,7 +87,7 @@
           <div class-param-require style-width=30%>Require</div>
         </div>
       {{/if}}
-      <div class=scrolled-wrapper><div as-scrolled>
+      <div>
         {{#each report.parameters}}
           <div class-parameter on-focusin="@.editParam(@context)">
             <div class-param-name><input value="{{.name}}" /></div>
@@ -97,7 +98,7 @@
             <div class-param-btn><button class-ico on-click="@.checkLink('param', @keypath), @context.splice('../', @index, 1)">{{>times}}</button></div>
           </div>
         {{/each}}
-      </div></div>
+      </div>
       {{#if ~/sources}}
         <div class=header>
           <h3>Provided Sources</h3>
@@ -108,7 +109,7 @@
             <div class-src-name>Name</div>
           </div>
         {{/if}}
-        <div class=scrolled-wrapper><div as-scrolled>
+        <div>
           {{#each ~/sources}}
             <div class-src>
               <div class-src-name><input value="{{.name}}" /></div>
@@ -119,7 +120,7 @@
               </div>
             </div>
           {{/each}}
-        </div></div>
+        </div>
       {{else}}
         <div class="header" style-justify-content=center>
           <button class-plain on-click="@.push('sources', {})" title="Create a new source of data to reference from a report source">Provide Source</button>
@@ -134,7 +135,7 @@
           <div class-src-name style-width="100%">Name</div>
         </div>
       {{/if}}
-      <div class=scrolled-wrapper><div as-scrolled>
+      <div>
         {{#each report.sources}}
           <div class-src on-focusin="@.editReportSrc(@context)">
             <div class-rsrc-name><input value="{{.name}}" /></div>
@@ -144,7 +145,7 @@
             </div>
           </div>
         {{/each}}
-      </div></div>
+      </div>
     {{elseif ~/widget}}
       <div class=scrolled-wrapper><div as-scrolled>
         <div class=sheet>
@@ -155,6 +156,7 @@
         </div>
       </div></div>
     {{/if}}
+  </div></div>
   {{else}}
     <div class-placeholder>Click on a Widget</div>
   {{/if}}
@@ -189,10 +191,6 @@
 
   .properties-pull {
     display: none;
-  }
-
-  .properties .widget-tree {
-    max-height: 33%;
   }
 
   .placeholder {
