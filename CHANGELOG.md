@@ -1,3 +1,35 @@
+## 0.11.0
+
+2022-09-03
+
+### Data
+
+* __BUG__: The `date` operator will now properly handle a relative range without a time specifier.
+* __BUG__: The `string` operator will now correctly allow stringifying arrays rather than always joining them.
+* `+`, `-`, `/`, `*`, `%`, and `/%` now have alpha aliases `add`, `subtract`, `divide`, `multiply`, `modulus`, and `intdiv`, so that they can be invoked with call syntax.
+* The addition operators can now operate on object arguments, where the result will be a new aggregated shallow copy of each object, effectively `Object.assign({}, ...args)`.
+* Number formats now allow for accounting-style negative numbers with an additional argument specifying sign, wrap, or both.
+* The report definition now allows for an additional expression to contribute to the base context before the report is run. Data sources are available during evaluation, any variables set will go into the root data (which is the context for the evaluation), and if the result of the expression is an object, it's properties are copied into the root context.
+* The proper case formatter will now handle values with apostrophes.
+
+### Render
+
+* __BUG__: Non-string values emitted into labels will no longer throw an exception.
+* __BUG__: Continuous reports will now render a legible page in dark mode on screens.
+* __BUG__: Measured labels will now break words to wrap, so a long word, series of long words, or group of symbols next to words will no longer throw off the measurement by causing an early wrapping.
+* `@group` is now exposed to footers in addition to group headers and row contents.
+* `@grouped` is now a boolean and exposed to group headers and row contents in addition to footers.
+* `@source` and `@level` are now exposed to group headers, rows, and footers.
+* Widget font properties can now be supplied as expressions that are evaluated in the context in which the widget is rendered.
+
+### Designer
+
+* __BUG__: Bottom pane property editors will now render correctly in mobile layouts.
+* __BUG__: Fetched data sources will no longer error due to multiple read attempts.
+* The left properties panel and widget tree will now balance more evenly on smaller layouts.
+* Context expressions can now be provided for containers.
+
+
 ## 0.10.15
 
 2022-07-21

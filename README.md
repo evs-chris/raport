@@ -328,11 +328,11 @@ There are a few operations built-in to the library to handle common expressions:
 | Name | Arguments | Description |
 | ---- | --------- | ----------- |
 | `case` | `string` | Returns the string formatted in the given case. Support cases are `upper`, `lower`, `snake`, `kebab`, `pascal`, `camel`, and `proper` e.g. `UPPER CASE`, `lower case`, `snake_case`, `kebab-case`, `PascalCase`, `camelCase`, and `Proper Case` |
-| `dollar` | | Returns the number with grouped whole number, two decimals, and a leadng dollar sign. |
+| `dollar` | `number = 2, sign = '$', negative? = 'sign'\|'wrap'\|'both'` | Returns the number with grouped whole number, two decimals, and a leadng dollar sign. |
 | `date` | `string` | Return the date formatted using the given string. See below for the breakdown of the format string. |
-| `integer` | `string? = ','` | Returns the number with grouped whole number and no decimals. The argument can specify the group string. This is also aliased as `int`. |
+| `integer` | `string? = ',', negative? = 'sign'\|'wrap'\|'both'` | Returns the number with grouped whole number and no decimals. The argument can specify the group string. This is also aliased as `int`. |
 | `iso8601` | | Returns the given Date or relative date as a timestamp in the form `yyyy-MM-ddTHH:mm:sszzz`. |
-| `number` | `number, string? = ','` | Returns the number with grouped whole number and the specified number of decimals. The second argument can specify the group string. This is also aliased as `num`. |
+| `number` | `number, string? = ',', negative? = 'sign'\|'wrap'\|'both'` | Returns the number with grouped whole number and the specified number of decimals. The second argument can specify the group string. This is also aliased as `num`. |
 | `or` | `any` | Returns the given argument if the value is falsey e.g. `false#or,:N/A` results in `N/A`. |
 | `ordinal` | `string? = ','` | Returns the number as an ordinal e.g. `1` becomes `1st` and `5280` becomes `5,280th`. The argument can specify the group string. |
 | `padl` | `number, string` | Returns the value padded to `number` places using `string` in a prefix position e.g. `23#padl,3,:0` results in `023`. |
