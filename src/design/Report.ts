@@ -1052,6 +1052,9 @@ export class Designer extends Ractive {
 
 Ractive.extendWith(Designer, {
   template, css, cssId: 'raport-report',
+  partials: {
+    measured: template.p.label,
+  },
   data() {
     return {
       pageSizes: PageSizes,

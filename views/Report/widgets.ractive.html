@@ -89,10 +89,6 @@
   </span>
 </template>
 
-<template id="measured">
-  <span class-content {{#unless ~/reparent}}on-mouseover="@.set('temp.hover', @keypath), false"{{/unless}} on-mouseout="@.set('temp.hover', ''), false" title="{{.text}}">{{.text}}</span>
-</template>
-
 <template id="image">
   {{#with @local as ctx}}
     <span class-content {{#unless ~/reparent}}on-mouseover="@.set('temp.hover', @keypath), false"{{/unless}} on-mouseout="@.set('temp.hover', ''), false" title="{{.url}}">
