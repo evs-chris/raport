@@ -1025,8 +1025,8 @@ registerFormat('iso8601', n => {
   return fmtDate(n, 'yyyy-MM-ddTHH:mm:sszzz');
 });
 
-registerFormat(['integer', 'int'], (n, [group]) => {
-  return number(n, 0, group);
+registerFormat(['integer', 'int'], (n, [group, neg]) => {
+  return number(n, 0, group, neg);
 });
 
 registerFormat(['number', 'num'], (n, [dec, group, neg]) => {
