@@ -265,6 +265,9 @@
     </select>
   </span></label>
   <label><span title="If bridging is enabled, the container can span multiple pages.">Bridge Breaks?</span><span><input type=checkbox checked="{{.bridge}}" /></span></label>
+  <label><span title="If supplied, this expression is evaluated and the result is added to the context stack that the container and its widgets are rendered in.">Context <button title="Edit in Expression Editor" class-ico on-click="@.editExpr('.context')">{{>pencil}}</button></span><span>
+    <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.context}} tabout /></div>
+  </span></label>
 </template>
 
 <template id="measured-props">
