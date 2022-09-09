@@ -77,7 +77,7 @@ export function styleFont(f: Font, context: RenderContext): string {
   }
   if (t = maybeComputed(f.line, context)) {
     if (t === 0) s += `line-height:initial;`;
-    else if (t != null) s += `line-height:${t}rem`;
+    else if (t != null) s += `line-height:${t}rem;`;
     else if (size) s += `line-height:${size}rem;`;
   }
   if (t = maybeComputed(f.weight, context)) s += `font-weight:${t};`;
