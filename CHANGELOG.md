@@ -1,3 +1,22 @@
+## 0.11.11
+
+2022-09-10
+
+### Render
+
+* __BUG__: Fixed line heights will once again render correctly.
+* __BUG__: Containers that aren't allowed to bridge will no longer try to continue if they run out of vertical space in a paged render.
+* __BUG__: Repeaters now properly handle resuming rows that request continuation.
+
+### Designer
+
+* Measured labels and plain labels now render the same way in the designer.
+
+### Lib
+
+* The `Parameter` type definition now includes its `options` and `label` properties.
+
+
 ## 0.11.0
 
 2022-09-03
