@@ -661,10 +661,12 @@ export function isValue(o: any): o is Value {
 export type Parameter<T = any> = ParameterBase & T;
 export interface ParameterBase {
   name: string;
+  label?: string;
   type?: Type;
   required?: boolean;
   refine?: string;
   init?: ValueOrExpr;
+  options?: Array<string|{ label: string; value: any }>;
 }
 
 export interface ParameterMap {
