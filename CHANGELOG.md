@@ -1,6 +1,8 @@
-## 0.11.11
+## 0.11.2
 
 2022-09-10
+
+`0.11.1` needed a do-over due to missing updated types.
 
 ### Render
 
