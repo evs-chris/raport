@@ -45,7 +45,7 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   if (opts && opts.container && opts.computedHeight) i = `height:${h}rem;`;
   else s += `height:${h}rem;`;
 
-  const line = w.font && maybeComputed(w.font.size, context);
+  const line = w.font && maybeComputed(w.font.line, context);
   const size = w.font && maybeComputed(w.font.size, context);
 
   s += `${!opts || !opts.container || line ? `line-height:${(line || size) || getHeight(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize)}rem;` : ''}`;
@@ -75,11 +75,12 @@ export function styleFont(f: Font, context: RenderContext): string {
     s += `font-size:${t}rem;`;
     size = t;
   }
-  if (t = maybeComputed(f.line, context)) {
-    if (t === 0) s += `line-height:initial;`;
-    else if (t != null) s += `line-height:${t}rem;`;
-    else if (size) s += `line-height:${size}rem;`;
-  }
+
+  t = maybeComputed(f.line, context);
+  if (t === 0) s += `line-height:initial;`;
+  else if (t != null) s += `line-height:${t}rem;`;
+  else if (size) s += `line-height:${size}rem;`;
+
   if (t = maybeComputed(f.weight, context)) s += `font-weight:${t};`;
   if (t = maybeComputed(f.pre, context)) s += `white-space:pre-wrap;`;
   if (t = maybeComputed(f.clamp, context)) s += `white-space:nowrap;overflow:hidden;`;
