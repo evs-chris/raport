@@ -142,6 +142,8 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
           break;
         } else if (miss && tmp.find(e => e.type === 'missing') || tmp.find(e => e.type === 'check')) {
           legit = tmp.filter(e => miss && e.type === 'missing' || e.type === 'check');
+        } else if (tmp.find(e => e.path !== p))  {
+          legit = tmp;
         }
       }
       if (!ok && !legit) errs.push({ error: `type mismatch for union`, actual: unparseSchema(inspect(v)), expected: unparseSchema({ type: 'union', types }), value: v, path: p });
