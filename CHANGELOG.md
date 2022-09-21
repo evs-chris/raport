@@ -1,3 +1,20 @@
+## 0.11.3
+
+2022-09-21
+
+### Render
+
+* __BUG__: 0 line heights on labels are once again rendered correctly as `initial` rather than the label height.
+
+### Data
+
+* Schema validations for unions where the overarching type on a branch matches but has sub-match issues will now report the last sub-match issues if all branches fail.
+
+### Designer
+
+* Expression editor text heights now render more accurately, alleviating caret offset issues with longer expressions.
+
+
 ## 0.11.2
 
 2022-09-10
