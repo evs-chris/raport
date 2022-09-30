@@ -1551,8 +1551,12 @@ function stripDefaults(json: any): any {
       } else if (!Object.keys(v).length) continue;
       else if (Object.keys(v).length === 1 && 'x' in v && !v.x) continue;
       else if (k === 'format' && !v.name) continue;
-      else res[k] = stripDefaults(v);
-    } else res[k] = v;
+      else {
+        const r = stripDefaults(v);
+        if (r !== '') res[k] = r;
+      }
+    } else if (v === '') continue;
+    else res[k] = v;
   }
   if (res.type === 'page' || res.type === 'flow' || res.type === 'delimited') {
     if (res.context && !Object.keys(res.context).length) delete res.context;

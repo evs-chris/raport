@@ -60,13 +60,21 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   if ((opts && opts.font) || w.font) s += styleFont((opts && opts.font) || w.font, context);
   if (w.border) s += styleBorder(w.border, context);
 
+  s += styleExtra(w, context);
+
+  return [s, i];
+}
+
+export function styleExtra(w: { bg?: ValueOrExpr; radius?: ValueOrExpr }, context: RenderContext): string {
+  let s = '';
+
   const bg = maybeComputed(w.bg, context);
   if (bg) s += `background-color:${bg};`;
 
   const radius = maybeComputed(w.radius, context);
   if (radius) s += `border-radius:${radius};`;
 
-  return [s, i];
+  return s;
 }
 
 export function styleFont(f: Font, context: RenderContext): string {

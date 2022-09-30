@@ -190,6 +190,8 @@ export interface Image extends Widget {
 export interface Span {
   text: ValueOrExpr;
   font?: Font;
+  bg?: ValueOrExpr;
+  radius?: ValueOrExpr;
   id?: string;
 }
 export interface LabelFormat {

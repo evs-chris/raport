@@ -3,7 +3,7 @@ import { evaluate, filter, Group, ValueOrExpr, isValueOrExpr } from '../data/ind
 import { parse as parseTemplate } from '../data/parse/template';
 
 import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin, getWidthWithMargin } from './index';
-import { styleClass, style, styleFont, styleImage } from './style';
+import { styleClass, style, styleFont, styleImage, styleExtra } from './style';
 
 registerRenderer<Label>('label', (w, ctx, placement) => {
   addStyle(ctx, 'label', `.label {position:absolute;box-sizing:border-box;}`);
@@ -20,7 +20,7 @@ registerRenderer<Label>('label', (w, ctx, placement) => {
     }
     str += val;
     sval = val;
-    if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font, ctx), ''])}>${val}</span>`;
+    if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font, ctx) + styleExtra(v, ctx), ''])}>${val}</span>`;
     else return val;
   }).join('');
   if (w.id) {
