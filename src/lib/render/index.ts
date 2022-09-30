@@ -204,7 +204,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
         return { output: s, continue: state, height: offset };
       } else {
         const lp = Array.isArray(layout) && (layout[i] || [0, 0]);
-        let p = Array.isArray(lp) ? { x: lp[0] + m[3], y: lp[1] + m[0], maxX: placement.maxX } : (lp || placement);
+        let p = Array.isArray(lp) ? { x: lp[0] < 0 ? lp[0] - m[3] : lp[0] + m[3], y: lp[1] < 0 ? lp[1] - m[0] : lp[1] + m[0], maxX: placement.maxX } : (lp || placement);
         if (Array.isArray(lp)) p.availableX = p.maxX - p.x;
 
         if (!layout || typeof layout === 'string') {
