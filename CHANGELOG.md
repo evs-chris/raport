@@ -1,3 +1,16 @@
+## 0.11.4
+
+2022-09-30
+
+### Render
+
+* Widgets and label parts can be assigned background color and border radius. The designer supports expressions for both for widgets, but label parts can only be assigned literals from the the designer. The renderer _does_ support expressions for label parts.
+
+### Lib
+
+* The `ParameterMap` and `ParameterBase` types are now exported from the main module.
+
+
 ## 0.11.3
 
 2022-09-21
