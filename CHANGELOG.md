@@ -1,3 +1,12 @@
+## 0.11.51
+
+2022-09-30
+
+### Render
+
+* __BUG__: Containers that fill available space will now properly continue onto the next page if their contents don't fit in the available space.
+
+
 ## 0.11.4
 
 2022-09-30
