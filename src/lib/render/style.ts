@@ -60,6 +60,12 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   if ((opts && opts.font) || w.font) s += styleFont((opts && opts.font) || w.font, context);
   if (w.border) s += styleBorder(w.border, context);
 
+  const bg = maybeComputed(w.bg, context);
+  if (bg) s += `background-color:${bg};`;
+
+  const radius = maybeComputed(w.radius, context);
+  if (radius) s += `border-radius:${radius};`;
+
   return [s, i];
 }
 

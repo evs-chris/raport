@@ -210,7 +210,25 @@
       </select>
     {{/if}}
 </span></label>
+<label><span>Background Color <button class-hide /><button class-ico on-click="@context.set('.bg', typeof .bg === 'object' ? undefined : { x: '' })" title="{{typeof .bg === 'object' ? 'Change to value' : 'Change to Expression'}}">
+      {{>switch}}
+    </button>{{#if typeof .bg === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.bg.x')">{{>pencil}}</button>{{/if}}</span><span>
+    {{#if typeof .bg === 'object'}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.bg.x}} tabout /></div>
+    {{else}}
+      <input value="{{.bg}}" />
+    {{/if}}
+  </span></label>
 {{/if}}
+<label><span>Radius <button class-hide /><button class-ico on-click="@context.set('.radius', typeof .radius === 'object' ? undefined : { x: '' })" title="{{typeof .radius === 'object' ? 'Change to value' : 'Change to Expression'}}">
+      {{>switch}}
+    </button>{{#if typeof .radius === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.radius.x')">{{>pencil}}</button>{{/if}}</span><span>
+    {{#if typeof .radius === 'object'}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.radius.x}} tabout /></div>
+    {{else}}
+      <input value="{{.radius}}" />
+    {{/if}}
+  </span></label>
 {{#if !.margin}}
 <label><span title="Padding to add to the right side of the {{.type}}, which is useful for right-aligned text">Right Pad</span><span><input type=number value="{{.font.right}}" /></span></label>
 {{/if}}
