@@ -258,7 +258,7 @@ export class Designer extends Ractive {
   treeScrollToActive() {
     setTimeout(() => {
       const el = document.querySelector('.tree .node.active > .line');
-      if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 100);
   }
 
