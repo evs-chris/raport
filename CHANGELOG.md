@@ -1,4 +1,18 @@
-## 0.11.51
+## 0.11.6
+
+2022-09-30
+
+### Render
+
+* __BUG__: Manual layouts that use negative coordinates will now properly account for margins that would previously cause the coordinates to render as positive.
+* __BUG__: Widgets with height set to grow will now include their margin in their final height, like a contain widget. Those with a manual layout will also offset their bottom and right poisitioned children's coordinates by their top and left margin.
+
+### Designer
+
+* __BUG?__: Selecting a widget toward the end of the tree will no longer cause the non-scrollable html root element to scroll up in Firefox.
+
+
+## 0.11.5
 
 2022-09-30
 
