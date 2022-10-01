@@ -140,6 +140,8 @@ export interface Placement {
   availableY?: number;
   maxX?: number;
   maxY?: number;
+  offsetX?: number;
+  offsetY?: number;
 }
 export type Layout = Array<[number, number]>|Placement[]|'row'|string;
 

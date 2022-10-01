@@ -133,9 +133,7 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   if (w.margin) {
     const m = expandMargin(w, context, placement);
     extraHeight += m[0] + m[2];
-    if (placement.availableY) {
-      placement.availableY -= m[0] + m[2];
-    }
+    if (placement.availableY) placement.availableY -= m[0] + m[2];
   }
 
   const r = renderer.render(w, context, placement, state);
@@ -204,7 +202,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
         return { output: s, continue: state, height: offset };
       } else {
         const lp = Array.isArray(layout) && (layout[i] || [0, 0]);
-        let p = Array.isArray(lp) ? { x: lp[0] < 0 ? lp[0] - m[3] : lp[0] + m[3], y: lp[1] < 0 ? lp[1] - m[0] : lp[1] + m[0], maxX: placement.maxX } : (lp || placement);
+        let p = Array.isArray(lp) ? { x: lp[0] < 0 ? lp[0] : lp[0] + m[3], y: lp[1] < 0 ? lp[1] : lp[1] + m[0], maxX: placement.maxX } : (lp || placement);
         if (Array.isArray(lp)) p.availableX = p.maxX - p.x;
 
         if (!layout || typeof layout === 'string') {
@@ -215,8 +213,14 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
         p.maxX = p.maxX || placement.maxX;
         p.maxY = p.maxY || placement.maxY;
 
-        if (p.x < 0) p.x = (placement.availableX || 1) + p.x - getWidthWithMargin(w, placement, context) + 1;
-        if (p.y < 0) p.y = (placement.availableY || 1) + p.y - h + 1;
+        if (p.x < 0) {
+          p.offsetX = m[3];
+          p.x = (placement.availableX || 1) + p.x - getWidthWithMargin(w, placement, context) + 1;
+        }
+        if (p.y < 0) {
+          p.offsetY = m[0];
+          p.y = (placement.availableY || 1) + p.y - h + 1;
+        }
 
         const { x, y } = p;
         const r = renderWidget(w, context, p, state && state.child);

@@ -36,12 +36,16 @@ export function styleClass(ctx: RenderContext, cls: string[], [style, inline]: [
 }
 
 export function style(w: Widget, placement: Placement, context: RenderContext, opts?: StyleOptions): [string, string] {
-  let s = `left:${placement.x || 0}rem;top:${(placement.y || 0)}rem;`;
+  let s = `left:${(placement.x || 0) + (placement.offsetX || 0)}rem;top:${((placement.y || 0) + (placement.offsetY || 0))}rem;`;
   let i = ``;
 
   s += `width:${getWidthWithMargin(w, placement, context)}rem;`;
 
-  const h = getHeightWithMargin(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize) || 1;
+  let h = getHeightWithMargin(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize) || 1;
+  if (w.height === 'grow' && w.margin) {
+    const m = expandMargin(w, context, placement);
+    h += m[0] + m[2];
+  }
   if (opts && opts.container && opts.computedHeight) i = `height:${h}rem;`;
   else s += `height:${h}rem;`;
 
