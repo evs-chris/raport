@@ -1,3 +1,12 @@
+## 0.12.09
+
+2022-10-28
+
+### Data
+
+* The `in` operator can now check for numbers in print-style ranges. Print style number ranges are strings of numbers and ranges seperated by at least a space, `,`, or `;`. Numbers may be negative. Ranges consist of two numbers separated by a `-` with no intervening whitespace e.g. `10-49`. Greater than and less than a number e.g. `<10` and `>20` create implicit ranges that go to +/- inifinity on the relevant side. A full example of a print-style range would be `1, 3, 17, 19-25, >999`.
+
+
 ## 0.11.6
 
 2022-09-30
