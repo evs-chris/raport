@@ -4,6 +4,7 @@ import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseE
 import { parse as parseTemplate } from './parse/template';
 import { parseSchema, unparseSchema } from './parse/schema';
 import { stringify } from './parse/stringify';
+import { range as parseRange } from './parse/range';
 import { validate, inspect } from './schema';
 import { diff, deepEqual, labelDiff } from './diff';
 
@@ -196,8 +197,9 @@ registerOperator(
     }
     return name === 'like' || name === 'ilike' ? res : !res;
   }),
-  simple(['in', 'not-in'], (name: string, values: any[]): boolean => {
+  simple(['in', 'not-in'], (name: string, values: any[], ctx: Context): boolean => {
     const [l, r] = values;
+    let range: any;
     if (isDateRel(r)) {
       const range = dateRelToRange(r);
       const d = isDateRel(l) ? dateRelToRange(l)[0] : new Date(l);
@@ -205,6 +207,9 @@ registerOperator(
       return name === 'in' ? n : !n;
     } else if (typeof l === 'string' && typeof r === 'object' && !Array.isArray(r)) {
       return l in r;
+    } else if (typeof r === 'string' && isNum(l) && (range = _parseRange(ctx, r), Array.isArray(range))) {
+      const found = range.reduce((a, c) => a || (Array.isArray(c) ? l >= c[0] && l <= c[1] : l == c), false);
+      return name === 'in' ? found : !found;
     } else if (!Array.isArray(r) && typeof r !== 'string') {
       return name === 'in' ? l == r : l != r;
     } else if (Array.isArray(l) && Array.isArray(r)) {
@@ -776,6 +781,7 @@ registerOperator(
     else if (opts.time) return parseTime(v, opts);
     else if (opts.expr) return parseExpr(v, opts);
     else if (opts.schema) return parseSchema(v);
+    else if (opts.range) return parseRange(v, opts);
     else return parse(v, opts);
   }),
 );
@@ -998,6 +1004,12 @@ function fmtDate(n: any, fmt: string): string {
     if (d) n = d;
   }
   return date(isDateRel(n) ? dateRelToExactRange(n) : n, fmt);
+}
+
+function _parseRange(ctx: Context, range: string) {
+  const map = (ctx.root as any)._ranges || ((ctx.root as any)._ranges = {})
+  if (range in map) return map[range];
+  return (map[range] = parseRange(range));
 }
 
 // basic formats
