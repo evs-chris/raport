@@ -1,4 +1,11 @@
-## 0.12.09
+## 0.12.1
+
+2022-11-07
+
+* __BUG__: Dates without a timezone sill no longer shift the wrong direction in UTC+x timezones, like Fiji.
+
+
+## 0.12.0
 
 2022-10-28
 
