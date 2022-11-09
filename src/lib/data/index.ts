@@ -818,8 +818,10 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
     if (tz != null) {
       from.setUTCMinutes(from.getUTCMinutes() - tz);
       if (from !== to) to.setUTCMinutes(to.getUTCMinutes() - tz);
-    } else { // shift to local time, which will always be a positive move cause date line, apparently
-      const offset = Math.abs(from.getTimezoneOffset());
+    } else { // shift to local time
+      let offset = from.getTimezoneOffset();
+      // positive timezones need to shift from 24 hours to handle the date
+      if (offset < 0) offset = 1440 + offset;
       from.setUTCMinutes(from.getUTCMinutes() + offset);
       if (from !== to) to.setUTCMinutes(to.getUTCMinutes() + offset);
     }
