@@ -1,9 +1,15 @@
+## 0.12.3
+
+2022-11-09
+
+* __BUG__: Something something timezones and UTC+x. Dates without a timezone where it should be the same day as UTC but is still a positive offset no longer shift the date.
+
+
 ## 0.12.2
 
 2022-11-09
 
 * __BUG__: Dates without a timezone will no longer shift the wrong direction in UTC+x timezones other than UTC+12.
-
 
 ## 0.12.1
 
