@@ -1,3 +1,10 @@
+## 0.12.4
+
+2022-11-09
+
+* __BUG__: It's been a long day. The timezone police have the place surrounded and are searching for me. It's currently midnight somewhere, and I'm scared. Maybe the date won't shift any more if it happens to not be the same date in UTC and the local timezone. I must be silent. They are coming.
+
+
 ## 0.12.3
 
 2022-11-09
