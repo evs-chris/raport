@@ -820,11 +820,11 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
       if (from !== to) to.setUTCMinutes(to.getUTCMinutes() - tz);
     } else { // shift to local time
       let offset = from.getTimezoneOffset();
-      // positive timezones need to shift from 24 hours to handle the date
-      if (offset < 0) {
-        const now = new Date();
-        if (now.getHours() < 14) offset = 1440 + offset;
-      }
+      // account for the date being different in UTC
+      const now = new Date();
+      if (offset < 0 && now.getHours() < 14) offset = 1440 + offset;
+      else if (offset > 0 && now.getHours() > 14) offset = offset - 1440;
+
       from.setUTCMinutes(from.getUTCMinutes() + offset);
       if (from !== to) to.setUTCMinutes(to.getUTCMinutes() + offset);
     }
