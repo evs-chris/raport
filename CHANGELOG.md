@@ -1,3 +1,12 @@
+## 0.12.6
+
+2022-11-11
+
+### Parser
+
+* The range parser is now more permissive with additional spacing and trailing separators.
+
+
 ## 0.12.5
 
 0.12.1 - 0.12.4 tried some things to get dates and timezones sorted out, but it just didn't work out. We're gonna pretend like those never happened, and here's hoping 0.12.5 sticks.
