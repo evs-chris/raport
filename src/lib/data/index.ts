@@ -757,6 +757,7 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
 
   let from = new Date();
   let to: Date = 'd' in rel && rel.d ? new Date() : undefined;
+  from.setUTCFullYear(from.getFullYear(), from.getMonth(), from.getDate());
   from.setUTCHours(0, 0, 0, 0);
   let tz: number = 'z' in rel && rel.z != null ? rel.z : null;
 
@@ -819,12 +820,7 @@ export function dateRelToRange(rel: DateRel): [Date, Date] {
       from.setUTCMinutes(from.getUTCMinutes() - tz);
       if (from !== to) to.setUTCMinutes(to.getUTCMinutes() - tz);
     } else { // shift to local time
-      let offset = from.getTimezoneOffset();
-      // account for the date being different in UTC
-      const now = new Date();
-      if (offset < 0 && now.getHours() < 14) offset = 1440 + offset;
-      else if (offset > 0 && now.getHours() > 14) offset = offset - 1440;
-
+      const offset = from.getTimezoneOffset();
       from.setUTCMinutes(from.getUTCMinutes() + offset);
       if (from !== to) to.setUTCMinutes(to.getUTCMinutes() + offset);
     }
