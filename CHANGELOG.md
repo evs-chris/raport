@@ -1,28 +1,10 @@
-## 0.12.4
+## 0.12.5
 
-2022-11-09
+0.12.1 - 0.12.4 tried some things to get dates and timezones sorted out, but it just didn't work out. We're gonna pretend like those never happened, and here's hoping 0.12.5 sticks.
 
-* __BUG__: It's been a long day. The timezone police have the place surrounded and are searching for me. It's currently midnight somewhere, and I'm scared. Maybe the date won't shift any more if it happens to not be the same date in UTC and the local timezone. I must be silent. They are coming.
+2022-11-11
 
-
-## 0.12.3
-
-2022-11-09
-
-* __BUG__: Something something timezones and UTC+x. Dates without a timezone where it should be the same day as UTC but is still a positive offset no longer shift the date.
-
-
-## 0.12.2
-
-2022-11-09
-
-* __BUG__: Dates without a timezone will no longer shift the wrong direction in UTC+x timezones other than UTC+12.
-
-## 0.12.1
-
-2022-11-07
-
-* __BUG__: Dates without a timezone will no longer shift the wrong direction in UTC+x timezones, like Fiji.
+* __BUG__: Dates will now shift into the local timezone properly if there is no target timezone specified.
 
 
 ## 0.12.0
