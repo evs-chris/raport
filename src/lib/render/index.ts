@@ -111,6 +111,7 @@ export interface RenderState<T = any> {
   last?: number;
   state?: T;
   offset: number;
+  attempt?: number;
 }
 
 /** Render the given widget to string or a continuation using a registered renderer */
@@ -238,6 +239,11 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
             const offset = maxYOffset(ps);
             state = state || { offset };
             state.last = i;
+            state.attempt = (+state.attempt || 0) + 1;
+            if (state.attempt > 1) {
+              addStyle(context, 'error', `.error { position: absolute; box-sizing: border-box; color: red; border: 1px dotted; width: 100%; height: 2rem; padding: 0.5rem; }`);
+              return { output: `<div class="error" style="bottom: 0rem;">Widget overflow error</div>`, height: 2 };
+            }
             return { output: s, continue: state, height: offset };
           }
           s += r.output;
