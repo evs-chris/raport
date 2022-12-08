@@ -11,7 +11,7 @@ export { overlap, similar, similarity } from './data/builtins';
 
 export {
   evaluate, evalParse, evalValue, evalApply, extend,
-  filter, isValueOrExpr, join, safeGet, registerFormat, unregisterFormat, getOperatorMap, registerOperator, unregisterOperator,
+  filter, isValueOrExpr, join, safeGet, registerFormat, unregisterFormat, getOperatorMap, getOperator, registerOperator, unregisterOperator,
   Context, Root, Parameter, ParameterMap, ParameterBase,
   DataSet, DataSource, Field, Group, Schema, Sort, SourceMap,
   Operator, AggregateOperator, CheckedOperator, ValueOperator,

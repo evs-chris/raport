@@ -1,4 +1,4 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseExpr, parse } from './parse';
 import { parse as parseTemplate } from './parse/template';
@@ -640,8 +640,12 @@ registerOperator(
     if (name === 'trim' || name === 'triml') str = str.replace(triml, '');
     return str;
   }),
-  simple(['slice', 'substr'], (_name: string, [src, start, end]: any[]) => {
+  simple(['slice', 'substr'], (_name: string, [src, start, end]: any[], ctx) => {
     if (src && typeof src.slice === 'function') return src.slice(start, end);
+    else {
+      const op = getOperator<ValueOperator>('string');
+      if (op) return `${op.apply('string', [src], ctx)}`.slice(start, end);
+    }
   }),
   simple(['len', 'length'], (_name: string, [src]: any[]) => {
     if (src && 'length' in src) return src.length;

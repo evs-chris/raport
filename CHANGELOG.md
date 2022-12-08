@@ -2,6 +2,10 @@
 
 Unreleased
 
+### Data
+
+* The `slice`/`substr` operator will now stringify arguments that don't have a `slice` method available using the `string` operator.
+
 ### Designer
 
 __BUG__: The code editors in the designer now handle long lines and long expressions a little more gracefully, without the textarea and code getting and line numbers getting out of whack unless lines get very very long.

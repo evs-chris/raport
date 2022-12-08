@@ -343,6 +343,9 @@ export function unregisterOperator(...ops: Operator[]) {
 export function getOperatorMap(): { [key: string]: Operator } {
   return Object.assign({}, opMap);
 }
+export function getOperator<T extends Operator = Operator>(name: string): T {
+  return opMap[name] as T;
+}
 
 function mungeSort(context: Context, sorts: Sort[]|ValueOrExpr): Sort[] {
   let sortArr: Sort[];
