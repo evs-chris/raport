@@ -120,6 +120,16 @@ q.test('contains', t => {
   t.equal(evaluate('(contains (array 10 :test false) false)'), true);
   t.equal(evaluate('(contains (array 10 :test false) (array 10 false))'), true);
   t.equal(evaluate('(contains (array 10 :test false) (array 10 true))'), false);
+  t.ok(evaluate(`{ a::b c::d } contains =>_ == :d`));
+  t.notOk(evaluate(`{ a::b c::e } contains =>_ == :d`));
+  t.ok(evaluate(`{ a::b c::d } contains =>@key == :c`));
+  t.notOk(evaluate(`{ a::b e::d } contains =>@key == :c`));
+  t.ok(evaluate(`{ a::b c::d } contains =>@index == 1`));
+  t.notOk(evaluate(`{ a::b e::d } contains =>@index == 2`));
+  t.ok(evaluate(`[:a :b :c :d] contains =>_ == :d`));
+  t.notOk(evaluate(`[:a :b :c :e] contains =>_ == :d`));
+  t.ok(evaluate(`[:a :b :c :d] contains =>@index == 2`));
+  t.notOk(evaluate(`[:a :b :c :e] contains =>@index == 9`));
 });
 
 q.test('count', t => {
@@ -139,6 +149,16 @@ q.test('does-not-contain', t => {
   t.equal(evaluate('(does-not-contain (array 10 :test false) (array true 20))'), true);
   t.equal(evaluate('(does-not-contain (array 10 :test false) (array true 10))'), true);
   t.equal(evaluate('(does-not-contain (array 10 :test false) (array false 10))'), false);
+  t.notOk(evaluate(`{ a::b c::d } does-not-contain =>_ == :d`));
+  t.ok(evaluate(`{ a::b c::e } does-not-contain =>_ == :d`));
+  t.notOk(evaluate(`{ a::b c::d } does-not-contain =>@key == :c`));
+  t.ok(evaluate(`{ a::b e::d } does-not-contain =>@key == :c`));
+  t.notOk(evaluate(`{ a::b c::d } does-not-contain =>@index == 1`));
+  t.ok(evaluate(`{ a::b e::d } does-not-contain =>@index == 2`));
+  t.notOk(evaluate(`[:a :b :c :d] does-not-contain =>_ == :d`));
+  t.ok(evaluate(`[:a :b :c :e] does-not-contain =>_ == :d`));
+  t.notOk(evaluate(`[:a :b :c :d] does-not-contain =>@index == 2`));
+  t.ok(evaluate(`[:a :b :c :e] does-not-contain =>@index == 9`));
 });
 
 q.test('filter', t => {
@@ -146,12 +166,18 @@ q.test('filter', t => {
   t.equal(evaluate('(filter (array 1 2 3) =>(is @value 2))')[0], 2);
   t.equal(evaluate('(filter (array 1 2 3) =>(> @value 4))').length, 0);
   t.deepEqual(evaluate('(filter (array (object :foo 1) (object :foo 2)) =>(is foo 2))'), [{ foo: 2 }]);
+  t.deepEqual(evaluate(`filter({ a::b c::d } =>_ == :d)`), { c: 'd' });
+  t.deepEqual(evaluate(`filter({ a::b c::d } =>@key == :c)`), { c: 'd' });
+  t.deepEqual(evaluate(`filter({ a::b c::d } =>@index == 0)`), { a: 'b' });
 });
 
 q.test('find', t => {
   t.equal(evaluate('(find (array 1 2 3) 2)'), 2);
   t.equal(evaluate('(find (array 1 2 3) 4)'), undefined);
   t.deepEqual(evaluate('(find (array (object :foo 1) (object :foo 2)) =>(is foo 2))'), { foo: 2 });
+  t.equal(evaluate(`find({ a::b c::d } =>_ == :d)`), 'd');
+  t.equal(evaluate(`find({ a::b c::d } =>@key == :c)`), 'd');
+  t.equal(evaluate(`find({ a::b c::d } =>@index == 0)`), 'b');
 });
 
 q.test('format', t => {
@@ -200,6 +226,23 @@ q.test('in', t => {
   t.notOk(evaluate('(in :a (array 1 2 3))'));
   t.ok(evaluate('[1 2 3] in [3 2 1 0 :a]'));
   t.notOk(evaluate('[1 2 3] in [1 2 :a :b]'));
+  t.ok(evaluate(`99 in '1,2,3,4-100,1000'`));
+  t.ok(evaluate(`99 in '>10'`));
+  t.notOk(evaluate(`99 in '<10'`));
+  t.ok(evaluate(`(=>_ == :d) in { a::b c::d }`));
+  t.notOk(evaluate(`(=>_ == :d) in { a::b c::e }`));
+  t.ok(evaluate(`(=>@key == :c) in { a::b c::d }`));
+  t.notOk(evaluate(`(=>@key == :c) in { a::b e::d }`));
+  t.ok(evaluate(`(=>@index == 1) in { a::b c::d }`));
+  t.notOk(evaluate(`(=>@index == 2) in { a::b e::d }`));
+  t.ok(evaluate(`(=>_ == :d) in [:a :b :c :d]`));
+  t.notOk(evaluate(`(=>_ == :d) in [:a :b :c :e]`));
+  t.ok(evaluate(`(=>@index == 2) in [:a :b :c :d]`));
+  t.notOk(evaluate(`(=>@index == 9) in [:a :b :c :e]`));
+  t.ok(evaluate(`:a in { a::b c::d }`));
+  t.notOk(evaluate(`:a in { e::b c::d }`));
+  t.ok(evaluate(`[:a :c] in { a::b c::d }`));
+  t.notOk(evaluate(`[:a :e] in { e::b c::d }`));
 });
 
 q.test('intersect', t => {
@@ -237,7 +280,18 @@ q.test(`like`, t => {
 });
 
 // TODO: lower
-// TODO: map
+
+q.test('map', t => {
+  t.deepEqual(evaluate(`map([1 2 3] =>_ * 2)`), [2, 4, 6]);
+  t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>_ * 2)`), { a: 2, b: 4, c: 6 });
+  t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if _ == 1 then null else _ * 2)`), { b: 4, c: 6 });
+  t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if _ == 1 then [:d 69] else _ * 2)`), { d: 69, b: 4, c: 6 });
+  t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if @index == 0 then null else _ * 2)`), { b: 4, c: 6 });
+  t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if @index == 0 then [:d 69] else _ * 2)`), { d: 69, b: 4, c: 6 });
+  t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if @key == :a then null else _ * 2)`), { b: 4, c: 6 });
+  t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if @key == :a then [:d 69] else _ * 2)`), { d: 69, b: 4, c: 6 });
+});
+
 // TODO: max
 // TODO: min
 //
@@ -257,6 +311,19 @@ q.test('not-in', t => {
   t.notOk(evaluate('(not-in :b (array 1 2 :b 3))'));
   t.equal(evaluate('[1 :a] not-in [:b :c]'), true);
   t.equal(evaluate('[1 2 3] not-in [3 2 1 0]'), false);
+  t.notOk(evaluate(`99 not-in '1,2,3,4-100,1000'`));
+  t.notOk(evaluate(`99 not-in '>10'`));
+  t.ok(evaluate(`99 not-in '<10'`));
+  t.notOk(evaluate(`(=>_ == :d) not-in { a::b c::d }`));
+  t.ok(evaluate(`(=>_ == :d) not-in { a::b c::e }`));
+  t.notOk(evaluate(`(=>@key == :c) not-in { a::b c::d }`));
+  t.ok(evaluate(`(=>@key == :c) not-in { a::b e::d }`));
+  t.notOk(evaluate(`(=>@index == 1) not-in { a::b c::d }`));
+  t.ok(evaluate(`(=>@index == 2) not-in { a::b e::d }`));
+  t.notOk(evaluate(`(=>_ == :d) not-in [:a :b :c :d]`));
+  t.ok(evaluate(`(=>_ == :d) not-in [:a :b :c :e]`));
+  t.notOk(evaluate(`(=>@index == 2) not-in [:a :b :c :d]`));
+  t.ok(evaluate(`(=>@index == 9) not-in [:a :b :c :e]`));
 });
 
 q.test(`not-like`, t => {
@@ -290,6 +357,11 @@ q.test('or', t => {
 
 // TODO: padl
 // TODO: padr
+
+q.test('pipe', t => {
+  t.deepEqual(evaluate(`pipe([1 2 3] filter(=>_ != 1) map(=>_ * 2))`), [4, 6]);
+});
+
 // TODO: replace-all
 // TODO: replace
 // TODO: reverse

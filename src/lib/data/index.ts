@@ -295,9 +295,9 @@ export function template(root: string|Context|{ context: Context }|any, template
  * swapped for the evaluation and replaced afterwards. Swap should only be used for applications that are
  * passing the context value as the first local.
  */
-export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[], swap?: boolean): any {
-  if (typeof value === 'object' && 'a' in value) {
-    const c = swap ? ctx : extend(ctx, { value: locals[0] });
+export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[], swap?: boolean, special?: object): any {
+  if (isApplication(value)) {
+    const c = swap ? ctx : extend(ctx, { value: locals[0], special });
     const l = ctx.locals;
     let res: any;
     if ('n' in value) {
@@ -309,7 +309,7 @@ export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[], swap?
     return res;
   } else {
     const v = evalParse(ctx, value);
-    if (typeof v === 'object' && 'a' in v) return evalApply(ctx, v, locals);
+    if (isApplication(v)) return evalApply(ctx, v, locals, false, special);
     else return v;
   }
 }
@@ -325,7 +325,7 @@ export function evalValue(ctx: Context, expr: Value): any {
   if ('r' in expr) return safeGet(ctx, expr.r);
   else if ('v' in expr) return expr.v;
   else if ('op' in expr) return applyOperator(ctx, expr);
-  else if ('a' in expr) return expr;
+  else if (isApplication(expr)) return expr;
   else if (isDateRel(expr) || isTimespan(expr)) return expr;
 }
 
@@ -474,7 +474,7 @@ function applyOperator(root: Context, operation: Operation): any {
   // if the operator doesn't exist, try a local, pipe, or skip
   if (!op) {
     const local = safeGet(root, operation.op);
-    if (local && typeof local === 'object' && 'a' in local) {
+    if (isApplication(local)) {
       return evalApply(root, local, operation.args.map(a => evalParse(root, a)));
     } else if (operation.op === 'pipe') { // handle the special built-in pipe operator
       if (!operation.args || !operation.args.length) return true;
@@ -563,7 +563,7 @@ export interface Application { a: Value; n?: string[]; c?: string[] };
 export interface Literal { v: any; s?: 1; c?: string[] };
 
 export function isApplication(v: any): v is Application {
-  return typeof v === 'object' && 'a' in v && typeof v.a === 'object';
+  return typeof v === 'object' && 'a' in v && typeof v.a === 'object' && Object.keys(v).length === 1;
 }
 
 /** A timespan specified in milliseconds */
@@ -654,7 +654,7 @@ export function isValue(o: any): o is Value {
     ('r' in o && typeof o.r === 'string') ||
     ('op' in o && typeof o.op === 'string') ||
     ('v' in o) ||
-    ('a' in o)
+    (isApplication(o))
   );
 }
 

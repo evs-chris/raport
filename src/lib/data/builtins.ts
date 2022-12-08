@@ -207,9 +207,18 @@ registerOperator(
       return name === 'in' ? n : !n;
     } else if (typeof l === 'string' && typeof r === 'object' && !Array.isArray(r)) {
       return l in r;
+    } else if (Array.isArray(l) && l.length > 0 && typeof l[0] === 'string' && !Array.isArray(r) && r && typeof r === 'object') {
+      const keys = Object.keys(r);
+      const found = l.reduce((a, c) => a && ~keys.indexOf(c), true);
+      return name === 'in' ? found : !found;
     } else if (typeof r === 'string' && isNum(l) && (range = _parseRange(ctx, r), Array.isArray(range))) {
       const found = range.reduce((a, c) => a || (Array.isArray(c) ? l >= c[0] && l <= c[1] : l == c), false);
       return name === 'in' ? found : !found;
+    } else if (isApplication(l)) {
+      let found: any = false;
+      if (Array.isArray(r) || r && typeof r === 'object' && '0' in r) found = Array.prototype.find.call(r, (e: any, i: number) => evalApply(ctx, l, [e, i], false, { index: i, key: i }));
+      else if (r && typeof r === 'object') found = Object.entries(r).find((e, i) => evalApply(ctx, l, [e[1], i, e[0]], false, { index: i, key: e[0] }));
+      return name === 'in' ? !!found : !found;
     } else if (!Array.isArray(r) && typeof r !== 'string') {
       return name === 'in' ? l == r : l != r;
     } else if (Array.isArray(l) && Array.isArray(r)) {
@@ -219,13 +228,18 @@ registerOperator(
     const res = !!~r.indexOf(l);
     return name === 'in' ? res : !res;
   }), 
-  simple(['contains', 'does-not-contain'], (name: string, values: any[]): boolean => {
+  simple(['contains', 'does-not-contain'], (name: string, values: any[], ctx: Context): boolean => {
     const [l, r] = values;
     if (isDateRel(l)) {
       const range = dateRelToRange(l);
       const d = isDateRel(r) ? dateRelToRange(r)[0] : new Date(r);
       const n = d >= range[0] && d <= range[1];
       return name === 'contains' ? n : !n;
+    } else if (isApplication(r)) {
+      let found: any = false;
+      if (Array.isArray(l) || l && typeof l === 'object' && '0' in l) found = Array.prototype.find.call(l, (e: any, i: number) => evalApply(ctx, r, [e, i], false, { index: i, key: i }));
+      else if (r && typeof l === 'object') found = Object.entries(l).find((e, i) => evalApply(ctx, r, [e[1], i, e[0]], false, { index: i, key: e[0] }));
+      return name === 'contains' ? !!found : !found;
     } else if (!Array.isArray(l) && typeof l !== 'string') {
       return false;
     } else if (Array.isArray(r) && Array.isArray(l)) {
@@ -262,6 +276,7 @@ registerOperator(
     let [arr, flt, sorts, groups] = values;
     if (!Array.isArray(arr)) {
       if (arr && Array.isArray(arr.value)) arr = arr.value;
+      else if (typeof arr === 'object' && arr) return Object.entries(arr).filter((e, i) => evalApply(ctx, flt, [e[1], i, e[0]], false, { index: i, key: e[0] })).reduce((a, c) => (a[c[0]] = c[1], a), {});
       else return [];
     }
     return filter({ value: arr }, flt, sorts, groups, ctx).value;
@@ -427,11 +442,15 @@ registerOperator(
     let opts = args.slice(-1)[0] || {};
     if (name === 'unparse') opts = Object.assign({}, opts, { raport: 1 });
     if (opts.raport && opts.tpl) opts.template = 1;
-    if (value === null || value === undefined) return '';
+    if (!opts && (value === null || value === undefined)) return '';
 
     if (typeof opts === 'object' && opts.json) return JSON.stringify(value);
     if (typeof opts === 'object' && opts.schema) return unparseSchema(value);
-    else if (typeof opts === 'object' && opts.raport) return stringify(value, opts);
+    else if (typeof opts === 'object' && opts.raport) {
+      let v = stringify(value, opts);
+      if (v === undefined) v = stringify({ v: value }, opts);
+      return v;
+    }
 
     if (Array.isArray(value)) return value.join(', ');
 
@@ -943,7 +962,19 @@ registerOperator({
   names: ['map'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
     if (!args[0]) return arr;
-    return arr.map((e, i) => evalApply(ctx, args[0], [e, i]));
+    const v = args.length === 2 ? evalParse(ctx, args[0]) : arr;
+    const app = evalParse(ctx, args.length === 2 ? args[1] : args[0]);
+    if ((Array.isArray(v) || '0' in v) && isApplication(app)) return Array.prototype.map.call(v, (e: any, i: number) => evalApply(ctx, app, [e, i], false, { index: i, key: i }));
+    else if (v && typeof v === 'object' && isApplication(app)) {
+      const res: any = {};
+      Object.entries(v as object).forEach((e, i) => {
+        const r = evalApply(ctx, app, [e[1], i, e[0]], false, { index: i, key: e[0] });
+        if (Array.isArray(r) && r.length === 2 && typeof r[0] === 'string') res[r[0]] = r[1];
+        else if (r == null) return;
+        else res[e[0]] = r;
+      });
+      return res;
+    }
   }
 }, {
   type: 'aggregate',
@@ -979,8 +1010,15 @@ registerOperator({
   names: ['find'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
     if (!args[0]) return;
-    if (typeof args[0] === 'object' && args[0] && 'a' in args[0]) return arr.find((e, i) => evalApply(ctx, args[0], [e, i]));
-    else {
+    else if (isApplication(args[0])) return arr.find((e, i) => evalApply(ctx, args[0], [e, i], false, { index: i, key: i }));
+    else if (isApplication(args[1])) {
+      const v = evalParse(ctx, args[0]);
+      if (Array.isArray(v)) return v.find((e, i) => evalApply(ctx, args[1], [e, i], false, { index: i, key: i }));
+      else if (typeof v === 'object' && v) {
+        const e = Object.entries(v).find((e, i) => evalApply(ctx, args[1], [e[1], i, e[0]], false, { index: i, key: e[0] }));
+        if (e) return e[1];
+      }
+    } else {
       const v = evalParse(ctx, args[0]);
       return arr.find(e => e == v);
     }

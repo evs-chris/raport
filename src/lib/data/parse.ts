@@ -329,7 +329,7 @@ const call_op = map(seq(name(opName, 'op'), bracket_op(args)), ([op, args]) => {
   return res;
 }, { primary: true, name: 'call' });
 
-export const operand: Parser<Value> = fmt_op(postfix_path(alt('operand', bracket_op(if_op), bracket_op(case_op), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`), sexp, values)));
+export const operand: Parser<Value> = fmt_op(postfix_path(alt('operand', bracket_op(application), bracket_op(if_op), bracket_op(case_op), verify(bracket_op(binop), v => 'op' in v || `expected bracketed op`), sexp, values)));
 export const unop = map(seq(str('not ', '+'), operand), ([op, arg]) => ({ op: op === '+' ? op : 'not', args: [arg] }), 'unary op');
 
 function leftassoc(left: Value, [, op, , right]: [string, string, string, Value]) {

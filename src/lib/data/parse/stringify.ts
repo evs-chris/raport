@@ -1,4 +1,4 @@
-import { ValueOrExpr, Operation, Literal, DateRel, DateRelRange, isDateRel, isTimespan, TimeSpan } from '../index';
+import { ValueOrExpr, Operation, Literal, DateRel, DateRelRange, isDateRel, isTimespan, TimeSpan, isApplication } from '../index';
 import { endRef, isTimespanMS, timespans, timeSpanToNumber } from '../parse';
 import { Schema } from '../index';
 
@@ -115,7 +115,7 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
   _noname = opts.noNamedArgs;
   _html = opts.htmlSafe;
   _nochecks = opts.noChecks;
-  if (!_sexprops && typeof value === 'object' && 'op' in value && value.op === 'block') return stringifyRootBlock(value);
+  if (!_sexprops && typeof value === 'object' && value && 'op' in value && value.op === 'block') return stringifyRootBlock(value);
   else return _stringify(value);
 }
 
@@ -167,7 +167,7 @@ function _stringify(value: ValueOrExpr): string {
     }
   } else if ('op' in value) {
     stringed = stringifyOp(value);
-  } else if ('a' in value) {
+  } else if (isApplication(value)) {
     const arrow = ((_tplmode && _html !== false) || _html) ? '\\' : '>';
     if ('n' in value) stringed = `|${value.n.join(_listcommas ? ', ' : ' ')}| =${arrow} ${_stringify(value.a)}`;
     else stringed = `=${arrow}${_stringify(value.a)}`;
