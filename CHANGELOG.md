@@ -1,3 +1,30 @@
+## 0.13.0
+
+2022-12-07
+
+### Data
+
+* __BUG:__ An object will now only be considered to be an application if it has a single `a` key.
+* The `in` and `not-in` operators can now check for:
+  * nultiple keys in an object
+  * entries in an array that match an application
+  * entries in an object that match an application
+* The `contains` and `does-not-contain` operators can now check for:
+  * entries in an array that match an application
+  * entries in an object that match an application
+* The `map` operator can now map objects where an array of two items with the first being a string will replace the entry in the resulting object, a nullish value will remove the entry from the resulting object, and any other value will result in an entry with the same key and the new value in the resulting object.
+* The `filter` operator can now filter objects to produce a new object containing only entries matching the filter. Sorts and groups are ignored for object filters.
+* The `find` operator can now check objects and arrays for an entry matching an application.
+
+### Parser
+
+* __BUG:__ The parser will now properly parse a bracketed application as such rather than an s-expression with the operator being `=>`.
+
+### Render
+
+* __BUG:__ Having a widget with a height greater than `maxY` will no longer result in an infinite loop.
+
+
 ## 0.12.6
 
 2022-11-11
