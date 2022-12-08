@@ -1,3 +1,12 @@
+## 0.13.1
+
+Unreleased
+
+### Designer
+
+__BUG__: The code editors in the designer now handle long lines and long expressions a little more gracefully, without the textarea and code getting and line numbers getting out of whack unless lines get very very long.
+
+
 ## 0.13.0
 
 2022-12-07

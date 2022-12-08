@@ -195,10 +195,10 @@ Ractive.extendWith(Viewer, {
   css,
   cssData: {
     extra: `
-      pre { margin: 0; white-space: pre-wrap; font-size: 0.9em; }
+      pre { margin: 0; white-space: pre-wrap; font-size: 14px; }
       .syntax-editor code { padding: 0; flex-grow: 1; }
       .syntax-editor { max-height: 100%; overflow: auto; }
-      .syntax-editor code { font-size: inherit; line-height: 1em; }
+      .syntax-editor code { font-size: inherit; line-height: 14px; }
       `,
   },
   partials: {
@@ -216,14 +216,18 @@ Ractive.extendWith(Viewer, {
 
 function breakLines(src: string, width: number) {
   if (width < 16) return [];
-  const char = (16 * 0.85) * 0.6;
-  const count = Math.floor(width / char);
+  const char = 8.4;
+  const count = width / char;
   const res = [];
   const lines = src.split('\n');
 
   for (let il = 0; il < lines.length; il++) {
     const l = lines[il];
-    const vert = Math.ceil(l.length / count);
+    const base = l.length / count;
+    let vert = Math.ceil(base);
+    let factor = (width - Math.floor(width / char) * char) / char;
+    if (factor < 0.2) factor = 0.5;
+    vert = Math.ceil(base + (vert * factor) / count);
     res.push(il + 1);
     if (vert > 1) for (let i = 1; i < vert; i++) res.push('');
   }

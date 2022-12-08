@@ -5,15 +5,17 @@ export default function autosize(node: HTMLElement) {
   helper.style.position = 'absolute';
   helper.style.left = '-110%';
   helper.style.zIndex = '-1';
-  helper.style.height = '1rem';
-  helper.style.fontSize = '0.85rem';
-  helper.style.lineHeight = '1rem';
-  helper.style.padding = '0.5rem';
+  helper.style.height = '14px';
+  helper.style.fontSize = '14px';
+  helper.style.lineHeight = '14px';
+  helper.style.padding = '14px';
   helper.style.wordBreak = 'break-all';
   helper.style.whiteSpace = 'pre-wrap';
   document.body.appendChild(helper);
 
   function resize() {
+    const style = getComputedStyle(node);
+    helper.style.boxSizing = style.boxSizing;
     helper.style.width = `${node.clientWidth}px`;
     helper.value = (node as HTMLTextAreaElement).value;
     node.style.height = `${helper.scrollHeight + 8}px`;
