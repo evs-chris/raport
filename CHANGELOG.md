@@ -1,9 +1,10 @@
 ## 0.13.1
 
-Unreleased
+2022-12-13
 
 ### Data
 
+* __BUG:__ The `like`, `not-like`, `ilike`, and `not-ilike` operators will now correctly operate on multiline strings, meaning that `'a\nb'` will properly match the pattern `'*a*b*'`.
 * The `slice`/`substr` operator will now stringify arguments that don't have a `slice` method available using the `string` operator.
 
 ### Designer
