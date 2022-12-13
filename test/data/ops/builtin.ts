@@ -212,6 +212,7 @@ q.test('if', t => {
 
 q.test(`ilike`, t => {
   t.equal(evaluate('(ilike :SomeThing :*et*)'), true);
+  t.equal(evaluate('`abe\npst\ng` ilike :*e*t*)'), true);
   t.equal(evaluate('(ilike :SomeThing :*fr*)'), false);
   t.equal(evaluate('(ilike (array :Or :SomeThing :Other) :*et*)'), true);
   t.equal(evaluate('(ilike (array :Or :SomeThing :Other) :*fr*)'), false);

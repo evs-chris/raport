@@ -191,7 +191,7 @@ registerOperator(
     for (let i = 0; i < patterns.length && !res; i++) {
       const r = patterns[i];
       if (typeof r !== 'string') continue;
-      const re = new RegExp(`${free ? '' : '^'}${r.replace(/[\s\%\*]+/g, '.*').replace(/\?/g, '.')}${free ? '' : '$'}`, ~name.indexOf('ilike') ? 'i' : '');
+      const re = new RegExp(`${free ? '' : '^'}${r.replace(/[\s\%\*]+/g, '[\\s\\S]*').replace(/\?/g, '.')}${free ? '' : '$'}`, ~name.indexOf('ilike') ? 'i' : '');
       if (Array.isArray(target)) res = !!target.find(v => re.test(v));
       else res = re.test(target);
     }
