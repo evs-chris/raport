@@ -787,7 +787,7 @@ export class Designer extends Ractive {
   fmt() {
     this._onChange(this.get('report'));
     const str = this.get('temp.expr.str');
-    const settings = this.get('~/settings.format');
+    const settings = this.get('~/settings.format') || {};
     const opts = { listWrap: { base: settings.wrap, array: settings.wrap_array, union: settings.wrap_union, args: settings.wrap_args, keys: settings.wrap_keys } };
     this.set('temp.expr.str', fmt(str, this.get('temp.expr.html'), this.get('tmp.nowrap'), opts));
   }

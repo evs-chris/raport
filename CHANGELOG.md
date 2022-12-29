@@ -1,3 +1,12 @@
+## 0.13.2
+
+Pending Release
+
+### Designer
+
+* __BUG__: The designer expression editor will no longer fail to format if you haven't set any format options.
+
+
 ## 0.13.1
 
 2022-12-13
