@@ -968,7 +968,7 @@ registerOperator({
     if (!args[0]) return arr;
     const v = args.length === 2 ? evalParse(ctx, args[0]) : arr;
     const app = evalParse(ctx, args.length === 2 ? args[1] : args[0]);
-    if ((Array.isArray(v) || '0' in v) && isApplication(app)) return Array.prototype.map.call(v, (e: any, i: number) => evalApply(ctx, app, [e, i], false, { index: i, key: i }));
+    if ((Array.isArray(v) || v && '0' in v) && isApplication(app)) return Array.prototype.map.call(v, (e: any, i: number) => evalApply(ctx, app, [e, i], false, { index: i, key: i }));
     else if (v && typeof v === 'object' && isApplication(app)) {
       const res: any = {};
       Object.entries(v as object).forEach((e, i) => {

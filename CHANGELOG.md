@@ -1,14 +1,23 @@
+## 0.13.3
+
+Pending Release
+
+### Data
+
+* __BUG:__ The `map` operator will no longer throw when applied to an undefined value.
+
+
 ## 0.13.2
 
 2023-01-16
 
 ### Render
 
-* __BUG__: Hidden widgets will not longer break layouts.
+* __BUG:__ Hidden widgets will no longer break layouts.
 
 ### Designer
 
-* __BUG__: The designer expression editor will no longer fail to format if you haven't set any format options.
+* __BUG:__ The designer expression editor will no longer fail to format if you haven't set any format options.
 
 
 ## 0.13.1
