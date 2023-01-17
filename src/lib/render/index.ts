@@ -117,7 +117,7 @@ export interface RenderState<T = any> {
 /** Render the given widget to string or a continuation using a registered renderer */
 export function renderWidget(w: Widget, context: RenderContext, placement: Placement, state?: RenderState): RenderContinuation {
   const renderer = renderers[w.type];
-  if (!renderer || (w.hide && evaluate(extendContext(context.context, { special: { widget: w, placement } }), w.hide))) return { output: '' };
+  if (!renderer || (w.hide && evaluate(extendContext(context.context, { special: { widget: w, placement } }), w.hide))) return { output: '', height: 0 };
 
   if (!('height' in w) && renderer.container) w.height = 'auto'; 
   const h = getHeightWithMargin(w, placement, context);
@@ -263,7 +263,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
 
     return { output: s, height: getHeightWithMargin(widget, placement, context) || maxYOffset(ps) - m[0], width: getWidthWithMargin(widget, placement, context) || maxXOffset(ps) - m[3] };
   }
-  return { output: '' };
+  return { output: '', height: 0 };
 }
 
 export function getWidth(w: Widget, placement: Placement, context: RenderContext): number {
