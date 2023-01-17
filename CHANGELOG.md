@@ -1,6 +1,10 @@
 ## 0.13.2
 
-Pending Release
+2023-01-16
+
+### Render
+
+* __BUG__: Hidden widgets will not longer break layouts.
 
 ### Designer
 
