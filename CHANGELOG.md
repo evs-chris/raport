@@ -1,10 +1,14 @@
 ## 0.13.3
 
-Pending Release
+2023-01-17
 
 ### Data
 
 * __BUG:__ The `map` operator will no longer throw when applied to an undefined value.
+
+### Render
+
+* __BUG:__ Manually positioned widgets without explicit x,y coordinates in an auto sized container will now properly be assigned 0,0 rather than breaking the height calculation on the container.
 
 
 ## 0.13.2
