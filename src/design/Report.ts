@@ -599,7 +599,7 @@ export class Designer extends Ractive {
         else prefix += '^';
         if (last === c.value) continue;
 
-        t = inspect(c.value, true);
+        t = inspect(c.value, c !== c.root);
         (t.fields || []).forEach(f => (f.name = `${prefix}${f.name}`, pl.fields.push(f)));
         last = c.value;
 
@@ -621,7 +621,10 @@ export class Designer extends Ractive {
       parts.pop();
     }
     if (ps[0][0] === '*' && ps[1] === 'value' && ps.length > 2) ps[1] = '0';
-    let ref = Ractive.joinKeys.apply(Ractive, ps);
+    const prefix = /^[!^@~*]+/.exec(ps[0]);
+    if (prefix) ps[0] = ps[0].substring(prefix[0].length);
+    let ref = stringify({ r: { k: ps } });
+    if (prefix) ref = `${prefix[0]}${ref}`;
     if (this.get('temp.expr.html') || this.get('temp.expr.template')) ref = `{{${ref}}}`;
 
     if (tab === 'text') {

@@ -10,7 +10,7 @@ function isDate(v: any) {
   return false;
 }
 
-export function inspect(base: any, flat?: true): Schema {
+export function inspect(base: any, flat?: boolean): Schema {
   const root = getType(base);
   if (Array.isArray(base)) {
     const fields: Field[] = [];
@@ -31,7 +31,7 @@ export function inspect(base: any, flat?: true): Schema {
   return { type: root };
 }
 
-function getField(name: string, v: any, flat?: true): Field {
+function getField(name: string, v: any, flat?: boolean): Field {
   const type = getType(v);
   if (!flat && (~type.indexOf('object') || type === 'array')) {
     const cs = inspect(v);
