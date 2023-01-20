@@ -369,7 +369,7 @@ export class Designer extends Ractive {
     this.link(path, 'source');
   }
 
-  moveUp(ctx: ContextHelper, path?: string|string[], index?: number) {
+  moveUp(ctx: ContextHelper, path?: string|string[], index?: number, end?: boolean) {
     const idx = index !== undefined ? index : ctx.get('@index');
     path = path || '../';
     if (!Array.isArray(path)) path = [path];
@@ -378,21 +378,22 @@ export class Designer extends Ractive {
       if (!p) continue;
       if (idx == null || idx <= 0) return;
       const item = ctx.get(joinPath(p, idx));
-      ctx.splice(p, idx - 1, 0, item);
+      ctx.splice(p, end ? 0 : idx - 1, 0, item);
       ctx.splice(p, idx + 1, 1);
     }
   }
 
-  moveDown(ctx: ContextHelper, path?: string|string[], index?: number) {
+  moveDown(ctx: ContextHelper, path?: string|string[], index?: number, end?: boolean) {
     const idx = index !== undefined ? index : ctx.get('@index');
     path = path || '../';
     if (!Array.isArray(path)) path = [path];
 
     for (const p of path) {
       if (!p) continue;
-      if (idx == null || !~idx || idx >= ctx.get('@last')) return;
+      const last = ctx.get('@last');
+      if (idx == null || !~idx || idx >= last) return;
       const item = ctx.get(joinPath(p, idx));
-      ctx.splice(p, idx + 2, 0, item);
+      ctx.splice(p, end ? last + 1 : idx + 2, 0, item);
       ctx.splice(p, idx, 1);
     }
   }

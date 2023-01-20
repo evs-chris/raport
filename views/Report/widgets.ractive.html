@@ -33,8 +33,8 @@
           <span class=actions>
             <button class=ico title="Copy {{.type}}" on-click="@.set('copy', @context), false">{{>copy}}</button>
             <button class=ico title="Move to another container" on-click="@.set('reparent', @context), false">{{>reparent}}</button>
-            <button class="ico up-arrow" title="Move up{{#if Array.isArray(^^/layout)}} (hold the control key to swap layout coordinate too){{/if}}" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined]), false">{{>arrow}}</button>
-            <button class="ico down-arrow" title="Move down{{#if Array.isArray(^^/layout)}} (hold the control key to swap layout coordinates too){{/if}}" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined]), false">{{>arrow}}</button>
+            <button class="ico up-arrow" title="Move up (hold the shift key to move to first{{#if Array.isArray(^^/layout)}}, hold the control key to swap layout coordinate too{{/if}})" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined], @index, @event.shiftKey), false">{{>arrow}}</button>
+            <button class="ico down-arrow" title="Move down (hold the shift key to move to last{{#if Array.isArray(^^/layout)}}, hold the control key to swap layout coordinates too{{/if}})" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined], @index, @event.shiftKey), false">{{>arrow}}</button>
           </span>
           <button class="ico remove" on-click="@.removeWidget(@context), false">{{>times}}</button>
         {{/if}}
