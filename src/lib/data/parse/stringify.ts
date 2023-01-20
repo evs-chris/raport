@@ -163,7 +163,11 @@ function _stringify(value: ValueOrExpr): string {
     if (typeof value.r === 'string') stringed = /^[0-9]/.test(value.r) ? `.${value.r}` : value.r;
     else {
       const r = value.r;
-      stringed = `${fill('^', r.u || 0)}${r.p || ''}${r.k.map((p, i) => typeof p === 'string' || typeof p === 'number' ? `${i ? '.' : ''}${p}` : `[${_stringify(p)}]`).join('')}`;
+      stringed = `${fill('^', r.u || 0)}${r.p || ''}${r.k.map((p, i) => {
+        if (typeof p === 'string' && checkIdent.test(p)) return `${i ? '' : '_'}[${_stringify({ v: p })}]`;
+        else if (typeof p === 'string' || typeof p === 'number') return `${i ? '.' : ''}${p}`;
+        else return `[${_stringify(p)}]`
+      }).join('')}`;
     }
   } else if ('op' in value) {
     stringed = stringifyOp(value);
