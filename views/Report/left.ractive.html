@@ -167,8 +167,8 @@
     {{#each .fields}}
       <div class-node class-active="@keypath === ~/temp.expr.path" class-hover="@keypath === ~/temp.expr.hover" on-click="@.editExpr(@context)">
         <span class-line on-mouseover="@.set('temp.expr.hover', @keypath), false" on-mouseout="@.set('temp.expr.hover', ''), false"><span>{{@index + 1}}. {{.}}</span>
-          <button class="ico field up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context, '../', @index), ~/report.header && @.moveUp(@context, '~/report.header', @index), false">{{>arrow}}</button>
-          <button class="ico field down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context, '../', @index), ~/report.header && @.moveDown(@context, '~/report.header', @index), false">{{>arrow}}</button>
+          <button class="ico field up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', ~/report.headers ? '~/report.headers' : undefined], @index), false">{{>arrow}}</button>
+          <button class="ico field down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', ~/report.headers ? '~/report.headers' : undefined], @index), false">{{>arrow}}</button>
           <button class="ico field remove" on-click="@.removeWidget(@context)">{{>times}}</button>
         </span>
     {{/each}}

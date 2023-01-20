@@ -369,20 +369,32 @@ export class Designer extends Ractive {
     this.link(path, 'source');
   }
 
-  moveUp(ctx: ContextHelper, path?: string, index?: number) {
+  moveUp(ctx: ContextHelper, path?: string|string[], index?: number) {
     const idx = index !== undefined ? index : ctx.get('@index');
+    path = path || '../';
+    if (!Array.isArray(path)) path = [path];
 
-    if (idx <= 0) return;
-    const [item] = ctx.splice(path || '../', idx - 1, 1).result;
-    ctx.splice(path || '../', idx, 0, item);
+    for (const p of path) {
+      if (!p) continue;
+      if (idx == null || idx <= 0) return;
+      const item = ctx.get(joinPath(p, idx));
+      ctx.splice(p, idx - 1, 0, item);
+      ctx.splice(p, idx + 1, 1);
+    }
   }
 
-  moveDown(ctx: ContextHelper, path?: string, index?: number) {
+  moveDown(ctx: ContextHelper, path?: string|string[], index?: number) {
     const idx = index !== undefined ? index : ctx.get('@index');
+    path = path || '../';
+    if (!Array.isArray(path)) path = [path];
 
-    if (idx >= ctx.get('@last')) return;
-    const [item] = ctx.splice(path || '../', idx + 1, 1).result;
-    ctx.splice(path || '../', idx, 0, item);
+    for (const p of path) {
+      if (!p) continue;
+      if (idx == null || !~idx || idx >= ctx.get('@last')) return;
+      const item = ctx.get(joinPath(p, idx));
+      ctx.splice(p, idx + 2, 0, item);
+      ctx.splice(p, idx, 1);
+    }
   }
 
   reparent(target: ContextHelper) {
@@ -1658,6 +1670,11 @@ function jsonToJS(json: any, strings: 'json'|'template'): string {
   else if (typeof json === 'string') return strings === 'json' ? JSON.stringify(json) : `\`${json.replace(/(`|${|\\)/g, '\\$1')}\``;
   else if (Array.isArray(json)) return `[${json.map(v => jsonToJS(v, strings)).join(',')}]`;
   else if (typeof json === 'object') return `{${Object.entries(json).map(([k, v]) => v === undefined ? v : `${plainKeys.test(k) ? k : `'${k}'`}:${jsonToJS(v, strings)}`).filter(v => !!v).join(',')}}`;
+}
+
+function joinPath(one: string, two: string) {
+  if (/\/$/.test(one)) return `${one}${two}`;
+  else return `${one}.${two}`;
 }
 
 registerOperator({

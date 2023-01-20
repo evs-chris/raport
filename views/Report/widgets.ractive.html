@@ -4,8 +4,8 @@
       <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : @.selectWidget(@keypath), false">
         <span class-line on-mouseover="@.set('temp.hover', @keypath), false"><span>group {{@index + 1}}</span>
           <span class=actions>
-            <button class="ico up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context), @.moveUp(@context, '^^/groupEnds'), false" title="Move up">{{>arrow}}</button>
-            <button class="ico down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context), @.moveDown(@context, '^^/groupEnds'), false" title="Move down">{{>arrow}}></button>
+            <button class="ico up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', '^^/groupEnds']), false" title="Move up">{{>arrow}}</button>
+            <button class="ico down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', '^^/groupEnds']), false" title="Move down">{{>arrow}}></button>
           </span>
           <button class="ico remove" on-click="@.removeWidget(@context), false" title="Remove">{{>times}}</button>
         </span>
@@ -30,8 +30,8 @@
         {{#if !~/reparent}}
           <span class=actions>
             <button class=ico title="Move to another container" on-click="@.set('reparent', @context), false">{{>reparent}}</button>
-            <button class="ico up-arrow" title="Move up" disabled="{{@index === 0}}" on-click="@.moveUp(@context), Array.isArray(^^/layout) ? @.moveUp(@context, '^^/layout') : false, false">{{>arrow}}</button>
-            <button class="ico down-arrow" title="Move down" disabled="{{@index === @last}}" on-click="@.moveDown(@context), Array.isArray(^^/layout) ? @.moveDown(@context, '^^/groupEnds') : false, false">{{>arrow}}</button>
+            <button class="ico up-arrow" title="Move up{{#if Array.isArray(^^/layout)}} (hold the control key to swap layout coordinate too){{/if}}" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined]), false">{{>arrow}}</button>
+            <button class="ico down-arrow" title="Move down{{#if Array.isArray(^^/layout)}} (hold the control key to swap layout coordinates too){{/if}}" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined]), false">{{>arrow}}</button>
           </span>
           <button class="ico remove" on-click="@.removeWidget(@context), false">{{>times}}</button>
         {{/if}}
