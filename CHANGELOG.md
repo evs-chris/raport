@@ -1,3 +1,24 @@
+## 0.13.5
+
+2023-01-20
+
+### Render
+
+* __BUG__: The `@size` reference is now actually available in page headers and footers.
+* Repeater rows and footers now get access to `@last` and `@count` special references, which are the last index and total count of the repeating source, respectively.
+
+### Parser
+
+* __BUG:__ References with non-identifier-safe path parts will now stringify correctly.
+
+### Designer
+
+* __BUG:__ Sources are no longer exposed as root references in the context section of the expression editor. Instead, they appear as valid source references e.g. `*some-source`.
+* __BUG:__ Linked references now show the correct parsed value in the expression editor.
+* Root references now include their full schema in the expression editor context section.
+* The expression editor now shows special references for specific contexts e.g. `@page` for page headers and footers and `@group` for grouped repeaters.
+
+
 ## 0.13.4
 
 2023-01-19
