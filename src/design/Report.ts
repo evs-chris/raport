@@ -415,6 +415,28 @@ export class Designer extends Ractive {
     target.push('.widgets', obj);
   }
 
+  paste(target: ContextHelper) {
+    const w: ContextHelper = this.get('copy');
+      this.set('copy', undefined);
+    if (!w || !target) return;
+
+    const obj = cloneDeep(w.get());
+    target.push('widgets', obj);
+
+    if (Array.isArray(target.get('layout'))) {
+      if (Array.isArray(w.get('^^/layout'))) target.push('layout', w.get(`^^/layout.${w.get('@index')}`))
+      else target.push('layout', [0, 0]);
+    }
+  }
+
+  fillArray(count: number) {
+    const res = [];
+    for (let i = 0; i < count; i++) {
+      res[i] = [];
+    }
+    return res;
+  }
+
   addHeader() {
     this.set('report.headers', (this.get('report.fields') || []).map(() => ''));
   }

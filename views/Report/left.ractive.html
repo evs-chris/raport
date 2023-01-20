@@ -15,13 +15,14 @@
       </select>
       <button on-click="@.addWidget(~/add)" class=add>+</button>
     {{/if}}
+    {{#if ~/copy}}<button class="ico large" on-click="@.set('copy', undefined)" title="Cancel copy">{{>copy, true as cancel}}</button>{{/if}}
     {{#if ~/reparent}}<button class="ico large" on-click="@.set('reparent', undefined)" title="Cancel move">{{>reparent, true as cancel}}</button>{{/if}}
     <button class="ico large" on-click="@.treeScrollToActive()" title="Scroll active widget into view">{{>scrollto}}</button>
   </div>
   <div class="scrolled-wrapper widget-tree">
     <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
       {{#with report}}
-      <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : @.selectWidget('report')"><span class-line on-mouseover="@.set('temp.hover', 'report'), false">Report</span>
+      <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : ~/copy ? @.paste(@context) : @.selectWidget('report')"><span class-line on-mouseover="@.set('temp.hover', 'report'), false">Report</span>
         {{#if report.type === 'delimited'}}
           {{>delimited-fields}}
         {{else}}

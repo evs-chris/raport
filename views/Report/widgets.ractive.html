@@ -1,7 +1,7 @@
 <div class=children>
   {{#if .type === 'repeater' && .group}}
     {{#each .group}}
-      <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : @.selectWidget(@keypath), false">
+      <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false">
         <span class-line on-mouseover="@.set('temp.hover', @keypath), false"><span>group {{@index + 1}}</span>
           <span class=actions>
             <button class="ico up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', '^^/groupEnds']), false" title="Move up">{{>arrow}}</button>
@@ -15,7 +15,7 @@
   {{/if}}
   {{#each .}}
     {{#if .type === 'container'}}
-      <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : @.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
+      <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
         <span class-line>
           <span>{{@key}}</span>
           {{#if @key !== 'row' || ../type !== 'repeater'}}<button class="ico remove" on-click="@.removeWidget(@context), false">{{>times}}</button>{{/if}}
@@ -25,12 +25,13 @@
     {{/if}}
   {{/each}}
   {{#each .widgets}}
-    <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" class-moving="~/reparent && @keypath === ~/reparent.resolve()" on-click="~/reparent && ~/reparent.resolve() === @keypath ? @.set('reparent', undefined) : ~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : @.selectWidget(@keypath), false" {{#if !~/reparent || .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1}}on-mouseover="@.set('temp.hover', @keypath), false"{{/if}}>
+    <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" class-moving="~/reparent && @keypath === ~/reparent.resolve() || ~/copy && @keypath === ~/copy.resolve()" on-click="~/reparent && ~/reparent.resolve() === @keypath ? @.set('reparent', undefined) : ~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false" {{#if !~/reparent || .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1}}on-mouseover="@.set('temp.hover', @keypath), false"{{/if}}>
       <span class-line>
         {{#if .widgets.length}}<button on-click="@.set('temp.tree.' + escapeKey(@keypath), ~/temp.tree[@keypath] === false ? true : false), false" class="ico expander">{{#if ~/temp.tree[@keypath] !== false}}-{{else}}+{{/if}}</button>{{/if}}
         <span>{{.type}}{{>widget-info}}</span>
         {{#if !~/reparent}}
           <span class=actions>
+            <button class=ico title="Copy {{.type}}" on-click="@.set('copy', @context), false">{{>copy}}</button>
             <button class=ico title="Move to another container" on-click="@.set('reparent', @context), false">{{>reparent}}</button>
             <button class="ico up-arrow" title="Move up{{#if Array.isArray(^^/layout)}} (hold the control key to swap layout coordinate too){{/if}}" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined]), false">{{>arrow}}</button>
             <button class="ico down-arrow" title="Move down{{#if Array.isArray(^^/layout)}} (hold the control key to swap layout coordinates too){{/if}}" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined]), false">{{>arrow}}</button>
@@ -166,6 +167,16 @@
 
 <template id="arrow">
   <svg viewBox="4 7 16 10"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"></path></svg>  
+</template>
+
+<template id="copy">
+  <svg viewBox="0 0 16 16">
+    <path d="m 2.5507813,0.02148438 c -1.0111865,0 -1.84570318,0.84012077 -1.84570318,1.84960932 v 9.7968753 c 0,1.009488 0.83451588,1.847656 1.84570318,1.847656 H 6.4335937 V 4.4023437 c 0,-0.2045815 0.1433298,-0.3457031 0.3496094,-0.3457031 H 11.121094 V 1.8710937 c 0,-1.00948872 -0.83647,-1.84960932 -1.8476565,-1.84960932 z m 0,1.50000002 h 6.7226562 c 0.2045818,0 0.3476563,0.1433291 0.3476563,0.3496093 V 2.5566406 H 6.7832031 c -1.0094885,0 -1.8496094,0.8345165 -1.8496094,1.8457031 V 12.015625 H 2.5507813 c -0.2045816,0 -0.3457032,-0.141378 -0.3457032,-0.347656 V 1.8710937 c 0,-0.2062803 0.1411208,-0.3496093 0.3457032,-0.3496093 z" />
+    <path d="m 6.7832031,2.5566406 c -1.0104117,0 -1.8476562,0.8372445 -1.8476562,1.8476563 v 9.7968751 c 0,1.010412 0.8372445,1.847656 1.8476562,1.847656 h 6.7226559 c 1.010412,0 1.845704,-0.837245 1.845704,-1.847656 V 4.4042969 c 0,-1.010411 -0.835292,-1.8476563 -1.845704,-1.8476563 z m 0,1.5 h 6.7226559 c 0.205359,0 0.345703,0.1422974 0.345704,0.3476563 v 9.7968751 c 0,0.20536 -0.140345,0.347656 -0.345704,0.347656 H 6.7832031 c -0.205358,0 -0.3476562,-0.142297 -0.3476562,-0.347656 V 4.4042969 c 0,-0.205358 0.1422982,-0.3476563 0.3476562,-0.3476563 z" />
+    {{#if cancel}}
+      <path d="M 2.5878906 1.7539062 L 1.3984375 2.9433594 L 6.7871094 8.3320312 L 1.3984375 13.720703 L 2.5878906 14.912109 L 7.9765625 9.5234375 L 13.367188 14.912109 L 14.556641 13.720703 L 9.1679688 8.3320312 L 14.556641 2.9433594 L 13.367188 1.7539062 L 7.9765625 7.1425781 L 2.5878906 1.7539062 z" opacity=0.5 fill=red />
+    {{/if}}
+  </svg>
 </template>
 
 <template id="reparent">

@@ -277,7 +277,7 @@
   {{/if}}
   {{/with}}
   <label><span>Layout</span><span>
-    <select twoway="false" value="{{Array.isArray(.layout) ? 'manual' : 'auto'}}" on-change="@context.set('.layout', @node.value === 'manual' ? [] : undefined)">
+    <select twoway="false" value="{{Array.isArray(.layout) ? 'manual' : 'auto'}}" on-change="@context.set('.layout', @node.value === 'manual' ? @.fillArray(.widgets.length) : undefined)">
       <option value="auto">Auto</option>
       <option value="manual">Manual</option>
     </select>
