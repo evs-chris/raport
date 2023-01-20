@@ -1,3 +1,17 @@
+## 0.13.4
+
+2023-01-19
+
+### Designer
+
+* __BUG:__ Moving a widget in a manual layout container down the list of widgets in the container will no longer break the container layout.
+* Labels and containers in the widget tree will now show a little info about their content, so they're a little easier to tell apart.
+* Holding shift while moving a widget up or down the tree will move the widget to the top or bottom, respectively.
+* Holding control while moving a widget in a manual layout container up or down the tree will stop its layout corrdinate from moving with it, effectively swapping the coordinates of the swapped widgets.
+* There is now a copy action button in the widget tree to allow easily duplicating a widget and its children.
+* Containers in the widget tree now support collapsing their nodes, making it easier to deal with adjacent widgets that have many children.
+
+
 ## 0.13.3
 
 2023-01-17
