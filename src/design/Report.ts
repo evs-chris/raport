@@ -518,7 +518,11 @@ export class Designer extends Ractive {
 
   async buildLocalContext(path?: string): Promise<Context> {
     const root = await this.buildRoot();
-    root.special['date'] = new Date();
+    root.special.date = new Date();
+    root.special.local = {};
+    root.special.locals = {};
+    root.special.special = {};
+    root.special.specials = {};
     let loc: any = this.get('report');
     let ctx: Context = root;
 
@@ -533,6 +537,18 @@ export class Designer extends Ractive {
       } else {
         while (loc && parts.length) {
           const part = parts.shift();
+
+          if (loc.type === 'page' && (part === 'header' || part === 'footer' || part === 'watermark' || part === 'overlay')) {
+            root.special.page = 1;
+            root.special.pages = 10;
+            root.special.size = { x: 30, y: 40 };
+          }
+
+          if (part === 'height' || part === 'width' || part === 'br' || part === 'margin' || part === 'hide') {
+            root.special.placement = { x: 0, y: 0, availableX: 10, availableY: 10, maxX: 10, maxY: 10, offsetX: 5, offsetY: 5 };
+            root.special.widget = loc;
+          }
+
           loc = loc[part];
           if (loc) {
             if (loc.context) {
@@ -545,8 +561,25 @@ export class Designer extends Ractive {
             }
           }
 
-          if (loc && loc.type === 'repeater' && parts[0] === 'row') {
-            ctx = extend(ctx, { value: evaluate(ctx, '@value.0') });
+          if (loc && loc.type === 'repeater') {
+            if (loc.group && loc.group.length && ctx.value && ctx.value.value && ctx.value.value[0]) {
+              root.special.grouped = true;
+              root.special.level = ctx.value.value[0].level;
+              root.special.group = ctx.value.value[0].group;
+            }
+
+            if (parts[0] === 'row') {
+              root.special.source = ctx.value;
+              ctx = extend(ctx, { value: evaluate(ctx, '@value.0') || evaluate(ctx, '@value.all.0') });
+              root.special.index = 0;
+            } else if (parts[0] === 'footer') {
+              root.special.values = {};
+            }
+
+            if (parts[0] === 'row' || parts[0] === 'footer') {
+              root.special.last = 10;
+              root.special.count = 11;
+            }
           }
         }
       }
