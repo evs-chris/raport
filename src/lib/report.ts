@@ -386,14 +386,13 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
   context.special.pages = pages.length;
   const footTop = size.height - 2 * size.margin[0] - footSize;
 
+  context.special.size = { x: availableX, y: pageY };
   pages.forEach((p, i) => {
     let n = `<div class="page-back pb${i}"><div${styleClass(ctx, ['page', `ps${i}`], ['', ''], '', 'p')}>\n`;
     context.special.page = i + 1;
     if (report.watermark) {
-      context.special.size = { x: availableX, y: pageY };
       const r = renderWidget(report.watermark, ctx, { x: 0, y: 0, maxX: availableX, maxY: pageY });
       n += r.output + '\n';
-      delete context.special.size;
     }
     if (report.header) {
       const r = renderWidget(report.header, ctx, { x: 0, y: 0, maxX: availableX, maxY });
@@ -405,10 +404,8 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
       n += r.output + '\n';
     }
     if (report.overlay) {
-      context.special.size = { x: availableX, y: pageY };
       const r = renderWidget(report.overlay, ctx, { x: 0, y: 0, maxX: availableX, maxY: pageY });
       n += r.output + '\n';
-      delete context.special.size;
     }
     n += '\n</div></div>';
     pages[i] = n;
