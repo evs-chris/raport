@@ -488,9 +488,6 @@ export class Designer extends Ractive {
     const res = new Root(cloneDeep(report.context), { parameters: this.get('params') });
     const srcs = await this.buildSources();
     applySources(res, report.sources || [], srcs);
-    for (const src of report.sources || []) {
-      if (!((src.name || src.source) in res.value)) res.value[src.name || src.source] = (res.sources[src.name || src.source] || {}).value;
-    }
     return res;
   }
 
@@ -586,9 +583,8 @@ export class Designer extends Ractive {
     let prefix = '';
 
     for (const k in ctx.root.sources) {
-      const cur = pl.fields.find(f => f.name === k);
-      if (cur) cur.name = `*${k}`;
-      else pl.fields.push({ name: `*${k}`, type: 'any' });
+      const schema = inspect(ctx.root.sources[k].value);
+      pl.fields.push({ name: `*${k}`, type: schema.type, fields: schema.fields });
     }
 
     let t = inspect(ctx.root.special);
