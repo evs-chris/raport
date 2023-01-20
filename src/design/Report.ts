@@ -1085,12 +1085,17 @@ Ractive.extendWith(Designer, {
           tab: 'text',
         },
         widget: 'report',
+        name: 'report',
+        tree: {},
       },
       exprExpand: {},
       showProjects: true,
     };
   },
   components: { Editor, Viewer },
+  helpers: {
+    escapeKey: Ractive.escapeKey,
+  },
   computed: {
     operators() {
       const map = getOperatorMap();
@@ -1265,6 +1270,12 @@ Ractive.extendWith(Designer, {
         this._contextText.value = target;
         this.autosize(this._contextText);
       }
+    },
+    report: {
+      handler() {
+        this.set('temp.tree', {});
+      },
+      strict: true
     },
   },
   on: {

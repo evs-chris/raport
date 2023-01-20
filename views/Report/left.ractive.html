@@ -34,7 +34,7 @@
   {{#if ~/temp.widget}}
   <div class="scrolled-wrapper"><div as-scrolled>
     <div class=header>
-      <h3>{{~/temp.name[0].toUpperCase()}}{{~/temp.name.substr(1)}}Properties</h3>
+      <h3>{{~/temp.name[0].toUpperCase()}}{{~/temp.name.substr(1)}} Properties</h3>
     </div>
     {{#if ~/temp.widget === 'report'}}
       <div class="growy">
@@ -187,6 +187,7 @@
     background-color: {{@style.bg}};
     display: flex;
     flex-direction: column;
+    z-index: 1999;
   }
 
   .properties-pull {

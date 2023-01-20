@@ -26,7 +26,9 @@
   {{/each}}
   {{#each .widgets}}
     <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" class-moving="~/reparent && @keypath === ~/reparent.resolve()" on-click="~/reparent && ~/reparent.resolve() === @keypath ? @.set('reparent', undefined) : ~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : @.selectWidget(@keypath), false" {{#if !~/reparent || .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1}}on-mouseover="@.set('temp.hover', @keypath), false"{{/if}}>
-      <span class-line><span>{{.type}}</span>
+      <span class-line>
+        {{#if .widgets.length}}<button on-click="@.set('temp.tree.' + escapeKey(@keypath), ~/temp.tree[@keypath] === false ? true : false), false" class="ico expander">{{#if ~/temp.tree[@keypath] !== false}}-{{else}}+{{/if}}</button>{{/if}}
+        <span>{{.type}}{{>widget-info}}</span>
         {{#if !~/reparent}}
           <span class=actions>
             <button class=ico title="Move to another container" on-click="@.set('reparent', @context), false">{{>reparent}}</button>
@@ -36,7 +38,9 @@
           <button class="ico remove" on-click="@.removeWidget(@context), false">{{>times}}</button>
         {{/if}}
         </span>
-        {{>widget-tree}}
+        {{#if ~/temp.tree[@keypath] !== false}}
+          {{>widget-tree}}
+        {{/if}}
     </div>
   {{/each}}
 </div>
@@ -152,6 +156,14 @@
   </div>
 </template>
 
+<template id="widget-info">
+  {{#if .type === 'label'}}
+    <span class="widget-info">{{.text}}</span>
+  {{elseif .widgets.length}}
+    <span class="widget-info">({{.widgets.length}} children)</span>
+  {{/if}}
+</template>
+
 <template id="arrow">
   <svg viewBox="4 7 16 10"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"></path></svg>  
 </template>
@@ -233,6 +245,7 @@
     display: none;
     position: absolute;
     right: 3rem;
+    background-color: inherit;
   }
   .line:hover .actions {
     display: block;
@@ -242,6 +255,24 @@
     height: 100%;
     border-radius: 0.2rem;
     transition: transform 0.2s ease-in-out 0.3s;
+  }
+
+  .line button.ico {
+    flex-shrink: 0;
+  }
+
+  .line button.ico.expander {
+    position: absolute;
+    left: -1.35em;
+    opacity: 0.5;
+    border: 0px solid;
+    transition: border-width 0.2s ease;
+    width: 0.75em;
+    text-align: center;
+    padding: 0 0.2em;
+  }
+  .line button.ico.expander:hover {
+    border-width: 1px;
   }
 
   .line button.ico svg,
@@ -262,6 +293,16 @@
   .hover .line .actions button.ico:hover svg,
   .line button.ico:hover svg {
     fill: {{@style.fg}};
+  }
+
+  span.widget-info {
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+    padding-left: 0.5em;
+    max-width: 85%;
+    opacity: 0.7;
   }
 
   button.ico[disabled] svg,
