@@ -1163,13 +1163,6 @@ Ractive.extendWith(Designer, {
         this.set(k.replace('temp', 'report'), (parse(`'${v.replace(/'/g, '\\\'')}'`) as Literal).v);
       } catch {}
     },
-    expr(v) {
-      if (!this.evalLock) {
-        this.evalLock = true;
-        this.set('temp.expr.str', v);
-        this.evalLock = false;
-      }
-    },
     'temp.expr.str'(v) {
       if (!v) {
         this.set('temp.expr.error', undefined);
@@ -1179,33 +1172,37 @@ Ractive.extendWith(Designer, {
       const path = this.get('temp.expr.path');
       const html = this.get('temp.expr.html') || this.get('temp.expr.template');
       if (path) this.set(path, v);
-      if (!this.evalLock && v.trim()) {
-        this.evalLock = true;
-        try {
-          const arr = Array.isArray(v) ? v : [v];
-          for (let i = 0; i < arr.length; i++) {
-            const v = typeof arr[i] === 'string' ? arr[i] : 'text' in arr[i] && typeof arr[i].text === 'string' ? arr[i].text : arr[i];
-            const parsed = (html ? parseTemplate : parse)(v, { detailed: true, contextLines: 3, consumeAll: true });
-            const msg = ('marked' in parsed ? 
-              `${'latest' in parsed ? `${parsed.latest.message || '(no message)'} on line ${parsed.latest.line} at column ${parsed.latest.column}\n\n${parsed.latest.marked}\n\n` : ''}${parsed.message || '(no message)'} on line ${parsed.line} at column ${parsed.column}\n\n${parsed.marked}\n\n` : '') + JSON.stringify(parsed, null, '  ');
+      if (!this.evalLock) {
+        if (typeof v === 'string' && v.trim()) {
+          this.evalLock = true;
+          try {
+            const arr = Array.isArray(v) ? v : [v];
+            for (let i = 0; i < arr.length; i++) {
+              const v = typeof arr[i] === 'string' ? arr[i] : 'text' in arr[i] && typeof arr[i].text === 'string' ? arr[i].text : arr[i];
+              const parsed = (html ? parseTemplate : parse)(v, { detailed: true, contextLines: 3, consumeAll: true });
+              const msg = ('marked' in parsed ? 
+                `${'latest' in parsed ? `${parsed.latest.message || '(no message)'} on line ${parsed.latest.line} at column ${parsed.latest.column}\n\n${parsed.latest.marked}\n\n` : ''}${parsed.message || '(no message)'} on line ${parsed.line} at column ${parsed.column}\n\n${parsed.marked}\n\n` : '') + JSON.stringify(parsed, null, '  ');
 
-            this.set('temp.expr.parsed', msg);
+              this.set('temp.expr.parsed', msg);
 
-            if ('message' in parsed) {
-              this.set('temp.expr.error', parsed)
-              this.set('temp.expr.ast', undefined);
-            } else {
-              this.set('temp.expr.ast', parsed);
-              this.set('temp.expr.error', undefined);
+              if ('message' in parsed) {
+                this.set('temp.expr.error', parsed)
+                this.set('temp.expr.ast', undefined);
+              } else {
+                this.set('temp.expr.ast', parsed);
+                this.set('temp.expr.error', undefined);
+              }
+
+              if (html) this.set('temp.expr.htmlstr', v);
+              else this.set('temp.expr.htmlstr', '');
+
+              if ('message' in parsed) break;
             }
-
-            if (html) this.set('temp.expr.htmlstr', v);
-            else this.set('temp.expr.htmlstr', '');
-
-            if ('message' in parsed) break;
-          }
-        } catch {}
-        this.evalLock = false;
+          } catch {}
+          this.evalLock = false;
+        } else {
+          this.set('temp.expr.parsed', undefined);
+        }
       }
     },
     'temp.expr.ast'(v, o) {
