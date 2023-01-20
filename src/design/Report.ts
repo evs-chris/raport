@@ -586,13 +586,15 @@ export class Designer extends Ractive {
     let prefix = '';
 
     for (const k in ctx.root.sources) {
-      pl.fields.push({ name: `*${k}`, type: 'any' });
+      const cur = pl.fields.find(f => f.name === k);
+      if (cur) cur.name = `*${k}`;
+      else pl.fields.push({ name: `*${k}`, type: 'any' });
     }
 
     let t = inspect(ctx.root.special);
     t.fields.forEach(f => (f.name = `@${f.name}`, pl.fields.push(f)));
 
-    (this.get('report.parameters') || []).forEach(p => pl.fields.push({ name: `!${p.name}`, type: p.type }));
+    (this.get('report.parameters') || []).forEach((p: Parameter) => pl.fields.push({ name: `!${p.name}`, type: p.type }));
 
     if (c !== c.root) {
       while (c) {
