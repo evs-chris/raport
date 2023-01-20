@@ -115,7 +115,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
     y += r.height;
   }
 
-  let rctx: RenderContext = state && state.state && state.state.context || extend(ctx, { special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: groupNo !== false, group: group && group.group, values: {} } });
+  let rctx: RenderContext = state && state.state && state.state.context || extend(ctx, { special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: groupNo !== false, group: group && group.group, values: {}, last: arr.length - 1, count: arr.length } });
   if (!state || !state.state || state.state.part !== 'footer') {
     let usedX = 0;
     let usedY = 0;

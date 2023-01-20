@@ -152,6 +152,8 @@ There are a number of special references that are context-specific:
 | `_` | case condition | Sugar for `@case` |
 | `_` | pipe arguments | Sugar for `@pipe` |
 | `@index` | repeater | The index of the nearest repeater iteration. |
+| `@last` | repeater | The index of the final nearest repeater iteration. |
+| `@count` | repeater | The total number of iterations for the nearest repeater. |
 | `@group` | repeater | The nearest group by value, if any. |
 | `@grouped` | repeater | Whether the current context is within a group. |
 | `@level` | repeater | The nearest group level, if any. |
