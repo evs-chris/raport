@@ -27,7 +27,7 @@
   {{#each .widgets}}
     <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" class-moving="~/reparent && @keypath === ~/reparent.resolve() || ~/copy && @keypath === ~/copy.resolve()" on-click="~/reparent && ~/reparent.resolve() === @keypath ? @.set('reparent', undefined) : ~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false" {{#if !~/reparent || .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1}}on-mouseover="@.set('temp.hover', @keypath), false"{{/if}}>
       <span class-line>
-        {{#if .widgets.length || .type === 'repeater'}}<button on-click="@.set('temp.tree.' + escapeKey(@keypath), ~/temp.tree[@keypath] === false ? true : false), false" class="ico expander">{{#if ~/temp.tree[@keypath] !== false}}-{{else}}+{{/if}}</button>{{/if}}
+        {{#if .widgets.length || .type === 'repeater'}}<button on-click="@.set('temp.tree.' + escapeKey(@keypath), ~/temp.tree && ~/temp.tree[@keypath] === false ? true : false), false" class="ico expander">{{#if ~/temp.tree[@keypath] !== false}}-{{else}}+{{/if}}</button>{{/if}}
         <span>{{.type}}{{>widget-info}}</span>
         {{#if !~/reparent}}
           <span class=actions>
