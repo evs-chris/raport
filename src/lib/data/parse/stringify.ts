@@ -247,7 +247,7 @@ function stringifyOp(value: Operation): string {
     return stringifyIf(value);
   } else if (op === 'case' && value.args && value.args.length > 2) {
     return stringifyCase(value);
-  } else if (op === '+' && value.args && value.args.length > 0 && findNestedStringOpL(op, value)) {
+  } else if (op === '+' && value.args && value.args.length > 1 && findNestedStringOpL(op, value)) {
     const args = flattenNestedBinopsL(op, value);
     return `'${args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[{']/g, v => `\\${v}`).replace(/\$$/, '\\$') : `{${_stringify(a)}}`).join('')}'`
   } else if ((op === 'fmt' || op === 'format') && value.args && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'string') {
