@@ -1,3 +1,21 @@
+## 0.13.6
+
+2023-02-02
+
+### Parser
+
+* __BUG__: Stringifying a unary `+` operation with a string literal will no longer break the stringifier.
+
+### Data
+
+* The `min` and `max` operators will now ignore `NaN` values.
+
+### Designer
+
+* __BUG__: The widget tree will no longer get stuck on collapsed.
+* The designer is now slightly more iframe embed friendly.
+
+
 ## 0.13.5
 
 2023-01-20
