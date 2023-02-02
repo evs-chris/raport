@@ -941,7 +941,7 @@ registerOperator({
   names: ['min', 'max'],
   apply(name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
     if (args[0]) arr = arr.map(e => evalApply(ctx, args[0], [e]));
-    return Math[name].apply(Math, arr);
+    return Math[name].apply(Math, arr.filter(e => !isNaN(e)));
   }
 }, {
   type: 'aggregate',
