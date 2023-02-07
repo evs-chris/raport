@@ -3,6 +3,8 @@ import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, Root, Context, R
 import { renderWidget, RenderContext, RenderResult, RenderState, expandMargin } from './render/index';
 import { styleClass, styleFont } from './render/style';
 
+import { parse as parseTemplate } from './data/parse/template';
+
 export type ReportType = 'delimited'|'flow'|'page';
 
 export type Report<T = {}> = Delimited<T> | Flow<T> | Page<T>;
@@ -317,7 +319,10 @@ function runDelimited(report: Delimited, context: Context): string {
   }
 
   let res = '';
-  if (headers) res += headers.map(h => `${report.quote || ''}${evaluate(context, h)}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
+  if (headers) {
+    const ctx = extend(context, { parser: parseTemplate });
+    res += headers.map(h => `${report.quote || ''}${evaluate(ctx, h)}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
+  }
   const unquote: RegExp = report.quote ? new RegExp(report.quote, 'g') : undefined;
   for (const value of values) {
     const c = extend(context, { value });
