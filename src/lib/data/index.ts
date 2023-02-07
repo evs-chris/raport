@@ -566,7 +566,9 @@ export interface Application { a: Value; n?: string[]; c?: string[] };
 export interface Literal { v: any; s?: 1; c?: string[] };
 
 export function isApplication(v: any): v is Application {
-  return typeof v === 'object' && 'a' in v && typeof v.a === 'object' && Object.keys(v).length === 1;
+  if (typeof v !== 'object' || !('a' in v) || typeof v.a !== 'object') return false;
+  const len = Object.keys(v).length;
+  return len === 1 || len === 2 && 'n' in v;
 }
 
 /** A timespan specified in milliseconds */
