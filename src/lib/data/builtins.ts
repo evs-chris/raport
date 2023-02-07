@@ -7,6 +7,7 @@ import { stringify } from './parse/stringify';
 import { range as parseRange } from './parse/range';
 import { validate, inspect } from './schema';
 import { diff, deepEqual, labelDiff } from './diff';
+import { detect as csvDetect, parse as csvParse } from './csv';
 
 function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
   return {
@@ -64,7 +65,7 @@ export function similarity(a: string, b: string, threshhold: number = 0.5, fudge
  * Finds the similarity between two strings based on a minimum threshhold and a fudge factor. The minimum threshhold determins the earliest that the search can return. The fudge factor allows skipping characters in either string, though there is no backtracking.
  * @param a - the first string
  * @param b - the second string
- * @param threshhold - defaults to 0.5 - the required similarity between two substrings, accounting for the fidge factor
+ * @param threshhold - defaults to 0.5 - the required similarity between two substrings, accounting for the fudge factor
  * @param fudges - the number skippable characters in either string without a match
  * @returns - a tuple of the substrings from each string and the similarity percentage, accounting for the fudge factor
  */
@@ -805,7 +806,14 @@ registerOperator(
     else if (opts.expr) return parseExpr(v, opts);
     else if (opts.schema) return parseSchema(v);
     else if (opts.range) return parseRange(v, opts);
-    else return parse(v, opts);
+    else if (opts.csv) {
+      if (opts.detect) opts = Object.assign(csvDetect(v), opts);
+      return csvParse(v, opts);
+    } else return parse(v, opts);
+  }),
+  simple(['detect-delimiters'], (_name: string, [data]: any[]) => {
+    if (typeof data !== 'string') return {};
+    return csvDetect(data);
   }),
 );
 

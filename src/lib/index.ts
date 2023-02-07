@@ -28,6 +28,8 @@ export { range as parseRange } from './data/parse/range';
 
 export { parseSchema, unparseSchema } from './data/parse/schema';
 
+export { csv as parseCSV, detect as detectCSV, CSVOptions, DEFAULTS as CSV_DEFAULTS } from './data/csv';
+
 export {
   registerLayout, registerRenderer, isComputed,
 } from './render/index';
