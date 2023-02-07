@@ -1,3 +1,28 @@
+## 0.14.0
+
+2023-02-08
+
+### Data
+
+* __BUG:__ Applications with named args are now properly detected by the internal `isApplication` check.
+* The `map` operator can now return an array of entries or an array of results when applied to an object if the `entries` or `array` option is supplied, respectively.
+* There is a new `detect-delimiters` operator that can detect delimited text delimiters, like CSV or TSV, for a given text and optional character count and return delimited text parsing options.
+* The `parse` operator can now read delimited text with the `csv` option. The given options may also include delimited text parsing options or the `detect` option to automatically detect delimiters.
+
+### Render
+
+* __BREAKING:__ Delimited text reports now process their headers in template rather than expression mode. This more closely matches their common use.
+* __BREAKING:__ Unset delimited fields now render as empty strings rather than `undefined`.
+
+### Designer
+
+* Provided data sources may now be delimited text or an expression that evaluates to data, JSON, or delimited text.
+* All of the widget properties now have tooltips.
+* The widget tree for delimited reports now shows the header text for each field, if available.
+* The context will now be read correctly if a delimited report source happens to be grouped.
+* There are a handful of console warnings fixed and style issues resolved.
+
+
 ## 0.13.6
 
 2023-02-02
