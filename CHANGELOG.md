@@ -1,3 +1,16 @@
+## 0.14.1
+
+2023-02-08
+
+### Data
+
+* When evaluating an operator that cannot be found, the root context will now be checked if the operator is not found in the local context.
+
+### Designer
+
+* The report context sections now have tooltips to explain what they do.
+
+
 ## 0.14.0
 
 2023-02-08
