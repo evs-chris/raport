@@ -1378,6 +1378,13 @@ const designerOpts: ExtendOpts<Designer> = {
           }
         }
       });
+      window.addEventListener('keydown', ev => {
+        if (ev.ctrlKey && ev.key === 's') {
+          this.saveProjects();
+          ev.stopPropagation();
+          ev.preventDefault();
+        }
+      }, { capture: true });
       this.loadProjects();
       if (settings.autosave) {
         let save: any = window.localStorage.getItem('autosave');
