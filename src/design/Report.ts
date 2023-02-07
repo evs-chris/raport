@@ -536,7 +536,11 @@ export class Designer extends Ractive {
       const parts = Ractive.splitKeypath(path);
       if (parts[0] === 'report') parts.shift();
       if (parts[0] === 'fields') {
-        ctx = extend(ctx, { value: evaluate(ctx, `*${this.get('report.sources.0.source')}.0`) });
+        const src = evaluate(ctx, `*${this.get('report.sources.0.source')}`);
+        if (src) {
+          if (src.all) ctx = extend(ctx, { value: src.all[0] });
+          else ctx = extend(ctx, { value: src[0] });
+        }
       } else if (parts[0] === 'sources') {
         if (parts[parts.length - 1] === 'base') ctx = extend(ctx, { value: evaluate(ctx, `*${this.get(`report.sources.${parts[1]}.source`)}.value`) });
         else ctx = extend(ctx, { value: evaluate(ctx, `*${this.get(`report.sources.${parts[1]}.source`)}.0`) });
