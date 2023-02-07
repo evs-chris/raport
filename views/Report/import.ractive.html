@@ -1,9 +1,10 @@
 <div class="delimited import paper">
-  <input type="file" style="display: none;" id="import-file" accept="application/json" />
+  <input type="file" style="display: none;" id="import-file" accept="*/*" />
   <div class-definition>
     <div class-actions>
       <button class="ico text" class-spacer on-click="@.loadImportFile()" title="Import data from a file">Load</button>
       <label><input type="checkbox" style="vertical-align: middle;" checked="{{data.type === 'fetch'}}" twoway=false on-change="@.set('data.type', @node.checked ? 'fetch' : undefined)" /> Fetch request?</label>
+      <label style="margin-left: 1em;"><input type="checkbox" style="vertical-align: middle;" checked="{{data.header}}" twoway=false on-change="@.set('data.header', @node.checked ? 1 : undefined), @.tryImport(@._importText.value)" /> Delimited header?</label>
     </div>
     {{#if data.type === 'fetch'}}
       <div>

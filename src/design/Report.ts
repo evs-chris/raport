@@ -1,6 +1,6 @@
 import { css, template } from 'views/Report';
 
-import Ractive, { InitOpts, ContextHelper, ReadLinkResult, ObserverHandle } from 'ractive';
+import Ractive, { ExtendOpts, InitOpts, ContextHelper, ReadLinkResult, ObserverHandle } from 'ractive';
 import { Report, Literal, run, parse, stringify, initParameters, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap, Parameter, StringifyOpts } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
@@ -33,6 +33,8 @@ export interface PlainSource {
   name: string;
   values(params?: object): Promise<any>;
   data?: any;
+  input?: string;
+  header?: boolean;
 }
 
 export const darkTheme = { fg: '#ccc', bg: '#222', border: '#555555', highlight: '#ddd', dark: '#444444', active: '#265189', hover: '#167808', error: '#a00', btntxt: '#ddd', code: { c1: '#ccc', c2: '#ccc', c3: '#1ca', c4: '#e81', c5: '#2a0', c6: '#e78', c7: '#6c3', c8: '#e82', c9: '#67f', c10: '#89d', c11: '#4bc', c12: '#1de', c13: '#29c', c14: '#888', c20: '#f00', }, };
@@ -300,6 +302,7 @@ export class Designer extends Ractive {
 
     let val: any;
     if ('type' in source && source.type === 'fetch') val = await this.fetchData();
+    else if ('input' in source) val = source.input;
     else if ('data' in source || 'values' in source) val = source.data ? source.data : await source.values();
 
     if (typeof val === 'object' && 'value' in val) val = val.value;
@@ -502,13 +505,16 @@ export class Designer extends Ractive {
         const vv: any = av;
         if (vv.type === 'fetch' && (vv.fetch || !vv.data)) {
           d = await this.fetchData(vv);
-          if (!vv.eval) d = { value: tryJSON(d) };
+          if (!vv.eval) d = { value: tryParseData(d, vv.header) };
           if (!vv.fetch) vv.data = d;
         } else if ('data' in av && av.data) {
-          if (!vv.eval && typeof av.data === 'string') d = { value: tryJSON(av.data) };
+          if (!vv.eval && typeof av.data === 'string') d = { value: tryParseData(av.data, av.header) };
           else d = av.data;
         } else if ('values' in av && typeof av.values === 'function') {
           d = await av.values(this.get('params') || []);
+        } else if ('input' in av && av.input) {
+          d = { value: tryParseData(av.input, av.header) };
+          av.data = d;
         }
         res[av.name] = d;
       }
@@ -777,7 +783,10 @@ export class Designer extends Ractive {
       if (input.files.length) {
         const file = input.files[0];
         const reader = new FileReader();
-        reader.onload = txt => this.tryImport(txt.target.result as string);
+        reader.onload = txt => {
+          this.tryImport(txt.target.result as string);
+          this._importText.value = txt.target.result.toString();
+        };
         reader.readAsText(file);
       }
     }
@@ -787,7 +796,8 @@ export class Designer extends Ractive {
 
   tryImport(str: string) {
     if (!str || !this.readLink('data')) return;
-    const json = tryJSON(str);
+    this.set('data.input', str);
+    const json = tryParseData(str, this.get('data.header'));
     if (json) {
       if (typeof json === 'object' && 'type' in json && json.type === 'fetch') this.set('data', json);
       else {
@@ -797,6 +807,7 @@ export class Designer extends Ractive {
     } else {
       this.set('data.data', str);
     }
+    this.update('sources');
   }
 
   loadContextFile() {
@@ -936,13 +947,17 @@ export class Designer extends Ractive {
   }
 
   saveProjects() {
-    const projects: AvailableSource[] = this.get('projects') || [];
+    const projects: Array<{ sources?: AvailableSource[] }> = this.get('projects') || [];
     for (const p of projects) {
-      if ('type' in p && p.type === 'fetch') delete (p as any).data;
+      if (!p.sources || !Array.isArray(p.sources)) continue;
+      for (const s of p.sources) {
+        if ('type' in s && s.type === 'fetch') delete (s as any).data;
+        else if ('input' in s) delete (s as any).data;
+      }
     }
     window.localStorage.setItem('projects', JSON.stringify(this.get('projects') || []));
     const project = this.get('project');
-    if (project) this.set('projectSaved', JSON.stringify(project));
+    if (project) this.set('projectSaved', this.stringifyProject(project));
   }
 
   loadProjects() {
@@ -972,7 +987,9 @@ export class Designer extends Ractive {
       if ('type' in s && s.type === 'fetch') {
         return Object.assign({}, s, { data: undefined });
       } else {
-        return Object.assign({}, s);
+        const res = Object.assign({}, s);
+        if ('input' in res) delete res.data;
+        return res;
       }
     });
     return JSON.stringify(Object.assign({}, project, { sources, report: this.get('project.report') || this.get('report') || {} }));
@@ -1051,7 +1068,7 @@ export class Designer extends Ractive {
     this.link(path, 'project');
     this.link('project.report', 'report');
     this.link('project.sources', 'sources');
-    this.set('projectSaved', JSON.stringify(this.get(path)));
+    this.set('projectSaved', this.stringifyProject(this.get(path)));
     this.resetUndo();
   }
 
@@ -1119,7 +1136,7 @@ export class Designer extends Ractive {
   }
 }
 
-Ractive.extendWith(Designer, {
+const designerOpts: ExtendOpts<Designer> = {
   template, css, cssId: 'raport-report',
   partials: {
     measured: template.p.label,
@@ -1269,7 +1286,7 @@ Ractive.extendWith(Designer, {
         this.set('temp.expr.ctx', false);
       }
     },
-    async 'temp.expr.path report.parameters report.sources'() {
+    async 'temp.expr.path report.parameters report.sources sources'() {
       if (sourceTm) {
         clearTimeout(sourceTm);
       }
@@ -1309,7 +1326,7 @@ Ractive.extendWith(Designer, {
         const project = this.get('project');
         const saved = this.get('projectSaved');
         if (!project) this.set('projectChanged', false);
-        else if (JSON.stringify(project) !== saved) this.set('projectChanged', true);
+        else if (this.stringifyProject(project) !== saved) this.set('projectChanged', true);
         else this.set('projectChanged', false);
       }, 1000),
     },
@@ -1583,13 +1600,26 @@ Ractive.extendWith(Designer, {
       };
     },
   },
-});
+}
+Ractive.extendWith(Designer, designerOpts);
 
-function tryJSON(str: string): any {
+function tryParseData(str: string, header?: boolean): any {
   try {
     return JSON.parse(str);
   } catch {
-    return {};
+    const csv = evaluate({ str, header }, `parse(str, { csv:1 detect:1 header:header })`);
+    if (!csv.length && str.length) {
+      const res = evaluate(str);
+      if (typeof res === 'string') {
+        try {
+          return JSON.parse(res);
+        } catch {
+          const csv = evaluate({ res, header }, `parse(str, { csv:1 detect:1 header:header })`);
+          if (csv.length) return csv;
+          else return str;
+        }
+      }
+    } else return csv;
   }
 }
 
