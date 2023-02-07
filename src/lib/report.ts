@@ -322,7 +322,7 @@ function runDelimited(report: Delimited, context: Context): string {
   for (const value of values) {
     const c = extend(context, { value });
     res += fields.map(f => {
-      let val = `${evaluate(c, f)}`;
+      let val = f ? `${evaluate(c, f)}` : '';
       if (unquote) val = val.replace(unquote, report.quote + report.quote);
       return `${report.quote || ''}${val}${report.quote || ''}`;
     }).join(report.field || ',') + (report.record || '\n');
