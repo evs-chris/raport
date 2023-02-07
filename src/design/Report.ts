@@ -490,6 +490,7 @@ export class Designer extends Ractive {
   async buildRoot(): Promise<Root> {
     const report: Report = this.get('report');
     const res = new Root(cloneDeep(report.context), { parameters: this.get('params') });
+    if (report.extraContext) evaluate(res, report.extraContext);
     const srcs = await this.buildSources();
     applySources(res, report.sources || [], srcs);
     return res;
