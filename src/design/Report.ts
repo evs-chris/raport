@@ -172,6 +172,7 @@ export class Designer extends Ractive {
     else if (w.width === 'grow' && Array.isArray(context.get('../../layout'))) return `(100% - ${context.get(`../../layout[${context.get('@index')}][0]`) || 0}rem)`; 
     else if (typeof w.width === 'object' && 'percent' in w.width) return `${w.width.percent}%`;
     else if (typeof w.width === 'number') return `${w.width}rem`;
+    else return '100%';
   }
 
   calcWidthWithMargin(w: Widget, context: ContextHelper): string {
@@ -1409,6 +1410,7 @@ const designerOpts: ExtendOpts<Designer> = {
     expr(node, header?: boolean) {
       const ctx = this.getContext(node);
       function change(v: string) {
+        if (!v) v = '';
         if (header) v = v.replace(/\.fields\./, '.headers.');
         if (v === ctx.resolve('.')) {
           node.classList.add('hover-expr');

@@ -9,7 +9,7 @@
 </div>
 
 <template id="ast-node">
-  <span class="{{.name}}">{{#if .children.length}}{{#each .children}}{{#if ^^/extra[@index]}}{{#with ^^/extra[@index]}}<span class="ast-extra">{{~/src.substring(this.0, this.1)}}{{/with}}{{/if}}{{>ast-node}}{{/each}}{{#if .extra[.children.length]}}{{#with .extra[.children.length]}}<span class="ast-extra">{{~/src.substring(this.0, this.1)}}{{/with}}{{/if}}{{else}}{{(~/src || '').substring(.start, .end)}}{{/if}}</span>
+  <span class="{{.name}}">{{#if .children.length}}{{#each .children}}{{#if ^^/extra[@index]}}{{#with ^^/extra[@index]}}<span class="ast-extra">{{(~/src || '').substring(this.0, this.1)}}{{/with}}{{/if}}{{>ast-node}}{{/each}}{{#if .extra[.children.length]}}{{#with .extra[.children.length]}}<span class="ast-extra">{{(~/src || '').substring(this.0, this.1)}}{{/with}}{{/if}}{{else}}{{(~/src || '').substring(.start, .end)}}{{/if}}</span>
 </template>
 
 <template id="viewer">

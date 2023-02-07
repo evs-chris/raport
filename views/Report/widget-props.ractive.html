@@ -10,7 +10,7 @@
       <div><input type="number" value="{{.width.percent}}" style-width="calc(100% - 2rem)" /><span class-unit>%</span></div>
     {{elseif .width === 'grow'}}
       <div>Fill/Grow</div>
-    {{else}}
+    {{elseif typeof .width === 'object'}}
       <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.width.x}} tabout /></div>
     {{/if}}
   </span>
@@ -28,7 +28,7 @@
       <div><input type="number" value="{{.height.percent}}" style-width="calc(100% - 2rem)" /><span class-unit>%</span></div>
     {{elseif .height === 'grow'}}
       <div>Fill/Grow</div>
-    {{else}}
+    {{elseif typeof .height === 'object'}}
       <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.height.x}} tabout /></div>
     {{/if}}
   </span>
