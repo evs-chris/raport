@@ -276,7 +276,7 @@ There are a few operations built-in to the library to handle common expressions:
 | `lower` | `string` | `string` | Lowercases the given string. |
 | `lt` | `any, any` | `boolean` | Returns true if the first value is less than the second value. |
 | `lte` | `any, any` | `boolean` | Returns true if the first value is less than or equal to the second value. |
-| `map` | aggregate | `array` | This will map the given source into a new array composed of the application for each value. |
+| `map` | aggregate | `array` | This will map the given source into a new array composed of the application for each value. If the target value is an object, the values will be mapped into a new object with the same keys. To return a replacement key, return a tuple of a key and value. To drop an entry, return null. If a truthy `entries` option is passed with an object target, an array of object entries is returned rather than a new object. If a truthy `array` option is passed with an object target, an array of the map results will be returned rather than a new object. |
 | `max` | aggregate | `number` | This will return the largets application in the given source. |
 | `min` | aggregate | `number` | This will return the smallest application in the given source. |
 | `not-ilike` | `string\|array, string\|array, 'free'\|{free?:boolean}` | `boolean` | `not-like`, but case insensitive. |

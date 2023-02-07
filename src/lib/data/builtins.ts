@@ -966,10 +966,21 @@ registerOperator({
   names: ['map'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
     if (!args[0]) return arr;
-    const v = args.length === 2 ? evalParse(ctx, args[0]) : arr;
-    const app = evalParse(ctx, args.length === 2 ? args[1] : args[0]);
+    let v: any[];
+    let app: any;
+    let opts: any;
+    if (isApplication(args[0])) v = arr, app = evalParse(ctx, args[0]), evalParse(ctx, opts = args[1]);
+    else if (isApplication(args[1])) v = evalParse(ctx, args[0]), app = evalParse(ctx, args[1]), opts = evalParse(ctx, args[2]);
     if ((Array.isArray(v) || v && '0' in v) && isApplication(app)) return Array.prototype.map.call(v, (e: any, i: number) => evalApply(ctx, app, [e, i], false, { index: i, key: i }));
     else if (v && typeof v === 'object' && isApplication(app)) {
+      if (opts && opts.array) return Object.entries(v as object).map((p, i) => evalApply(ctx, app, [p[1], i, p[0]], false, { index: i, key: p[0] }));
+      if (opts && opts.entries) return Object.entries(v as object).reduce((a, p, i) => {
+        const r = evalApply(ctx, app, [p[1], i, p[0]], false, { index: i, key: p[0] });
+        if (r === null) return a;
+        if (Array.isArray(r) && r.length === 2 && typeof r[0] === 'string') a.push(r);
+        else a.push([p[0], r]);
+        return a;
+      }, [] as any[]);
       const res: any = {};
       Object.entries(v as object).forEach((e, i) => {
         const r = evalApply(ctx, app, [e[1], i, e[0]], false, { index: i, key: e[0] });
