@@ -40,40 +40,40 @@
     {{#if ~/temp.widget === 'report'}}
       <div class="growy">
         <div class=sheet>
-          <label><span>Name <button class-ico on-click="@.editExpr('report.name', { template: true }), false">{{>pencil}}</button></span><span>
+          <label><span title="The name of this report, which is used for naming files. This is a template, so it must use mustache interpolators for variables.">Name <button class-ico on-click="@.editExpr('report.name', { template: true }), false">{{>pencil}}</button></span><span>
             <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src="{{report.name}}" tabout template /></div>
           </span></label>
-          <label><span>Type</span><span><select value="{{report.type}}">
+          <label><span title="Paged reports are rendered in consectutive, fixed-size pages. Flowed reports are rendered in a continuous container, which does not allow height fit on immediate child widgets or negative offsets. Delimited reports render delimited text only e.g. CSV.">Type</span><span><select value="{{report.type}}">
             <option value="page">Paged</option>
             <option value="flow">Continuous</option>
             <option value="delimited">Delimited</option>
           </select></span></label>
           {{#if report.type !== 'delimited'}}
-            <label><span>Combine styles into classes?</span><span><input type=checkbox checked="{{report.classifyStyles}}" /></span></label>
+            <label><span title="When enabled, widgets will have as few inline styles as possible with common style sets combined into classes. This can significantly reduce the resuling HTML from a report run.">Combine styles into classes?</span><span><input type=checkbox checked="{{report.classifyStyles}}" /></span></label>
             {{#if report.type === 'page'}}
-              <label><span>Paper size</span><span><select value="{{report.size}}">{{#each ~/pageSizes}}<option value="{{.}}">{{@key}}</option>{{/each}}</select></span></label>
-              <label><span>Orientation</span><span><select value="{{report.orientation}}">
+              <label><span title="The size of the page for this report.">Paper size</span><span><select value="{{report.size}}">{{#each ~/pageSizes}}<option value="{{.}}">{{@key}}</option>{{/each}}</select></span></label>
+              <label><span title="The orientation of the page for this report.">Orientation</span><span><select value="{{report.orientation}}">
                 <option>landscape</option>
                 <option>portrait</option>
               </select></span></label>
             {{else}}
-              <label><span>Width</span><span><input type=number value="{{report.width}}" /></span></label>
+              <label><span title="An optional width in rem for this report.">Width</span><span><input type=number value="{{report.width}}" /></span></label>
               {{#if !report.width}}
-                <label><span>Paper size</span><span><select value="{{report.size}}"><option value="{{undefined}}">(None)</option>{{#each ~/pageSizes}}<option value="{{.}}">{{@key}}</option>{{/each}}</select></span></label>
-                <label><span>Orientation</span><span><select value="{{report.orientation}}">
+                <label><span title="An optional width for this report if not specified directly in rem.">Paper size</span><span><select value="{{report.size}}"><option value="{{undefined}}">(None)</option>{{#each ~/pageSizes}}<option value="{{.}}">{{@key}}</option>{{/each}}</select></span></label>
+                <label><span title="The orientation of the paper specifying the width for this report.">Orientation</span><span><select value="{{report.orientation}}">
                   <option>landscape</option>
                   <option>portrait</option>
                 </select></span></label>
               {{/if}}
             {{/if}}
-            <label><span>Text Size</span><span><input type=number value="{{~/report.font.size}}" /></span></label>
-            <label><span>Line Height</span><span><input type=number value="{{~/report.font.line}}" /></span></label>
-            <label><span>Font Family</span><span><input value="{{~/report.font.family}}" /></span></label>
-            <label><span>Text Color</span><span><input value="{{~/report.font.color}}" /></span></label>
+            <label><span title="The base text size in rem for all widgets in this report.">Text Size</span><span><input type=number value="{{~/report.font.size}}" /></span></label>
+            <label><span title="The base line hieght in rem for all widgets in this report.">Line Height</span><span><input type=number value="{{~/report.font.line}}" /></span></label>
+            <label><span title="The base font family for all widgets in this report.">Font Family</span><span><input value="{{~/report.font.family}}" /></span></label>
+            <label><span title="The base text color for all widgets in this report.">Text Color</span><span><input value="{{~/report.font.color}}" /></span></label>
           {{else}}
-            <label><span>Record Delimiter</span><span><input value="{{temp.record}}" /></span></label>
-            <label><span>Field Delimiter</span><span><input value="{{temp.field}}" /></span></label>
-            <label><span>Quote</span><span><input value="{{temp.quote}}" /></span></label>
+            <label><span title="The string to render between records, defaulting to '\n'.">Record Delimiter</span><span><input value="{{temp.record}}" /></span></label>
+            <label><span title="The string to render between fields, defaulting to ','.">Field Delimiter</span><span><input value="{{temp.field}}" /></span></label>
+            <label><span title="The quote character to render around field values, defaulting to none.">Quote</span><span><input value="{{temp.quote}}" /></span></label>
           {{/if}}
         </div>
       </div>
@@ -368,7 +368,7 @@
     width: 100%;
     height: 100%;
     border: none;
-    background: transparent;
+    background-color: {{@style.bg}};
     color: {{@style.fg}};
   }
   .param-name {
