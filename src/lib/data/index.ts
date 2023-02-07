@@ -476,7 +476,7 @@ function applyOperator(root: Context, operation: Operation): any {
 
   // if the operator doesn't exist, try a local, pipe, or skip
   if (!op) {
-    const local = safeGet(root, operation.op);
+    const local = safeGet(root, operation.op) || safeGet(root.root, operation.op);
     if (isApplication(local)) {
       return evalApply(root, local, operation.args.map(a => evalParse(root, a)));
     } else if (operation.op === 'pipe') { // handle the special built-in pipe operator

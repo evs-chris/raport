@@ -2,12 +2,13 @@
   <input type="file" style="display: none;" id="context-file" accept="application/json" />
   <div class-definition>
     <div class-actions>
+      <span title="The root context to load for the report.">Base Context</span>
       <button class="ico text" class-spacer on-click="@.loadContextFile()" title="Import context from a file">Load</button>
     </div>
     <div class-json>
       <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-input-invalidate="@.autosize(@node)" on-change="@.tryContext(@node.value)" as-tracked=`_contextText`></textarea></div></div>
     </div>
-    <div style="margin-top: 2rem;">Extra Context</div>
+    <div style="margin-top: 2rem;" title="An expreession that is evaluated in the root context before the report is run. This is a good place to run set operators to set up helper applications.">Extra Context</div>
     <div class=extra-context>
       <div class-scrolled-wrapper><div as-scrolled><Editor src="{{~/report.extraContext}}" /></div></div>
     </div>
