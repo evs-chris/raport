@@ -512,7 +512,7 @@ export const formats = `let dateparts = 'Available placeholders are:\\n\\n* y - 
 export const generateMarkdown = `let mkarr = =>if count(_) then _ else [_]
 
 // expand operators such that there is one name per entry
-let expandedOps = sort(reduce(ops |a c| =>
+let expandedOps = sort(reduce(operators |a c| =>
 	a + map(mkarr(c.op) =>{ op:_ alias:filter(mkarr(^c.op) =>_ != ^^_) sig:^c.sig opts:^c.opts note:^c.note })
  []) [=>op])
 
