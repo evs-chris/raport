@@ -895,11 +895,13 @@ registerOperator({
     if (Array.isArray(value)) {
       const last = value.length - 1;
       return value.map((v, i) => evalApply(extend(ctx, { value: v, special: { last, index: i, key: i, 'last-key': last } }), body, [v, i])).join(opts?.join || '');
-    } else {
+    } else if (typeof value === 'object' && value) {
       const entries = Object.entries(value);
       const lastKey = entries[entries.length - 1][0];
       const last = entries.length - 1;
       return Object.entries(value).map(([k, v], i) => evalApply(extend(ctx, { value: v, special: { last, 'last-key': lastKey, index: i, key: k } }), body, [v, k])).join('');
+    } else {
+      return '';
     }
   }
 }, {
