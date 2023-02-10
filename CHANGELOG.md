@@ -1,3 +1,42 @@
+## 0.15.0
+
+2023-02-11
+
+### Data
+
+* __BREAKING:__ Formatters can now register default options. The builtin formatters will fall back to the defaults for arguments that aren't passed in.
+* __BUG:__ `eeach` and `with` will now properly handle undefined values.
+* __BUG:__ The `label-diff` operator now passes through its options the to `labelDiff` function and will not longer fail if no options are provided.
+* There is a new `set-defaults` operator that can be used to override builtin formatter defaults. This is probably best called from a report definition's extra context.
+* The `each` operator can now accept a `join` option when called from a non-template expression.
+* The `inspect` operator now accepts `mode` and `flat` options.
+* There is now a `pad` operator that will center its string with padding. There is also a new matching formatter.
+* `let` and `set` and the `safeSet` function will now return the value that is being replaced, if any.
+* The `group` operator will now properly handle non-array grouping arguments.
+
+### Parser
+
+* __BREAKING:__ Named arguments to operators are no longer gathered into an object expression and appended to the arguments list. They are now collected during parsing into a new field in the operator AST, which allows them to be used more reliably in operators that are sensitive to argument count. Named arguments are now known as operator options internally. The stringifier no longer accepts the option to not use named arguments.
+* __BREAKING:__ Formatters can now be applied with call-style arguments, which allows them to accept operator options. Most of the existing formatters now accept their positional arguments as options as well. The strigifier prefers shorter argument format if there is no need for the call-style.
+
+### Designer
+
+* `ctrl-s` will now save changes to the loaded project.
+* The designer root context will now include any extra context set in the report definition.
+* If you refresh the designer with a project open and unsaved, the designer will now reload the project before applying unsaved changes.
+* You can now double-click the `Plain` evaluation output toggle to copy the output to the clipboard.
+* More of the UI elements have tooltips that describe their intended purpose.
+* The widget tree now uses sticky positioning for nodes with children to keep the path to the displayed widgets visible if there is available space.
+* The evaluate pane operators listing is now searchable, which is useful when combined with the operator docs tooltips. You can also shift click an operator to pop its docs up in an alert.
+* You can now import/export all projects at once.
+* New projects will now start with the correct default config for a paged report.
+* The main designer view is now slightly more navigable for tightly packed widgets, especially when the target container is the active widget.
+
+### Project
+
+* The operator and formatter docs are now automatically exported to [Operators.md](./Operators.md) when packaging the project.
+
+
 ## 0.14.1
 
 2023-02-08
