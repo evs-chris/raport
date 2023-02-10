@@ -704,13 +704,21 @@
       box-shadow: 4px 5px 0.5rem #0005;
     }
 
-    .bottom-pane .bottom .context, .bottom-pane .bottom .ops {
-      display: none;
-    }
-
     .bottom-pane {
       width: calc(100% - 1rem);
       right: 0.5rem;
+    }
+  }
+
+  @media screen and (max-width: 72em) {
+    .bottom-pane .bottom .ops {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 48em) {
+    .bottom-pane .bottom .context {
+      display: none;
     }
   }
 </style>
