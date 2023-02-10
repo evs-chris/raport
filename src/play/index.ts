@@ -41,7 +41,7 @@ Ractive.extendWith(App, {
             const pj = pjs.findIndex(p => p.name === load.project);
             if (~pj) this.report.linkProject(`projects.${pj}`);
           }
-          if (load.report && (load.report.widgets.length || Object.keys(load.report.context).length)) this.report.set('report', load.report);
+          if (load.report) this.report.set('report', load.report);
           if (load.expr) this.report.set('temp.expr.str', load.expr);
           this.report.set('show.bottom', load.bottom);
           this.report.set('max.bottom', load.max);
