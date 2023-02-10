@@ -789,11 +789,17 @@ registerOperator(
     v = v == null ? '' : v;
     return name === 'upper' ? `${v}`.toUpperCase() : `${v}`.toLowerCase();
   }),
-  simple(['format', 'fmt'], (_name: string, args: any[]): string => {
+  simple(['format', 'fmt'], (_name: string, args: any[], opts): string => {
     let [n, v, ...s] = args;
     const fmt = formats[v];
     if (!fmt) return `${n}`;
-    else return fmt(n, s);
+    else return fmt.apply(n, s, opts);
+  }),
+  simple(['set-defaults'], (_name: string, [type, name]: any[], opts) => {
+    if (type === 'format' && typeof name === 'string') {
+      const fmt = formats[name];
+      if (fmt) return Object.assign(fmt.defaults, opts);
+    }
   }),
   simple(['parse'], (_name: string, args: any[]): any => {
     let opts = args.slice(-1)[0] || {};
@@ -1071,41 +1077,41 @@ function _parseRange(ctx: Context, range: string) {
 }
 
 // basic formats
-registerFormat('dollar', (n, [dec, sign, neg]) => {
-  return dollar(n, undefined, dec, sign, neg);
-});
+registerFormat('dollar', function(n, [dec, group, sign, neg], opts) {
+  return dollar(n, undefined, dec ?? opts?.dec ?? this.defaults.dec, group ?? opts?.group ?? this.defaults.group, sign ?? opts?.sign ?? this.defaults.sign, neg ?? opts?.neg ?? this.defaults.neg);
+}, { dec: 2, group: ',', sign: '$', neg: 'sign' });
 
-registerFormat('date', (n, [fmt]) => {
-  return fmtDate(n, fmt);
-});
+registerFormat('date', function(n, [fmt], opts) {
+  return fmtDate(n, fmt ?? opts?.format ?? this.defaults.format);
+}, { format: 'yyyy-MM-dd' });
 
-registerFormat('time', n => {
-  return fmtDate(n, 'HH:mm:ss');
-});
+registerFormat('time', function(n, [fmt], opts) {
+  return fmtDate(n, fmt ?? opts?.format ?? this.defaults.format);
+}, { format: 'HH:mm:ss' });
 
-registerFormat('timestamp', n => {
-  return fmtDate(n, 'yyyy-MM-dd HH:mm:ss');
-});
+registerFormat('timestamp', function(n, [fmt], opts) {
+  return fmtDate(n, fmt ?? opts?.format ?? this.defaults.format);
+}, { format: 'yyyy-MM-dd HH:mm:ss' });
 
-registerFormat('timestamptz', n => {
-  return fmtDate(n, 'yyyy-MM-dd HH:mm:sszzz');
-});
+registerFormat('timestamptz', function(n, [fmt], opts) {
+  return fmtDate(n, fmt ?? opts?.format ?? this.defaults.format);
+}, { format: 'yyyy-MM-dd HH:mm:sszzz' });
 
 registerFormat('iso8601', n => {
   return fmtDate(n, 'yyyy-MM-ddTHH:mm:sszzz');
 });
 
-registerFormat(['integer', 'int'], (n, [group, neg]) => {
-  return number(n, 0, group, neg);
-});
+registerFormat(['integer', 'int'], function(n, [group, neg], opts) {
+  return number(n, 0, group ?? opts?.group ?? this.defaults.group, neg ?? opts?.neg ?? this.defaults.neg);
+}, { group: ',', neg: 'sign' });
 
-registerFormat(['number', 'num'], (n, [dec, group, neg]) => {
-  return number(n, dec, group, neg);
-});
+registerFormat(['number', 'num'], function(n, [dec, group, neg], opts) {
+  return number(n, dec ?? opts?.dec ?? this.defaults.dev, group ?? opts?.group ?? this.defaults.group, neg ?? opts?.neg ?? this.defaults.neg);
+}, { dec: 2, group: ',', neg: 'sign' });
 
-registerFormat('ordinal', (n, [group]) => {
-  return ordinal(n, group == null ? ',' : group);
-});
+registerFormat('ordinal', function(n, [group], opts) {
+  return ordinal(n, group ?? opts?.group ?? this.defaults.group);
+}, { group: ',' });
 
 registerFormat('phone', n => {
   return phone(n);
@@ -1115,18 +1121,17 @@ registerFormat('or', (n, [v]) => {
   return n || v;
 });
 
-registerFormat('padl', function(n, [count, val]) {
-  return pad('l', n, count, val || ' ');
+registerFormat('padl', function(n, [count, val], opts) {
+  return pad('l', n, count ?? opts?.len, val ?? opts?.pad ?? this.defaults.pad);
 }, { pad: ' ' });
 
-registerFormat('padr', function(n, [count, val]) {
-  return pad('r', n, count, val || ' ');
+registerFormat('padr', function(n, [count, val], opts) {
+  return pad('r', n, count ?? opts?.len, val ?? opts?.pad ?? this.defaults.pad);
 }, { pad: ' ' });
 
-registerFormat('pad', function(n, [count, val]) {
-  return pad('c', n, count, val || ' ');
+registerFormat('pad', function(n, [count, val], opts) {
+  return pad('c', n, count ?? opts?.len, val ?? opts?.pad ?? this.defaults.pad);
 }, { pad: ' ' });
-
 
 registerFormat('trim', n => {
   if (!n) return n;

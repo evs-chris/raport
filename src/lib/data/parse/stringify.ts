@@ -245,8 +245,8 @@ function stringifyOp(value: Operation): string {
     const val = value.args[0];
     let vs = _stringify(val);
     if (typeof val !== 'string' && 'op' in val && (binops.includes(val.op) || unops.includes(val.op))) vs = `(${vs})`;
-    return `${vs}#${[value.args[1].v].concat(value.args.slice(2).map(a => _stringify(a))).join(',')}`;
-  } else if (binops.includes(op) && value.args && value.args.length > 1 && (!deepops.includes(op) || value.args.length === 2)) {
+    if (value.opts) return `${vs}#${[value.args[1].v]}${wrapArgs('(', value.args.slice(2), value.opts, ')')}`;
+    else return `${vs}#${[value.args[1].v].concat(value.args.slice(2).map(a => _stringify(a))).join(',')}`;
   } else if (binops.includes(op) && value.args && value.args.length > 1 && !value.opts && (!deepops.includes(op) || value.args.length === 2)) {
     let parts = value.args.map((a, i) => stringifyBinopArg(op, a, i === 0 ? 1 : 2));
     const long = parts.find(p => p.length > 30 || ~p.indexOf('\n')) || parts.reduce((a, c) => a + c.length, 0) && parts.length > 2;
