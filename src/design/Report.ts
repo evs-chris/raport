@@ -9,6 +9,38 @@ import autosize from './autosize';
 import { trackfocus, getLastFocus } from './trackfocus';
 import { debounce } from './util';
 
+import { operators as operator_docs } from './docs';
+
+export interface OperatorDoc {
+  op: string|string[];
+  note?: string;
+  sig: Array<{
+    bin?: 1; un?: 1; agg?: 1;
+    proto: string;
+    desc: string;
+    eg?: string|string[];
+  }>;
+  opts?: Array<{
+    name: string|string[];
+    type: string,
+    desc: string;
+  }>
+}
+
+export interface FormatDoc {
+  name: string|string[];
+  desc: string;
+  opts?: Array<{
+    name: string;
+    type: string;
+    desc: string;
+  }>;
+}
+
+export const docs = {
+  operators: evaluate(operator_docs) as Array<OperatorDoc>,
+};
+
 let sourceTm: any;
 
 export interface ExprOptions {
@@ -1143,6 +1175,25 @@ export class Designer extends Ractive {
 
   copyToClipboard(str: string) {
     copyToClipboard(str);
+  }
+
+  getOperatorDoc(op: string) {
+    const doc = docs.operators.find(d => d.op === op || Array.isArray(d.op) && d.op.includes(op));
+    if (doc) return `${op}${Array.isArray(doc.op) ? `(alias ${doc.op.filter(n => n !== op).join(', ')})` : ''}
+---${doc.note ? `
+NOTE: ${doc.note}
+` : ''}
+${doc.sig.map(s => `${s.proto}\n  ${s.desc}\n`).join('\n')}${doc.opts ? `
+
+Options
+---
+${doc.opts.map(o => `${Array.isArray(o.name) ? `${o.name[0]} (alias ${o.name.slice(1).join(', ')})` : o.name} - ${o.type}\n  ${o.desc}\n`).join('\n')}` : ''}`;
+    else return `<no documentation available> ${op} may be a designer-only, undesirable, or custom operator`;
+  }
+
+  showOperatorDoc(op: string) {
+    const doc = this.getOperatorDoc(op);
+    if (doc) window.alert(doc);
   }
 }
 

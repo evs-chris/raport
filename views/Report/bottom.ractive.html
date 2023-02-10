@@ -144,12 +144,12 @@
       </div></div>
     </div>
     <div class-ops style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
-      <div class-header title="All of the registered operators know at design time">Operators</div>
+      <div class-header title="All of the registered operators know at design time. Click an operator to insert it into the expression. Hover over an operator for a tooltip with its documentation. Hold the shift key and click an operator for popup with its documentation.">Operators</div>
       <div class-panel class-scrolled-wrapper><div as-scrolled>
         {{~/temp.expr.tab === 'ast' && @context.decorators.scrolled && @context.decorators.scrolled.invalidate() || '' && ''}}
         {{#each ~/operators}}
-          <div class-entry-details>
-            <button class-expr-operator on-click="@.insertOp(@key)">{{@key}}</button>
+          <div class-entry-details title="{{@.getOperatorDoc(@key)}}">
+            <button class-expr-operator on-click="@event.shiftKey ? @.showOperatorDoc(@key) : @.insertOp(@key)">{{@key}}</button>
             <div class-entry-type>{{.type}}</div>
           </div>
         {{/each}}
