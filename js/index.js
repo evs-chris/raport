@@ -33,7 +33,13 @@
                     const json = window.sessionStorage.getItem('load') || '{}';
                     try {
                         const load = JSON.parse(json);
-                        if (load.report && (load.report.widgets.length || Object.keys(load.report.context).length))
+                        if (load.project) {
+                            const pjs = this.report.get('projects') || [];
+                            const pj = pjs.findIndex(p => p.name === load.project);
+                            if (~pj)
+                                this.report.linkProject(`projects.${pj}`);
+                        }
+                        if (load.report)
                             this.report.set('report', load.report);
                         if (load.expr)
                             this.report.set('temp.expr.str', load.expr);
@@ -45,7 +51,7 @@
                 }, 500);
                 window.addEventListener('beforeunload', () => {
                     if (this.get('loaded') && this.report) {
-                        const load = { report: this.report.get('report'), bottom: this.report.get('show.bottom'), max: this.report.get('max.bottom') };
+                        const load = { report: this.report.get('report'), bottom: this.report.get('show.bottom'), max: this.report.get('max.bottom'), project: this.report.get('project.name') };
                         if (!this.report.get('temp.expr.path'))
                             load.expr = this.report.get('temp.expr.str');
                         window.sessionStorage.setItem('load', JSON.stringify(load));
