@@ -1033,6 +1033,22 @@ export class Designer extends Ractive {
     return JSON.stringify(Object.assign({}, project, { sources, report: this.get('project.report') || this.get('report') || {} }));
   }
 
+  stringifyProjects() {
+    const projects = this.get('projects') || [];
+    return JSON.stringify(projects.map(p => {
+      const sources = ((p.sources || []) as AvailableSource[]).map(s => {
+        if ('type' in s && s.type === 'fetch') {
+          return Object.assign({}, s, { data: undefined });
+        } else {
+          const res = Object.assign({}, s);
+          if ('input' in res) delete res.data;
+          return res;
+        }
+      });
+      return Object.assign({}, p, { sources });
+    }));
+  }
+
   removeProject() {
     if (window.confirm('Do you want to delete this project? This cannot be undone.')) {
       const project = this.get('project');
@@ -1047,13 +1063,19 @@ export class Designer extends Ractive {
     }
   }
 
-  importProject(str?: string) {
+  importProject(single: boolean, str?: string) {
     const cb = (txt: string) => {
       const res = JSON.parse(txt);
-      if (Array.isArray(res) && res.length > 0 && 'name' in res[0]) {
-        this.set('projects', res);
+      if (!single && Array.isArray(res) && res.length > 0 && 'name' in res[0]) {
+        const current = (this.get<any[]>('projects') || []).slice();
+        for (const r of res) {
+          const idx = current.findIndex(p => p.name === r.name);
+          if (~idx) current.splice(idx, 1, r);
+          else current.push(r);
+        }
+        this.set('projects', current);
         this.checkLinks();
-      } else if (typeof res === 'object' && 'name' in res) {
+      } else if (single && typeof res === 'object' && !Array.isArray(res) && 'name' in res) {
         const proj = this.get('project');
         const projects = this.get('projects');
         this.set('project', res);

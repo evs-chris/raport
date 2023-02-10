@@ -22,17 +22,17 @@
         <label class="input" title="The wrap length for the code formatter for schema unions">Union Wrap<input type=number value="{{~/settings.format.wrap_union}}" /></label>
       </div>
     </div>
+    <input type="file" style="display: none;" id="project-file" accept="application/json" />
     {{#if ~/showProjects}}
     <div class-project-pane>
       <div class-project-pane-left>
         {{#if ~/project != null}}
           <div>
-            <input type="file" style="display: none;" id="project-file" accept="application/json" />
             <label class-input style-width=20rem>Project Name<input value="{{~/project.name}}" /></label>
             <button class-plain title="Save all projects to browser storage" on-click="@.saveProjects()">Save Projects</button>
-            <button class-plain title="Export this project to a file" on-click="@.download(~/project.name + '.json', @.stringifyProject())">Export Project</button>
+            <button class-plain title="Export this project to a JSON file" on-click="@.download(~/project.name + '.json', @.stringifyProject())">Export Project</button>
             <button class-plain title="Create a copy of this project" on-click="@.cloneProject()">Clone Project</button>
-            <button class-plain title="Import this project definition from a file" on-click="@.importProject()">Import Project</button>
+            <button class-plain title="Import this project definition from a JSON file" on-click="@.importProject(true)">Import Project</button>
             <button class-plain title="Create a new empty project" on-click="@.makeProject(true)">New Project</button>
             <br /><br />
             <button class-plain title="Delete this project from browser storage" style-background={{@style.error}} on-click="@.removeProject()">Delete Project</button>
@@ -40,7 +40,7 @@
             <br /><br />
             <button class-plain title="Export this project as text to the below text field" on-click="@.set('projectText', @.stringifyProject())">Refresh Text</button>
           </div>
-          <label class-grow class-area>Project Definition<textarea twoway=false on-change="@.importProject(@node.value)">{{projectText}}</textarea></label>
+          <label class-grow class-area>Project Definition<textarea twoway=false on-change="@.importProject(true, @node.value)">{{projectText}}</textarea></label>
         {{else}}
           <div>
             <button class-plain title="Convert the current definition to a project" on-click="@.makeProject()">Make Project</button>
@@ -54,6 +54,8 @@
           <div class-project-item {{#if . === ~/project}}class="active-project" title="Project {{.name}} is already loaded"{{else}}title="Load {{.name}}, discarding any unsaved changes in the current project or definitions" on-click="@.linkProject(@keypath)"{{/if}}>{{.name}}</div>
           {{/each}}
         </div>
+        <button class-plain on-click="@.download('Raport Projects.json', @.stringifyProjects())" title="Export all projects to a JSON file">Export All Projects</button>
+        <button class-plain style-background={{@style.error}} on-click="@.importProject()" title="Import multiple projects from a JSON file. Existing projects with the same name as an import will be overwritten.">Import Projects</button>
       </div>
     </div>
     {{/if}}
