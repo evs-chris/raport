@@ -42,7 +42,7 @@
 {{else}}
   <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled><div style="padding: 3rem; min-width: min-content;">
     <div class="paper" style="{{@.paperSize()}}" on-click="@event.target === @node ? @.selectWidget('report') : true">
-      <div class=bar style-cursor=pointer on-click="@.unlink('widget'), @.unlink('expr'), @.set('temp', { name: 'report ', widget: 'report' })" class-active="temp.widget === 'report' || temp.widget === 'report.watermark' || temp.widget === 'report.overlay'" class-hover="temp.hover === 'report' || temp.hover === 'report.watermark' || temp.hover === 'report.overlay'" on-mouseover="@.set('temp.hover', ~/inWatermark ? 'report.watermark' : ~/inOverlay ? 'report.overlay' : 'report'), false" on-mouseout="@.set('temp.hover', ''), false">
+      <div class="bar report-paper" style-cursor=pointer on-click="@.unlink('widget'), @.unlink('expr'), @.set('temp', { name: 'report ', widget: 'report' })" class-active="temp.widget === 'report' || temp.widget === 'report.watermark' || temp.widget === 'report.overlay'" class-hover="temp.hover === 'report' || temp.hover === 'report.watermark' || temp.hover === 'report.overlay'" on-mouseover="@.set('temp.hover', ~/inWatermark ? 'report.watermark' : ~/inOverlay ? 'report.overlay' : 'report'), false" on-mouseout="@.set('temp.hover', ''), false">
         <span class-name>
           {{#if ~/inWatermark}}Watermark
           {{elseif ~/inOverlay}}Overlay
@@ -51,31 +51,31 @@
         {{#if report.type === 'page'}}
           {{#if !~/temp.widget || !/^report.(water|overlay)/.test(~/temp.widget)}}
             {{#if report.header}}
-              <span class-btn on-click="@.set('report.header', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove page header</span>
+              <span class-btn on-click="@.set('report.header', undefined), @.unlink('widget'), @.set('temp.widget', '')" title="The page header takes a fixed amount of space at the top of every page">Remove page header</span>
             {{else}}
-              <span class-btn on-click="@.set('report.header', { type: 'container' })">Add page header</span>
+              <span class-btn on-click="@.set('report.header', { type: 'container' })" title="The page header takes a fixed amount of space at the top of every page">Add page header</span>
             {{/if}}
 
             {{#if report.footer}}
-              <span class-btn on-click="@.set('report.footer', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove page footer</span>
+              <span class-btn on-click="@.set('report.footer', undefined), @.unlink('widget'), @.set('temp.widget', '')" title="The page footer takes a fixed amount of space at the bottom of every page">Remove page footer</span>
             {{else}}
-              <span class-btn on-click="@.set('report.footer', { type: 'container' })">Add page footer</span>
+              <span class-btn on-click="@.set('report.footer', { type: 'container' })" title="The page footer takes a fixed amount of space at the bottom of every page">Add page footer</span>
             {{/if}}
           {{/if}}
         {{/if}}
 
         {{#if report.watermark}}
-          <span class-btn on-click="@.set('report.watermark', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove watermark</span>
-          {{#unless ~/inWatermark}}<span class-btn on-click="@.link('report.watermark', 'widget'), @.set('temp.widget', 'report.watermark'), false">Edit watermark</span>{{/unless}}
+          <span class-btn on-click="@.set('report.watermark', undefined), @.unlink('widget'), @.set('temp.widget', '')" title="The watermark content is layered beneath the contents of each page">Remove watermark</span>
+          {{#unless ~/inWatermark}}<span class-btn on-click="@.link('report.watermark', 'widget'), @.set('temp.widget', 'report.watermark'), false" title="Switch the designer to the watermark view">Edit watermark</span>{{/unless}}
         {{else}}
-          <span class-btn on-click="@.set('report.watermark', { type: 'container' }), @.link('report.watermark', 'widget'), @.set('temp.widget', 'report.watermark'), false">Add watermark</span>
+          <span class-btn on-click="@.set('report.watermark', { type: 'container' }), @.link('report.watermark', 'widget'), @.set('temp.widget', 'report.watermark'), false" title="The watermark content is layered beneath the contents of each page">Add watermark</span>
         {{/if}}
 
         {{#if report.overlay}}
-          <span class-btn on-click="@.set('report.overlay', undefined), @.unlink('widget'), @.set('temp.widget', '')">Remove overlay</span>
-          {{#unless ~/inOverlay}}<span class-btn on-click="@.link('report.overlay', 'widget'), @.set('temp.widget', 'report.overlay'), false">Edit overlay</span>{{/unless}}
+          <span class-btn on-click="@.set('report.overlay', undefined), @.unlink('widget'), @.set('temp.widget', '')" title="The overlay content is layered above the conents of each page">Remove overlay</span>
+          {{#unless ~/inOverlay}}<span class-btn on-click="@.link('report.overlay', 'widget'), @.set('temp.widget', 'report.overlay'), false" title="Switch the designer to the overlay view">Edit overlay</span>{{/unless}}
         {{else}}
-          <span class-btn on-click="@.set('report.overlay', { type: 'container' }), @.link('report.overlay', 'widget'), @.set('temp.widget', 'report.overlay'), false">Add overlay</span>
+          <span class-btn on-click="@.set('report.overlay', { type: 'container' }), @.link('report.overlay', 'widget'), @.set('temp.widget', 'report.overlay'), false" title="The overlay content is layered above the conents of each page">Add overlay</span>
         {{/if}}
 
         {{#if /^report.(water|overlay)/.test(~/temp.widget)}}
@@ -106,6 +106,11 @@
     background-color: {{@style.bg}};
     color: {{@style.fg}};
     position: relative;
+  }
+
+  .report-paper.bar {
+    background-color: {{@style.bg}};
+    opacity: 1;
   }
 
   .delimited.paper {

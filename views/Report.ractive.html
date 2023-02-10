@@ -469,6 +469,7 @@
     left: -1.5px;
     background-position: 1.5rem 1.5rem;
     background-size: 1rem 1rem;
+    z-index: 10;
   }
 
   div.widgets.manual {
@@ -482,6 +483,7 @@
     box-sizing: border-box;
     font-size: 0.83rem;
     position: relative;
+    z-index: 10;
   }
 
   div.widgets.manual > .widget {
@@ -512,15 +514,18 @@
     border-color: {{@style.hover}};
     border-style: solid;
     background-color: {{@style.hover}}20;
+    z-index: 888;
   }
 
   .active-widget > .bar, .bar.active {
-    background-color: {{@style.active}};
+    background-color: {{@style.active}} !important;
     z-index: 999;
   }
 
   .hover-widget > .bar, .bar.hover {
-    background-color: {{@style.hover}};
+    background-color: {{@style.hover}} !important;
+    z-index: 888;
+    z-index: 888;
   }
 
   .widget > .btn {
