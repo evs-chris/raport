@@ -110,7 +110,7 @@
       <div class-tab class-result class-active-tab="~/temp.expr.tab === 'result'">
         <div class-editor-buttons>
           <div class=toggles>{{#with ~/temp.expr.resulttype as t}}
-            <span class-toggle class-active="!t || t === 'plain'" {{#if t && t !== 'plain'}}on-click="@.set('temp.expr.resulttype', 'plain')"{{/if}} title="Show result as a plain string">Plain</span>
+            <span class-toggle class-active="!t || t === 'plain'" {{#if t && t !== 'plain'}}on-click="@.set('temp.expr.resulttype', 'plain')"{{/if}} title="Show result as a plain string. Double click to copy the text to the clipboard." on-dblclick="@.copyToClipboard(~/temp.expr.result)">Plain</span>
             <span class-toggle class-active="t === 'json'" {{#if t !== 'json'}}on-click="@.set('temp.expr.resulttype', 'json')"{{/if}} title="Show result as JSON">JSON</span>
             <span class-toggle class-active="t === 'html'" {{#if t !== 'html'}}on-click="@.set('temp.expr.resulttype', 'html')"{{/if}} title="Show result as HTML">HTML</span>
           {{/with}}</div>

@@ -1140,6 +1140,10 @@ export class Designer extends Ractive {
     else if (settings.outTheme === 'light') Ractive.styleSet('out', lightTheme);
     else Ractive.styleSet('out', dark ? darkTheme : lightTheme);
   }
+
+  copyToClipboard(str: string) {
+    copyToClipboard(str);
+  }
 }
 
 const designerOpts: ExtendOpts<Designer> = {
@@ -1793,3 +1797,26 @@ registerOperator({
     console.log.apply(console, args);
   }
 });
+
+let clipEl: HTMLTextAreaElement;
+function copyToClipboard(text: string): Promise<boolean> {
+  if (!clipEl) {
+    clipEl = document.createElement('textarea');
+    clipEl.id = 'clipEl';
+    clipEl.style.position = 'absolute';
+    clipEl.style.width = '1em';
+    clipEl.style.height = '1em';
+    clipEl.tabIndex = -1;
+    clipEl.style.left = '-10000px';
+    document.body.appendChild(clipEl);
+  }
+
+  try {
+    clipEl.value = text;
+    clipEl.select();
+    document.execCommand('copy');
+    return Promise.resolve(true);
+  } catch {
+    return Promise.resolve(false);
+  }
+}
