@@ -882,7 +882,7 @@ registerOperator({
   names: ['each'],
   checkArg(_name: string, i: number, last: number, value: any): CheckResult {
     if (i === 0) {
-      if (Array.isArray(value) || typeof value === 'object') return 'continue';
+      if (Array.isArray(value) && value.length || value && typeof value === 'object' && Object.keys(value).length) return 'continue';
       else return { skip: 1 };
     } else if (i === 1) return { skip: last - i, value };
     else if (i === last) return { result: value };
@@ -906,7 +906,7 @@ registerOperator({
   type: 'checked',
   names: ['with'],
   checkArg(_name: string, i: number, last: number, value: any): CheckResult {
-    if (i === 0 && typeof value === 'object') return 'continue';
+    if (i === 0 && value && typeof value === 'object') return 'continue';
     else if (i === 1) return { skip: last - i, value };
     else if (i === last) return { result: value };
     else if (i % 2 === 0) {
