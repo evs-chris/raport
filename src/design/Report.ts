@@ -1007,7 +1007,9 @@ export class Designer extends Ractive {
   }
 
   makeProject(clean?: true) {
-    const project = clean ? { name: 'Project', report: {}, sources: [] } : { name: 'Project', report: this.get('report') || {}, sources: this.get('sources') || [] };
+    const project = clean ?
+      { name: 'Project', sources: [], report: { type: 'page', classifyStyles: true, orientation: 'landscape', size: PageSizes.letter } } :
+      { name: 'Project', report: this.get('report') || {}, sources: this.get('sources') || [] };
     this.unlink('report');
     this.unlink('sources');
     this.unlink('project');
