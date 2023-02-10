@@ -507,8 +507,8 @@ registerOperator(
     if (name === 'valid') return res === true;
     else return res;
   }),
-  simple(['inspect'], (_name, [v, mode]) => {
-    if (mode === 'schema') return unparseSchema(inspect(v));
+  simple(['inspect'], (_name, [v, mode], opts) => {
+    if ((mode || opts?.mode) === 'schema') return unparseSchema(inspect(v, opts?.flat));
     else return inspect(v);
   }),
   simple(['diff'], (_, [left, right, equal], _opts, ctx: Context) => {
