@@ -111,7 +111,7 @@ export interface LabelOptions {
 }
 
 export function labelDiff(diff: Diff, label: any, opts?: LabelOptions): Diff {
-  const out: Diff = opts.omit ? {} : Object.assign({}, diff);
+  const out: Diff = opts?.omit ? {} : Object.assign({}, diff);
   _labelDiff(diff, label, '', '', out, opts);
   return out;
 }
@@ -136,7 +136,7 @@ function _labelDiff(diff: Diff, label: any, path: string, str: string, out: Diff
         const pp = `${p}${p && '.'}${num}`;
         if (pp in diff) {
           out[`${lbl}${lbl && ' '}${+num + 1}`] = diff[pp];
-          if (opts.omit) delete out[pp];
+          if (opts?.omit) delete out[pp];
         }
         if (l[1]) _labelDiff(diff, l[1], pp, `${lbl}${lbl && ' '}${+num + 1}`, out, opts);
       }
@@ -146,7 +146,7 @@ function _labelDiff(diff: Diff, label: any, path: string, str: string, out: Diff
       const lbl = `${str}${str && ' '}${l[0]}`;
       if (p in diff) {
         out[lbl] = diff[p];
-        if (opts.omit) delete out[p];
+        if (opts?.omit) delete out[p];
       }
       if (l[1]) _labelDiff(diff, l[1], p, lbl, out, opts);
     }

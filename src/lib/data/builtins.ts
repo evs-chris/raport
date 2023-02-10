@@ -518,8 +518,8 @@ registerOperator(
     }
     return diff(left, right, equal);
   }),
-  simple(['label-diff'], (_, [diff, label, opts]) => {
-    return labelDiff(diff, label, opts);
+  simple(['label-diff'], (_, [diff, label], opts) => {
+    return labelDiff(diff, label, opts as any);
   }),
 );
 
