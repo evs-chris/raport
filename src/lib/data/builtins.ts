@@ -607,16 +607,19 @@ registerOperator(
 );
 
 // string
-function pad(left: boolean, str: string, count: number, pad: string): string {
+function pad(where: 'l'|'c'|'r', str: string, count: number, pad: string): string {
   if (typeof str !== 'string') str = '' + str;
   if (!isNum(count)) return str;
   if (!pad) pad = ' ';
   if (typeof pad !== 'string') pad = '' + pad;
   if (pad.length < 1) pad = ' ';
 
-  for (let i = str.length; i < count; i = str.length) {
-    if (left) str = pad + str;
-    else str += pad;
+  const ct = (count - str.length) / 2;
+  for (let i = 0; str.length < count; i++) {
+    if (where === 'l') str = pad + str;
+    else if (where === 'r') str = str + pad;
+    else if (i < ct) str = pad + str;
+    else str = str + pad;
   }
 
   return str;
@@ -628,9 +631,9 @@ registerOperator(
   simple(['eval'], (_name: string, [v], _opts, ctx: Context): any => {
     return evaluate(ctx, v);
   }),
-  simple(['padl', 'padr'], (name: string, args: any[]): string => {
+  simple(['padl', 'padr', 'pad'], (name: string, args: any[]): string => {
     let [str, count, val] = args;
-    return pad(name === 'padl', str, count, val);
+    return pad(name === 'padl' ? 'l' : name === 'padr' ? 'r' : 'c', str, count, val);
   }),
   simple(['trim', 'triml', 'trimr'], (name: string, args: any[]): string => {
     let [str] = args;
@@ -1112,13 +1115,18 @@ registerFormat('or', (n, [v]) => {
   return n || v;
 });
 
-registerFormat('padl', (n, [count, val]) => {
-  return pad(true, n, count, val || '0');
-});
+registerFormat('padl', function(n, [count, val]) {
+  return pad('l', n, count, val || ' ');
+}, { pad: ' ' });
 
-registerFormat('padr', (n, [count, val]) => {
-  return pad(false, n, count, val || ' ');
-});
+registerFormat('padr', function(n, [count, val]) {
+  return pad('r', n, count, val || ' ');
+}, { pad: ' ' });
+
+registerFormat('pad', function(n, [count, val]) {
+  return pad('c', n, count, val || ' ');
+}, { pad: ' ' });
+
 
 registerFormat('trim', n => {
   if (!n) return n;
