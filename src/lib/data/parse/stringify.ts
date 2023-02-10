@@ -33,8 +33,6 @@ export interface BaseStringifyOpts {
   template?: boolean;
   /** Output unindented single line expressions. */
   noIndent?: boolean;
-  /** Output named args as an object literal */
-  noNamedArgs?: boolean;
   /** Output HTML-friendly syntax */
   htmlSafe?: boolean;
   /** Strip checks out of schema types */
@@ -63,8 +61,6 @@ let _tpl: boolean = false;
 let _tplmode: boolean = false;
 let _noindent: boolean = false;
 let _listwrap: _ListOverride = { array: 60, union: 60, args: 60, keys: 60 };
-let _lastarg: boolean = false;
-let _noname: boolean = false;
 let _html: boolean = false;
 let _nochecks: boolean = false;
 
@@ -112,7 +108,6 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
       };
     }
   } else _listwrap = { array: 60, union: 60, args: 60, keys: 60 };
-  _noname = opts.noNamedArgs;
   _html = opts.htmlSafe;
   _nochecks = opts.noChecks;
   if (!_sexprops && typeof value === 'object' && value && 'op' in value && value.op === 'block') return stringifyRootBlock(value);
@@ -189,8 +184,6 @@ function _stringify(value: ValueOrExpr): string {
 }
 
 function stringifyBinopArg(op: string, arg: ValueOrExpr, pos: 1|2): string {
-  const n = _noname;
-  _noname = true;
   let res: string;
   if (op === '**' && pos === 1 && typeof arg !== 'string' && 'op' in arg && arg.op === '**') res = `(${_stringify(arg)})`;
   if (typeof arg !== 'string' && 'op' in arg) {
@@ -198,7 +191,6 @@ function stringifyBinopArg(op: string, arg: ValueOrExpr, pos: 1|2): string {
     else if (arg.op === 'if' || arg.op === 'unless' || arg.op === 'case' || arg.op === 'fmt' || arg.op === 'format') res = `(${_stringify(arg)})`;
     else res = _stringify(arg);
   } else res = _stringify(arg);
-  _noname = n;
   return res;
 }
 
@@ -234,15 +226,14 @@ function stringifyOp(value: Operation): string {
     else if (op === '<=') op = 'lte';
     else if (op === '&&') op = 'and';
   }
-  if (!_noarr && op === 'array') {
-    return wrapArgs('[', value.args, ']');
+  if (!_noarr && op === 'array' && !value.opts) {
+    return wrapArgs('[', value.args, value.opts, ']');
   } else if (!_noobj && op === 'object' && value.args && !value.args.find((a, i) => i % 2 === 0 && (typeof a === 'string' || !('v' in a) || typeof a.v !== 'string'))) {
     if (!value.args || !value.args.length) return '{}';
-    if (!_noname && _lastarg) return wrapArgs('', value.args, '', 2);
-    else return wrapArgs('{', value.args, '}', 2);
+    return wrapArgs('{', value.args, value.opts, '}', 2);
   } else if (_sexprops) {
     if (!value.args || !value.args.length) return `(${op})`;
-    return wrapArgs(`(${op} `, value.args, ')', 0, true);
+    return wrapArgs(`(${op} `, value.args, value.opts, ')', 0, true);
   } else if (op === 'if' || op === 'unless' && value.args && value.args.length > 2) {
     return stringifyIf(value);
   } else if (op === 'case' && value.args && value.args.length > 2) {
@@ -256,6 +247,7 @@ function stringifyOp(value: Operation): string {
     if (typeof val !== 'string' && 'op' in val && (binops.includes(val.op) || unops.includes(val.op))) vs = `(${vs})`;
     return `${vs}#${[value.args[1].v].concat(value.args.slice(2).map(a => _stringify(a))).join(',')}`;
   } else if (binops.includes(op) && value.args && value.args.length > 1 && (!deepops.includes(op) || value.args.length === 2)) {
+  } else if (binops.includes(op) && value.args && value.args.length > 1 && !value.opts && (!deepops.includes(op) || value.args.length === 2)) {
     let parts = value.args.map((a, i) => stringifyBinopArg(op, a, i === 0 ? 1 : 2));
     const long = parts.find(p => p.length > 30 || ~p.indexOf('\n')) || parts.reduce((a, c) => a + c.length, 0) && parts.length > 2;
     const split = _noindent ? ' ' : long ? `\n${padl('', '  ', _level + 1)}` : ' ';
@@ -287,10 +279,10 @@ function stringifyOp(value: Operation): string {
   } else if (op === 'get' && value.args.length === 2 && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'object' && 'k' in value.args[1].v) {
     return `${_stringify(value.args[0])}${_stringify({ r: { k: ['r'].concat(value.args[1].v.k) } }).substr(1)}`;
   } else if (call_op.test(op)) {
-    return wrapArgs(`${op}(`, value.args || [], ')', 0, true);
+    return wrapArgs(`${op}(`, value.args || [], value.opts, ')', 0, true);
   } else {
     if (!value.args || !value.args.length) return `(${op})`;
-    return wrapArgs(`(${op} `, value.args, ')', 0, true);
+    return wrapArgs(`(${op} `, value.args, value.opts, ')', 0, true);
   }
 }
 
@@ -330,9 +322,9 @@ function stringifyLiteral(value: Literal): string {
     } else {
       const keys = Object.keys(value.v);
       let res = '';
-      if (_noname || !_lastarg) res += '{';
+      res += '{';
       res += `${keys.map(k => `${_key = true, _stringify({ v: k })}:${_key = false, _stringify({ v: value.v[k] })}`).join(_listcommas ? ', ' : ' ')}`;
-      if (_noname || !_lastarg) res += '}';
+      res += '}';
       return res;
     }
   }
@@ -457,8 +449,8 @@ function indentAll(amount: string, str: string): string {
   return str.replace(/\n/gm, `\n${amount}`);
 }
 
-function wrapArgs(open: string, args: ValueOrExpr[], close: string, keyMod?: number, call?: boolean): string {
-  if (!args || !args.length) return `${open}${close}`;
+function wrapArgs(open: string, args: ValueOrExpr[], opts: ValueOrExpr, close: string, keyMod?: number, call?: boolean): string {
+  if ((!args || !args.length) && !opts) return `${open}${close}`;
   _level++;
   const _f = _first;
   let parts: string[];
@@ -479,14 +471,27 @@ function wrapArgs(open: string, args: ValueOrExpr[], close: string, keyMod?: num
       }
     }
   } else {
-    const last = args.length - 1;
-    const _la = _lastarg;
     parts = args.map((a, i) => {
       _first = i === 0;
-      if (call && i === last) _lastarg = true;
       return _stringify(a);
     });
-    _lastarg = _la;
+  }
+  if (opts && typeof opts === 'object') {
+    const args = 'op' in opts && opts.args ? opts.args : 'v' in opts ? Object.entries(opts.v).reduce((a, c) => (a.push({ v: c[0] }, { v: c[1] }), a), []) : [];
+    for (let i = 0; i < args.length; i++) {
+      if (i % 2 === 0) {
+        _key = true;
+        parts.push(_stringify(args[i]) + ':');
+        _key = false;
+      } else {
+        _level++;
+        _first = i === 1;
+        const res = _stringify(args[i]);
+        if (res[0] === '\n')  parts[parts.length - 1] += ' ' + res.replace(leadingSpace, '');
+        else parts[parts.length - 1] += res;
+        _level--;
+      }
+    }
   }
   _level--;
   _first = _f;

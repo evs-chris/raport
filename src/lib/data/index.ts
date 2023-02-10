@@ -70,6 +70,7 @@ export interface Operation {
   op: string;
   args?: ValueOrExpr[];
   c?: string[];
+  opts?: ValueOrExpr;
 }
 
 export type Sort = ValueOrExpr|SortBy;
@@ -86,24 +87,30 @@ export interface SortByDir extends SortByBase {
 
 export type Operator = AggregateOperator | ValueOperator | CheckedOperator;
 
+export interface OperatorOptions {
+  [key: string]: any;
+  // this is a dirty hack to make ts acknowledge that this isn't just any old object
+  __options: 1;
+}
+
 export interface BaseOperator {
   names: string[];
 }
 export interface ValueOperator extends BaseOperator {
   type: 'value';
-  apply(name: string, values: any[], context: Context): any;
+  apply(name: string, values: any[], opts: OperatorOptions, context: Context): any;
 }
 
 export interface CheckedOperator extends BaseOperator {
   type: 'checked';
-  apply(name: string, values: any[], context: Context): any;
-  checkArg: (name: string, num: number, last: number, value: any, context: Context, expr: ValueOrExpr) => CheckResult;
+  apply(name: string, values: any[], opts: OperatorOptions, context: Context): any;
+  checkArg: (name: string, num: number, last: number, value: any, opts: OperatorOptions, context: Context, expr: ValueOrExpr) => CheckResult;
   extend?: true;
 }
 
 export interface AggregateOperator extends BaseOperator {
   type: 'aggregate';
-  apply(name: string, values: any[], args: ValueOrExpr[], context: Context): any;
+  apply(name: string, values: any[], args: ValueOrExpr[], opts: OperatorOptions, context: Context): any;
   extend?: true;
   value?: true;
 }
@@ -499,10 +506,11 @@ function applyOperator(root: Context, operation: Operation): any {
     args = [];
     const flts = operation.args || [];
     const ctx = op.extend ? extend(root, {}) : root;
+    const opts = operation.opts ? evalParse(ctx, operation.opts) : undefined;
     for (let i = 0; i < flts.length; i++) {
       const a = flts[i];
       const arg = evalParse(ctx, a);
-      const res = op.checkArg(operation.op, i, flts.length - 1, arg, ctx, a);
+      const res = op.checkArg(operation.op, i, flts.length - 1, arg, opts, ctx, a);
       if (res === 'continue') args.push(arg);
       else if ('skip' in res) {
         i += res.skip;
@@ -510,14 +518,15 @@ function applyOperator(root: Context, operation: Operation): any {
       } else if ('result' in res) return res.result;
     }
 
-    return op.apply(operation.op, args, ctx);
+    return op.apply(operation.op, args, opts, ctx);
   } else if (op.type === 'value') {
     args = (operation.args || []).map(a => evalParse(root, a));
-    return op.apply(operation.op, args, root);
+    return op.apply(operation.op, args, operation.opts ? evalParse(root, operation.opts) : undefined, root);
   } else {
     let arr: any[];
     const ctx = op.extend ? extend(root, {}) : root;
     const args = (operation.args || []).slice();
+    const opts = operation.opts ? evalParse(ctx, operation.opts) : undefined;
     let arg: any;
     if (!op.value) {
       arg = evalParse(ctx, args[0]);
@@ -535,7 +544,7 @@ function applyOperator(root: Context, operation: Operation): any {
         else arr = [];
       }
     }
-    return op.apply(operation.op, Array.isArray(arr) ? arr : [], args, ctx);
+    return op.apply(operation.op, Array.isArray(arr) ? arr : [], args, opts, ctx);
   }
 }
 

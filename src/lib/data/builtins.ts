@@ -1,4 +1,4 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator, OperatorOptions } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseExpr, parse } from './parse';
 import { parse as parseTemplate } from './parse/template';
@@ -9,7 +9,7 @@ import { validate, inspect } from './schema';
 import { diff, deepEqual, labelDiff } from './diff';
 import { detect as csvDetect, parse as csvParse } from './csv';
 
-function simple(names: string[], apply: (name: string, values: any[], ctx: Context) => any): ValueOperator {
+function simple(names: string[], apply: (name: string, values: any[], opts: OperatorOptions, ctx: Context) => any): ValueOperator {
   return {
     type: 'value', names, apply
   };
@@ -142,7 +142,7 @@ registerOperator(
     const res = l === r;
     return name === 'strict-is' ? res : !res;
   }),
-  simple(['deep-is', 'deep-is-not', '===', '!=='], (name: string, values: any[], ctx): boolean => {
+  simple(['deep-is', 'deep-is-not', '===', '!=='], (name: string, values: any[], _opts, ctx: Context): boolean => {
     let [l, r, equal] = values;
     if (equal && isApplication(equal)) {
       const eq = equal;
@@ -198,7 +198,7 @@ registerOperator(
     }
     return name === 'like' || name === 'ilike' ? res : !res;
   }),
-  simple(['in', 'not-in'], (name: string, values: any[], ctx: Context): boolean => {
+  simple(['in', 'not-in'], (name: string, values: any[], _opts, ctx: Context): boolean => {
     const [l, r] = values;
     let range: any;
     if (isDateRel(r)) {
@@ -229,7 +229,7 @@ registerOperator(
     const res = !!~r.indexOf(l);
     return name === 'in' ? res : !res;
   }), 
-  simple(['contains', 'does-not-contain'], (name: string, values: any[], ctx: Context): boolean => {
+  simple(['contains', 'does-not-contain'], (name: string, values: any[], _opts, ctx: Context): boolean => {
     const [l, r] = values;
     if (isDateRel(l)) {
       const range = dateRelToRange(l);
@@ -253,7 +253,7 @@ registerOperator(
   simple(['clamp'], (_name, [min, v, max]: any[]): any => {
     return v < min ? min : v > max ? max : v;
   }),
-  simple(['get'], (_name: string, values: any[], ctx): any => {
+  simple(['get'], (_name: string, values: any[], _opts, ctx: Context): any => {
     const [l, r] = values;
     const c = extend(ctx, { value: l });
     if (isKeypath(r)) return safeGet(c, r);
@@ -273,7 +273,7 @@ registerOperator(
     if (typeof str !== 'string') return [str];
     else return str.split(split || '');
   }),
-  simple(['filter'], (_name: string, values: any[], ctx?: Context): any => {
+  simple(['filter'], (_name: string, values: any[], _opts, ctx: Context): any => {
     let [arr, flt, sorts, groups] = values;
     if (!Array.isArray(arr)) {
       if (arr && Array.isArray(arr.value)) arr = arr.value;
@@ -286,8 +286,7 @@ registerOperator(
     const [val] = values;
     return { value: val };
   }),
-  simple(['group'], (_name: string, values: any[], ctx?: Context): any => {
-    ctx = ctx || new Root({});
+  simple(['group'], (_name: string, values: any[], _opts, ctx: Context): any => {
     let [arr, groups] = values;
     if (!Array.isArray(arr)) {
       if (arr && Array.isArray(arr.value)) arr = arr.value;
@@ -295,8 +294,7 @@ registerOperator(
     }
     return filter({ value: arr }, null, null, groups, ctx).value;
   }),
-  simple(['sort'], (_name: string, values: any[], ctx?: Context): any => {
-    ctx = ctx || new Root({});
+  simple(['sort'], (_name: string, values: any[], _opts, ctx: Context): any => {
     let [arr, sort] = values;
     if (!Array.isArray(arr)) {
       if (arr && Array.isArray(arr.value)) arr =arr.value;
@@ -304,8 +302,8 @@ registerOperator(
     }
     return filter({ value: arr }, null, sort, null, ctx).value;
   }),
-  simple(['time-span', 'time-span-ms'], (_name: string, args: any[]): any => {
-    const namedArgs = Object.prototype.toString.call(args[args.length - 1]) === '[object Object]' ? args[args.length - 1] : {};
+  simple(['time-span', 'time-span-ms'], (_name: string, args: any[], opts: any): any => {
+    const namedArgs = opts || {};
     const span = isDateRel(args[0]) && isDateRel(args[1]) ? datesDiff(dateRelToDate(args[0]), dateRelToDate(args[1])) : isTimespan(args[0]) ? args[0] : 0;
 
     // if a unit is specified, break the span up
@@ -459,7 +457,7 @@ registerOperator(
     if (res.slice(0, 7) === '[object') return JSON.stringify(value);
     return res;
   }),
-  simple(['call'], (_name: string, args: any[], ctx): any => {
+  simple(['call'], (_name: string, args: any[], _opts, ctx: Context): any => {
     if (args[0] != null && typeof args[1] === 'string' && typeof args[0][args[1]] === 'function') {
       const obj = args.shift();
       const name = args.shift();
@@ -489,11 +487,11 @@ registerOperator(
     }
     return res;
   }),
-  simple(['let'], (_name, [name, value]: any[], ctx): any => {
-    safeSet(ctx, name, value, true);
+  simple(['let'], (_name, [name, value]: any[], _opts, ctx: Context): any => {
+    return safeSet(ctx, name, value, true);
   }),
-  simple(['set'], (_name, [name, value]: any[], ctx): any => {
-    safeSet(ctx, name, value);
+  simple(['set'], (_name, [name, value]: any[], _opts, ctx: Context): any => {
+    return safeSet(ctx, name, value);
   }),
   simple(['similarity'], (_name, [left, right, threshhold, fudges]: any[]): number => {
     return similarity(`${left || ''}`, `${right || ''}`, threshhold, fudges);
@@ -504,8 +502,8 @@ registerOperator(
   simple(['overlap'], (_name, [left, right, threshhold]: any[]): any => {
     return overlap(`${left || ''}`, `${right || ''}`, threshhold);
   }),
-  simple(['validate', 'valid'], (name, [left, right, mode]) => {
-    const res = validate(left, right, mode);
+  simple(['validate', 'valid'], (name, [left, right, mode], opts) => {
+    const res = validate(left, right, mode || opts?.mode || (opts?.strict && 'strict'));
     if (name === 'valid') return res === true;
     else return res;
   }),
@@ -513,7 +511,7 @@ registerOperator(
     if (mode === 'schema') return unparseSchema(inspect(v));
     else return inspect(v);
   }),
-  simple(['diff'], (_, [left, right, equal], ctx) => {
+  simple(['diff'], (_, [left, right, equal], _opts, ctx: Context) => {
     if (equal && isApplication(equal)) {
       const eq = equal;
       equal = (l: any, r: any) => evalApply(ctx, eq, [l, r]);
@@ -627,7 +625,7 @@ const triml = /^\s*/;
 const trimr = /\s*$/;
 const escapeRe = /([\.\[\]\{\}\(\)\^\$\*\+\-])/g;
 registerOperator(
-  simple(['eval'], (_name: string, [v], ctx): any => {
+  simple(['eval'], (_name: string, [v], _opts, ctx: Context): any => {
     return evaluate(ctx, v);
   }),
   simple(['padl', 'padr'], (name: string, args: any[]): string => {
@@ -641,11 +639,11 @@ registerOperator(
     if (name === 'trim' || name === 'triml') str = str.replace(triml, '');
     return str;
   }),
-  simple(['slice', 'substr'], (_name: string, [src, start, end]: any[], ctx) => {
+  simple(['slice', 'substr'], (_name: string, [src, start, end]: any[], _opts, ctx: Context) => {
     if (src && typeof src.slice === 'function') return src.slice(start, end);
     else {
       const op = getOperator<ValueOperator>('string');
-      if (op) return `${op.apply('string', [src], ctx)}`.slice(start, end);
+      if (op) return `${op.apply('string', [src], undefined, ctx)}`.slice(start, end);
     }
   }),
   simple(['len', 'length'], (_name: string, [src]: any[]) => {
@@ -684,10 +682,9 @@ registerOperator(
     if (!src) return [];
     return Object.values(src);
   }),
-  simple(['date'], (_name: string, args: any[], ctx): Date|DateRel => {
+  simple(['date'], (_name: string, args: any[], opts, ctx: Context): Date|DateRel => {
     let [v, t] = args;
-    let opts = (args.length > 1 ? args.slice(-1)[0] : false) || {};
-    if (typeof opts !== 'object') opts = {};
+    if (typeof opts !== 'object' || !opts) opts = {} as any;
 
     let res: Date|DateRel;
     if (v !== undefined) {
@@ -782,7 +779,7 @@ registerOperator(
 
     return res;
   }),
-  simple(['interval'], (_name: string, [v]: any[], ctx): DateRel => {
+  simple(['interval'], (_name: string, [v]: any[], _opts, ctx: Context): DateRel => {
     return evaluate(ctx, ~v.indexOf('#') ? v : `#${v}#`);
   }),
   simple(['upper', 'lower'], (name: string, [v]: any[]): string => {
@@ -853,7 +850,7 @@ registerOperator({
 }, {
   type: 'checked',
   names: ['case', 'switch'],
-  checkArg(_name: string, i: number, last: number, value: any, ctx: Context, ast): CheckResult {
+  checkArg(_name: string, i: number, last: number, value: any, _opts, ctx: Context, ast): CheckResult {
     if (i === 0) { // set the value and move to the next
       (ctx.special || (ctx.special = {})).case = value;
       return 'continue';
@@ -885,11 +882,10 @@ registerOperator({
       else return { skip: 1 };
     } else return { result: value };
   },
-  apply(_name: string, [value, body]: [any[]|object, ValueOrExpr], ctx?: Context) {
-    ctx = ctx || new Root();
+  apply(_name: string, [value, body]: [any[]|object, ValueOrExpr], opts, ctx: Context) {
     if (Array.isArray(value)) {
       const last = value.length - 1;
-      return value.map((v, i) => evalApply(extend(ctx, { value: v, special: { last, index: i, key: i, 'last-key': last } }), body, [v, i])).join('');
+      return value.map((v, i) => evalApply(extend(ctx, { value: v, special: { last, index: i, key: i, 'last-key': last } }), body, [v, i])).join(opts?.join || '');
     } else {
       const entries = Object.entries(value);
       const lastKey = entries[entries.length - 1][0];
@@ -909,8 +905,7 @@ registerOperator({
       else return { skip: 1 };
     } else return { result: value };
   },
-  apply(_name: string, [value, body]: [any, ValueOrExpr], ctx?: Context) {
-    ctx = ctx || new Root();
+  apply(_name: string, [value, body]: [any, ValueOrExpr], _opts, ctx: Context) {
     return evalApply(extend(ctx, { value }), body, [value]);
   }
 }, {
@@ -928,33 +923,33 @@ registerOperator({
 registerOperator({
   type: 'aggregate',
   names: ['avg'],
-  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+  apply(_name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
     return arr.reduce((a, c) => a + num(args[0] ? evalApply(ctx, args[0], [c]) : c), 0) / arr.length;
   },
 }, {
   type: 'aggregate',
   names: ['sum'],
-  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+  apply(_name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
     return arr.reduce((a, c) => a + num(args[0] ? evalApply(ctx, args[0], [c]) : c), 0);
   }
 }, {
   type: 'aggregate',
   names: ['count'],
-  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+  apply(_name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
     if (args.length) return arr.filter((e, i) => evalApply(ctx, args[0], [e, i])).length;
     else return arr.length;
   }
 }, {
   type: 'aggregate',
   names: ['min', 'max'],
-  apply(name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+  apply(name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
     if (args[0]) arr = arr.map(e => evalApply(ctx, args[0], [e]));
     return Math[name].apply(Math, arr.filter(e => !isNaN(e)));
   }
 }, {
   type: 'aggregate',
   names: ['first', 'nth', 'last'],
-  apply(name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+  apply(name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
     let val: any;
     let apply = 0;
     if (name === 'first') val = arr[0];
@@ -972,13 +967,12 @@ registerOperator({
 }, {
   type: 'aggregate',
   names: ['map'],
-  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+  apply(_name: string, arr: any[], args: ValueOrExpr[], opts, ctx: Context) {
     if (!args[0]) return arr;
     let v: any[];
     let app: any;
-    let opts: any;
-    if (isApplication(args[0])) v = arr, app = evalParse(ctx, args[0]), evalParse(ctx, opts = args[1]);
-    else if (isApplication(args[1])) v = evalParse(ctx, args[0]), app = evalParse(ctx, args[1]), opts = evalParse(ctx, args[2]);
+    if (isApplication(args[0])) v = arr, app = evalParse(ctx, args[0]);
+    else if (isApplication(args[1])) v = evalParse(ctx, args[0]), app = evalParse(ctx, args[1]);
     if ((Array.isArray(v) || v && '0' in v) && isApplication(app)) return Array.prototype.map.call(v, (e: any, i: number) => evalApply(ctx, app, [e, i], false, { index: i, key: i }));
     else if (v && typeof v === 'object' && isApplication(app)) {
       if (opts && opts.array) return Object.entries(v as object).map((p, i) => evalApply(ctx, app, [p[1], i, p[0]], false, { index: i, key: p[0] }));
@@ -1002,14 +996,14 @@ registerOperator({
 }, {
   type: 'aggregate',
   names: ['reduce'],
-  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+  apply(_name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
     if (!args[0]) return arr;
     return arr.reduce((a, c, i) => evalApply(ctx, args[0], [a, c, i]), evalParse(ctx, args[1]));
   }
 }, {
   type: 'aggregate',
   names: ['unique', 'unique-map'],
-  apply(name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+  apply(name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
     const seen = [];
     const res = [];
     for (const e of arr) {
@@ -1024,14 +1018,14 @@ registerOperator({
 }, {
   type: 'aggregate',
   names: ['join'],
-  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+  apply(_name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
     if (args.length > 1) return arr.map(e => evalApply(ctx, args[0], [e])).join(evalParse(ctx, args[1]));
     return arr.join(evalParse(ctx, args[0]));
   }
 }, {
   type: 'aggregate',
   names: ['find'],
-  apply(_name: string, arr: any[], args: ValueOrExpr[], ctx: Context) {
+  apply(_name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
     if (!args[0]) return;
     else if (isApplication(args[0])) return arr.find((e, i) => evalApply(ctx, args[0], [e, i], false, { index: i, key: i }));
     else if (isApplication(args[1])) {
@@ -1049,7 +1043,7 @@ registerOperator({
 }, {
   type: 'aggregate',
   names: ['block'],
-  apply(_name: string, _arr: any[], args: ValueOrExpr[], ctx: Context) {
+  apply(_name: string, _arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
     const last = args.length - 1;
     if (last < 0) return;
     const c = extend(ctx, { locals: {} });

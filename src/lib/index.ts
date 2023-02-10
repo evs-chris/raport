@@ -15,7 +15,7 @@ export {
   Context, Root, Parameter, ParameterMap, ParameterBase,
   DataSet, DataSource, Field, Group, Schema, Sort, SourceMap,
   Operator, AggregateOperator, CheckedOperator, ValueOperator,
-  Operation,
+  Operation, OperatorOptions,
   Type, ArrayType, ValueType, Value, Literal, Reference, ValueOrExpr,
   template,
 } from './data/index';

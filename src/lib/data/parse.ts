@@ -52,7 +52,7 @@ export const keywords = map<string, any>(str('null', 'true', 'false', 'undefined
 export const ident = read1To(endRef, true);
 export const sexprop = read1To(' \r\n\t():{}[],"\'\\;&#@', true);
 
-export const args: Parser<Value[]> = {};
+export const args: Parser<[Value[], Value]> = {};
 export const array: Parser<Value> = {};
 export const block: Parser<Value> = {};
 export const object: Parser<Value> = {};
@@ -302,7 +302,8 @@ export const sexp = map(bracket(
   check(ws, str(')')),
 ), ([op, , args]) => {
   const res: Value = { op };
-  if (args && args.length) res.args = args;
+  if (args[0] && args[0].length) res.args = args[0];
+  if (args[1]) res.opts = args[1];
   return res;
 }, { primary: true, name: 's-expression' });
 
@@ -325,7 +326,8 @@ export const case_op: Parser<Value> = {};
 const opName = read1('abcdefghifghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_$0123456789');
 const call_op = map(seq(name(opName, 'op'), bracket_op(args)), ([op, args]) => {
   const res: Value = { op };
-  if (args && args.length) res.args = args;
+  if (args[0] && args[0].length) res.args = args[0];
+  if (args[1]) res.opts = args[1];
   return res;
 }, { primary: true, name: 'call' });
 
@@ -455,8 +457,8 @@ const namedArg: Parser<[Value, Value]> = map(seq(ident, str(':'), ws, value), ([
 application.parser = map(seq(opt(bracket(check(str('|'), ws), rep1sep(opName, read1(space + ','), 'allow'), str('|'))), ws, str('=>', '=\\'), ws, value), ([names, , , , value]) => (names ? { a: value, n: names } : { a: value }), { primary: true, name: 'application' });
 args.parser = map(repsep(alt<[Value, Value] | Value>('argument', namedArg, value), read1(space + ','), 'allow'), (args) => {
   const [plain, obj] = args.reduce((a, c) => ((Array.isArray(c) ? a[1].push(c) : a[0].push(c)), a), [[], []] as [Array<Value>, Array<[Value, Value]>]);
-  if (obj.length) plain.push(objectOp(obj));
-  return plain;
+  if (obj.length) return [plain, objectOp(obj)];
+  return [plain, undefined];
 });
 
 const letter = map(seq(str('let'), rws, name(localpath, { name: 'reference', primary: true }), ws, str('='), ws, value), ([, , k, , , , v]) => ({ op: 'let', args: [{ v: k }, v] }), { primary: true, name: 'let' });
