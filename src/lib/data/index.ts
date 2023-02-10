@@ -205,7 +205,7 @@ export function safeGet(root: Context, path: string|Keypath): any {
   }
 }
 
-export function safeSet(root: Context, path: string|Keypath, value: any, islet?: boolean) {
+export function safeSet(root: Context, path: string|Keypath, value: any, islet?: boolean): any {
   if (!path) return;
   const p = typeof path === 'string' ? (islet ? parseLetPath(path) : parsePath(path)) : path;
 
@@ -246,7 +246,11 @@ export function safeSet(root: Context, path: string|Keypath, value: any, islet?:
       o = o[key];
     }
     
-    if (o) o[keys[last]] = value;
+    if (o) {
+      const cur = o[keys[last]];
+      o[keys[last]] = value;
+      return cur;
+    }
   }
 }
 
