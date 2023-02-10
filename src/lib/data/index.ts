@@ -443,7 +443,7 @@ export function filter(ds: DataSet|any[], filter?: ValueOrExpr, sorts?: Sort[]|V
     });
   }
 
-  if (!Array.isArray(groups)) groups = evalParse(_context, groups);
+  if (groups && !Array.isArray(groups)) groups = [groups];
 
   if (Array.isArray(groups) && groups.length) {
     return { value: { schema: _ds.schema, grouped: groups.length, level: 0, value: group(values, groups, _context, 1), all: values } };
@@ -462,7 +462,7 @@ function group(arr: any[], groups: Array<ValueOrExpr>, ctx: Context, level: numb
   const res: Group[] = [];
   const order: string[] = [];
   for (const e of arr) {
-    const g = `${evalParse(extend(ctx, { value: e }), groups[0])}`;
+    const g = isApplication(groups[0]) ? `${evalApply(ctx, groups[0], [e])}` : `${evalParse(extend(ctx, { value: e }), groups[0])}`;
     if (!cache[g]) {
       order.push(g);
       cache[g] = [];
