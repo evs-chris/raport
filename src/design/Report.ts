@@ -1238,7 +1238,9 @@ const designerOpts: ExtendOpts<Designer> = {
   computed: {
     operators() {
       const map = getOperatorMap();
-      const keys = Object.keys(map).filter(k => !~k.indexOf('parse')).sort();
+      const search = this.get('opsearch');
+      let keys = Object.keys(map).sort();
+      if (search) keys = keys.filter(k => ~k.indexOf(search));
       return keys.reduce((a, c) => (a[c] = map[c], a), {} as typeof map);
     },
     inWatermark() {

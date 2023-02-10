@@ -144,7 +144,7 @@
       </div></div>
     </div>
     <div class-ops style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
-      <div class-header title="All of the registered operators know at design time. Click an operator to insert it into the expression. Hover over an operator for a tooltip with its documentation. Hold the shift key and click an operator for popup with its documentation.">Operators</div>
+      <div class-header title="All of the registered operators know at design time. Click an operator to insert it into the expression. Hover over an operator for a tooltip with its documentation. Hold the shift key and click an operator for popup with its documentation."><span>Operators</span><span><input placeholder="Search..." value="{{~/opsearch}}" /></span></div>
       <div class-panel class-scrolled-wrapper><div as-scrolled>
         {{~/temp.expr.tab === 'ast' && @context.decorators.scrolled && @context.decorators.scrolled.invalidate() || '' && ''}}
         {{#each ~/operators}}
@@ -374,7 +374,8 @@
   .bottom-pane .context .header, .bottom-pane .ops .header {
     height: 2.55em;
     font-weight: bold;
-    text-align: center;
+    display: flex;
+    justify-content: space-evenly;
     line-height: 2.2em;
     font-size: 0.85rem;
   }
@@ -397,7 +398,7 @@
     font-size: 1em;
   }
 
-  .bottom-pane .properties textarea, .bottom-pane .properties select, .bottom-pane .properties input {
+  .bottom-pane .properties textarea, .bottom-pane .properties select, .bottom-pane input {
     color: {{@style.fg}};
     background-color: {{@style.bg}};
     border: 1px solid {{@style.border}};
