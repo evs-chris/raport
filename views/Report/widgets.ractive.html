@@ -2,7 +2,7 @@
   {{#if .type === 'repeater' && .group}}
     {{#each .group}}
       <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false">
-        <span class-line on-mouseover="@.set('temp.hover', @keypath), false"><span>group {{@index + 1}}</span>
+        <span class="line {{@.getNestLevel(@keypath)}}" on-mouseover="@.set('temp.hover', @keypath), false"><span>group {{@index + 1}}</span>
           <span class=actions>
             <button class="ico up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', '^^/groupEnds']), false" title="Move up">{{>arrow}}</button>
             <button class="ico down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', '^^/groupEnds']), false" title="Move down">{{>arrow}}></button>
@@ -16,7 +16,7 @@
   {{#each .}}
     {{#if .type === 'container'}}
       <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
-        <span class-line>
+        <span class="line {{@.getNestLevel(@keypath)}}">
           <span>{{@key}}</span>
           {{#if @key !== 'row' || ../type !== 'repeater'}}<button class="ico remove" on-click="@.removeWidget(@context), false" title="Remove container">{{>times}}</button>{{/if}}
         </span>
@@ -26,7 +26,7 @@
   {{/each}}
   {{#each .widgets}}
     <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" class-moving="~/reparent && @keypath === ~/reparent.resolve() || ~/copy && @keypath === ~/copy.resolve()" on-click="~/reparent && ~/reparent.resolve() === @keypath ? @.set('reparent', undefined) : ~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false" {{#if !~/reparent || .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1}}on-mouseover="@.set('temp.hover', @keypath), false"{{/if}}>
-      <span class-line>
+      <span class="line {{@.getNestLevel(@keypath)}}">
         {{#if .widgets.length || .type === 'repeater'}}<button on-click="@.set('temp.tree.' + escapeKey(@keypath), ~/temp.tree && ~/temp.tree[@keypath] === false ? true : false), false" class="ico expander">{{#if ~/temp.tree[@keypath] !== false}}-{{else}}+{{/if}}</button>{{/if}}
         <span>{{.type}}{{>widget-info}}</span>
         {{#if !~/reparent}}
@@ -38,10 +38,10 @@
           </span>
           <button class="ico remove" on-click="@.removeWidget(@context), false" title="Remove {{.type}}">{{>times}}</button>
         {{/if}}
-        </span>
-        {{#if ~/temp.tree[@keypath] !== false}}
-          {{>widget-tree}}
-        {{/if}}
+      </span>
+      {{#if ~/temp.tree[@keypath] !== false}}
+        {{>widget-tree}}
+      {{/if}}
     </div>
   {{/each}}
 </div>
@@ -252,6 +252,44 @@
 </template>
 
 <style rel=ractive>
+  @media screen and (min-height: 10em) {
+    .tree .line {
+      position: sticky;
+      top: 0;
+    }
+    .tree .line.level1 {
+      top: 2.2em;
+    }
+  }
+  @media screen and (min-height: 15em) {
+    .tree .line.level2 {
+      top: 4.4em;
+    }
+    .tree .line.level3 {
+      top: 6.6em;
+    }
+  }
+  @media screen and (min-height: 20em) {
+    .tree .line.level4 {
+      top: 8.8em;
+    }
+    .tree .line.level5 {
+      top: 11em;
+    }
+  }
+  @media screen and (min-height: 25em) {
+    .tree .line.level6 {
+      top: 13.2em;
+    }
+    .tree .line.level7 {
+      top: 15.4em;
+    }
+  }
+  @media screen and (min-height: 30em) {
+    .tree .line.level8 {
+      top: 17.6em;
+    }
+  }
   .line .actions {
     display: none;
     position: absolute;

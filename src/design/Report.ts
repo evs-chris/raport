@@ -1195,6 +1195,10 @@ ${doc.opts.map(o => `${Array.isArray(o.name) ? `${o.name[0]} (alias ${o.name.sli
     const doc = this.getOperatorDoc(op);
     if (doc) window.alert(doc);
   }
+
+  getNestLevel(path: string): string {
+    return `level${Math.floor(path.split('.').length / 2)}`;
+  }
 }
 
 const designerOpts: ExtendOpts<Designer> = {

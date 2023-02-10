@@ -236,6 +236,7 @@
     cursor: pointer;
     position: relative;
     transition: background-color 0.2s ease-in-out;
+    z-index: 1;
   }
 
   .properties .tree .node.active > .line {
@@ -258,6 +259,8 @@
     margin: 0.1rem;
     min-height: 2rem;
     transition: background-color 0.2s ease-in-out;
+    background-color: {{@style.bg}};
+    z-index: 10;
   }
 
   .properties .tree .node.hover > .line {
