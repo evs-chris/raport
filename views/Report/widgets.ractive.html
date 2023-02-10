@@ -7,7 +7,7 @@
             <button class="ico up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', '^^/groupEnds']), false" title="Move up">{{>arrow}}</button>
             <button class="ico down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', '^^/groupEnds']), false" title="Move down">{{>arrow}}></button>
           </span>
-          <button class="ico remove" on-click="@.removeWidget(@context), false" title="Remove">{{>times}}</button>
+          <button class="ico remove" on-click="@.removeWidget(@context), false" title="Remove group">{{>times}}</button>
         </span>
         {{>widget-tree}}
       </div>
@@ -18,7 +18,7 @@
       <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
         <span class-line>
           <span>{{@key}}</span>
-          {{#if @key !== 'row' || ../type !== 'repeater'}}<button class="ico remove" on-click="@.removeWidget(@context), false">{{>times}}</button>{{/if}}
+          {{#if @key !== 'row' || ../type !== 'repeater'}}<button class="ico remove" on-click="@.removeWidget(@context), false" title="Remove container">{{>times}}</button>{{/if}}
         </span>
         {{>widget-tree}}
       </div>
@@ -36,7 +36,7 @@
             <button class="ico up-arrow" title="Move up (hold the shift key to move to first{{#if Array.isArray(^^/layout)}}, hold the control key to swap layout coordinate too{{/if}})" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined], @index, @event.shiftKey), false">{{>arrow}}</button>
             <button class="ico down-arrow" title="Move down (hold the shift key to move to last{{#if Array.isArray(^^/layout)}}, hold the control key to swap layout coordinates too{{/if}})" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined], @index, @event.shiftKey), false">{{>arrow}}</button>
           </span>
-          <button class="ico remove" on-click="@.removeWidget(@context), false">{{>times}}</button>
+          <button class="ico remove" on-click="@.removeWidget(@context), false" title="Remove {{.type}}">{{>times}}</button>
         {{/if}}
         </span>
         {{#if ~/temp.tree[@keypath] !== false}}

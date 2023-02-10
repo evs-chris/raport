@@ -2,15 +2,15 @@
   {{>left}}
   <div class=layout on-keys('z', { ctrl: true })="@.undo(), true" on-keys('Z', { ctrl: true, shift: true })="@.redo(), true" class-pad-me="~/show.pad">
     <div class="design actions">
-      <button disabled="{{report.type === 'delimited' && report.sources.length !== 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>{{>play}}</button>
-      <button on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'context' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">Designer</button>
+      <button title="Run report" disabled="{{report.type === 'delimited' && report.sources.length !== 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>{{>play}}</button>
+      <button title="Design report: modify layout and widgets" on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'context' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">Designer</button>
       {{#if result}}
-        <button on-click="@.set('tab', 'result')" class-tab class-active="tab === 'result'">Output</button>
+        <button title="View report output" on-click="@.set('tab', 'result')" class-tab class-active="tab === 'result'">Output</button>
       {{/if}}
-      <button on-click="@.set('tab', 'context')" class-tab class-active="tab === 'context'">Context</button>
-      <button on-click="@.set('tab', 'definition')" class-tab class-active="tab === 'definition'">Definition</button>
+      <button title="Set up initial report data" on-click="@.set('tab', 'context')" class-tab class-active="tab === 'context'">Context</button>
+      <button title="Import/export report definition as plain text" on-click="@.set('tab', 'definition')" class-tab class-active="tab === 'definition'">Definition</button>
       {{#if data && @.readLink('data')}}
-        <button on-click="@.set('tab', 'import')" class-tab class-active="tab === 'import'">Import Data</button>
+        <button title="Manage data for the {{data.name}} provided source" on-click="@.set('tab', 'import')" class-tab class-active="tab === 'import'">Import Data</button>
       {{/if}}
       {{#if data && tab === 'import'}}
         <span class-which><button class="ico" on-click="@.checkLink('import')">{{>times}}</button> Close Import</span>
@@ -18,7 +18,7 @@
       {{#if tab === 'result'}}<button class="ico text" on-click="@.download((~/report.name || 'report') + (~/report.type === 'delimited' ? '.csv' : '.html'), ~/result, ~/report.type === 'delimited' ? 'text/csv' : 'text/html')" title="Save output to a file">Save Output</button>{{/if}}
       <div class=right>
         {{#if ~/projectChanged}}<span class="ico error" title="There are unsaved changes to this project ({{~/project.name}})">{{>warning}}</span>{{/if}}
-        <button on-click="@.set('tab', 'project')" class-tab class-active="tab === 'project'">{{~/showProjects ? 'Project' : 'Settings'}}</button>
+        <button title="Manage projects and designer settings" on-click="@.set('tab', 'project')" class-tab class-active="tab === 'project'">{{~/showProjects ? 'Project' : 'Settings'}}</button>
       </div>
     </div>
     <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'context' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">
@@ -590,6 +590,7 @@
     line-height: 0.8rem;
     color: {{@style.fg}};
     cursor: pointer;
+    user-select: none;
   }
 
   .toggle.active {

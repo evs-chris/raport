@@ -8,18 +8,18 @@
           <option value=dark>Dark</option>
           <option value=light>Light</option>
         </select></label>
-        <label class="input">Output Theme<br/><select value="{{~/settings.outTheme}}">
+        <label title="Select a theme for the rendered report output" class="input">Output Theme<br/><select value="{{~/settings.outTheme}}">
           <option value="{{undefined}}">Follow Designer</option>
           <option value=dark>Dark</option>
           <option value=light>Light</option>
         </select></label>
-        <label class="check"><input type=checkbox checked="{{~/settings.autosave}}" /> Auto save on leave?</label>
+        <label class="check" title="Automatically save an open project when leaving the page?"><input type=checkbox checked="{{~/settings.autosave}}" /> Auto save on leave?</label>
         <br/><br/>
-        <label class="input">Format Wrap<input type=number value="{{~/settings.format.wrap}}" /></label>
-        <label class="input">Array Wrap<input type=number value="{{~/settings.format.wrap_array}}" /></label>
-        <label class="input">Object Wrap<input type=number value="{{~/settings.format.wrap_keys}}" /></label>
-        <label class="input">Argument Wrap<input type=number value="{{~/settings.format.wrap_args}}" /></label>
-        <label class="input">Union Wrap<input type=number value="{{~/settings.format.wrap_union}}" /></label>
+        <label class="input" title="The base wrap length for the code formatter (default 40)">Format Wrap<input type=number value="{{~/settings.format.wrap}}" /></label>
+        <label class="input" title="The wrap length for the code formatter array literals">Array Wrap<input type=number value="{{~/settings.format.wrap_array}}" /></label>
+        <label class="input" title="The wrap length for the code formatter for object literals">Object Wrap<input type=number value="{{~/settings.format.wrap_keys}}" /></label>
+        <label class="input" title="The wrap length for the code formatter for operator arguments">Argument Wrap<input type=number value="{{~/settings.format.wrap_args}}" /></label>
+        <label class="input" title="The wrap length for the code formatter for schema unions">Union Wrap<input type=number value="{{~/settings.format.wrap_union}}" /></label>
       </div>
     </div>
     {{#if ~/showProjects}}
@@ -47,11 +47,11 @@
           </div>
         {{/if}}
       </div>
-      <div class-project-pane-right>
+      <div class-project-pane-right title="Click a project to load it">
         Projects
         <div class-project-list>
           {{#each ~/projects}}
-            <div class-project-item title="Load {{.name}}, discarding any unsaved changes in the current project or definitions" class-active-project=". === ~/project" on-click="@.linkProject(@keypath)">{{.name}}</div>
+          <div class-project-item {{#if . === ~/project}}class="active-project" title="Project {{.name}} is already loaded"{{else}}title="Load {{.name}}, discarding any unsaved changes in the current project or definitions" on-click="@.linkProject(@keypath)"{{/if}}>{{.name}}</div>
           {{/each}}
         </div>
       </div>
@@ -130,6 +130,7 @@
   .active-project {
     background-color: {{@style.border}};
     color: {{@style.fg}};
+    cursor: default;
   }
 
   label.input {

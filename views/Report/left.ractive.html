@@ -13,7 +13,7 @@
         <option>image</option>
         <option>measured</option>
       </select>
-      <button on-click="@.addWidget(~/add)" class=add>+</button>
+      <button title="Add {{~/add}} to {{~/temp.widget}}" on-click="@.addWidget(~/add)" class=add>+</button>
     {{/if}}
     {{#if ~/copy}}<button class="ico large" on-click="@.set('copy', undefined)" title="Cancel copy">{{>copy, true as cancel}}</button>{{/if}}
     {{#if ~/reparent}}<button class="ico large" on-click="@.set('reparent', undefined)" title="Cancel move">{{>reparent, true as cancel}}</button>{{/if}}
@@ -78,8 +78,8 @@
         </div>
       </div>
       <div class=header>
-        <h3>Parameters</h3>
-        <button on-click="@.push('report.parameters', {})" class=add>+</button>
+        <h3 title="Define parameters that can be collected, passed into the report, and referenced as !name">Parameters</h3>
+        <button on-click="@.push('report.parameters', {})" class=add title="Add parameter">+</button>
       </div>
       {{#if report.parameters}}
         <div class-parameter class-head>
@@ -102,8 +102,8 @@
       </div>
       {{#if ~/sources}}
         <div class=header>
-          <h3>Provided Sources</h3>
-          <button on-click="@.push('sources', {})" class=add>+</button>
+          <h3 title="Define data sources that are available in the designer">Provided Sources</h3>
+          <button on-click="@.push('sources', {})" class=add title="Add provided source">+</button>
         </div>
         {{#if ~/sources}}
           <div class-src class-head>
@@ -128,8 +128,8 @@
         </div>
       {{/if}}
       <div class=header>
-        <h3>Source{{#if report.type !== 'delimited'}}s{{/if}}</h3>
-        {{#if report.type !== 'delimited' || report.sources.length < 1}}<button on-click="@.push('report.sources', { name: '', parameters: {} })" class=add>+</button>{{/if}}
+        <h3 title="Define {{#if report.type === 'delimited'}}the data source{{else}}data sources{{/if}} that will be available in the report and will pull from provided sources or a base value">Source{{#if report.type !== 'delimited'}}s{{/if}}</h3>
+        {{#if report.type !== 'delimited' || report.sources.length < 1}}<button on-click="@.push('report.sources', { name: '', parameters: {} })" class=add title="Add source">+</button>{{/if}}
       </div>
       {{#if report.sources.length}}
         <div class-src class-head>
