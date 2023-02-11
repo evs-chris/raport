@@ -1,3 +1,27 @@
+## 0.15.1
+
+2023-02-16
+
+### Render
+
+* __BUG:__ Containers that land on a page boundary but are not allowed to break will now resume correctly (from the first widget) on the following page.
+* __BUG:__ Repeaters with non-full-width rows will now properly allocate height for incomplete width use i.e. when only a portion of the available width is consumed, the row will still use its full height.
+__BUG:__ Automatic layouts now take the current y-axis offset into account when determining the available height for a widget i.e. in an available height of 10, a widget being rendered at y=2 would only have an available height of 8 rather than 10.
+
+### Data
+
+* __BUG:__ The `nth` operator now accesses elements with a 1-based index to match its documentation.
+* __BUG:__ Aggregate operators can now correctly access implicit data sources that in DataSet form.
+* Negative indexes into an array will now access from the end of the array rather than returning undefined.
+* The `nth` operator also now allows negative index access.
+* The `min` and `max` operators will now check all of their arguments if there is no current source, an array is not given, and the first argument is not an application.
+* The `source` operator will no longer turn an existing source into a source. It also now accepts a second application argument that, if given, will call the application with the given source installed and return the application's result.
+
+### Designer
+
+* __BUG:__ Selecting the report will no longer collapse all container widgets in the tree.
+
+
 ## 0.15.0
 
 2023-02-11
