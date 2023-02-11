@@ -1289,6 +1289,8 @@
 <dd>Returns the largest entry in the applications for the given array of values.</dd>
 <dt><code>application => number</code> (aggregate)</dt>
 <dd>Returns the largest entry in the applications for the current source.</dd>
+<dt><code>...number => number</code></dt>
+<dd>Returns the largest entry in the given list of number arguments. If no arguments are given the result will be 0.</dd>
 </dl>
 
 </dl>
@@ -1311,6 +1313,8 @@
 <dd>Returns the smallest entry in the applications for the given array of values.</dd>
 <dt><code>application => number</code> (aggregate)</dt>
 <dd>Returns the smallest entry in the applications for the current source.</dd>
+<dt><code>...number => number</code></dt>
+<dd>Returns the smallest entry in the given list of number arguments. If no arguments are given the result will be 0.</dd>
 </dl>
 
 </dl>
@@ -1460,9 +1464,9 @@
 
 <dl>
 <dt><code>(any[], number) => any</code></dt>
-<dd>Returns the nth item in the given array using a 1-based index.</dd>
+<dd>Returns the nth item in the given array using a 1-based index. If the number is negative, the offset is from the end rather than the beginning.</dd>
 <dt><code>number => any</code> (aggregate)</dt>
-<dd>Returns the nth item in the current source using a 1-based index.</dd>
+<dd>Returns the nth item in the current source using a 1-based index. If the number is negative, the offset is from the end rather than the beginning.</dd>
 </dl>
 
 </dl>
@@ -1891,7 +1895,9 @@
 
 <dl>
 <dt><code>any => DataSet</code></dt>
-<dd>Creates a DataSet from the given value.</dd>
+<dd>Creates a DataSet from the given value, or returns the value if it is already a DataSet.</dd>
+<dt><code>(any, application) => any</code></dt>
+<dd>Creates a DateSet from the given value if it is not already a DataSet, and then sets that as the @source to call the given application. The result of the application is returned.</dd>
 </dl>
 
 </dl>
