@@ -15,6 +15,8 @@ q.test('*', t => {
   t.equal(evaluate('(* 2 4 2)'), 16);
 });
 
+// TODO: **
+
 q.test('+', t => {
   t.equal(evaluate('(+ 2 4)'), 6);
   t.equal(evaluate('(+ 2 4 2)'), 8);
@@ -30,6 +32,8 @@ q.test('/', t => {
   t.equal(evaluate('(/ 10 2)'), 5);
   t.equal(evaluate('(/ 10 2 2)'), 2.5);
 });
+
+// TODO: /%
 
 q.test('<', t => {
   t.notOk(evaluate('(< 10 2)'));
@@ -55,6 +59,13 @@ q.test('>=', t => {
   t.ok(evaluate('(>= 2 2)'));
 });
 
+// TODO: ==, is
+// TODO: !=, is-not
+// TODO: ===, deep-is
+// TODO: !==, deep-is-not
+// TODO: ??
+// TODO: abs
+
 q.test('and', t => {
   const op: Operator = { type: 'value', names: ['nope'], apply() { t.notOk('nope'); } };
   registerOperator(op);
@@ -76,10 +87,15 @@ q.test('avg', t => {
   t.equal(evaluate('(avg (array 3 5 7 9 11 13))'), 8);
 });
 
+// TODO: block
+
 q.test('call', t => {
   t.equal(evaluate('(call 10 :toString)'), '10');
   t.equal(evaluate('(call 10 :toString 16)'), 'a');
 });
+
+// TODO: case
+// TODO: ceil
 
 q.test('clamp', t => {
   t.equal(evaluate('(clamp 10 20 30)'), 20);
@@ -141,6 +157,9 @@ q.test('date', t => {
   t.equal(evaluate('(call (date :2019-01-01) :toISOString)').substr(0, 10), '2019-01-01');
 });
 
+// TODO: detect-delimiters
+// TODO: diff
+
 q.test('does-not-contain', t => {
   t.equal(evaluate('(does-not-contain :test :ee)'), true);
   t.equal(evaluate('(does-not-contain (array 10 :test false) 11)'), true);
@@ -161,6 +180,9 @@ q.test('does-not-contain', t => {
   t.ok(evaluate(`[:a :b :c :e] does-not-contain =>@index == 9`));
 });
 
+// TODO: each
+// TODO: eval
+
 q.test('filter', t => {
   // TODO: there's a lot more available here
   t.equal(evaluate('(filter (array 1 2 3) =>(is @value 2))')[0], 2);
@@ -179,6 +201,9 @@ q.test('find', t => {
   t.equal(evaluate(`find({ a::b c::d } =>@key == :c)`), 'd');
   t.equal(evaluate(`find({ a::b c::d } =>@index == 0)`), 'b');
 });
+
+// TODO: first
+// TODO: floor
 
 q.test('format', t => {
   // TODO: test all of the builtins
@@ -246,6 +271,8 @@ q.test('in', t => {
   t.notOk(evaluate(`[:a :e] in { e::b c::d }`));
 });
 
+// TODO: inspect
+
 q.test('intersect', t => {
   const arr = evaluate('intersect([1 1 2 3 4 5 5] [1 2 2 3 6 6])');
   t.equal(arr.length, 3);
@@ -253,6 +280,8 @@ q.test('intersect', t => {
   t.equal(arr[1], 2);
   t.equal(arr[2], 3);
 });
+
+// TODO: interval
 
 q.test(`is`, t => {
   t.ok(evaluate(`(is :joe 'joe')`));
@@ -265,7 +294,11 @@ q.test(`is-not`, t => {
 });
 
 // TODO: join
+// TODO: keys
+// TODO: label-diff
 // TODO: last
+// TODO: let
+// TODO: len, length
 
 q.test(`like`, t => {
   t.equal(evaluate('(like :SomeThing :*et*)'), false);
@@ -283,6 +316,7 @@ q.test(`like`, t => {
 // TODO: lower
 
 q.test('map', t => {
+  // TODO: test options
   t.deepEqual(evaluate(`map([1 2 3] =>_ * 2)`), [2, 4, 6]);
   t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>_ * 2)`), { a: 2, b: 4, c: 6 });
   t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if _ == 1 then null else _ * 2)`), { b: 4, c: 6 });
@@ -314,6 +348,8 @@ q.test('min', t => {
   t.equal(evaluate(ctx, 'min(=>_ + 10)'), 11);
   t.equal(evaluate('min()'), 0);
 });
+
+// TODO: not
 
 q.test(`not-ilike`, t => {
   t.equal(evaluate('(not-ilike :SomeThing :*et*)'), false);
@@ -370,6 +406,7 @@ q.test('nth', t => {
   t.equal(evaluate(ctx, 'nth(-2)'), 3);
 });
 
+// TODO: num
 // TODO: object
 
 q.test('or', t => {
@@ -385,20 +422,39 @@ q.test('or', t => {
   unregisterOperator(op);
 });
 
+// TODO: overlap
+// TODO: pad
 // TODO: padl
 // TODO: padr
+// TODO: parse
 
 q.test('pipe', t => {
   t.deepEqual(evaluate(`pipe([1 2 3] filter(=>_ != 1) map(=>_ * 2))`), [4, 6]);
 });
 
+// TODO: rand, random
+// TODO: reduce
 // TODO: replace-all
 // TODO: replace
 // TODO: reverse
-// TODO: slice
+// TODO: round
+// TODO: set
+// TODO: set-defaults
+// TODO: similar
+// TODO: similarity
+// TODO: slice, substr
 // TODO: sort
-// TODO: source
-// TODO: substr
+
+q.test('source', t => {
+  t.deepEqual(evaluate('source([1 2 3])'), { value: [1, 2, 3] });
+  t.deepEqual(evaluate('source({ value: [1 2 3] })'), { value: [1, 2, 3] });
+  t.equal(evaluate('source({ value: [1 2 3] } =>max())'), 3);
+});
+
+// TODO: split
+// TODO: strict-is
+// TODO: strict-is-not
+// TODO: string
 // TODO: sum
 
 q.test('time-span', t => {
@@ -417,9 +473,17 @@ q.test('time-span', t => {
 // TODO: trim
 // TODO: triml
 // TODO: trimr
-// TODO: unique
 
-q.test('unique-by', t => {
+q.test('unique', t => {
   const vals = [{ a: 10, b: 'a' }, { a: 12, b: 'b' }, { a: 10, b: 'c' }];
-  t.deepEqual(evaluate({ vals }, '(map (unique vals =>a) => b)'), ['a', 'b']);
+  t.deepEqual(evaluate({ vals }, '(map (unique vals =>a) =>b)'), ['a', 'b']);
 });
+
+// TODO: unique-map
+// TODO: unless
+// TODO: unparse
+// TODO: upper
+// TODO: valid
+// TODO: validate
+// TODO: values
+// TODO: with

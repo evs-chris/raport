@@ -376,7 +376,8 @@ export const operators = `[
 		{ proto:'(any[], sort[]) => any[]' desc:'Sorts the given array using the given sort array. Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application. Any array elements that are applications are applied directly to get a comparison value. Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags.' }
 	]}
 	{ op:'source' sig:[
-		{ proto:'any => DataSet' desc:'Creates a DataSet from the given value.' }
+		{ proto:'any => DataSet' desc:'Creates a DataSet from the given value, or returns the value if it is already a DataSet.' }
+		{ proto:'(any, application) => any' desc:'Creates a DateSet from the given value if it is not already a DataSet, and then sets that as the @source to call the given application. The result of the application is returned.' }
 	]}
 	{ op:'split' sig:[
 		{ proto:'string => string[]' desc:'Splits the given string into an array containing each of its characters.' }

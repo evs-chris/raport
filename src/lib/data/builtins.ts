@@ -282,9 +282,11 @@ registerOperator(
     }
     return filter({ value: arr }, flt, sorts, groups, ctx).value;
   }),
-  simple(['source'], (_name: string, values: any[]): any => {
-    const [val] = values;
-    return { value: val };
+  simple(['source'], (_name: string, values: any[], _opts, ctx): any => {
+    const [val, app] = values;
+    let source = typeof val === 'object' && val && 'value' in val ? val : { value: val };
+    if (isApplication(app)) return evalApply(ctx, app, [], false, { source });
+    return source;
   }),
   simple(['group'], (_name: string, values: any[], _opts, ctx: Context): any => {
     let [arr, groups] = values;
