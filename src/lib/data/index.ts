@@ -542,7 +542,7 @@ function applyOperator(root: Context, operation: Operation): any {
       if (!arr) {
         const src = evalValue(ctx, { r: '@source' });
         if (Array.isArray(src)) arr = src;
-        else if (typeof src === 'object' && 'value' in src && Array.isArray(src.value)) arr = src.values;
+        else if (typeof src === 'object' && 'value' in src && Array.isArray(src.value)) arr = src.value;
         else arr = [];
       }
     }
