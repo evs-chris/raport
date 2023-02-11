@@ -1,4 +1,4 @@
-import { evaluate, registerOperator, unregisterOperator, Operator } from '../../../src/lib/index';
+import { evaluate, registerOperator, unregisterOperator, Operator, Root } from '../../../src/lib/index';
 
 const q = QUnit;
 
@@ -293,9 +293,28 @@ q.test('map', t => {
   t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if @key == :a then [:d 69] else _ * 2)`), { d: 69, b: 4, c: 6 });
 });
 
-// TODO: max
-// TODO: min
-//
+q.test('max', t => {
+  t.equal(evaluate('max([1 2 3 4])'), 4);
+  t.equal(evaluate('max(1 2 3 4)'), 4);
+  t.equal(evaluate('max([1 2 3 4] =>_ + 10)'), 14);
+  const ctx = new Root({}, { special: { source: { value: [1, 2, 3, 4] } } });
+  // defaults to the nearest source if not given an array
+  t.equal(evaluate(ctx, 'max(5 6 7 8)'), 4);
+  t.equal(evaluate(ctx, 'max(=>_ + 10)'), 14);
+  t.equal(evaluate('max()'), 0);
+});
+
+q.test('min', t => {
+  t.equal(evaluate('min([1 2 3 4])'), 1);
+  t.equal(evaluate('min(1 2 3 4)'), 1);
+  t.equal(evaluate('min([1 2 3 4] =>_ + 10)'), 11);
+  const ctx = new Root({}, { special: { source: { value: [1, 2, 3, 4] } } });
+  // defaults to the nearest source if not given an array
+  t.equal(evaluate(ctx, 'min(5 6 7 8)'), 1);
+  t.equal(evaluate(ctx, 'min(=>_ + 10)'), 11);
+  t.equal(evaluate('min()'), 0);
+});
+
 q.test(`not-ilike`, t => {
   t.equal(evaluate('(not-ilike :SomeThing :*et*)'), false);
   t.equal(evaluate('(not-ilike :SomeThing :*fr*)'), true);

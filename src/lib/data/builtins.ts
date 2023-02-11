@@ -955,7 +955,7 @@ registerOperator({
   names: ['min', 'max'],
   apply(name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
     if (isApplication(args[0])) arr = arr.map(e => evalApply(ctx, args[0], [e]));
-    else if (args.length && !arr.length) arr = args.map(a => evalApply(ctx, a, []));
+    else if (args.length && !arr.length) arr = args.map(a => evalParse(ctx, a));
     if (!arr.length) return 0;
     return Math[name].apply(Math, arr.filter(e => !isNaN(e)));
   }

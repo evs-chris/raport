@@ -247,12 +247,14 @@ export const operators = `[
 		{ proto:'number[] => number' desc:'Returns the largest entry in the given array of numbers.' }
 		{ proto:'(any[], application) => number' desc:'Returns the largest entry in the applications for the given array of values.' }
 		{ agg:1 proto:'application => number' desc:'Returns the largest entry in the applications for the current source.' }
+		{ proto:'...number => number' desc:'Returns the largest entry in the given list of number arguments. If no arguments are given the result will be 0.' }
 	]}
 	{ op:'min' sig:[
 		{ agg:1 proto: '() => number' desc:'Returns the smallest entry in the current source.' }
 		{ proto:'number[] => number' desc:'Returns the smallest entry in the given array of numbers.' }
 		{ proto:'(any[], application) => number' desc:'Returns the smallest entry in the applications for the given array of values.' }
 		{ agg:1 proto:'application => number' desc:'Returns the smallest entry in the applications for the current source.' }
+		{ proto:'...number => number' desc:'Returns the smallest entry in the given list of number arguments. If no arguments are given the result will be 0.' }
 	]}
   { op:'not' sig:[
     { un:1 proto:'any => boolean' desc:'Negates the truthiness of the given value.' }
