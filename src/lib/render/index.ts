@@ -172,7 +172,7 @@ registerLayout('row', (w, o, m, p, ps, context) => {
 
   n.y -= o;
 
-  if (p.availableY) n.availableY = p.availableY - ps[0][1];
+  if (p.availableY) n.availableY = p.availableY - ps[0][1] - n.y;
 
   return n;
 });
