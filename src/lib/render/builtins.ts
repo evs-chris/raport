@@ -124,6 +124,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   if (!state || !state.state || state.state.part !== 'footer') {
     let usedX = 0;
     let usedY = 0;
+    let initY = y;
     for (let i = (state && state.state && state.state.current) || 0; i < arr.length; i++) {
       const c = group && group.grouped ?
         extend(rctx, { value: arr[i], special: { index: i, values: {} } }) :
@@ -141,6 +142,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
         if (r.height > usedY) usedY = r.height;
       } else if (r.width && usedX && r.width > availableX - usedX) {
         y += usedY;
+        initY = y;
         availableY -= usedY;
         usedY = 0;
         usedX = 0;
@@ -149,16 +151,26 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
       }
 
       if (r.height > availableY || r.cancel) {
-        if (commit) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx, child: r.continue } } };
-        else return { output: '', height: y, continue: { offset: y, state: { part: state && state.state && state.state.part || 'body', src, current: i, context: rctx, child: r.continue } } };
-      } else if (!usedY) availableY -= r.height;
+        if (initY === y && usedY) y += usedY;
+        if (commit) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx }, child: r.continue } };
+        else return { output: '', height: y, continue: { offset: y, state: { part: state && state.state && state.state.part || 'body', src, current: i, context: rctx }, child: r.continue } };
+      }
 
-      if (!usedY) y += r.height;
+      if (!usedY) {
+        y += r.height;
+        availableY -= r.height;
+      }
+
       html += r.output;
       commit = true;
 
-      if (r.continue) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx }, child: r.continue } };
+      if (r.continue) {
+        if (initY === y && usedY) y += usedY;
+        return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx }, child: r.continue } };
+      }
     }
+
+    if (initY === y && usedY) y += usedY;
   }
 
   if (w.footer) {
