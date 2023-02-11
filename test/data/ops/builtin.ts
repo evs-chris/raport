@@ -359,7 +359,17 @@ q.test(`not-like`, t => {
   t.equal(evaluate('[:A :B] not-like [:D :C]'), true);
 });
 
-// TODO: nth
+q.test('nth', t => {
+  t.equal(evaluate('nth([1 2 3 4] 1)'), 1);
+  t.equal(evaluate('nth([1 2 3 4] -1)'), 4);
+  t.equal(evaluate('nth([1 2 3 4] -2)'), 3);
+  const ctx = new Root({}, { special: { source: { value: [1, 2, 3, 4] } } });
+  // defaults to the nearest source if not given an array
+  t.equal(evaluate(ctx, 'nth(1)'), 1);
+  t.equal(evaluate(ctx, 'nth(-1)'), 4);
+  t.equal(evaluate(ctx, 'nth(-2)'), 3);
+});
+
 // TODO: object
 
 q.test('or', t => {

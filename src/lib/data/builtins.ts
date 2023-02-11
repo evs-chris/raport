@@ -970,7 +970,7 @@ registerOperator({
     else if (args[0]) {
       const i = evalParse(ctx, args[0]);
       if (typeof i === 'number') {
-        val = arr[i];
+        val = i < 0 ? arr[arr.length + i] : arr[i - 1];
         apply = 1;
       }
     }

@@ -286,8 +286,8 @@ export const operators = `[
 		{ name:'free' type:'boolean' desc:'Causes the patterns not to be anchored to the start and end of the target string.' }
 	]}
 	{ op:'nth' sig:[
-		{ proto:'(any[], number) => any' desc:'Returns the nth item in the given array using a 1-based index.' }
-		{ agg:1 proto:'number => any' desc:'Returns the nth item in the current source using a 1-based index.' }
+		{ proto:'(any[], number) => any' desc:'Returns the nth item in the given array using a 1-based index. If the number is negative, the offset is from the end rather than the beginning.' }
+		{ agg:1 proto:'number => any' desc:'Returns the nth item in the current source using a 1-based index. If the number is negative, the offset is from the end rather than the beginning.' }
 	]}
 	{ op:'num' sig:[
 		{ proto:'string => number' desc:'Returns the first positive number found in the string, including an optional decimal.' }
