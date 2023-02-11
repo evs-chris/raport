@@ -50,8 +50,13 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
     r.height = h || r.height;
     r.width = getWidthWithMargin(w, placement, ctx);
   }
-  if ((r.cancel || r.continue) && !w.bridge) return { continue: ((r.continue || {} as RenderState).offset = 0, r.continue), output: '' };
-  else if (r.continue) r.continue.offset = 0;
+  if ((r.cancel || r.continue) && !w.bridge) {
+    const state = r.continue || {} as RenderState;
+    state.offset = 0;
+    // must start over
+    delete state.last;
+    return { continue: state, output: '' };
+  } else if (r.continue) r.continue.offset = 0;
   return r;
 }, { container: true });
 
