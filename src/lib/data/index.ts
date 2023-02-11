@@ -193,11 +193,9 @@ export function safeGet(root: Context, path: string|Keypath): any {
 
     for (let i = idx; i < parts.length; i++) {
       const part = parts[i];
-      if (typeof part !== 'object') o = o && o[part];
-      else {
-        const v = evalValue(root, part);
-        o = o && o[v];
-      }
+      const v = typeof part !== 'object' ? part : evalValue(root, part);
+      if (Array.isArray(o) && typeof v === 'number' && v < 0) o = o[o.length + v];
+      else o = o && o[v];
       if (o === null || o === undefined) return;
     }
 
