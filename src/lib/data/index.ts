@@ -487,7 +487,7 @@ function applyOperator(root: Context, operation: Operation): any {
   if (!op) {
     const local = safeGet(root, operation.op) || safeGet(root.root, operation.op);
     if (isApplication(local)) {
-      return evalApply(root, local, operation.args.map(a => evalParse(root, a)));
+      return evalApply(root, local, (operation.args || []).map(a => evalParse(root, a)));
     } else if (operation.op === 'pipe') { // handle the special built-in pipe operator
       if (!operation.args || !operation.args.length) return true;
       let v = evalParse(root, operation.args[0]);
