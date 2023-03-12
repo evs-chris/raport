@@ -103,7 +103,7 @@
       {{#if ~/sources}}
         <div class=header>
           <h3 title="Define data sources that are available in the designer">Provided Sources</h3>
-          <button on-click="@.push('sources', {})" class=add title="Add provided source">+</button>
+          <button on-click="~/actions.provideSource()" class=add title="Add provided source">+</button>
         </div>
         {{#if ~/sources}}
           <div class-src class-head>
@@ -115,7 +115,7 @@
             <div class-src>
               <div class-src-name><input value="{{.name}}" /></div>
               <div class-src-btn>
-                <button class-ico class-large title="Import data..." on-click="@.editProvidedData(@context)">{{>pencil}}</button>
+                <button class-ico class-large title="Import data..." on-click="~/actions.editProvidedSource(@context)">{{>pencil}}</button>
                 <button class-ico class-large title="Log data to console..." on-click="@.logData(.)">{{>'console'}}</button>
                 <button class-ico class-large on-click="@.checkLink('import', @keypath), @context.splice('../', @index, 1)">{{>times}}</button>
               </div>
@@ -124,7 +124,7 @@
         </div>
       {{else}}
         <div class="header" style-justify-content=center>
-          <button class-plain on-click="@.push('sources', {})" title="Create a new source of data to reference from a report source">Provide Source</button>
+          <button class-plain on-click="~/actions.provideSource()" title="Create a new source of data to reference from a report source">Provide Source</button>
         </div>
       {{/if}}
       <div class=header>

@@ -1253,6 +1253,10 @@ const designerOpts: ExtendOpts<Designer> = {
       },
       exprExpand: {},
       showProjects: true,
+      actions: {
+        provideSource: () => this.push('sources', {}),
+        editProvidedSource: (ctx: ContextHelper) => this.editProvidedData(ctx),
+      },
     };
   },
   components: { Editor, Viewer },

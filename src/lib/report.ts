@@ -30,8 +30,6 @@ export interface ReportSource extends PartSource {
   parameters?: { [name: string]: ValueOrExpr };
 }
 
-// TODO: sources should be a named datasource and a label for the report so that one source can be used multiple times
-
 interface BaseReport<T = {}> {
   type: ReportType;
   name?: string;
