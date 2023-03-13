@@ -1341,9 +1341,11 @@ const designerOpts: ExtendOpts<Designer> = {
 
               if ('message' in parsed) {
                 this.set('temp.expr.error', parsed)
+                this.set('temp.expr.errormsg', msg);
                 this.set('temp.expr.ast', undefined);
               } else {
                 this.set('temp.expr.ast', parsed);
+                this.set('temp.expr.errormsg', undefined);
                 this.set('temp.expr.error', undefined);
               }
 

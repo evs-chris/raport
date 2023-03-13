@@ -18,7 +18,18 @@
         <button title="Evaluate the current expression" disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>{{>play}}</button>
         <button title="Modify the current expression" class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">{{#if ~/temp.expr.template}}Template{{else}}Text{{/if}}</button>
         {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.template}}<button title="Format the current expression" class="ico text" on-click="@.fmt()">Format</button>{{/if}}
-        {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.path}}<label title="Enable to treat the current expression as a template"><input type=checkbox checked="{{~/temp.expr.template}}" /> Template</label>{{/if}}
+        {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.path}}<label style="margin-left: 1em;" title="Enable to treat the current expression as a template"><input type=checkbox checked="{{~/temp.expr.template}}" /> Template?</label>{{/if}}
+        {{#if ~/temp.expr.tab === 'parsed'}}
+          <div class-editor-buttons>
+            <div class=toggles>{{#with ~/temp.expr.parsedtype as t}}
+              <span class-toggle class-active="!t || t === 'json'" {{#if t && t !== 'json'}}on-click="@.set('temp.expr.parsedtype', 'json')"{{/if}} title="Show the AST as JSON. Double click to copy the JSON to the clipboard." on-dblclick="@.copyToClipboard(JSON.stringify(~/temp.expr.ast))">JSON</span>
+              <span class-toggle class-active="t === 'raport'" {{#if t !== 'raport'}}on-click="@.set('temp.expr.parsedtype', 'raport')"{{/if}} title="Show the AST as a Raport expression.">Raport</span>
+            {{/with}}</div>
+          </div>
+          {{#if ~/temp.expr.parsedtype === 'json' || !~/temp.expr.parsedtype}}
+            <label style="margin-left: 2em;"><input type=checkbox bind-checked="~/temp.expr.jsonsquash" title="Enable to display JSON with no additional whitespace" /> Compact?</label>
+          {{/if}}
+        {{/if}}
         <button title="Modify the current HTML template" class-tab style-display="{{~/temp.expr.html ? '' : 'none'}}" class-active="~/temp.expr.tab === 'html'" on-click="@.set('temp.expr.tab', 'html')">HTML</button>
         <div style-flex-grow=2 />
         <button title="View the result of the current expression's execution" class-tab class-active="~/temp.expr.tab === 'result'" on-click="@.set('temp.expr.tab', 'result')">Result</button>
@@ -116,7 +127,7 @@
             <span class-toggle class-active="t === 'html'" {{#if t !== 'html'}}on-click="@.set('temp.expr.resulttype', 'html')"{{/if}} title="Show result as HTML">HTML</span>
           {{/with}}</div>
           <div style="margin-left: 2em;">
-            {{#if ~/temp.expr.resulttype === 'json'}}<label><input type=checkbox bind-checked="~/temp.expr.jsonsquash" /> Compact?</label>{{/if}}
+            {{#if ~/temp.expr.resulttype === 'json'}}<label><input type=checkbox bind-checked="~/temp.expr.jsonsquash" title="Enable to display JSON with no additional whitespace" /> Compact?</label>{{/if}}
           </div>
         </div>
         <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
@@ -137,7 +148,7 @@
       </div>
       <div class-tab class-parsed class-active-tab="~/temp.expr.tab === 'parsed'">
         <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
-          <code><pre style-margin="1em">{{~/temp.expr.parsed}}</pre></code>
+          <code><pre style-margin="1em">{{#if ~/temp.expr.errormsg}}{{~/temp.expr.errormsg}}{{else}}{{#if ~/temp.expr.parsedtype === 'raport'}}{{@.unparse(~/temp.expr.ast)}}{{else}}{{JSON.stringify(~/temp.expr.ast, null, ~/temp.expr.jsonsquash ? '' : '  ')}}{{/if}}{{/if}}</pre></code>
         </div></div>
       </div>
     </div>
