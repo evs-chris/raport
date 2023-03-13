@@ -1480,10 +1480,21 @@ const designerOpts: ExtendOpts<Designer> = {
         }
       });
       window.addEventListener('keydown', ev => {
-        if (ev.ctrlKey && ev.key === 's') {
-          this.saveProjects();
-          ev.stopPropagation();
-          ev.preventDefault();
+        if (ev.ctrlKey) {
+          if (ev.key === 's') {
+            this.saveProjects();
+            ev.stopPropagation();
+            ev.preventDefault();
+          } else if (ev.key === 'Enter' && document.activeElement.tagName !== 'TEXTAREA') {
+            this.set({
+              'temp.expr.tab': 'text',
+              'show.bottom': true,
+            });
+            const el = document.getElementById('expr-text');
+            if (el) el.focus();
+            ev.stopPropagation();
+            ev.preventDefault();
+          }
         }
       }, { capture: true });
       this.loadProjects();
