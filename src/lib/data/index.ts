@@ -359,7 +359,8 @@ export function getOperator<T extends Operator = Operator>(name: string): T {
   return opMap[name] as T;
 }
 
-function mungeSort(context: Context, sorts: Sort[]|ValueOrExpr): Sort[] {
+const _defaultGetValue = (c: Context, b: ValueOrExpr, v: any) => evalApply(c, b, v);
+export function sort(context: Context, arr: any[], sorts: Sort[]|ValueOrExpr, getValue?: (context: Context, by: ValueOrExpr, v: any) => any): any[] {
   let sortArr: Sort[];
   
   if (Array.isArray(sorts)) {
@@ -376,13 +377,52 @@ function mungeSort(context: Context, sorts: Sort[]|ValueOrExpr): Sort[] {
       el = sortArr[i];
       const by = isLiteral(el) ? el.v : el;
       if (typeof by === 'string') {
-        if (by[0] === '-') sortArr[i] = { by: by.substr(1), desc: true };
-        else sortArr[i] = { by: by[0] === '+' ? by.substr(1) : by, desc: false };
+        if (by[0] === '-') sortArr[i] = { by: by.slice(1), desc: true };
+        else sortArr[i] = { by: by[0] === '+' ? by.slice(1) : by, desc: false };
       }
     }
   }
 
-  return sortArr;
+  getValue = getValue || _defaultGetValue;
+  if (sortArr && sortArr.length) {
+    const dirs = sortArr.map(s => {
+      if (typeof s === 'object') {
+        if ('by' in s) {
+          if ('desc' in s) {
+            if (typeof s.desc === 'boolean') return s.desc;
+            return evalParse(context, s.desc);
+          } else if ('dir' in s) {
+            const lower = typeof s.dir === 'string' ? s.dir.toLowerCase() : s.dir;
+            const dir = lower === 'asc' || lower === 'desc' ? lower : evalParse(context, s.dir);
+            const val = typeof dir === 'string' ? dir.toLowerCase() : dir;
+            if (val === 'desc') return true;
+          }
+        }
+      }
+      // default to asc
+      return false;
+    });
+
+    arr.sort((a, b) => {
+      for (let i = 0; i < sortArr.length; i++) {
+        const s = sortArr[i];
+        const desc = dirs[i];
+        const by: ValueOrExpr = typeof s === 'string' ? s : s && (s as any).by ? (s as any).by : s;
+        const l = getValue(context, by, a);
+        const r = getValue(context, by, b);
+        const cmp = l == null && r != null ? -1 
+          : l != null && r == null ? 1
+          : (l < r) === (r < l) ? 0
+          : l < r ? -1
+          : l > r ? 1
+          : 0;
+        if (cmp) return (desc ? -1 : 1) * cmp;
+      }
+      return 0;
+    });
+  }
+
+  return arr;
 }
 
 export function filter(arr: any[], filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context|any): any[];
@@ -404,45 +444,7 @@ export function filter(ds: DataSet|any[], filter?: ValueOrExpr, sorts?: Sort[]|V
     });
   }
 
-  const sortArr = mungeSort(_context, sorts);  
-
-  if (sortArr && sortArr.length) {
-    const dirs: boolean[] = sortArr.map(s => {
-      if (typeof s === 'object') {
-        if ('by' in s) {
-          if ('desc' in s) {
-            if (typeof s.desc === 'boolean') return s.desc;
-            return evalParse(_context, s.desc);
-          } else if ('dir' in s) {
-            const lower = typeof s.dir === 'string' ? s.dir.toLowerCase() : s.dir;
-            const dir = lower === 'asc' || lower === 'desc' ? lower : evalParse(_context, s.dir);
-            const val = typeof dir === 'string' ? dir.toLowerCase() : dir;
-            if (val === 'desc') return true;
-          }
-        }
-      }
-      // default to asc
-      return false;
-    });
-
-    values.sort((a, b) => {
-      for (let i = 0; i < sortArr.length; i++) {
-        const s = sortArr[i];
-        const desc = dirs[i];
-        const by: ValueOrExpr = typeof s === 'string' ? s : s && (s as any).by ? (s as any).by : s;
-        const l = evalApply(_context, by, [a]);
-        const r = evalApply(_context, by, [b]);
-        const cmp = l == null && r != null ? -1 
-          : l != null && r == null ? 1
-          : (l < r) === (r < l) ? 0
-          : l < r ? -1
-          : l > r ? 1
-          : 0;
-        if (cmp) return (desc ? -1 : 1) * cmp;
-      }
-      return 0;
-    });
-  }
+  if (sorts) sort(_context, values, sorts);
 
   if (groups && !Array.isArray(groups)) groups = [groups];
 

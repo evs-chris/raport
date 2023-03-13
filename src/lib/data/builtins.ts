@@ -1,4 +1,4 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, Root, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator, OperatorOptions } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator, OperatorOptions, sort } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseExpr, parse } from './parse';
 import { parse as parseTemplate } from './parse/template';
@@ -277,7 +277,11 @@ registerOperator(
     let [arr, flt, sorts, groups] = values;
     if (!Array.isArray(arr)) {
       if (arr && Array.isArray(arr.value)) arr = arr.value;
-      else if (typeof arr === 'object' && arr) return Object.entries(arr).filter((e, i) => evalApply(ctx, flt, [e[1], i, e[0]], false, { index: i, key: e[0] })).reduce((a, c) => (a[c[0]] = c[1], a), {});
+      else if (typeof arr === 'object' && arr) {
+        let step = Object.entries(arr).filter((e, i) => evalApply(ctx, flt, [e[1], i, e[0]], false, { index: i, key: e[0] }));
+        if (sorts) step = sort(ctx, step, sorts, (c, b, v) => evalApply(c, b, [v[1], v[0]], false, { key: v[0] }));
+        return step.reduce((a, c) => (a[c[0]] = c[1], a), {});
+      }
       else return [];
     }
     return filter({ value: arr }, flt, sorts, groups, ctx).value;
@@ -297,12 +301,14 @@ registerOperator(
     return filter({ value: arr }, null, null, groups, ctx).value;
   }),
   simple(['sort'], (_name: string, values: any[], _opts, ctx: Context): any => {
-    let [arr, sort] = values;
+    let [arr, sorts] = values;
+    if (!sorts) return arr;
     if (!Array.isArray(arr)) {
-      if (arr && Array.isArray(arr.value)) arr =arr.value;
+      if (arr && Array.isArray(arr.value)) arr = arr.value;
+      else if (arr && typeof arr === 'object') return sort(ctx, Object.entries(arr), sorts, (c, b, v) => evalApply(c, b, [v[1], v[0]], false, { key: v[0] })).reduce((a, c) => (a[c[0]] = c[1], a), {});
       else return {};
     }
-    return filter({ value: arr }, null, sort, null, ctx).value;
+    return filter({ value: arr }, null, sorts, null, ctx).value;
   }),
   simple(['time-span', 'time-span-ms'], (_name: string, args: any[], opts: any): any => {
     const namedArgs = opts || {};
