@@ -552,7 +552,11 @@ export class Designer extends Ractive {
     const res: SourceMap = {};
     for (const src of report.sources || []) {
       const av = avs.find(s => s.name === src.source);
-      if (av) res[av.name] = { value: await this.loadSourceData(av) };
+      if (av) {
+        const data = await this.loadSourceData(av);
+        if (data && typeof data === 'object' && 'value' in data) res[av.name] = data;
+        else res[av.name] = { value: data };
+      }
     }
     return res;
   }
