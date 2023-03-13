@@ -114,6 +114,9 @@
             <span class-toggle class-active="t === 'json'" {{#if t !== 'json'}}on-click="@.set('temp.expr.resulttype', 'json')"{{/if}} title="Show result as JSON">JSON</span>
             <span class-toggle class-active="t === 'html'" {{#if t !== 'html'}}on-click="@.set('temp.expr.resulttype', 'html')"{{/if}} title="Show result as HTML">HTML</span>
           {{/with}}</div>
+          <div style="margin-left: 2em;">
+            {{#if ~/temp.expr.resulttype === 'json'}}<label><input type=checkbox bind-checked="~/temp.expr.jsonsquash" /> Compact?</label>{{/if}}
+          </div>
         </div>
         <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
           {{#if ~/temp.expr.result === undefined}}
@@ -122,7 +125,7 @@
             {{#if ~/temp.expr.resulttype === 'html'}}
               {{{~/temp.expr.result}}}
             {{elseif ~/temp.expr.resulttype === 'json'}}
-              <code><pre>{{JSON.stringify(~/temp.expr.result, null, '  ')}}</pre></code>
+              <code><pre>{{JSON.stringify(~/temp.expr.result, null, ~/temp.expr.jsonsquash ? undefined : '  ')}}</pre></code>
             {{else}}
               <code><pre>{{~/temp.expr.result}}</pre></code>
             {{/if}}
