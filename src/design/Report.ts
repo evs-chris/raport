@@ -346,11 +346,7 @@ export class Designer extends Ractive {
   }
 
   async logData(source: AvailableSource) {
-    if ('type' in source && source.type === 'fetch') {
-      console.log(await this.fetchData(source));
-    } else if ('data' in source || 'values' in source) {
-      console.log(source.data ? source.data : await source.values());
-    }
+    console.log(await this.loadSourceData(source));
   }
 
   editExpr(path: string, options?: ExprOptions) {
@@ -528,30 +524,35 @@ export class Designer extends Ractive {
     return res;
   }
 
+  async loadSourceData(av: AvailableSource): Promise<any> {
+    const load = this.get('actions.loadSourceData');
+    let d: any;
+    let vv: any = av;
+    if (vv.type === 'fetch' && (vv.fetch || !vv.data)) {
+      d = await this.fetchData(vv);
+      if (!vv.eval) d = { value: tryParseData(d, vv.header) };
+      if (!vv.fetch) vv.data = d;
+    } else if ('data' in av && av.data) {
+      if (!vv.eval && typeof av.data === 'string') d = { value: tryParseData(av.data, av.header) };
+      else d = av.data;
+    } else if ('values' in av && typeof av.values === 'function') {
+      d = await av.values(this.get('params') || []);
+    } else if ('input' in av && av.input) {
+      d = { value: tryParseData(av.input, av.header) };
+      av.data = d;
+    } else {
+      if (typeof load === 'function') vv.data = d = await load(av);
+    }
+    return d;
+  }
+
   async buildSources(): Promise<SourceMap> {
     const report: Report = this.get('report');
     const avs: AvailableSource[] = this.get('sources') || [];
     const res: SourceMap = {};
     for (const src of report.sources || []) {
       const av = avs.find(s => s.name === src.source);
-      if (av) {
-        let d: any;
-        const vv: any = av;
-        if (vv.type === 'fetch' && (vv.fetch || !vv.data)) {
-          d = await this.fetchData(vv);
-          if (!vv.eval) d = { value: tryParseData(d, vv.header) };
-          if (!vv.fetch) vv.data = d;
-        } else if ('data' in av && av.data) {
-          if (!vv.eval && typeof av.data === 'string') d = { value: tryParseData(av.data, av.header) };
-          else d = av.data;
-        } else if ('values' in av && typeof av.values === 'function') {
-          d = await av.values(this.get('params') || []);
-        } else if ('input' in av && av.input) {
-          d = { value: tryParseData(av.input, av.header) };
-          av.data = d;
-        }
-        res[av.name] = d;
-      }
+      if (av) res[av.name] = { value: await this.loadSourceData(av) };
     }
     return res;
   }
@@ -989,7 +990,7 @@ export class Designer extends Ractive {
     for (const p of projects) {
       if (!p.sources || !Array.isArray(p.sources)) continue;
       for (const s of p.sources) {
-        if ('type' in s && s.type === 'fetch') delete (s as any).data;
+        if ('type' in s && s.type) delete (s as any).data;
         else if ('input' in s) delete (s as any).data;
       }
     }
@@ -1024,7 +1025,7 @@ export class Designer extends Ractive {
   stringifyProject(project?: any) {
     if (!project) project = this.get('project');
     const sources = (this.get<AvailableSource[]>('project.sources') || this.get('sources') || []).map(s => {
-      if ('type' in s && s.type === 'fetch') {
+      if ('type' in s && s.type) {
         return Object.assign({}, s, { data: undefined });
       } else {
         const res = Object.assign({}, s);
@@ -1039,7 +1040,7 @@ export class Designer extends Ractive {
     const projects = this.get('projects') || [];
     return JSON.stringify(projects.map(p => {
       const sources = ((p.sources || []) as AvailableSource[]).map(s => {
-        if ('type' in s && s.type === 'fetch') {
+        if ('type' in s && s.type) {
           return Object.assign({}, s, { data: undefined });
         } else {
           const res = Object.assign({}, s);
