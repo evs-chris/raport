@@ -73,14 +73,14 @@
               </div>
               <div class-scrolled-wrapper style-flex-grow=1>
                 <div as-scrolled>
-                  <Editor src="{{.str}}" template="{{.html || .template}}" on-run="@.eval()" primary />
+                  <Editor src="{{.str}}" template="{{.html || .template}}" on-run="~/temp.expr.tab === 'result' ? @.set('temp.expr.tab', 'text') : @.eval()" primary />
                 </div>
               </div>
             {{/if}}
           {{else}}
             <div class-scrolled-wrapper style-flex-grow=1>
               <div as-scrolled>
-                <Editor src="{{.str}}" template="{{.html || .template}}" on-run="@.eval()" primary />
+                <Editor src="{{.str}}" template="{{.html || .template}}" on-run="~/temp.expr.tab === 'result' ? @.set('temp.expr.tab', 'text') : @.eval()" primary />
               </div>
             </div>
           {{/if}}
