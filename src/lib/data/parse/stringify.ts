@@ -100,12 +100,7 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
     else if (typeof o === 'number') _listwrap = { array: o, union: o, args: o, keys: o };
     else {
       const b = !o.base ? 0 : o.base === true ? 1 : o.base;
-      _listwrap = {
-        array: 'array' in o ? (!o.array ? 0 : o.array === true ? 1 : o.array) : b,
-        union: 'union' in o ? (!o.union ? 0 : o.union === true ? 1 : o.union) : b,
-        args: 'args' in o ? (!o.args ? 0 : o.args === true ? 1 : o.args) : b,
-        keys: 'keys' in o ? (!o.keys ? 0 : o.keys === true ? 1 : o.keys) : b,
-      };
+      _listwrap = Object.keys(_listwrap).reduce((a, c) => (a[c] = c in o && o[c] != null ? (!o[c] ? 0 : o[c] === true ? 1 : o[c]) : b, a), {} as any);
     }
   } else _listwrap = { array: 60, union: 60, args: 60, keys: 60 };
   _html = opts.htmlSafe;
