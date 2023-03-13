@@ -1195,6 +1195,7 @@ export class Designer extends Ractive {
     if (settings.outTheme === 'dark') Ractive.styleSet('out', darkTheme);
     else if (settings.outTheme === 'light') Ractive.styleSet('out', lightTheme);
     else Ractive.styleSet('out', dark ? darkTheme : lightTheme);
+    this.fire('applySettings', {}, this);
   }
 
   copyToClipboard(str: string) {
