@@ -233,7 +233,7 @@ function stringifyOp(value: Operation): string {
     return wrapArgs('{', value.args, value.opts, '}', 2);
   } else if (_sexprops) {
     if (!value.args || !value.args.length) return `(${op})`;
-    return wrapArgs(`(${op} `, value.args, value.opts, ')', 0, true);
+    return wrapArgs(`(${op} `, value.args, value.opts, ')', 0);
   } else if (op === 'if' || op === 'unless' && value.args && value.args.length > 2) {
     return stringifyIf(value);
   } else if (op === 'case' && value.args && value.args.length > 2) {
@@ -279,10 +279,10 @@ function stringifyOp(value: Operation): string {
   } else if (op === 'get' && value.args.length === 2 && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'object' && 'k' in value.args[1].v) {
     return `${_stringify(value.args[0])}${_stringify({ r: { k: ['r'].concat(value.args[1].v.k) } }).substr(1)}`;
   } else if (call_op.test(op)) {
-    return wrapArgs(`${op}(`, value.args || [], value.opts, ')', 0, true);
+    return wrapArgs(`${op}(`, value.args || [], value.opts, ')', 0);
   } else {
     if (!value.args || !value.args.length) return `(${op})`;
-    return wrapArgs(`(${op} `, value.args, value.opts, ')', 0, true);
+    return wrapArgs(`(${op} `, value.args, value.opts, ')', 0);
   }
 }
 
@@ -314,18 +314,13 @@ function stringifyLiteral(value: Literal): string {
   } else if (value.v === 'null' || value.v === null) {
     return 'null';
   } else if (Array.isArray(value.v)) {
-    if (_noarr) return `(array${value.v.length ? ' ' : ''}${value.v.map(v => _stringify({ v })).join(_listcommas ? ', ': ' ')})`;
-    return `[${value.v.map(v => _stringify({ v })).join(_listcommas ? ', ' : ' ')}]`;
+    if (_noarr) return wrapArgs('(array', value.v.map(v => ({ v })), null, ')', null, 'array');
+    return wrapArgs('[', value.v.map(v => ({ v })), null, ']', null, 'array');
   } else if (typeof value.v === 'object') {
     if (isDateRel(value.v)) {
       return stringifyDate(value.v);
     } else {
-      const keys = Object.keys(value.v);
-      let res = '';
-      res += '{';
-      res += `${keys.map(k => `${_key = true, _stringify({ v: k })}:${_key = false, _stringify({ v: value.v[k] })}`).join(_listcommas ? ', ' : ' ')}`;
-      res += '}';
-      return res;
+      return wrapArgs('{', Object.entries(value.v).reduce((a, c) => (a.push({ v: c[0] }, { v: c[1] }), a), []), null, '}', 2, 'keys');
     }
   }
 }
@@ -449,7 +444,7 @@ function indentAll(amount: string, str: string): string {
   return str.replace(/\n/gm, `\n${amount}`);
 }
 
-function wrapArgs(open: string, args: ValueOrExpr[], opts: ValueOrExpr, close: string, keyMod?: number, call?: boolean): string {
+function wrapArgs(open: string, args: ValueOrExpr[], opts: ValueOrExpr, close: string, keyMod?: number, wrapSetting?: keyof _ListOverride): string {
   if ((!args || !args.length) && !opts) return `${open}${close}`;
   _level++;
   const _f = _first;
@@ -498,7 +493,7 @@ function wrapArgs(open: string, args: ValueOrExpr[], opts: ValueOrExpr, close: s
 
   let join = _listcommas ? ', ' : ' ';
   if (_noindent || (parts.length == 1 && !~parts[0].indexOf('\n'))) return `${open}${parts.join(join)}${close}`;
-  let wrap = _listwrap.args;
+  let wrap = _listwrap[wrapSetting || 'args'];
   const base = parts.join(_listcommas ? ', ' : ' ');
   if (!wrap && ~base.indexOf('\n')) wrap = 1;
   if (wrap === 1 && _listcommas) join = ',\n';
