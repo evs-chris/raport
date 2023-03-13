@@ -308,6 +308,8 @@ export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[], swap?
   if (isApplication(value)) {
     const c = swap ? ctx : extend(ctx, { value: locals[0], special });
     const l = ctx.locals;
+    const v = ctx.value;
+    ctx.value = locals[0];
     let res: any;
     if ('n' in value) {
       const map = value.n.reduce((a, c, i) => (a[c] = locals[i], a), {} as ParameterMap);
@@ -315,9 +317,10 @@ export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[], swap?
     }
     res = evalValue(c, value.a);
     c.locals = l;
+    c.value = v;
     return res;
   } else {
-    const v = evalParse(ctx, value);
+    const v = evalParse(extend(ctx, { value: locals[0], special }), value);
     if (isApplication(v)) return evalApply(ctx, v, locals, false, special);
     else return v;
   }
