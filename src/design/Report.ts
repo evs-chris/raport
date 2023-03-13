@@ -914,9 +914,16 @@ export class Designer extends Ractive {
   fmtAll() {
     const json = this.get('report');
     this._onChange(json);
-    const settings = this.get('~/settings.format');
+    const settings = this.get('~/settings.format') || {};
     const opts = { listWrap: { base: settings.wrap, array: settings.wrap_array, union: settings.wrap_union, args: settings.wrap_args, keys: settings.wrap_keys } };
     this.set('report', fmtAll(json, this.get('tmp.nowrap'), opts));
+  }
+
+  unparse(value: any) {
+    if (!isValueOrExpr(value)) value = { v: value };
+    const settings = this.get('~/settings.format') || {};
+    const opts = { listWrap: { base: settings.wrap, array: settings.wrap_array, union: settings.wrap_union, args: settings.wrap_args, keys: settings.wrap_keys } };
+    return stringify(value, opts);
   }
 
   removeWidget(ctx: ContextHelper) {

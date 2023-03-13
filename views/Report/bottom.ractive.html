@@ -112,6 +112,7 @@
           <div class=toggles>{{#with ~/temp.expr.resulttype as t}}
             <span class-toggle class-active="!t || t === 'plain'" {{#if t && t !== 'plain'}}on-click="@.set('temp.expr.resulttype', 'plain')"{{/if}} title="Show result as a plain string. Double click to copy the text to the clipboard." on-dblclick="@.copyToClipboard(~/temp.expr.result)">Plain</span>
             <span class-toggle class-active="t === 'json'" {{#if t !== 'json'}}on-click="@.set('temp.expr.resulttype', 'json')"{{/if}} title="Show result as JSON">JSON</span>
+            <span class-toggle class-active="t === 'raport'" {{#if t !== 'raport'}}on-click="@.set('temp.expr.resulttype', 'raport')"{{/if}} title="Show result as a Raport expression">Raport</span>
             <span class-toggle class-active="t === 'html'" {{#if t !== 'html'}}on-click="@.set('temp.expr.resulttype', 'html')"{{/if}} title="Show result as HTML">HTML</span>
           {{/with}}</div>
           <div style="margin-left: 2em;">
@@ -126,6 +127,8 @@
               {{{~/temp.expr.result}}}
             {{elseif ~/temp.expr.resulttype === 'json'}}
               <code><pre>{{JSON.stringify(~/temp.expr.result, null, ~/temp.expr.jsonsquash ? undefined : '  ')}}</pre></code>
+            {{elseif ~/temp.expr.resulttype === 'raport'}}
+              <code><pre>{{@.unparse(~/temp.expr.result)}}</pre></code>
             {{else}}
               <code><pre>{{~/temp.expr.result}}</pre></code>
             {{/if}}
