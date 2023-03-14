@@ -10,6 +10,10 @@ function isDate(v: any) {
   return false;
 }
 
+export function isSchema(what: any): what is Schema {
+  return what && typeof what === 'object' && 'type' in what && typeof what.type === 'string';
+}
+
 export function inspect(base: any, flat?: boolean): Schema {
   const root = getType(base);
   if (Array.isArray(base)) {

@@ -5,7 +5,7 @@ import { parse as parseTemplate } from './parse/template';
 import { parseSchema, unparseSchema } from './parse/schema';
 import { stringify } from './parse/stringify';
 import { range as parseRange } from './parse/range';
-import { validate, inspect } from './schema';
+import { validate, inspect, isSchema } from './schema';
 import { diff, deepEqual, labelDiff } from './diff';
 import { detect as csvDetect, parse as csvParse } from './csv';
 
@@ -132,14 +132,16 @@ export function similar(a: string, b: string, threshhold: number = 0.5, fudges: 
 
 // basic ops
 registerOperator(
-  simple(['is', 'is-not', '==', '!=', 'strict-is', 'strict-is-not'], (name: string, values: any[]): boolean => {
+  simple(['is', 'is-not', '==', '!='], (name: string, values: any[]): boolean => {
     const [l, r] = values;
-    const res = equals(l, r);
-    return name === 'is' || name === '==' ? res : !res;
+    let cmp = equals(l, r);
+    if (!cmp && (name === 'is' || name === 'is-not') && isSchema(r)) cmp = validate(l, r, 'loose') === true;
+    return name === 'is' || name === '==' ? cmp : !cmp;
   }),
   simple(['strict-is', 'strict-is-not'], (name: string, values: any[]): boolean => {
     const [l, r] = values;
-    const res = l === r;
+    let res = l === r;
+    if (!res && isSchema(r)) res = validate(l, r, 'strict') === true;
     return name === 'strict-is' ? res : !res;
   }),
   simple(['deep-is', 'deep-is-not', '===', '!=='], (name: string, values: any[], _opts, ctx: Context): boolean => {
