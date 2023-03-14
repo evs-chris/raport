@@ -304,24 +304,19 @@ export function template(root: string|Context|{ context: Context }|any, template
  * swapped for the evaluation and replaced afterwards. Swap should only be used for applications that are
  * passing the context value as the first local.
  */
-export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[], swap?: boolean, special?: object): any {
+export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[], special?: object): any {
   if (isApplication(value)) {
-    const c = swap ? ctx : extend(ctx, { value: locals[0], special });
-    const l = ctx.locals;
-    const v = ctx.value;
-    ctx.value = locals[0];
+    const c = extend(ctx, { value: locals[0], special, fork: !ctx.locals });
     let res: any;
     if ('n' in value) {
       const map = value.n.reduce((a, c, i) => (a[c] = locals[i], a), {} as ParameterMap);
       c.locals = map;
     }
     res = evalValue(c, value.a);
-    c.locals = l;
-    c.value = v;
     return res;
   } else {
-    const v = evalParse(extend(ctx, { value: locals[0], special }), value);
-    if (isApplication(v)) return evalApply(ctx, v, locals, false, special);
+    const v = evalParse(extend(ctx, { value: locals[0], special, fork: !ctx.locals }), value);
+    if (isApplication(v)) return evalApply(ctx, v, locals, special);
     else return v;
   }
 }
@@ -750,11 +745,12 @@ export interface ExtendOptions {
   locals?: ParameterMap,
   parser?: (txt: string) => Value;
   path?: string;
+  fork?: boolean;
 }
 
 export function extend(context: Context, opts: ExtendOptions): Context {
   return {
-    parent: context,
+    parent: opts.fork ? context.parent : context,
     root: context.root,
     path: opts.path || '',
     value: 'value' in opts ? opts.value : context.value,

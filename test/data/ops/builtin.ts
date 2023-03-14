@@ -1,4 +1,4 @@
-import { evaluate, registerOperator, unregisterOperator, Operator, Root } from '../../../src/lib/index';
+import { evaluate, registerOperator, unregisterOperator, Operator, Root, parse } from '../../../src/lib/index';
 
 const q = QUnit;
 
@@ -87,7 +87,15 @@ q.test('avg', t => {
   t.equal(evaluate('(avg (array 3 5 7 9 11 13))'), 8);
 });
 
-// TODO: block
+q.test('block', t => {
+  const op = parse('let i = 10; i + i * i');
+  t.ok(typeof op === 'object' && 'op' in op && op.op === 'block');
+  t.equal(evaluate(op), 110);
+  t.equal(evaluate(`let i = 10; { let j = 20; j + i }`), 30);
+  t.equal(evaluate(`{ let j = 20; j + 10 }; j + 'a'`), 'a');
+  t.equal(evaluate(`map([{ foo::bar }] =>{ { let j = 20; j + 10 }; j + 'a' })[0]`), 'a');
+  t.equal(evaluate(`let a = map([{ foo::bar }] =>{ { let j = 20; j + 10 }; let b = :no; j + 'a' })[0]; a + b`), 'a');
+});
 
 q.test('call', t => {
   t.equal(evaluate('(call 10 :toString)'), '10');
@@ -232,6 +240,8 @@ q.test('if', t => {
   t.equal(evaluate('(if false :yep true :elseif (nope))'), 'elseif');
   t.equal(evaluate('(if false :yep false :elseif :else)'), 'else');
 
+  t.equal(evaluate({ base: [{ foo: 'bar' }] }, `{ let sam = :sam; map(base, =>{ let sam = :mas; foo + ^sam + sam })[0] }`), 'barsammas');
+
   unregisterOperator(op);
 });
 
@@ -325,6 +335,7 @@ q.test('map', t => {
   t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if @index == 0 then [:d 69] else _ * 2)`), { d: 69, b: 4, c: 6 });
   t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if @key == :a then null else _ * 2)`), { b: 4, c: 6 });
   t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if @key == :a then [:d 69] else _ * 2)`), { d: 69, b: 4, c: 6 });
+  t.equal(evaluate({ outer: [{ foo: 'bar' }] }, `map(outer =>{ let joe = :joe; let sam = :mas { let sam = :sam; joe + sam + ^sam + foo } })[0]`), 'joesammasbar');
 });
 
 q.test('max', t => {
