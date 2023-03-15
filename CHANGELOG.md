@@ -1,3 +1,12 @@
+## 0.16.1
+
+2023-03-15
+
+### Designer
+
+* The context list of the expression evaluation pane can now be filtered to show branch nodes and leaves that contain a filter string.
+
+
 ## 0.16.0
 
 2023-03-15
