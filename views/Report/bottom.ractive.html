@@ -153,7 +153,7 @@
       </div>
     </div>
     <div class-context style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
-      <div class-header title="The approximate data that should be available in this expression's context">Context</div>
+      <div class-header title="The approximate data that should be available in this expression's context"><span>Context</span><span><input placeholder="Filter..." value="{{~/ctxsearch}}" lazy=500 /></span></div>
       <div class-panel class-scrolled-wrapper><div as-scrolled>
         {{#if ~/temp.expr.ctx}}
           {{>expr-context ~/temp.expr.ctx}}
@@ -161,7 +161,7 @@
       </div></div>
     </div>
     <div class-ops style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
-      <div class-header title="All of the registered operators know at design time. Click an operator to insert it into the expression. Hover over an operator for a tooltip with its documentation. Hold the shift key and click an operator for popup with its documentation."><span>Operators</span><span><input placeholder="Search..." value="{{~/opsearch}}" /></span></div>
+      <div class-header title="All of the registered operators know at design time. Click an operator to insert it into the expression. Hover over an operator for a tooltip with its documentation. Hold the shift key and click an operator for popup with its documentation."><span>Operators</span><span><input placeholder="Search..." value="{{~/opsearch}}" lazy=500 /></span></div>
       <div class-panel class-scrolled-wrapper><div as-scrolled>
         {{~/temp.expr.tab === 'ast' && @context.decorators.scrolled && @context.decorators.scrolled.invalidate() || '' && ''}}
         {{#each ~/operators}}
@@ -323,7 +323,7 @@
 </template>
 
 <template id="expr-context">
-  {{#each .fields}}
+  {{#each .fields}}{{#if !~/ctxsearch || .fields || ~.name.indexOf(~/ctxsearch)}}
     <div class-context-entry class-expanded="~/exprExpand[@keypath]">
       <div class-entry-details>
         <div>
@@ -334,7 +334,7 @@
       </div>
       {{#if .fields}}{{>expr-context}}{{/if}}
     </div>
-  {{/each}}
+  {{/if}}{{/each}}
 </template>
 
 <template id="bottom-parameters" src="./params.ractive.html" />
