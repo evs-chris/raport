@@ -471,8 +471,10 @@ q.test('sort', t => {
   t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] :+a)'), [{ a: 'a' }, { a: 'b' }, { a: 'c' }]);
   t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] :-a)'), [{ a: 'c' }, { a: 'b' }, { a: 'a' }]);
   t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] [:-a])'), [{ a: 'c' }, { a: 'b' }, { a: 'a' }]);
+  t.equal(JSON.stringify(evaluate('sort({ b::a c::a a::a })')), JSON.stringify({ a: 'a', b: 'a', c: 'a' }));
   t.equal(JSON.stringify(evaluate('sort({ b::a c::a a::a } =>@key)')), JSON.stringify({ a: 'a', b: 'a', c: 'a' }));
   t.equal(JSON.stringify(evaluate('sort({ b::a c::a a::a } `-@key`)')), JSON.stringify({ c: 'a', b: 'a', a: 'a' }));
+  t.equal(JSON.stringify(evaluate('sort({ b::b c::a a::c } =>_)')), JSON.stringify({ c: 'a', b: 'b', a: 'c' }));
 });
 
 q.test('source', t => {

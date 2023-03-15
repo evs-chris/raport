@@ -304,13 +304,16 @@ registerOperator(
   }),
   simple(['sort'], (_name: string, values: any[], _opts, ctx: Context): any => {
     let [arr, sorts] = values;
-    if (!sorts) sorts = [{ a: { r: { k: ['_'] } } }];
     if (!Array.isArray(arr)) {
       if (arr && Array.isArray(arr.value)) arr = arr.value;
-      else if (arr && typeof arr === 'object') return sort(ctx, Object.entries(arr), sorts, (c, b, v) => evalApply(c, b, [v[1], v[0]], { key: v[0] })).reduce((a, c) => (a[c[0]] = c[1], a), {});
+      else if (arr && typeof arr === 'object') {
+        if (!sorts) sorts = [{ a: { r: { p: '@', k: ['key'] } } }];
+        return sort(ctx, Object.entries(arr), sorts, (c, b, v) => evalApply(c, b, [v[1], v[0]], { key: v[0] })).reduce((a, c) => (a[c[0]] = c[1], a), {});
+      }
       else return {};
     }
-    return filter({ value: arr }, null, sorts, null, ctx).value;
+    if (!sorts) sorts = [{ a: { r: { k: ['_'] } } }];
+    return sort(ctx, arr, sorts);
   }),
   simple(['time-span', 'time-span-ms'], (_name: string, args: any[], opts: any): any => {
     const namedArgs = opts || {};
