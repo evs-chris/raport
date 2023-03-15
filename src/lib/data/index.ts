@@ -360,10 +360,15 @@ export function sort(context: Context, arr: any[], sorts: Sort[]|ValueOrExpr, ge
   
   if (Array.isArray(sorts)) {
     sortArr = sorts;
+  } else if (isApplication(sorts)) {
+    sortArr = [sorts];
+  } else if (typeof sorts === 'object' && sorts && 'by' in sorts) {
+    sortArr = [sorts];
   } else {
     const s = evalParse(context, sorts);
     if (Array.isArray(s)) sortArr = s;
     else if (typeof s === 'string') sortArr = [{ v: s }];
+    else if (typeof sorts === 'string') sortArr = [sorts]
   }
 
   if (sortArr) {

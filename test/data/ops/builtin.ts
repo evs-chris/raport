@@ -454,7 +454,26 @@ q.test('pipe', t => {
 // TODO: similar
 // TODO: similarity
 // TODO: slice, substr
-// TODO: sort
+
+q.test('sort', t => {
+  t.deepEqual(evaluate('sort([3 2 1])'), [1, 2, 3]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] =>a)'), [{ a: 'a' }, { a: 'b' }, { a: 'c' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] { by: =>a })'), [{ a: 'a' }, { a: 'b' }, { a: 'c' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] { by: =>a desc:1 })'), [{ a: 'c' }, { a: 'b' }, { a: 'a' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] { by: =>a dir::desc })'), [{ a: 'c' }, { a: 'b' }, { a: 'a' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] [=>a])'), [{ a: 'a' }, { a: 'b' }, { a: 'c' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] [{ by: =>a }])'), [{ a: 'a' }, { a: 'b' }, { a: 'c' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] [{ by: =>a desc:1 }])'), [{ a: 'c' }, { a: 'b' }, { a: 'a' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] { by: =>a desc:1 })'), [{ a: 'c' }, { a: 'b' }, { a: 'a' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] [:a])'), [{ a: 'a' }, { a: 'b' }, { a: 'c' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] [:+a])'), [{ a: 'a' }, { a: 'b' }, { a: 'c' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] :a)'), [{ a: 'a' }, { a: 'b' }, { a: 'c' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] :+a)'), [{ a: 'a' }, { a: 'b' }, { a: 'c' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] :-a)'), [{ a: 'c' }, { a: 'b' }, { a: 'a' }]);
+  t.deepEqual(evaluate('sort([{ a::a } { a::c } { a::b }] [:-a])'), [{ a: 'c' }, { a: 'b' }, { a: 'a' }]);
+  t.equal(JSON.stringify(evaluate('sort({ b::a c::a a::a } =>@key)')), JSON.stringify({ a: 'a', b: 'a', c: 'a' }));
+  t.equal(JSON.stringify(evaluate('sort({ b::a c::a a::a } `-@key`)')), JSON.stringify({ c: 'a', b: 'a', a: 'a' }));
+});
 
 q.test('source', t => {
   t.deepEqual(evaluate('source([1 2 3])'), { value: [1, 2, 3] });

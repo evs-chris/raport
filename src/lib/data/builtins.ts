@@ -304,7 +304,7 @@ registerOperator(
   }),
   simple(['sort'], (_name: string, values: any[], _opts, ctx: Context): any => {
     let [arr, sorts] = values;
-    if (!sorts) return arr;
+    if (!sorts) sorts = [{ a: { r: { k: ['_'] } } }];
     if (!Array.isArray(arr)) {
       if (arr && Array.isArray(arr.value)) arr = arr.value;
       else if (arr && typeof arr === 'object') return sort(ctx, Object.entries(arr), sorts, (c, b, v) => evalApply(c, b, [v[1], v[0]], { key: v[0] })).reduce((a, c) => (a[c[0]] = c[1], a), {});
