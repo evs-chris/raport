@@ -1,3 +1,32 @@
+## 0.16.0
+
+2023-03-15
+
+### Data
+
+* __BUG:__ Applications as custom operators can now be called without arguments.
+* __BREAKING:__ Applications that need to be parsed will now be evaulated in the same way they would have been had they been pre-parsed.
+* __BREAKING:__ The context used in applications and blocks will now fork the current context if there are no locals defined in the current context to eliminate the need to use context parent prefixes where unnecessary.
+* Internal sort functionality has been refactored to be more useful for the `sort` operator, which allows the `sort` operator to work on objects in addition to arrays. Objects can now have their keys sorted by arbitrary application.
+* The `sort` operator can now accept a single sort specifier without a wrapping array, and it now defaults to an identity sort if no specifiers are provided.
+* The `is` and `is-not` operators, but not their symbolic aliases, can now be used to verify that a value conforms to a schema e.g. `{ name::dave } is @[{ name: string }]` will return `true`. The check is done with loose validation.
+* Similarly, `strict-is` and `strict-is-not` can be used to verify that a value strictly conforms to a schema.
+
+### Parser
+
+* __BUG:__ The stringifier will now take into account wrap settings when stringifying object and array literals.
+* Nullish settings for stringifier wrap options will now apply the base setting rather than `0`.
+
+### Designer
+
+The designer has been adjusted to be more amenable to embedding within other projects (see [pg-difficult](https://github.com/evs-chris/pg-difficult) for example), mostly by enhancing the 'no-project' mode enabled by setting `showProjects` to `false`. There are also several new events that fire in place of undesirable standalone behavior, like providing a source or saving a project.
+
+* __BUG:__ The page widget header will remain legible while the page is not the active widget.
+* `<ctrl>+<enter>` will now activate the eval pane if it's not focused or run the expression if it is focused.
+* Eval results can now be rendered as compact JSON and Raport expression.
+* The parsed eval AST now has an option to display as a pretty-printed Raport expression.
+
+
 ## 0.15.1
 
 2023-02-16

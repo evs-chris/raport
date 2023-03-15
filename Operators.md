@@ -14,6 +14,8 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Returns true if the given values are not equal (not strict).</dd>
+<dt><code>(any, schema) => boolean</code> (binary)</dt>
+<dd>(Only applies to the 'is-not' alias) Returns true if the given value does not loosely conform to the given schema.</dd>
 </dl>
 
 </dl>
@@ -215,6 +217,8 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Returns true if the given values are equal (not strict).</dd>
+<dt><code>(any, schema) => boolean</code> (binary)</dt>
+<dd>(Only applies to the 'is' alias) Returns true if the given value loosely conforms to the given schema.</dd>
 </dl>
 
 </dl>
@@ -711,8 +715,12 @@
 <dl>
 <dt><code>(any[], application) => any[]</code></dt>
 <dd>Filters the given array using the given application to remove entries that return a false-y result.</dd>
+<dt><code>(object, application) => object</code></dt>
+<dd>Filters the given object using the given application to remove entries that return a false-y result.</dd>
 <dt><code>(any[], application, sort[]) => any[]</code></dt>
 <dd>Filters the given array using the given application to remove entries that return a false-y result. The result is then sorted using the given sort array.</dd>
+<dt><code>(object, application, sort[]) => object</code></dt>
+<dd>Filters the given object using the given application to remove entries that return a false-y result. The result is then sorted using the given sort array.</dd>
 <dt><code>(any[], application, sort[], application|application[]) => any[]</code></dt>
 <dd>Filters the given array using the given application to remove entries that return a false-y result. The result is then sorted using the given sort array. The result is finally grouped by the final application or array of applications.</dd>
 </dl>
@@ -1023,6 +1031,8 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Returns true if the given values are equal (not strict).</dd>
+<dt><code>(any, schema) => boolean</code> (binary)</dt>
+<dd>(Only applies to the 'is' alias) Returns true if the given value loosely conforms to the given schema.</dd>
 </dl>
 
 </dl>
@@ -1039,6 +1049,8 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Returns true if the given values are not equal (not strict).</dd>
+<dt><code>(any, schema) => boolean</code> (binary)</dt>
+<dd>(Only applies to the 'is-not' alias) Returns true if the given value does not loosely conform to the given schema.</dd>
 </dl>
 
 </dl>
@@ -1879,7 +1891,9 @@
 
 <dl>
 <dt><code>(any[], sort[]) => any[]</code></dt>
-<dd>Sorts the given array using the given sort array. Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application. Any array elements that are applications are applied directly to get a comparison value. Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags.</dd>
+<dd>Sorts the given array using the given sort array. Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application. Any array elements that are applications are applied directly to get a comparison value. Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags. If no sorts are provided, an identity sort will be applied.</dd>
+<dt><code>(object, sort[]) => object</code></dt>
+<dd>Sorts the given object keys using the given sort array. Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application. Any array elements that are applications are applied directly to get a comparison value. Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags. If no sorts are provided, an identity sort will be applied to the keys.</dd>
 </dl>
 
 </dl>
@@ -1930,8 +1944,10 @@
 <dd>
 
 <dl>
-<dt><code>(any, any) => boolean</code></dt>
+<dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Returns true if the two arguments are the same literal value or are pointers to the same object.</dd>
+<dt><code>(any, schema) => boolean</code> (binary)</dt>
+<dd>(Only applies to the 'strict-is' alias) Returns true if the given value strictly conforms to the given schema.</dd>
 </dl>
 
 </dl>
@@ -1946,8 +1962,10 @@
 <dd>
 
 <dl>
-<dt><code>(any, any) => boolean</code></dt>
+<dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Returns false if the two arguments are the same literal value or are pointers to the same object.</dd>
+<dt><code>(any, schema) => boolean</code> (binary)</dt>
+<dd>(Only applies to the 'strict-is-not' alias) Returns true if the given value does not strictly conform to the given schema.</dd>
 </dl>
 
 </dl>

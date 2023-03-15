@@ -31,9 +31,11 @@ export const operators = `[
 	]}
 	{ op:['==' 'is'] sig:[
 		{ bin:1 proto:'(any, any) => boolean' desc:'Returns true if the given values are equal (not strict).' }
+    { bin:1 proto:'(any, schema) => boolean' desc:'(Only applies to the \\'is\\' alias) Returns true if the given value loosely conforms to the given schema.' }
 	]}
 	{ op:['!=' 'is-not'] sig:[
 		{ bin:1 proto:'(any, any) => boolean' desc:'Returns true if the given values are not equal (not strict).' }
+    { bin:1 proto:'(any, schema) => boolean' desc:'(Only applies to the \\'is-not\\' alias) Returns true if the given value does not loosely conform to the given schema.' }
 	]}
 	{ op:['===' 'deep-is'] sig:[
 		{ bin:1 proto: '(any, any) => boolean' desc:'Do a deep equality check on the first two arguments using loose equality for primitives.' }
@@ -141,7 +143,9 @@ export const operators = `[
 	]}
 	{ op:'filter' sig:[
 		{ proto:'(any[], application) => any[]' desc:'Filters the given array using the given application to remove entries that return a false-y result.' }
+		{ proto:'(object, application) => object' desc:'Filters the given object using the given application to remove entries that return a false-y result.' }
 		{ proto:'(any[], application, sort[]) => any[]' desc:'Filters the given array using the given application to remove entries that return a false-y result. The result is then sorted using the given sort array.' }
+		{ proto:'(object, application, sort[]) => object' desc:'Filters the given object using the given application to remove entries that return a false-y result. The result is then sorted using the given sort array.' }
 		{ proto:'(any[], application, sort[], application|application[]) => any[]' desc:'Filters the given array using the given application to remove entries that return a false-y result. The result is then sorted using the given sort array. The result is finally grouped by the final application or array of applications.' }
 	]}
 	{ op:'find' sig:[
@@ -373,7 +377,8 @@ export const operators = `[
 		{ proto:'(string, number, number) => any[]' desc:'Returns a substring of the given string starting from the character at the given index and ending immediately before the final given index. If the final index is negative, it is an offset from the end of the string.' }
 	]}
 	{ op:'sort' sig:[
-		{ proto:'(any[], sort[]) => any[]' desc:'Sorts the given array using the given sort array. Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application. Any array elements that are applications are applied directly to get a comparison value. Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags.' }
+		{ proto:'(any[], sort[]) => any[]' desc:'Sorts the given array using the given sort array. Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application. Any array elements that are applications are applied directly to get a comparison value. Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags. If no sorts are provided, an identity sort will be applied.' }
+		{ proto:'(object, sort[]) => object' desc:'Sorts the given object keys using the given sort array. Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application. Any array elements that are applications are applied directly to get a comparison value. Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags. If no sorts are provided, an identity sort will be applied to the keys.' }
 	]}
 	{ op:'source' sig:[
 		{ proto:'any => DataSet' desc:'Creates a DataSet from the given value, or returns the value if it is already a DataSet.' }
@@ -384,10 +389,12 @@ export const operators = `[
 		{ proto:'(string, string) => string[]' desc:'Splits the given string into an array containing substrings delimited by the second argument.' }
 	]}
 	{ op:'strict-is' sig:[
-		{ proto:'(any, any) => boolean' desc:'Returns true if the two arguments are the same literal value or are pointers to the same object.' }
+		{ bin:1 proto:'(any, any) => boolean' desc:'Returns true if the two arguments are the same literal value or are pointers to the same object.' }
+    { bin:1 proto:'(any, schema) => boolean' desc:'(Only applies to the \\'strict-is\\' alias) Returns true if the given value strictly conforms to the given schema.' }
 	]}
 	{ op:'strict-is-not' sig:[
-		{ proto:'(any, any) => boolean' desc:'Returns false if the two arguments are the same literal value or are pointers to the same object.' }
+		{ bin:1 proto:'(any, any) => boolean' desc:'Returns false if the two arguments are the same literal value or are pointers to the same object.' }
+    { bin:1 proto:'(any, schema) => boolean' desc:'(Only applies to the \\'strict-is-not\\' alias) Returns true if the given value does not strictly conform to the given schema.' }
 	]}
 	{ op:'string' sig:[
 		{ proto:'any => string' desc:'Politely stringifies the given value, meaning that there are no undefined, null, or object prototype values strings returned.' }
@@ -516,12 +523,12 @@ export const generateMarkdown = `let mkarr = =>if count(_) then _ else [_]
 
 // expand operators such that there is one name per entry
 let expandedOps = sort(reduce(operators |a c| =>
-	a + map(mkarr(c.op) =>{ op:_ alias:filter(mkarr(^c.op) =>_ != ^^_) sig:^c.sig opts:^c.opts note:^c.note })
+	a + map(mkarr(c.op) |o| =>{ op:o alias:filter(mkarr(c.op) =>_ != o) sig:c.sig opts:c.opts note:c.note })
  []) [=>op])
 
 // expand formats such that there is one name per entry
 let expandedFormats = sort(reduce(formats |a c| =>
-	a + map(mkarr(c.name) =>{ name:_ alias:filter(mkarr(^c.name) =>_ != ^^_) desc:^c.desc opts:^c.opts })
+	a + map(mkarr(c.name) |f| =>{ name:f alias:filter(mkarr(c.name) =>_ != f) desc:c.desc opts:c.opts })
  []) [=>name])
 
  // this is a bit wacky dues to markdown having significant leading space
