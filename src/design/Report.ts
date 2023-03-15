@@ -997,17 +997,21 @@ export class Designer extends Ractive {
   }
 
   saveProjects() {
-    const projects: Array<{ sources?: AvailableSource[] }> = this.get('projects') || [];
-    for (const p of projects) {
-      if (!p.sources || !Array.isArray(p.sources)) continue;
-      for (const s of p.sources) {
-        if ('type' in s && s.type) delete (s as any).data;
-        else if ('input' in s) delete (s as any).data;
+    if (this.get('showProjects') === false) {
+      this.fire('save', {}, this);
+    } else {
+      const projects: Array<{ sources?: AvailableSource[] }> = this.get('projects') || [];
+      for (const p of projects) {
+        if (!p.sources || !Array.isArray(p.sources)) continue;
+        for (const s of p.sources) {
+          if ('type' in s && s.type) delete (s as any).data;
+          else if ('input' in s) delete (s as any).data;
+        }
       }
+      window.localStorage.setItem('projects', JSON.stringify(this.get('projects') || []));
+      const project = this.get('project');
+      if (project) this.set('projectSaved', this.stringifyProject(project));
     }
-    window.localStorage.setItem('projects', JSON.stringify(this.get('projects') || []));
-    const project = this.get('project');
-    if (project) this.set('projectSaved', this.stringifyProject(project));
   }
 
   loadProjects() {
