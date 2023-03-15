@@ -354,7 +354,7 @@ export function getOperator<T extends Operator = Operator>(name: string): T {
   return opMap[name] as T;
 }
 
-const _defaultGetValue = (c: Context, b: ValueOrExpr, v: any) => evalApply(c, b, v);
+const _defaultGetValue = (c: Context, b: ValueOrExpr, v: any) => evalApply(c, b, [v]);
 export function sort(context: Context, arr: any[], sorts: Sort[]|ValueOrExpr, getValue?: (context: Context, by: ValueOrExpr, v: any) => any): any[] {
   let sortArr: Sort[];
   
