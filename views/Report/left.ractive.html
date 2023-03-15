@@ -113,7 +113,7 @@
         <div>
           {{#each ~/sources}}
             <div class-src>
-              <div class-src-name><input value="{{.name}}" /></div>
+              <div class-src-name><input value="{{.name}}" disabled="{{~/showProjects === false}}" /></div>
               <div class-src-btn>
                 <button class-ico class-large title="Import data..." on-click="~/actions.editProvidedSource(@context)">{{>pencil}}</button>
                 <button class-ico class-large title="Log data to console..." on-click="@.logData(.)">{{>'console'}}</button>
