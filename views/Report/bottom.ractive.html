@@ -222,7 +222,11 @@
   <div class-tab class-active-tab="~/temp.bottom.tab === 'source'" class-properties>
     {{#with ~/source}}
       <label title="Expose this source to the report context with this name. If none is provided, this source will be named based on its upstream source."><span>Name</span><input value="{{.name}}" /></label>
-      <label title="The upstream source that this source should be based on."><span>Source</span><select value="{{.source}}">{{#each ~/sources}}<option>{{.name}}</option>{{/each}}</select></label>
+      {{#if ~@.readLink('source').keypath.indexOf('widgets')}}
+        <label title="The upstream source that this source should be based on."><span>Source</span><select value="{{.source}}">{{#each ~/report.sources}}<option>{{.name}}</option>{{/each}}</select></label>
+      {{else}}
+        <label title="The upstream source that this source should be based on."><span>Source</span><select value="{{.source}}">{{#each ~/sources}}<option>{{.name}}</option>{{/each}}</select></label>
+      {{/if}}
       <label title="An expression providing the base data for this source. This will override the upstream source."><span>Base <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.base')">{{>pencil}}</button></span><textarea rows=1>{{.base}}</textarea></label>
       <label title="A filter expression to apply to the source before it is used."><span>Filter <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.filter')">{{>pencil}}</button></span><textarea rows=1>{{.filter}}</textarea></label>
       <label title="A sort expression to apply to the source before it is used. This should be an array of applications or config objects with by keys having application values."><span>Sort <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.sort')">{{>pencil}}</button></span><textarea rows=1>{{.sort}}</textarea></label>

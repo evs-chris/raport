@@ -108,7 +108,7 @@ export class Designer extends Ractive {
 
   async run() {
     const report: Report = this.get('report');
-    const ctx = new Root(cloneDeep(report.context), { parameters: this.get('params') });
+    const ctx = new Root(cloneDeep(report.context || {}), { parameters: this.get('params') });
     const srcs = await this.buildSources();
     let text: string;
     this.fire('running');
@@ -533,12 +533,15 @@ export class Designer extends Ractive {
       if (!vv.eval) d = { value: tryParseData(d, vv.header) };
       if (!vv.fetch) vv.data = d;
     } else if ('data' in av && av.data) {
-      if (!vv.eval && typeof av.data === 'string') d = { value: tryParseData(av.data, av.header) };
-      else d = av.data;
+      if (!vv.eval && typeof av.data === 'string') {
+        d = tryParseData(av.data, av.header);
+        if (!d || typeof d !== 'object' || !('value' in d)) d = { value: d };
+      } else d = av.data;
     } else if ('values' in av && typeof av.values === 'function') {
       d = await av.values(this.get('params') || []);
     } else if ('input' in av && av.input) {
-      d = { value: tryParseData(av.input, av.header) };
+      d = tryParseData(av.input, av.header);
+      if (!d || typeof d !== 'object' || !('value' in d)) d = { value: d };
       av.data = d;
     } else {
       if (typeof load === 'function') vv.data = d = await load(av);
@@ -665,7 +668,9 @@ export class Designer extends Ractive {
     let prefix = '';
 
     for (const k in ctx.root.sources) {
-      const schema = inspect(ctx.root.sources[k].value);
+      const source = ctx.root.sources[k];
+      if (!source || !source.value) continue;
+      const schema = inspect(source.value);
       pl.fields.push({ name: `*${k}`, type: schema.type, fields: schema.fields });
     }
 
