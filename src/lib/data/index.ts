@@ -759,7 +759,7 @@ export function extend(context: Context, opts: ExtendOptions): Context {
     root: context.root,
     path: opts.path || '',
     value: 'value' in opts ? opts.value : context.value,
-    special: opts.special || {},
+    special: opts.fork ? Object.assign({}, context.special, { pipe: undefined }, opts.special) : (opts.special || {}),
     parser: opts.parser,
     locals: opts.locals,
   };
