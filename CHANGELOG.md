@@ -1,3 +1,21 @@
+## 0.17.0
+
+2023-03-20
+
+### Data
+
+* __BUG__: Special variables are now handled safely when forking a context. This keeps specials from disappearing from scope when evaluating some applications.
+
+### Render
+
+* Repeaters can now provide an alternate container that will be rendered in the body if there is no data available in the row source.
+
+### Designer
+
+* Top-level report widgets and those in the overlay and watermark can now be positioned manually by the designer.
+* The widget tree now shows groups, headers, footers, and alternates and the overlay and watermark in a more logical order for how they appear in a rendered report.
+
+
 ## 0.16.2
 
 2023-03-20
