@@ -1,3 +1,17 @@
+## 0.16.2
+
+2023-03-20
+
+### Data
+
+* __BUG__: Data sources that are based on a data set will no longer erroneously wrap it in a further data set.
+
+### Designer
+
+* __BUG__: The source editor now correctly distinguishes between a report source, which has access to provided sources, and a widget source, which has access to report sources.
+* __BUG__: Cached sources that result in a data set will no longer introduce an additional wrapper data set while building report context.
+
+
 ## 0.16.1
 
 2023-03-15
