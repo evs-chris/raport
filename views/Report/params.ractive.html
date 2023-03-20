@@ -1,6 +1,8 @@
-<div class-scrolled-wrapper style-flex-grow=1><div as-scrolled>
-  <button on-click="@.set('report.defaultParams', params)" class="ico text" title="Save these values as the report defaults">Save as Defaults</button>
-  <button on-click="@.initParams()" class="ico text" title="Re-initialize all parameters">Re-init Params</button>
+<div class=parameters>
+  <div style="display: flex; justify-content: space-around;">
+    <button on-click="@.set('report.defaultParams', params)" class="ico text" title="Save these values as the report defaults">Save as Defaults</button>
+    <button on-click="@.initParams()" class="ico text" title="Re-initialize all parameters">Re-init Params</button>
+  </div>
   <div class="param-editor">
   {{#each ~/report.parameters}}{{#if .name}}
     <div class-param>
@@ -36,9 +38,17 @@
     </div>
   {{/if}}{{/each}}
   </div>
-</div></div>
+</div>
 
 <style rel=ractive>
+  .parameters {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+
   .param {
     width: 18rem;
     margin: 0.5rem;
@@ -66,6 +76,12 @@
   }
 
   .param-editor {
-    column-width: 20em;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    width: 100%;
+    height: 100%;
+    align-content: start;
+    overflow: auto;
   }
 </style>
