@@ -41,8 +41,8 @@
   </div></div></div>
 {{else}}
   <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled><div style="padding: 3rem; min-width: min-content;">
-    <div class="paper" style="{{@.paperSize()}}" on-click="@event.target === @node ? @.selectWidget('report') : true">
-      <div class="bar report-paper" style-cursor=pointer on-click="@.unlink('widget'), @.unlink('expr'), @.set('temp', { name: 'report ', widget: 'report', tree: ~/temp.tree })" class-active="temp.widget === 'report' || temp.widget === 'report.watermark' || temp.widget === 'report.overlay'" class-hover="temp.hover === 'report' || temp.hover === 'report.watermark' || temp.hover === 'report.overlay'" on-mouseover="@.set('temp.hover', ~/inWatermark ? 'report.watermark' : ~/inOverlay ? 'report.overlay' : 'report'), false" on-mouseout="@.set('temp.hover', ''), false">
+    <div class="paper" style="{{@.paperSize()}}" on-click="@event.target === @node ? @.selectWidget(~/inOverlay ? 'report.overlay' : ~/inWatermark ? 'report.watermark' : 'report') : true">
+      <div class="bar report-paper" style-cursor=pointer on-click="console.log(inOverlay, inWatermark), @.unlink('widget'), @.unlink('expr'), @.set('temp', { name: 'report ', widget: ~/inOverlay ? 'report.overlay' : ~/inWatermark ? 'report.watermark' : 'report', tree: ~/temp.tree })" class-active="temp.widget === 'report' || temp.widget === 'report.watermark' || temp.widget === 'report.overlay'" class-hover="temp.hover === 'report' || temp.hover === 'report.watermark' || temp.hover === 'report.overlay'" on-mouseover="@.set('temp.hover', ~/inWatermark ? 'report.watermark' : ~/inOverlay ? 'report.overlay' : 'report'), false" on-mouseout="@.set('temp.hover', ''), false">
         <span class-name>
           {{#if ~/inWatermark}}Watermark
           {{elseif ~/inOverlay}}Overlay
@@ -82,21 +82,33 @@
           <span class-btn on-click="@.unlink('widget'), @.set('temp.widget', '')">Edit report</span>
         {{/if}}
       </div>
-      {{#if ~/report.type === 'page' && ~/report.header}}{{>widget ~/report.header, 'page header' as label}}{{/if}}
       {{#if /^report.water/.test(~/temp.widget)}}
-        {{#each ~/report.watermark.widgets}}
-          {{>widget}}
-        {{/each}}
+        <div class-widgets class-manual="Array.isArray(~/report.watermark.layout)">
+          {{#with ~/report.watermark}}
+            {{#each .widgets}}
+              {{>widget}}
+            {{/each}}
+          {{/with}}
+        </div>
       {{elseif /^report.overlay/.test(~/temp.widget)}}
-        {{#each ~/report.overlay.widgets}}
-          {{>widget}}
-        {{/each}}
+        <div class-widgets class-manual="Array.isArray(~/report.overlay.layout)">
+          {{#with ~/report.overlay}}
+            {{#each .widgets}}
+              {{>widget}}
+            {{/each}}
+          {{/with}}
+        </div>
       {{else}}
-        {{#each ~/report.widgets}}
-          {{>widget}}
-        {{/each}}
+        {{#if ~/report.type === 'page' && ~/report.header}}{{>widget ~/report.header, 'page header' as label}}{{/if}}
+        <div class-widgets class-manual="Array.isArray(~/report.layout)">
+          {{#with ~/report}}
+            {{#each .widgets}}
+              {{>widget}}
+            {{/each}}
+          {{/with}}
+        </div>
+        {{#if ~/report.type === 'page' && ~/report.footer}}{{>widget ~/report.footer, 'page footer' as label}}{{/if}}
       {{/if}}
-      {{#if ~/report.type === 'page' && ~/report.footer}}{{>widget ~/report.footer, 'page footer' as label}}{{/if}}
     </div>
   </div></div></div>
 {{/if}}
