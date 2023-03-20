@@ -1,29 +1,30 @@
 <div class=children>
   {{#if .type === 'repeater' && .group}}
     {{#each .group}}
-      <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false">
-        <span class="line {{@.getNestLevel(@keypath)}}" on-mouseover="@.set('temp.hover', @keypath), false"><span>group {{@index + 1}}</span>
+      <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
+        <span class="line {{@.getNestLevel(@keypath)}}">
+          {{#if .widgets.length}}<button on-click="@.set('temp.tree.' + escapeKey(@keypath), ~/temp.tree && ~/temp.tree[@keypath] === false ? true : false), false" class="ico expander">{{#if ~/temp.tree[@keypath] !== false}}-{{else}}+{{/if}}</button>{{/if}}
+          <span>group {{@index + 1}} {{>widget-info}}</span>
           <span class=actions>
             <button class="ico up-arrow" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', '^^/groupEnds']), false" title="Move up">{{>arrow}}</button>
-            <button class="ico down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', '^^/groupEnds']), false" title="Move down">{{>arrow}}></button>
+            <button class="ico down-arrow" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', '^^/groupEnds']), false" title="Move down">{{>arrow}}</button>
           </span>
           <button class="ico remove" on-click="@.removeWidget(@context), false" title="Remove group">{{>times}}</button>
         </span>
-        {{>widget-tree}}
+        {{#if ~/temp.tree[@keypath] !== false}}
+          {{>widget-tree}}
+        {{/if}}
       </div>
     {{/each}}
   {{/if}}
+  {{#if .overlay.type === 'container'}}{{#with .overlay}}{{>special-container 'overlay' as label}}{{/with}}{{/if}}
+  {{#if .header.type === 'container'}}{{#with .header}}{{>special-container 'header' as label}}{{/with}}{{/if}}
   {{#each .}}
-    {{#if .type === 'container'}}
-      <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
-        <span class="line {{@.getNestLevel(@keypath)}}">
-          <span>{{@key}}</span>
-          {{#if @key !== 'row' || ../type !== 'repeater'}}<button class="ico remove" on-click="@.removeWidget(@context), false" title="Remove container">{{>times}}</button>{{/if}}
-        </span>
-        {{>widget-tree}}
-      </div>
+    {{#if @key !== 'header' && @key !== 'footer' && @key !== 'alternate' && @key !== 'overlay' && @key !== 'watermark' && .type === 'container'}}
+      {{>special-container @key as label}}
     {{/if}}
   {{/each}}
+  {{#if .alternate.type === 'container'}}{{#with .alternate}}{{>special-container 'alternate' as label}}{{/with}}{{/if}}
   {{#each .widgets}}
     <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" class-moving="~/reparent && @keypath === ~/reparent.resolve() || ~/copy && @keypath === ~/copy.resolve()" on-click="~/reparent && ~/reparent.resolve() === @keypath ? @.set('reparent', undefined) : ~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false" {{#if !~/reparent || .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1}}on-mouseover="@.set('temp.hover', @keypath), false"{{/if}}>
       <span class="line {{@.getNestLevel(@keypath)}}">
@@ -44,6 +45,8 @@
       {{/if}}
     </div>
   {{/each}}
+  {{#if .footer.type === 'container'}}{{#with .footer}}{{>special-container 'footer' as label}}{{/with}}{{/if}}
+  {{#if .watermark.type === 'container'}}{{#with .watermark}}{{>special-container 'watermark' as label}}{{/with}}{{/if}}
 </div>
 
 <template id="widget">
@@ -132,6 +135,12 @@
       <span class-btn on-click="@context.set('.header', { type: 'container' })">Add Header</span>
     {{/if}}
 
+    {{#if .alternate}}
+      <span class-btn on-click="@context.set('.alternate', undefined), @.unlink('widget'), @.set('temp.widget', undefined)">Remove Alternate</span>
+    {{else}}
+      <span class-btn on-click="@context.set('.alternate', { type: 'container' })">Add Alternate</span>
+    {{/if}}
+
     {{#if .footer}}
       <span class-btn on-click="@context.set('.footer', undefined), @.unlink('widget'), @.set('temp.widget', undefined)">Remove Footer</span>
     {{else}}
@@ -151,6 +160,10 @@
     {{#if !.row}}{{@context.set('.row', { type: 'container' }) && ''}}{{/if}}
     {{#with .row}}{{>widget 'Row' as label}}{{/with}}
 
+    {{#if .alternate}}
+      {{#with .alternate}}{{>widget 'Alternate' as alabel}}{{/with}}
+    {{/if}}
+
     {{#if .footer}}
       {{#with .footer}}{{>widget 'Footer' as label}}{{/with}}
     {{/if}}
@@ -161,8 +174,21 @@
   {{#if .type === 'label'}}
     <span class="widget-info">{{.text}}</span>
   {{elseif .widgets.length}}
-    <span class="widget-info">({{.widgets.length}} children)</span>
+    <span class="widget-info">({{.widgets.length}} child{{#if .widgets.length !== 1}}ren{{/if}})</span>
   {{/if}}
+</template>
+
+<template id="special-container">
+  <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="~/reparent && .type === 'container' && @keypath.indexOf(~/reparent.resolve()) === -1 ? @.reparent(@context) : ~/copy && .type === 'container' ? @.paste(@context) : @.selectWidget(@keypath), false" on-mouseover="@.set('temp.hover', @keypath), false">
+    <span class="line {{@.getNestLevel(@keypath)}}">
+      {{#if .widgets.length}}<button on-click="@.set('temp.tree.' + escapeKey(@keypath), ~/temp.tree && ~/temp.tree[@keypath] === false ? true : false), false" class="ico expander">{{#if ~/temp.tree[@keypath] !== false}}-{{else}}+{{/if}}</button>{{/if}}
+      <span>{{label || 'unknown'}} {{>widget-info}}</span>
+      {{#if @key !== 'row' || ../type !== 'repeater'}}<button class="ico remove" on-click="@.removeWidget(@context), false" title="Remove {{label || 'unknown'}}">{{>times}}</button>{{/if}}
+    </span>
+    {{#if ~/temp.tree[@keypath] !== false}}
+      {{>widget-tree}}
+    {{/if}}
+  </div>
 </template>
 
 <template id="arrow">

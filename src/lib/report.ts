@@ -217,6 +217,7 @@ export interface Repeater extends Widget {
   groupEnds?: boolean[];
   row: Container;
   footer?: Container;
+  alternate?: Container;
   headerPerPage?: boolean;
 }
 
