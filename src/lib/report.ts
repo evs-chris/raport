@@ -285,7 +285,8 @@ export function applySources(context: RootContext, sources: ReportSource[], map:
   const srcs = context.sources;
   for (const source of sources) {
     let base = map[source.source || source.name] || { value: [] };
-    if (source.base) base = { value: evaluate(extend(context, { value: base.value, special: { source: base } }), source.base) };
+    if (source.base) base = evaluate(extend(context, { value: base.value, special: { source: base } }), source.base);
+    if (Array.isArray(base)) base = { value: base };
     srcs[source.name || source.source] = base;
   }
 
