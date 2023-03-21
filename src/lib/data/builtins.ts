@@ -1045,7 +1045,12 @@ registerOperator({
   type: 'aggregate',
   names: ['join'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
-    if (args.length > 1) return arr.map(e => evalApply(ctx, args[0], [e])).join(evalParse(ctx, args[1]));
+    if (isApplication(args[0])) {
+      arr = arr.map(e => evalApply(ctx, args[0], [e]));
+      args = args.slice(1);
+    }
+    if (args.length > 1 && arr.length > 2) return [arr.slice(0, -1).join(evalParse(ctx, args[0])), arr[arr.length - 1]].join(evalParse(ctx, args[1]));
+    else if (args.length > 2 && arr.length === 2) return arr.join(evalParse(ctx, args[2]));
     return arr.join(evalParse(ctx, args[0]));
   }
 }, {

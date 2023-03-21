@@ -1067,12 +1067,28 @@
 <dl>
 <dt><code>(any[], string) => string</code></dt>
 <dd>Joins all of the elements in the given array with the given string.</dd>
+<dt><code>(any[], application, string) => string</code></dt>
+<dd>Joins all of the results of the given application of each element in the given array with the given string.</dd>
+<dt><code>(any[], string, string) => string</code></dt>
+<dd>Joins all of the elements in the given array with the given string. The last element is appended using the final string if there are more than two elements.</dd>
+<dt><code>(any[], application, string, string) => string</code></dt>
+<dd>Joins all of the results of the given application of each element in the given array with the given string. The last element is appended using the final string if there are more than two elements.</dd>
+<dt><code>(any[], string, string, string) => string</code></dt>
+<dd>Joins all of the elements in the given array with the given string. The elements are joined using the final string if there are only two elements. The last element is appended using the second string if there are more than two elements.</dd>
+<dt><code>(any[], application, string, string, string) => string</code></dt>
+<dd>Joins all of the results of the given application of each element in the given array with the given string. The elements are joined using the final string if there are only two elements. The last element is appended using the second string if there are more than two elements.</dd>
 <dt><code>string => string</code> (aggregate)</dt>
 <dd>Joins all of the elements in the current source with the given string.</dd>
-<dt><code>(any[], string, string) => string</code></dt>
-<dd>Joins all of the elements in the given array with the given string. The last element is appended using the final string.</dd>
+<dt><code>(application, string) => string</code> (aggregate)</dt>
+<dd>Joins all of the results of the given application of each element in the current source with the given string.</dd>
 <dt><code>(string, string) => string</code> (aggregate)</dt>
-<dd>Joins all of the elements in the current source with the given string. The last element is appended using the final string.</dd>
+<dd>Joins all of the elements in the current source with the given string. The last element is appended using the final string if there are more than two elements.</dd>
+<dt><code>(application, string, string) => string</code> (aggregate)</dt>
+<dd>Joins all of the results of the given application of each element in the current source with the given string. The last element is appended using the final string if there are more than two elements.</dd>
+<dt><code>(string, string, string) => string</code> (aggregate)</dt>
+<dd>Joins all of the elements in the current source with the given string. The elements are joined with the final string if there are only two elements. The last element is appended using the second string if there are more than two elements.</dd>
+<dt><code>(application, string, string, string) => string</code> (aggregate)</dt>
+<dd>Joins all of the results of the given application of each element in the current source with the given string. The elements are joined with the final string if there are only two elements. The last element is appended using the second string if there are more than two elements.</dd>
 </dl>
 
 </dl>

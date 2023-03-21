@@ -303,7 +303,36 @@ q.test(`is-not`, t => {
   t.ok(evaluate(`(is-not :joe 'Joe')`));
 });
 
-// TODO: join
+q.test('join', t => {
+  t.equal(evaluate(`join([:a :b :c] ', ')`), 'a, b, c');
+  t.equal(evaluate(`join([:a :b] ', ')`), 'a, b');
+  t.equal(evaluate(`join([:a :b] ', ' ', and ')`), 'a, b');
+  t.equal(evaluate(`join([:a :b] ', ' ', and ' ' and ')`), 'a and b');
+  t.equal(evaluate(`join([:a :b :c] =>upper(_) ', ')`), 'A, B, C');
+  t.equal(evaluate(`join([:a :b] =>upper(_) ', ')`), 'A, B');
+  t.equal(evaluate(`join([:a :b] =>upper(_) ', ' ', and ')`), 'A, B');
+  t.equal(evaluate(`join([:a :b] =>upper(_) ', ' ', and ' ' and ')`), 'A and B');
+  t.equal(evaluate(`join([:a :b :c] ', ' ', and ')`), 'a, b, and c');
+  t.equal(evaluate(`join([:a :b :c] ', ' ', and ' ' and ')`), 'a, b, and c');
+  t.equal(evaluate(`join([:a :b :c] =>upper(_) ', ' ', and ')`), 'A, B, and C');
+  t.equal(evaluate(`join([:a :b :c] =>upper(_) ', ' ', and ' ' and ')`), 'A, B, and C');
+  const ctx = new Root({});
+  ctx.special.source = { value: ['a', 'b', 'c'] };
+  t.equal(evaluate(ctx, `join(', ')`), 'a, b, c');
+  t.equal(evaluate(ctx, `join(=>upper(_) ', ')`), 'A, B, C');
+  t.equal(evaluate(ctx, `join(', ' ', and ')`), 'a, b, and c');
+  t.equal(evaluate(ctx, `join(', ' ', and ' ' and ')`), 'a, b, and c');
+  t.equal(evaluate(ctx, `join(=>upper(_) ', ' ', and ')`), 'A, B, and C');
+  t.equal(evaluate(ctx, `join(=>upper(_) ', ' ', and ' ' and ')`), 'A, B, and C');
+  ctx.special.source = { value: ['a', 'b'] };
+  t.equal(evaluate(ctx, `join(', ')`), 'a, b');
+  t.equal(evaluate(ctx, `join(', ' ', and ')`), 'a, b');
+  t.equal(evaluate(ctx, `join(', ' ', and ' ' and ')`), 'a and b');
+  t.equal(evaluate(ctx, `join(=>upper(_) ', ')`), 'A, B');
+  t.equal(evaluate(ctx, `join(=>upper(_) ', ' ', and ')`), 'A, B');
+  t.equal(evaluate(ctx, `join(=>upper(_) ', ' ', and ' ' and ')`), 'A and B');
+});
+
 // TODO: keys
 // TODO: label-diff
 // TODO: last

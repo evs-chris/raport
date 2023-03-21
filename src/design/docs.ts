@@ -204,9 +204,17 @@ export const operators = `[
 	]}
 	{ op:'join' sig:[
 		{ proto:'(any[], string) => string' desc:'Joins all of the elements in the given array with the given string.' }
+		{ proto:'(any[], application, string) => string' desc:'Joins all of the results of the given application of each element in the given array with the given string.' }
+		{ proto:'(any[], string, string) => string' desc:'Joins all of the elements in the given array with the given string. The last element is appended using the final string if there are more than two elements.' }
+		{ proto:'(any[], application, string, string) => string' desc:'Joins all of the results of the given application of each element in the given array with the given string. The last element is appended using the final string if there are more than two elements.' }
+		{ proto:'(any[], string, string, string) => string' desc:'Joins all of the elements in the given array with the given string. The elements are joined using the final string if there are only two elements. The last element is appended using the second string if there are more than two elements.' }
+		{ proto:'(any[], application, string, string, string) => string' desc:'Joins all of the results of the given application of each element in the given array with the given string. The elements are joined using the final string if there are only two elements. The last element is appended using the second string if there are more than two elements.' }
 		{ agg:1 proto:'string => string' desc:'Joins all of the elements in the current source with the given string.' }
-		{ proto:'(any[], string, string) => string' desc:'Joins all of the elements in the given array with the given string. The last element is appended using the final string.' }
-		{ agg:1 proto:'(string, string) => string' desc:'Joins all of the elements in the current source with the given string. The last element is appended using the final string.' }
+		{ agg:1 proto:'(application, string) => string' desc:'Joins all of the results of the given application of each element in the current source with the given string.' }
+		{ agg:1 proto:'(string, string) => string' desc:'Joins all of the elements in the current source with the given string. The last element is appended using the final string if there are more than two elements.' }
+		{ agg:1 proto:'(application, string, string) => string' desc:'Joins all of the results of the given application of each element in the current source with the given string. The last element is appended using the final string if there are more than two elements.' }
+		{ agg:1 proto:'(string, string, string) => string' desc:'Joins all of the elements in the current source with the given string. The elements are joined with the final string if there are only two elements. The last element is appended using the second string if there are more than two elements.' }
+		{ agg:1 proto:'(application, string, string, string) => string' desc:'Joins all of the results of the given application of each element in the current source with the given string. The elements are joined with the final string if there are only two elements. The last element is appended using the second string if there are more than two elements.' }
 	]}
 	{ op:'keys' sig:[
 		{ proto:'object => string[]' desc:'Returns an array of all of the keys in the given object.' }
