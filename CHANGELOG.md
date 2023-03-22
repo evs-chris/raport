@@ -1,3 +1,16 @@
+## 0.17.1
+
+2023-03-21
+
+### Data
+
+* __BUG__: The `join` operator now behaves as indicated by its docs. It can now be given special final separators for two and three or more items.
+
+### Designer
+
+* __BUG__: The source editor will no longer break when switching between report sources and widget sources.
+
+
 ## 0.17.0
 
 2023-03-20
