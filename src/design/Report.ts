@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { ExtendOpts, InitOpts, ContextHelper, ReadLinkResult, ObserverHandle } from 'ractive';
-import { Report, Literal, run, parse, stringify, initParameters, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap, Parameter, StringifyOpts } from 'raport/index';
+import { Report, ReportSource, Literal, run, parse, stringify, initParameters, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap, Parameter, StringifyOpts } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 import { Editor, Viewer } from './Editor';
@@ -1315,6 +1315,10 @@ const designerOpts: ExtendOpts<Designer> = {
           margin
         };
       }
+    },
+    sourceNames() {
+      const sources: ReportSource[] = this.get('report.sources') || [];
+      return sources.map(s => ({ label: s.label || s.name || s.source, value: s.name || s.source }));
     },
   },
   observe: {

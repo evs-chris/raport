@@ -71,6 +71,7 @@
             <label><span title="The base font family for all widgets in this report.">Font Family</span><span><input value="{{~/report.font.family}}" /></span></label>
             <label><span title="The base text color for all widgets in this report.">Text Color</span><span><input value="{{~/report.font.color}}" /></span></label>
           {{else}}
+            <label><span title="The primary source used as the basis for the report.">Primary Source</span><span><select value="{{report.source}}">{{#each ~/sourceNames}}<option value="{{.value}}">{{.label}}</option>{{/each}}</select></span></label>
             <label><span title="The string to render between records, defaulting to '\n'.">Record Delimiter</span><span><input value="{{temp.record}}" /></span></label>
             <label><span title="The string to render between fields, defaulting to ','.">Field Delimiter</span><span><input value="{{temp.field}}" /></span></label>
             <label><span title="The quote character to render around field values, defaulting to none.">Quote</span><span><input value="{{temp.quote}}" /></span></label>
@@ -128,8 +129,8 @@
         </div>
       {{/if}}
       <div class=header>
-        <h3 title="Define {{#if report.type === 'delimited'}}the data source{{else}}data sources{{/if}} that will be available in the report and will pull from provided sources or a base value">Source{{#if report.type !== 'delimited'}}s{{/if}}</h3>
-        {{#if report.type !== 'delimited' || report.sources.length < 1}}<button on-click="@.push('report.sources', { name: '', parameters: {} })" class=add title="Add source">+</button>{{/if}}
+        <h3 title="Define data sources that will be available in the report and will pull from provided sources or a base value">Sources</h3>
+        <button on-click="@.push('report.sources', { name: '', parameters: {} })" class=add title="Add source">+</button>
       </div>
       {{#if report.sources.length}}
         <div class-src class-head>
