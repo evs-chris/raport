@@ -1,3 +1,12 @@
+## 0.17.2
+
+2023-04-05
+
+### Designer
+
+* Delimited reports can now have multiple defined sources, and the primary source is now selected in report properties, defaulting to the first defined source.
+
+
 ## 0.17.1
 
 2023-03-21
