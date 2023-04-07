@@ -1,3 +1,16 @@
+## 0.17.3
+
+2023-04-07
+
+### Designer
+
+* Delimited reports will now have widget and size entries left over from switching report types removed from their compact definitions.
+
+### Data
+
+* Building a DataSet from a source value is now normalized by using the new `toDataSet` method that ensures sources match the expected interface.
+
+
 ## 0.17.2
 
 2023-04-05
