@@ -1825,6 +1825,10 @@ function stripDefaults(json: any): any {
     if (!res.field) delete res.field;
     if (!res.quote) delete res.quote;
   }
+  if (res.type === 'delimited') {
+    delete res.size;
+    delete res.widgets;
+  }
   if (res.source) {
     if (!res.filter) delete res.filter;
     if (!res.sort) delete res.sort;
