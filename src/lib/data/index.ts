@@ -35,8 +35,16 @@ export interface DataSource<T = any, R = any> {
 
 export interface DataSet<R = any> {
   schema?: Schema;
-  grouped?: number;
   value: R;
+}
+
+export function toDataSet(value: any): DataSet {
+  if (Array.isArray(value)) return { value };
+  if (value && typeof value === 'object') {
+    for (const k in value) if (k !== 'schema' && k !== 'value') return { value };
+    return value;
+  }
+  return { value };
 }
 
 export class CachedDataSource<R = any> implements DataSource<any, R> {

@@ -1,4 +1,4 @@
-import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, Root, Context, RootContext, extend, evaluate, filter } from './data/index';
+import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, Root, Context, RootContext, extend, evaluate, filter, toDataSet } from './data/index';
 
 import { renderWidget, RenderContext, RenderResult, RenderState, expandMargin } from './render/index';
 import { styleClass, styleFont } from './render/style';
@@ -287,8 +287,7 @@ export function applySources(context: RootContext, sources: ReportSource[], map:
   for (const source of sources) {
     let base = map[source.source || source.name] || { value: [] };
     if (source.base) base = evaluate(extend(context, { value: base.value, special: { source: base } }), source.base);
-    if (Array.isArray(base)) base = { value: base };
-    srcs[source.name || source.source] = base;
+    srcs[source.name || source.source] = toDataSet(base);
   }
 
   for (const source of sources) {
@@ -300,7 +299,7 @@ export function applySource(context: RootContext, source: ReportSource, sources:
   let base = sources[source.source || source.name] || { value: [] };
   if (source.base) base = { value: evaluate(extend(context, { value: base.value, special: { source: base } }), source.base) };
   if (source.filter || source.sort || source.group) context.sources[source.name || source.source] = filter(base, source.filter, source.sort, source.group, context);
-  else context.sources[source.name || source.source] = base;
+  else context.sources[source.name || source.source] = toDataSet(base);
 }
 
 function runDelimited(report: Delimited, context: Context): string {

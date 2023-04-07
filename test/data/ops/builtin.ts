@@ -510,6 +510,7 @@ q.test('source', t => {
   t.deepEqual(evaluate('source([1 2 3])'), { value: [1, 2, 3] });
   t.deepEqual(evaluate('source({ value: [1 2 3] })'), { value: [1, 2, 3] });
   t.equal(evaluate('source({ value: [1 2 3] } =>max())'), 3);
+  t.deepEqual(evaluate('source({ value:9 max:10 })'), { value: { value: 9, max: 10 } });
 });
 
 // TODO: split
