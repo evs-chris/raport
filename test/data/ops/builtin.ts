@@ -281,6 +281,14 @@ q.test('in', t => {
   t.notOk(evaluate(`[:a :e] in { e::b c::d }`));
 });
 
+q.test('index', t => {
+  const list = [{ id: 1, name: 'joe' }, { id: 2, name: 'sue' }, { id: 3, name: 'larry' }];
+  t.deepEqual(evaluate({ list }, 'index(list, =>id)'), { 1: list[0], 2: list[1], 3: list[2] });
+  t.deepEqual(evaluate({ list }, 'index(list, =>[id _])'), { 1: list[0], 2: list[1], 3: list[2] });
+  t.deepEqual(evaluate({ list }, 'index(list, =>[id name])'), { 1: 'joe', 2: 'sue', 3: 'larry' });
+  t.deepEqual(evaluate({ list }, 'index(list, =>if @index == 1 then [] else [id name])'), { 1: 'joe', 3: 'larry' });
+});
+
 // TODO: inspect
 
 q.test('intersect', t => {

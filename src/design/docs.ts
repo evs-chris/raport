@@ -190,6 +190,9 @@ export const operators = `[
 		{ bin:1 proto:'(date, daterange) => boolean' desc:'Returns true if the first argument is a falls within the second argument range.' }
 		{ bin:1 proto:'(number, range) => boolean' desc:'Returns true if the first argument is a falls within the second argument range.' }
 	]}
+  { op:'index' sig:[
+    { agg:1 proto:'(array, application) => object' desc:'Returns a map of the given array keyed on the result of the application. If the application returns a tuple, the values in the map will be the second value in the tuple and the keys will be the first. If the application returns an empty tuple, the value in the array will be omitted from the result.' }
+  ]}
 	{ op:'inspect' sig:[
 		{ proto:'(any) => schema' desc:'Inspects the given value and returns a schema based on its contents.' }
 	] opts:[
