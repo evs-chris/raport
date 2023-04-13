@@ -1,3 +1,12 @@
+## 0.18.0
+
+2023-04-12
+
+### Data
+
+* There is a new `index` operator that converts an array into a map using a given application that returns an empty array to omit, a key or single-entry tuple for the key, or a tuple of key and value.
+
+
 ## 0.17.3
 
 2023-04-07
