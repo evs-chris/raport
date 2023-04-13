@@ -964,6 +964,11 @@
 <dd>Returns a map of the given array keyed on the result of the application. If the application returns a tuple, the values in the map will be the second value in the tuple and the keys will be the first. If the application returns an empty tuple, the value in the array will be omitted from the result.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>many</code></dt><dd>If enabled, the values will be lists of values with matching keys.</dd>
+</dl>
 </dl>
 <br/>
 

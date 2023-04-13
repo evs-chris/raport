@@ -1,3 +1,12 @@
+## 0.18.1
+
+2023-04-12
+
+### Data
+
+* The `index` operator now supports a `many` option that aggregates values that have the same key into lists rather than overwriting the same key in the resulting map.
+
+
 ## 0.18.0
 
 2023-04-12
