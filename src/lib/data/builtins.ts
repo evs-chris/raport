@@ -1022,15 +1022,21 @@ registerOperator({
 }, {
   type: 'aggregate',
   names: ['index'],
-  apply(_name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
+  apply(_name: string, arr: any[], args: ValueOrExpr[], opts, ctx: Context) {
     if (!args[0]) return {};
+    const many = opts && opts.many;
     return arr.reduce((a, c, i) => {
       const pair = evalApply(ctx, args[0], [c, i], { index: i, all: a });
+      let k: any, v = c;
       if (Array.isArray(pair)) {
         if (pair.length === 0) return a;
-        else if (pair.length === 1) a[pair[0]] = c;
-        else a[pair[0]] = pair[1];
-      } else a[pair] = c;
+        else if (pair.length === 1) k = pair[0];
+        else (k = pair[0], v = pair[1]);
+      } else k = pair;
+      if (many) {
+        if (k in a) a[k].push(v);
+        else a[k] = [v];
+      } else a[k] = v;
       return a;
     }, {});
   },

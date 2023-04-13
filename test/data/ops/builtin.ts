@@ -287,6 +287,8 @@ q.test('index', t => {
   t.deepEqual(evaluate({ list }, 'index(list, =>[id _])'), { 1: list[0], 2: list[1], 3: list[2] });
   t.deepEqual(evaluate({ list }, 'index(list, =>[id name])'), { 1: 'joe', 2: 'sue', 3: 'larry' });
   t.deepEqual(evaluate({ list }, 'index(list, =>if @index == 1 then [] else [id name])'), { 1: 'joe', 3: 'larry' });
+  t.deepEqual(evaluate({ list }, 'index(list, =>id many:1)'), { 1: [list[0]], 2: [list[1]], 3: [list[2]] });
+  t.deepEqual(evaluate({ list }, 'index(list + { id:2 name::frank }, =>[id name] many:1)'), { 1: ['joe'], 2: ['sue', 'frank'], 3: ['larry'] });
 });
 
 // TODO: inspect

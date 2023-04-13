@@ -192,6 +192,8 @@ export const operators = `[
 	]}
   { op:'index' sig:[
     { agg:1 proto:'(array, application) => object' desc:'Returns a map of the given array keyed on the result of the application. If the application returns a tuple, the values in the map will be the second value in the tuple and the keys will be the first. If the application returns an empty tuple, the value in the array will be omitted from the result.' }
+  ] opts: [
+    { name:'many' type::boolean desc:'If enabled, the values will be lists of values with matching keys.' }
   ]}
 	{ op:'inspect' sig:[
 		{ proto:'(any) => schema' desc:'Inspects the given value and returns a schema based on its contents.' }
