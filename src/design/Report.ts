@@ -91,6 +91,7 @@ export class Designer extends Ractive {
   _importText: HTMLTextAreaElement;
   _contextText: HTMLTextAreaElement;
   _inited = false;
+  _isplay = false;
 
   addWidget(type: string) {
     const widget: any = { type };
@@ -108,8 +109,10 @@ export class Designer extends Ractive {
 
   async run() {
     const report: Report = this.get('report');
+    this._isplay = true;
     const ctx = new Root(cloneDeep(report.context || {}), { parameters: this.get('params') });
     const srcs = await this.buildSources();
+    this._isplay = false;
     let text: string;
     this.fire('running');
     try {
@@ -526,13 +529,14 @@ export class Designer extends Ractive {
 
   async loadSourceData(av: AvailableSource): Promise<any> {
     const load = this.get('actions.loadSourceData');
+    const nocache = this._isplay;
     let d: any;
     let vv: any = av;
     if (vv.type === 'fetch' && (vv.fetch || !vv.data)) {
       d = await this.fetchData(vv);
       if (!vv.eval) d = { value: tryParseData(d, vv.header) };
       if (!vv.fetch) vv.data = d;
-    } else if ('data' in av && av.data) {
+    } else if ('data' in av && av.data && (!vv.cached || !nocache)) {
       if (!vv.eval && typeof av.data === 'string') {
         d = tryParseData(av.data, av.header);
         if (!d || typeof d !== 'object' || !('value' in d)) d = { value: d };
@@ -544,7 +548,10 @@ export class Designer extends Ractive {
       if (!d || typeof d !== 'object' || !('value' in d)) d = { value: d };
       av.data = d;
     } else {
-      if (typeof load === 'function') vv.data = d = await load(av);
+      if (typeof load === 'function') {
+        vv.cached = true;
+        vv.data = d = await load(av);
+      }
     }
     return d;
   }
