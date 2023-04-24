@@ -15,7 +15,7 @@
   <div class-tab class-active-tab="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'">
     <div class-editor>
       <div class-actions>
-        <button title="Evaluate the current expression" disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>{{>play}}</button>
+        <button title="Evaluate the current expression (CTRL+Enter)" disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>{{>play}}</button>
         <button title="Modify the current expression" class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">{{#if ~/temp.expr.template}}Template{{else}}Text{{/if}}</button>
         {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.template}}<button title="Format the current expression" class="ico text" on-click="@.fmt()">Format</button>{{/if}}
         {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.path}}<label style="margin-left: 1em;" title="Enable to treat the current expression as a template"><input type=checkbox checked="{{~/temp.expr.template}}" /> Template?</label>{{/if}}

@@ -2,7 +2,7 @@
   {{>left}}
   <div class=layout on-keys('z', { ctrl: true })="@.undo(), true" on-keys('Z', { ctrl: true, shift: true })="@.redo(), true" class-pad-me="~/show.pad">
     <div class="design actions">
-      <button title="Run report" disabled="{{report.type === 'delimited' && report.sources.length < 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>{{>play}}</button>
+      <button title="Run report (CTRL+Shift+Enter)" disabled="{{report.type === 'delimited' && report.sources.length < 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>{{>play}}</button>
       <button title="Design report: modify layout and widgets" on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'context' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">Designer</button>
       {{#if result}}
         <button title="View report output" on-click="@.set('tab', 'result')" class-tab class-active="tab === 'result'">Output</button>

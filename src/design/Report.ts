@@ -1509,6 +1509,11 @@ const designerOpts: ExtendOpts<Designer> = {
             this.saveProjects();
             ev.stopPropagation();
             ev.preventDefault();
+          } else if (ev.shiftKey && ev.key === 'Enter') {
+            this.run();
+            this.set('tab', 'result');
+            ev.stopPropagation();
+            ev.preventDefault();
           } else if (ev.key === 'Enter' && document.activeElement.tagName !== 'TEXTAREA') {
             this.set({
               'temp.expr.tab': 'text',
