@@ -376,7 +376,7 @@ if_op.parser = alt({ primary: true, name: 'conditional' },
     if (el) op.args.push(el[3]);
     return op;
   }, 'if'),
-  map(seq(str('unless'), rws, value, rws, str('then'), rws, value, opt(seq(rws, str('else'), rws, value))), ([, , cond, , , , hit, miss]) => {
+  map(seq(str('unless'), rws, value, rws, str('then'), rws, value, opt(seq(rws, str('else'), rws, value)), opt(seq(rws, str('end')))), ([, , cond, , , , hit, miss]) => {
     const op = { op: 'unless', args: [cond, hit] };
     if (miss) op.args.push(miss[3]);
     return op;
