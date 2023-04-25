@@ -88,6 +88,7 @@ export function deepEqual(v1: any, v2: any, equal?: EqualizerValue): boolean {
 
 function _deepEqual(v1: any, v2: any, equal: (v1: any, v2: any) => boolean): boolean {
   if (typeof v1 !== 'object' || typeof v2 !== 'object') return equal(v1, v2);
+  if ((!v1 || !v2) && v1 != v2) return false; // eslint-ignore-line eqeqeq
 
   const ks = Object.keys(v1 || {});
   for (const k of Object.keys(v2 || {})) if (!~ks.indexOf(k)) ks.push(k);

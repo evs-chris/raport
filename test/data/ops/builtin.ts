@@ -7,11 +7,13 @@ q.module('data/ops/builtin');
 q.test('%', t => {
   t.equal(evaluate('(% 5 2)'), 1);
   t.equal(evaluate('(% 10 2)'), 0);
+  t.equal(evaluate('10 % 2'), 0);
   t.equal(evaluate('(% 17 10 5)'), 2);
 });
 
 q.test('*', t => {
   t.equal(evaluate('(* 2 4)'), 8);
+  t.equal(evaluate('2 * 4'), 8);
   t.equal(evaluate('(* 2 4 2)'), 16);
 });
 
@@ -19,21 +21,28 @@ q.test('*', t => {
 
 q.test('+', t => {
   t.equal(evaluate('(+ 2 4)'), 6);
+  t.equal(evaluate('2 + 4'), 6);
   t.equal(evaluate('(+ 2 4 2)'), 8);
   t.equal(evaluate('(+ :joe :y)'), 'joey');
 });
 
 q.test('-', t => {
   t.equal(evaluate('(- 10 8)'), 2);
+  t.equal(evaluate('10 - 8'), 2);
   t.equal(evaluate('(- 10 8 10)'), -8);
 });
 
 q.test('/', t => {
   t.equal(evaluate('(/ 10 2)'), 5);
+  t.equal(evaluate('10 / 2'), 5);
   t.equal(evaluate('(/ 10 2 2)'), 2.5);
 });
 
-// TODO: /%
+q.test('/%', t => {
+  t.equal(evaluate('(/% 10 3)'), 3);
+  t.equal(evaluate('10 /% 3'), 3);
+  t.equal(evaluate('(/% 10 2 2)'), 2);
+});
 
 q.test('<', t => {
   t.notOk(evaluate('(< 10 2)'));
@@ -59,12 +68,53 @@ q.test('>=', t => {
   t.ok(evaluate('(>= 2 2)'));
 });
 
-// TODO: ==, is
-// TODO: !=, is-not
-// TODO: ===, deep-is
-// TODO: !==, deep-is-not
-// TODO: ??
-// TODO: abs
+q.test('==', t => {
+  t.ok(evaluate('10 == 5 * 2'));
+  t.ok(evaluate(`#2022-12-22# == date('2022-12-25') - #3d#`));
+  t.notOk(evaluate('10 == 3'));
+});
+
+q.test('is', t => {
+  t.ok(evaluate('{ a:10 } is @[{a:number b?:string}]'));
+  t.notOk(evaluate('{ b::10 } is @[{a:number b?:string}]'));
+});
+
+q.test('!=', t => {
+  t.notOk(evaluate('10 != 5 * 2'));
+  t.notOk(evaluate(`#2022-12-22# != date('2022-12-25') - #3d#`));
+  t.ok(evaluate('10 != 3'));
+});
+
+q.test('is-not', t => {
+  t.notOk(evaluate('{ a:10 } is-not @[{a:number b?:string}]'));
+  t.ok(evaluate('{ b::10 } is-not @[{a:number b?:string}]'));
+});
+
+q.test('===', t => {
+  t.ok(evaluate('{ a:10 } === { a:5 + 5 }'));
+  t.ok(evaluate('null === null'));
+  t.ok(evaluate('null === undefined'));
+  t.notOk(evaluate('null === false'));
+  t.notOk(evaluate('{ a:10 } === null'));
+});
+
+q.test('!==', t => {
+  t.notOk(evaluate('{ a:10 } !== { a:5 + 5 }'));
+  t.ok(evaluate('{ a:10 } !== { b:20 }'));
+  t.ok(evaluate('{ a:10 } !== null'));
+});
+
+q.test('??', t => {
+  t.equal(evaluate('false ?? true'), false);
+  t.equal(evaluate('a ?? false'), false);
+  t.equal(evaluate('null ?? 1'), 1);
+  t.equal(evaluate(`'' ?? 1`), '');
+});
+
+q.test('abs', t => {
+  t.equal(evaluate('abs(10 - 20)'), 10);
+  t.equal(evaluate('(abs -50)'), 50);
+});
 
 q.test('and', t => {
   const op: Operator = { type: 'value', names: ['nope'], apply() { t.notOk('nope'); } };
