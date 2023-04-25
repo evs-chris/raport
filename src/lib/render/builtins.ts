@@ -1,5 +1,5 @@
 import { Container, Label, Repeater, Image, MeasuredLabel, HTML } from '../report';
-import { evaluate, filter, Group, ValueOrExpr, isValueOrExpr } from '../data/index';
+import { evaluate, filter, Group, ValueOrExpr, isValueOrExpr, extend as extendData } from '../data/index';
 import { parse as parseTemplate } from '../data/parse/template';
 
 import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin, getWidthWithMargin } from './index';
@@ -42,7 +42,12 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
   let h: number;
   if (!w.height) w.height = 'auto';
   else if (w.height !== 'auto') h = getHeightWithMargin(w, placement, ctx);
-  const wctx = w.context ? extend(ctx, { value: evaluate(ctx, w.context) }) : ctx;
+  const wctx = ((state || {}).state || {}).ctx ? Object.assign({}, ctx, { context: state.state.ctx }) : ctx;
+  if (w.context && !((state || {}).state || {}).ctx) {
+    if (!wctx.context.locals) wctx.context.locals = {};
+    const value = evaluate(wctx, w.context);
+    if (value) wctx.context = extendData(wctx.context, { value });
+  }
   const cw = getWidth(w, placement, ctx) || placement.availableX;
   const r = renderWidgets(w, wctx, { x: 0, y: 0, availableX: cw, availableY: h || placement.availableY, maxX: cw, maxY: h != null ? h : placement.maxY }, state, w.layout);
   if (!r.cancel) {
@@ -56,7 +61,10 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
     // must start over
     delete state.last;
     return { continue: state, output: '' };
-  } else if (r.continue) r.continue.offset = 0;
+  } else if (r.continue) {
+    if (w.context) r.continue.state = { ctx: wctx.context };
+    r.continue.offset = 0;
+  }
   return r;
 }, { container: true });
 
