@@ -33,7 +33,10 @@ function num(v: any): number {
 }
 
 function equals(l: any, r: any): boolean {
-  return l == r; // eslint-disable-line eqeqeq
+  if (l === r || l == r) return true; // eslint-disable-line eqeqeq
+  if (isDateRel(l) && isDateRel(r)) return +dateRelToDate(l) === +dateRelToDate(r);
+  if (typeof l === 'number' && typeof r === 'number') return isNaN(l) && isNaN(r);
+  return false;
 }
 
 /**
