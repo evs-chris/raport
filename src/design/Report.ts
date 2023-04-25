@@ -613,7 +613,9 @@ export class Designer extends Ractive {
           loc = loc[part];
           if (loc) {
             if (loc.context) {
-              ctx = extend(ctx, { value: evaluate(ctx, loc.context) });
+              if (!ctx.locals) ctx.locals = {};
+              const value = evaluate(ctx, loc.context);
+              if (value) ctx = extend(ctx, { value });
             } else if (loc.source && loc.source.source) {
               const source = filter(root.sources[loc.source.source] || { value: [] }, loc.source.filter, loc.source.sort, loc.source.group, ctx);
               ctx = extend(ctx, { value: source.value, special: { source } });
