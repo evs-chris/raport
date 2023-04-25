@@ -9,7 +9,7 @@ import autosize from './autosize';
 import { trackfocus, getLastFocus } from './trackfocus';
 import { debounce } from './util';
 
-import { operators as operator_docs } from './docs';
+import { operators as operator_docs, languageReference as langref } from './docs';
 
 export { highlight } from './Editor';
 
@@ -1234,11 +1234,11 @@ export class Designer extends Ractive {
 
   getOperatorDoc(op: string) {
     const doc = docs.operators.find(d => d.op === op || Array.isArray(d.op) && d.op.includes(op));
-    if (doc) return `${op}${Array.isArray(doc.op) ? `(alias ${doc.op.filter(n => n !== op).join(', ')})` : ''}
+    if (doc) return `${op}${Array.isArray(doc.op) ? ` (alias ${doc.op.filter(n => n !== op).join(', ')})` : ''}
 ---${doc.note ? `
 NOTE: ${doc.note}
 ` : ''}
-${doc.sig.map(s => `${s.proto}\n  ${s.desc}\n`).join('\n')}${doc.opts ? `
+${doc.sig.map(s => `${s.proto}${s.bin ? '        (can be binary)' : ''}${s.un ? '        (can be unary)' : ''}\n  ${s.desc}\n`).join('\n')}${doc.opts ? `
 
 Options
 ---
@@ -1288,6 +1288,7 @@ const designerOpts: ExtendOpts<Designer> = {
         provideSource: () => this.push('sources', {}),
         editProvidedSource: (ctx: ContextHelper) => this.editProvidedData(ctx),
       },
+      langref,
     };
   },
   components: { Editor, Viewer },

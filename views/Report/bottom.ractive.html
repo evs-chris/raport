@@ -1,6 +1,7 @@
 <div class-top class-actions>
   {{#if ~/report.parameters.length}}<span title="Set values for report parameters" class-tab class-active="~/temp.bottom.tab === 'params'" on-click="@.set('temp.bottom.tab', 'params'), @.set('show.bottom', true)">Parameters</span>{{/if}}
   <span title="Evaluate expressions" class-tab class-active="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'" on-click="@.set('temp.bottom.tab', 'expr'), @.set('show.bottom', true)">{{#if ~/temp.expr.path}}Expression{{else}}Evaluate{{/if}}</span>
+  <span title="Expression language reference" class-tab class-active="~/temp.bottom.tab === 'langref'" on-click="@.set('temp.bottom.tab', 'langref'), @.set('show.bottom', true)">Reference</span>
   {{#if ~/temp.bottom.param}}<span title="Modify report parameter {{~/param.name}}" class-tab class-active="~/temp.bottom.tab === 'param'" on-click="@.set('temp.bottom.tab', 'param'), @.set('show.bottom', true)">Parameter</span>{{/if}}
   {{#if ~/temp.bottom.source}}<span title="Modify data source {{~/source.name || ~/source.source}}" class-tab class-active="~/temp.bottom.tab === 'source'" on-click="@.set('temp.bottom.tab', 'source'), @.set('show.bottom', true)">Source</span>{{/if}}
   <span class-which>
@@ -12,6 +13,9 @@
   <button title="{{#if ~/show.bottom}}Hide{{else}}Show{{/if}} the bottom pane" on-click="@.toggle('show.bottom')" class-ico style-height="2.5rem" class="{{#if ~/show.bottom}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>
 </div>
 <div class-bottom>
+  <div class-tab class-active-tab="~/temp.bottom.tab === 'langref'">
+    <iframe srcdoc="{{langref}}" />
+  </div>
   <div class-tab class-active-tab="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'">
     <div class-editor>
       <div class-actions>

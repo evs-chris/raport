@@ -39,11 +39,11 @@ export const operators = `[
 	]}
 	{ op:['===' 'deep-is'] sig:[
 		{ bin:1 proto: '(any, any) => boolean' desc:'Do a deep equality check on the first two arguments using loose equality for primitives.' }
-		{ proto: "(any, any, 'strict'|'loose'|application) => boolean' desc:'Do a deep equality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality." }
+		{ proto: "(any, any, 'strict'|'loose'|application) => boolean" desc:'Do a deep equality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.' }
 	]}
 	{ op:['!==' 'deep-is-not'] sig:[
 		{ bin:1 proto: '(any, any) => boolean' desc:'Do a deep inequality check on the first two arguments using loose equality for primitives.' }
-		{ proto: "(any, any, 'strict'|'loose'|application) => boolean' desc:'Do a deep inequality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality." }
+		{ proto: "(any, any, 'strict'|'loose'|application) => boolean" desc:'Do a deep inequality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.' }
 	]}
 	{ op:['>' 'gt'] sig:[
 		{ bin:1 proto: '(any, any) => boolean' desc:'Returns true if the first value is greater than the second value.' }
@@ -610,3 +610,271 @@ __NOTE:__ {note}
 
 ')}
 '`;
+
+export const languageReference = `<html>
+<head><title>Raport Expression Language Reference</title></head>
+<style>
+  html {
+	font-family: sans-serif;
+	font-size: 1em;
+	background-color: #eee;
+  }
+  h1 { text-align: center; }
+  h2 { margin-top: 3em; }
+  h3 { margin-top: 1.5em; }
+  body { padding: 1em; }
+  code {
+	font-family: monospace;
+	padding: 0.4em;
+	vertical-align: baseline;
+	font-size: 1.1em;
+	line-height: 1em;
+	box-sizing: border-box;
+	display: inline-block;
+	border: 1px solid #ddd;
+	background-color: #f0f0f0;
+  }
+
+  div.indent {
+	padding-left: 1em;
+  }
+
+  .ast-nodes .reference {
+	color: #43b;
+	font-weight: 500;
+  }
+
+  .ast-nodes .primitive,
+  .ast-nodes .number,
+  .ast-nodes .date,
+  .ast-nides .timespan {
+	color: #087;
+	font-weight: 500;
+  }
+
+  .ast-nodes .format-op {
+	color: #e81;
+  }
+
+  .ast-nodes .string,
+  .ast-nodes .string > .ast-extra {
+	color: #170;
+  }
+
+  .ast-nodes .string > .string-interpolation {
+	font-style: oblique;
+  }
+
+  .ast-nodes .binary-op > .ast-extra,
+  .ast-nodes .conditional > .ast-extra {
+	color: #a66;
+  }
+
+  .ast-nodes .typelit,
+  .ast-nodes .typelit > .ast-extra {
+	color: #361;
+  }
+
+  .ast-nodes .typelit .type {
+	color: #67f;
+	font-weight: 500;
+  }
+
+  .ast-nodes .typelit .key,
+  .ast-nodes .typelit .literal {
+	font-weight: 500;
+	color: #557;
+  }
+
+  .ast-nodes .typelit .key {
+	color: #b61;
+  }
+
+  .ast-nodes .typelit .condition {
+	font-weight: 700;
+  }
+
+  .ast-nodes .ast-fail {
+	color: #f00;
+  }
+
+  .ast-nodes .interpolator,
+  .ast-nodes .each-block > .ast-extra,
+  .ast-nodes .if-block > .ast-extra,
+  .ast-nodes .unless-block > .ast-extra,
+  .ast-nodes .case-block > .ast-extra,
+  .ast-nodes .with-block > .ast-extra {
+	font-weight: 600;
+  }
+
+  .ast-nodes .each-block > .ast-extra {
+	color: #4bc;
+  }
+
+  .ast-nodes .case-block > .ast-extra,
+  .ast-nodes .unless-block > .ast-extra,
+  .ast-nodes .if-block > .ast-extra {
+	color: #1de;
+  }
+
+  .ast-nodes .with-block > .ast-extra {
+	color: #29c;
+  }
+</style>
+<body>
+
+<h1 id="raport-expression-language-reference">Raport Expression Language Reference</h1>
+<p>As implied by Raport Expression Language (REL), the language is composed entirely of expessions. There are no statements. The expressions are composed only of operations and values.</p>
+<h2 id="syntax">Syntax</h2>
+<div class=indent>
+<p>The root syntax is based on LISP, but the most common usage relies on sugared syntax that more closely resembles other commom languages. The general LISP-y syntax is <code>([operator] ...args)</code>, where <code>args</code> are values or operations. The default parser will accept multiple expressions in sequence and automatically wrap them in a <code>block</code> operation.</p>
+</div>
+
+<h2 id="values">Values</h2>
+<div class=indent>
+<p>Built-in data types include numbers, strings, booleans, objects, arrays, applications, null, undefined, dates, and schemas. There is also a range pseudo-value available to certain operators that automaically parse it from a string in certain circumstances.</p>
+<h3 id="numbers">Numbers</h3>
+<p>Numbers may have an optional leading <code>-</code>, one or more digits, optionally separated by <code>_</code>, an optional <code>.</code> followed by one or more digits, optionally separated by <code>_</code>, and an optional <code>e</code> followed by an optional <code>-</code> and one or more digits, optionally separated by <code>_</code>.</p>
+<p>Example: <code><span class=ast-nodes><span class="number">1</span></span></code>, <code><span class=ast-nodes><span class="number">-1</span></span></code>, <code><span class=ast-nodes><span class="number">0.1</span></span></code>, <code><span class=ast-nodes><span class="number">-0.1</span></span></code>, <code><span class=ast-nodes><span class="number">111_000</span></span></code>, <code><span class=ast-nodes><span class="number">-5_0</span></span></code>, <code><span class=ast-nodes><span class="number">3.14159e-10</span></span></code></p>
+<h3 id="strings">Strings</h3>
+<p>Strings come in three different flavors: symbolic, single-quoted with optional interpolation, and double-quoted. The symbolic form is constructed of a leading <code>:</code> followed character that is not whitespace or one of <code>():{}[]&lt;&gt;,;\\&amp;#</code> or a quote.</p>
+<p>Single-quoted strings may be quoted with <code>&#39;</code> or <code>&#96;</code>, and interpolators are contained within <code>{}</code>, optionally prefixed with <code>$</code>.</p>
+<p>Quoted strings may have any character within escaped with <code>\\</code>, including the interpolation delimiters within single-quoted strings. Any characters that are not the terminating quote are included in the string, including newlines.</p>
+<p>Example: <code><span class=ast-nodes><span class="string">:foo22</span></span></code>, <code><span class=ast-nodes><span class="string">'test string'</span></span></code>, <code><span class=ast-nodes><span class="string">&quot;test string&quot;</span></span></code>, <code><span class=ast-nodes><span class="string"><span class="ast-extra">'an </span><span class="string-interpolation"><span class="ast-extra">{</span><span class="reference">interpolated</span><span class="ast-extra">}</span></span><span class="ast-extra"> string'</span></span></span></code></p>
+<h3 id="booleans">Booleans</h3>
+<p>Simply <code><span class="ast-nodes"><span class="primitive">true</span></span></code> and <code><span class="ast-nodes"><span class="primitive">false</span></span></code>. REL uses truthiness so as not to require explicit conversion of values to booleans. Anything that is not <code><span class="ast-nodes"><span class="primitive">null</span></span></code>, <code><span class="ast-nodes"><span class="primitive">undefined</span></span></code>, <code><span class="ast-nodes"><span class="primitive">false</span></span></code>, <code><span class="ast-nodes"><span class="number">0</span></span></code>, <code>NaN</code>, or an empty string is considered equivalent to <code><span class="ast-nodes"><span class="primitive">true</span></span></code>.</p>
+<h3 id="objects">Objects</h3>
+<p>Object literals consist of key/value pairs contained within <code>{}</code>s. Keys may be quoted, though it&#39;s only necessary for non-symbolic names or interpolation. Key/value pairs may be separated with <code>,</code>s, and the last pair may have a trailing <code>,</code>.</p>
+<p>Example: <code><span class="ast-nodes"><span class="object"><span class="ast-extra">{ foo:</span><span class="string">:bar</span><span class="ast-extra"> baz:</span><span class="string">'bat'</span><span class="ast-extra"> bip:</span><span class="binary-op"><span class="reference">bop</span><span class="ast-extra"> * </span><span class="number">22</span></span><span class="ast-extra"> </span><span class="string">'some str'</span><span class="ast-extra">:</span><span class="number">99</span><span class="ast-extra"> </span><span class="string"><span class="ast-extra">'nine</span><span class="string-interpolation"><span class="ast-extra">{</span><span class="binary-op"><span class="number">9</span><span class="ast-extra"> + </span><span class="number">1</span></span><span class="ast-extra">}</span></span><span class="ast-extra">'</span></span><span class="ast-extra">:</span><span class="number">19</span><span class="ast-extra"> }</span></span></span></code></p>
+<h3 id="arrays">Arrays</h3>
+<p>Array literals consist of values contained within <code>[]</code>s. Values may be separated by <code>,</code>s, and the last value may have a trailing <code>,</code>.</p>
+<p>Example: <code><span class="ast-nodes"><span class="array"><span class="ast-extra">[</span><span class="string">:a</span><span class="ast-extra"> </span><span class="string">:b</span><span class="ast-extra"> </span><span class="string">:c</span><span class="ast-extra"> </span><span class="number">1</span><span class="ast-extra"> </span><span class="number">2</span><span class="ast-extra"> </span><span class="number">3</span><span class="ast-extra">]</span></span></span></code></p>
+<h3 id="applications">Applications</h3>
+<p>An application is an expression that isn&#39;t immediately evaluated. Applications may optionally start with an argument list with named arguments listed between <code>||</code>s, then a required big arrow <code>=&gt;</code>, and an expression than may be enclosed in a block.</p>
+<p>Example: <code><span class="ast-nodes"><span class="application"><span class="ast-extra">=&gt; </span><span class="binary-op"><span class="reference">_</span><span class="ast-extra"> + </span><span class="number">10</span></span></span></span></code>, <code><span class="ast-nodes"><span class="application"><span class="ast-extra">|a b c| =&gt; </span><span class="binary-op"><span class="reference">a</span><span class="ast-extra"> * </span><span class="reference">b</span><span class="ast-extra"> + </span><span class="reference">c</span></span></span></span></code></p>
+<h3 id="null">Null</h3>
+<p>Simply <code><span class="ast-nodes"><span class="primitive">null</span></span></code>. Null in a language with <code><span class="ast-nodes"><span class="primitive">undefined</span></span></code> is a bit of a strange concept, but it can be useful as a sort of &quot;this field intentionally left blank&quot; indicator. It also survives in JSON.</p>
+<h3 id="undefined">Undefined</h3>
+<p>Simply <code><span class="ast-nodes"><span class="primitive">undefined</span></span></code>. This will be omitted in JSON.</p>
+<h3 id="dates">Dates</h3>
+<p>Date literals include single dates, date ranges, and intervals of time. Dates are specified in a relaxed ISO-8601 format enclosed in <code>##</code>s. A date that isn&#39;t specified down to the millisecond is a range from the start of the specified time to the end e.g. <code><span class="ast-nodes"><span class="date">#2022-01-01#</span></span></code> spans from midnight to a millisecond before midnight on 2022-01-02. When dates are converted to an instant, the default is to resolve to the start of the range. To default to the end of the range, there can be a <code>&lt;</code> immediately before the closing <code>#</code>.</p>
+<p>Example: <code><span class="ast-nodes"><span class="date">#2020#</span></span></code>, <code><span class="ast-nodes"><span class="date">#1999-01-01 17:45#</span></span></code>, <code><span class="ast-nodes"><span class="date">#1970-06-15T00:00:01.443+04:30#</span></span></code></p>
+<p>Intervals are also specified enclosed in <code>##</code>s with each portion of the interval, optionally separated by spaces. Intervals may include years, months, weeks, days, hours, minutes, seconds, and milliseconds.</p>
+<p>Example: <code><span class="ast-nodes"><span class="date">#2 years#</span></span></code>, <code><span class="ast-nodes"><span class="date">#5M3d#</span></span></code>, <code><span class="ast-nodes"><span class="date">#15 weeks 2 days 9 minutes 17 seconds#</span></span></code></p>
+<p>There are also a few special relative dates available: <code><span class="ast-nodes"><span class="date">#yesterday#</span></span></code>, <code><span class="ast-nodes"><span class="date">#today#</span></span></code>, <code><span class="ast-nodes"><span class="date">#tomorrow#</span></span></code>, <code><span class="ast-nodes"><span class="date">#last week#</span></span></code>, <code><span class="ast-nodes"><span class="date">#this week#</span></span></code>, <code><span class="ast-nodes"><span class="date">#next week#</span></span></code>, <code><span class="ast-nodes"><span class="date">#last month#</span></span></code>, <code><span class="ast-nodes"><span class="date">#this month#</span></span></code>, <code><span class="ast-nodes"><span class="date">#next month#</span></span></code>, <code><span class="ast-nodes"><span class="date">#last year#</span></span></code>, <code><span class="ast-nodes"><span class="date">#this year#</span></span></code>, and <code><span class="ast-nodes"><span class="date">#next year#</span></span></code>. Like the ISO-ish dates, these are ranges that cover their narrowest specification, so last week is from midnight on the first day of the week to the last millisecond of the last day of the week.</p>
+<h3 id="schemas">Schemas</h3>
+<p>Schemas describe the type structure of a value. They consist of any number of type definitions followed by the root definition and are contained within <code>@[]</code>.</p>
+<ul>
+<li>Built-in primitive types include <code>number</code>, <code>string</code>, <code>boolean</code>, <code>date</code>, and <code>any</code>.</li>
+<li>Types may also be followed by <code>[]</code> to indicate an array of that type of any length e.g. <code>string[]</code>. Complex array types may also be specified by wrapping a type within an <code>Array&lt;&gt;</code> e.g. <code>Array&lt;string|number&gt;</code>.</li>
+<li>Literal values are also accepted as types e.g. <code>12</code> is a type that only matches the number <code>12</code>, and <code>&#39;yes&#39;</code> is a type that only matches the string <code>&quot;yes&quot;</code>.<ul>
+<li>Other supported literal values are <code>true</code>, <code>false</code>, <code>null</code>, and <code>undefined</code>.</li>
+</ul>
+</li>
+<li>Tuple types are composed of an array literal of other types e.g. <code>[number number boolean]</code> will match the value <code>[10 12 false]</code>.</li>
+<li>Type unions are composed by separating types with a <code>|</code> e.g. <code>string|number</code> will match a string or number.</li>
+<li>Object types are specified as object literals with types as the values of their pairs e.g. <code>{ a:number b:string }</code> will match the value <code>{ a:21 b::sure }</code>.<ul>
+<li>Any key within an object type may be marked as optional by following its name with a <code>?</code> e.g. <code>{ a:number b?:date }</code> will match the value <code>{ a:21 }</code>.</li>
+<li>All remaining keys can be matched with the special key <code>...</code> to ensure that any other keys within an object arematch a certain type e.g. <code>{ a:number ...:string }</code> will match any object with an <code>a</code> key that is a number and all other keys, if any, that have string values.</li>
+</ul>
+</li>
+<li>Type aliases may be defined using the <code>type</code> keyword followed by a name and a definition e.g. <code>type Foo = { a:number b:string }</code>, followed by at least one whitespace or <code>;</code>. Type aliases may be used anywhere a primitive type would be, including in unions, tuples, and with array specifiers.</li>
+<li>Any type may have conditions that are specified as applications that receive the value being validated and return true or false. Conditions are specified with a trailing <code>?</code> and application e.g. <code>type LargeNumber = number ? =&gt; _ &gt; 100000000</code>. More than one condition may be applied to a type.</li>
+</ul>
+<p>Example: <code><span class="ast-nodes"><span class="typelit"><span class="ast-extra">@[</span><span class="type">number</span><span class="ast-extra">|</span><span class="type">string</span><span class="ast-extra">]</span></span></span></code>, <code><span class="ast-nodes"><span class="typelit"><span class="ast-extra">@[type </span><span class="type">Foo</span><span class="ast-extra"> = { </span><span class="key">t</span><span class="ast-extra">:</span><span class="literal">'strings'</span><span class="ast-extra">, ...:</span><span class="type">string</span><span class="ast-extra"> }; type </span><span class="type">Bar</span><span class="ast-extra"> = { </span><span class="key">t</span><span class="ast-extra">:</span><span class="literal">'numbers'</span><span class="ast-extra">, ...:</span><span class="type">number</span><span class="ast-extra"> }; Array&lt;</span><span class="type">Foo</span><span class="ast-extra">|</span><span class="type">Bar</span><span class="ast-extra">&gt;]</span></span></span></code></p>
+<h3 id="ranges">Ranges</h3>
+<p>Ranges don&#39;t have any special syntax built directly into REL, but there is a built-in parser that several operators use to see if numbers fall into ranges. The range itself is an array of arrays or numbers, where a number is considered to be in the range if it appears directly in the array or in the inclusive range bounded by the first and second elements of an inner array. The components of a range may be specified by any of the following, separated by whitespace and optionally <code>,</code>s:</p>
+<ul>
+<li>Any integer, indicating exactly that integer</li>
+<li>Two integers with nothing but a <code>-</code> between them, indicating any number that falls within the inclusive range of the left and right integer</li>
+<li>a <code>&lt;</code> followed by an integer with optional preceding whitespace, indicating any number less than the integer</li>
+<li>a <code>&gt;</code> followed by an integer with optional preceding whitespace, indicating any number greater than the integer</li>
+<li>a <code>*</code>, indicating any number</li>
+</ul>
+<p>Exmaple: <code><span class="ast-nodes"><span class="string">'1, 3, 5, 7, &gt;10'</span></span></code>, <code><span class="ast-nodes"><span class="string">'22-33 44 55-66'</span></span></code></p>
+</div>
+
+<h2 id="references">References</h2>
+<div class=indent>
+<p>REL is built around contexts that are somewhat analogous to stack frames that have an inherent base value. When an expression is being evaluated there is usually some value that is currently in scope as the focus of the context. The value of at the base of the current scope is available as the special reference <code><span class="ast-nodes"><span class="reference">@value</span></span></code> or <code>_</code>. If the value happens to have properties, they can be referenced directly by their names e.g. in a context with a value of <code>{ foo: 21, bar: 22 }</code>, the reference <code><span class="ast-nodes"><span class="reference">foo</span></span></code> will resolve to <code>21</code> when evaluated.</p>
+<p>If the context value happens to have a nested structure built of object and/or arrays, further children of the primary property can be accessed using dotted path or bracketed path notation e.g. <code><span class="ast-nodes"><span class="reference">foo.bar</span></span></code>, <code><span class="ast-nodes"><span class="reference">array.1.prop</span></span></code> or <code><span class="ast-nodes"><span class="reference"><span class="ast-extra">array[</span><span class="number">1</span><span class="ast-extra">].prop</span></span></span></code>, and <code><span class="ast-nodes"><span class="reference"><span class="ast-extra">foo[</span><span class="binary-op"><span class="string">:ba</span><span class="ast-extra"> + </span><span class="string">:r</span></span><span class="ast-extra">]</span></span></span></code>. The bracketed notation allows for expressions to be used when resolving names. References are always resolved safely to <code>undefined</code>, so doing something like <code><span class="ast-nodes"><span class="binary-op"><span class="object"><span class="ast-extra">{ foo:</span><span class="string">:bar</span><span class="ast-extra"> }</span></span><span class="ast-extra">.baz.bat</span></span></span></code> does not cause an error.</p>
+<p>Contexts may also have defined local variables, such as named arguments passed to an application, or any names defined by the <code>let</code> operator. These take precedent over context value properties in their scope, so to access a property with the same name as a local variable, you would have to use a special reference e.g. <code><span class="ast-nodes"><span class="reference">_.foo</span></span></code>.</p>
+<h3 id="prefixes">Prefixes</h3>
+<p>As indicated above, there are certain special references available in certain contexts. These references have the prefix <code>@</code>, and <code><span class="ast-nodes"><span class="reference">@value</span></span></code> is always available. Another example of a special reference is <code><span class="ast-nodes"><span class="reference">@index</span></span></code>, which is often available in contexts where iteration is taking place.</p>
+<p>Report definitions may include named parameters that are kept in a separate namespace from the report root context value. These values are available in any context by prefixing their name with a <code>!</code> e.g. <code><span class="ast-nodes"><span class="reference">!date</span></span></code> would resolve the value passed for the <code>date</code> parameter.</p>
+<p>Parent contexts are also available from their children by applying the context pop prefix <code>^</code> one or more times to a reference e.g. <code><span class="ast-nodes"><span class="reference">^foo</span></span></code> will resolve to whatever <code><span class="ast-nodes"><span class="reference">foo</span></span></code> would resolve to in the parent context, and <code><span class="ast-nodes"><span class="reference"><span class="ast-extra">^^^foo.bar[</span><span class="number">9</span><span class="ast-extra">]</span></span></span></code> will resolve to whatever <code><span class="ast-nodes"><span class="reference"><span class="ast-extra">foo.bar[</span><span class="number">9</span><span class="ast-extra">]</span></span></span></code> would resolve to in the great-grandparent context.</p>
+<p>The root context value is also available in any context by prefixing a reference with the root context prefix <code>~</code> e.g. <code><span class="ast-nodes"><span class="reference">~foo.bar</span></span></code> will resolve to <code><span class="ast-nodes"><span class="reference">foo.bar</span></span></code> in the root context.</p>
+<p>Report definitions may include named data sources that are kept in a separate namespace from the report root context value.  These data sources are available in any context by prefixing their name with a <code>*</code> e.g. <code><span class="ast-nodes"><span class="reference">*people</span></span></code> would resolve to the data passed or retrieved for the <code>people</code> data source.</p>
+</div>
+
+<h2 id="comments">Comments</h2>
+<div class=indent>
+<p>Any expression may be preceeded by any number of line comments, which start with <code>//</code> and include any subsequent characters up to a newline. The final line may not be comment, as comments must be followed by an expression.</p>
+<p>Example: <pre><code><span class="ast-nodes"><span class="comment">// add a and b
+</span><span class="binary-op"><span class="reference">a</span><span class="ast-extra"> + </span><span class="reference">b</span></span></span></code></pre></p>
+</div>
+
+<h2 id="variables">Variables</h2>
+<div class=indent>
+<p>Most of the data accessed in REL comes from a data source, and as such, it doesn&#39;t often make sense to change any values. There are some cases where local variables can be quite useful to allow breaking up complex calculations into steps or to foward an alias into an algorithm. For these purposes, REL has <code>let</code> and <code>set</code> operators, which change a value in the local scope and local context, respectively. The <code>let</code> operator works with the <code>^</code> prefix to allow accessing parent scopes. The <code>set</code> operator works with <code>~</code> and <code>^</code> prefixes to allow working with the root and parent contexts.</p>
+<p>Example: <code><span class="ast-nodes"><span class="let"><span class="ast-extra">let </span><span class="reference">foo</span><span class="ast-extra"> = </span><span class="number">10</span></span></span></code>, <code><span class="ast-nodes"><span class="set"><span class="ast-extra">set </span><span class="reference">~name</span><span class="ast-extra"> = </span><span class="string">:Joe</span></span></span></code>, <code><span class="ast-nodes"><span class="let"><span class="ast-extra">let </span><span class="reference">^^type</span><span class="ast-extra"> = </span><span class="object"><span class="ast-extra">{ size: </span><span class="number">22</span><span class="ast-extra">, id:</span><span class="string">:1</span><span class="ast-extra"> }</span></span></span></span></code></p>
+</div>
+
+<h2 id="operations">Operations</h2>
+<div class=indent>
+<p>Operators are the foundational component of REL, as everything within REL other than a few of the primitive literals, references, and comments are built as operators. An operator may be called using LISP syntax, call syntax, or in many cases special syntax such as unary or boolean syntax. The following are equivalent:</p>
+<ul>
+<li><code><span class="ast-nodes"><span class="s-expression"><span class="ast-extra">(if </span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &gt; </span><span class="number">10</span></span><span class="ast-extra"> </span><span class="string">:large</span><span class="ast-extra"> </span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &lt; </span><span class="number">5</span></span><span class="ast-extra"> </span><span class="string">:small</span><span class="ast-extra"> </span><span class="string">:medium</span><span class="ast-extra">)</span></span></span></code></li>
+<li><code><span class="ast-nodes"><span class="call"><span class="ast-extra">if(</span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &gt; </span><span class="number">10</span></span><span class="ast-extra"> </span><span class="string">:large</span><span class="ast-extra"> </span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &lt; </span><span class="number">5</span></span><span class="ast-extra"> </span><span class="string">:small</span><span class="ast-extra"> </span><span class="string">:medium</span><span class="ast-extra">)</span></span></span></code></li>
+<li><code><span class="ast-nodes"><span class="conditional"><span class="ast-extra">if </span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &gt; </span><span class="number">10</span></span><span class="ast-extra"> then </span><span class="string">:large</span><span class="ast-extra"> elif </span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &lt; </span><span class="number">5</span></span><span class="ast-extra"> then </span><span class="string">:small</span><span class="ast-extra"> else </span><span class="string">:medium</span></span></span></code></li>
+<li><code><span class="ast-nodes"><span class="conditional"><span class="ast-extra">if </span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &gt; </span><span class="number">10</span></span><span class="ast-extra"> </span><span class="block"><span class="ast-extra">{ </span><span class="string">:large</span><span class="ast-extra"> }</span></span><span class="ast-extra"> elif </span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &lt; </span><span class="number">5</span></span><span class="ast-extra"> </span><span class="block"><span class="ast-extra">{ </span><span class="string">:small</span><span class="ast-extra"> }</span></span><span class="ast-extra"> else </span><span class="block"><span class="ast-extra">{ </span><span class="string">:medium</span><span class="ast-extra"> }</span></span></span></span></code></li>
+</ul>
+<p>Most operators are limited to LISP and call syntax because that&#39;s how they&#39;re most reasonably used. <code>+</code> and <code>not</code> are available as unary operators. Supported binary operators in order of precedence are exponentiation (<code>**</code>), mutiplication/division/modulus/int division (<code>*</code>, <code>/</code>, <code>%</code>, <code>/%</code>), addition/subtraction (<code>+</code>, <code>-</code>), comparison (<code>&gt;=</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&lt;</code>, <code>ilike</code>, <code>in</code>, <code>like</code>, <code>not-ilike</code>, <code>not-like</code>, <code>not-in</code>, <code>contains</code>, <code>does-not-contain</code>, <code>gt</code>, <code>gte</code>, <code>lt</code>, <code>lte</code>), equality (<code>is</code>, <code>is-not</code>, <code>==</code>, <code>!=</code>, <code>deep-is</code>, <code>deep-is-not</code>, <code>strict-is</code>, <code>strict-is-not</code>, <code>===</code>, <code>!==</code>), boolean and (<code>and</code>, <code>&amp;&amp;</code>), and boolean or (<code>or</code>, <code>\|\|</code>) and nullish coalescing (<code>??</code>). At least one space is required on either side of a binary operator.</p>
+<p>Most operators take a number of arguments, which are passed within their <code>()</code>s. Some operators will evaluate their arguments lazily, like <code>and</code> and <code>or</code>, and others will evaluate all of their arguments before processing them. Some operators will implicitly operate on their nearest data source, and these are internally configured as aggregate operators, including <code>sum</code> and <code>avg</code>.</p>
+<p>Call operations may be attached to a reference such that the reference further refines the result of the call operation.</p>
+<p>Example: <code><span class="ast-nodes"><span class="binary-op"><span class="call"><span class="ast-extra">find(</span><span class="reference">list</span><span class="ast-extra"> </span><span class="application"><span class="ast-extra">=&gt;</span><span class="binary-op"><span class="call"><span class="ast-extra">len(</span><span class="reference">parts</span><span class="ast-extra">)</span></span><span class="ast-extra"> &gt; </span><span class="number">10</span></span></span><span class="ast-extra">)</span></span><span class="ast-extra">.name</span></span></span></code></p>
+<h3 id="named-arguments">Named arguments</h3>
+<p>Operators that are called in LISP or call syntax may also accept named arguments that are specified as key/value pairs at the end of the argument list. These are often used to control specialized behavior or the operator using flags that would otherwise be cumbersome as positional arguments e.g. <code><span class="ast-nodes"><span class="call"><span class="ast-extra">parse(</span><span class="string">'1 3 5 7'</span><span class="ast-extra"> range:</span><span class="number">1</span><span class="ast-extra">)</span></span></span></code>, which asks the <code>parse</code> operator to parse the given string as a range rather than the default REL expression.</p>
+<h3 id="formats">Formats</h3>
+<p>There is a built-in format operator that formats values as strings using registered formatters. One example is the <code>date</code> formatter that outputs <code>date</code> values as strings in the <code>yyyy-MM-dd</code> format by default. It can also accept an argument that specifies the format to use when converting the date to a string. The <code>format</code> operator can be called explicitly or, since formatting values as strings is a fairly common need, using a special postfix format operation syntax that is a <code>#</code> followed by the name of the formatter and optionally any argument expressions separated by <code>,</code>s with no whitespaces. The following are equivalent:</p>
+<ul>
+<li><code><span class="ast-nodes"><span class="call"><span class="ast-extra">format(</span><span class="reference">@date</span><span class="ast-extra"> </span><span class="string">:date</span><span class="ast-extra"> </span><span class="string">'MM/dd/yyyy'</span><span class="ast-extra">)</span></span></span></code></li>
+<li><code><span class="ast-nodes"><span class="binary-op"><span class="reference">@date</span><span class="format-op"><span class="ast-extra">#date,</span><span class="string">'MM/dd/yyyy'</span></span></span></span></code></li>
+</ul>
+<h3 id="pipes">Pipes</h3>
+<p>Processing data often calls operators on the results of calling operators on the results of calling operators, resulting in large nested argument lists that can become hard to keep track of. To address this, REL has a special built-in <code>pipe</code> operator that accepts a starting value and forwards it through the list of calls supplied to it as arguments, replacing the value with the result of the previous call each time. If one of the arguments to a call is <code>_</code>, the call will be evaluated as-is, but if no reference to <code>_</code> appears in the call arguments list, <code>_</code> will be supplied as the first argument. The following are equivalent:</p>
+<ul>
+<li><code><span class="ast-nodes"><span class="call"><span class="ast-extra">join(</span><span class="call"><span class="ast-extra">map(</span><span class="call"><span class="ast-extra">filter(</span><span class="reference">things</span><span class="ast-extra"> </span><span class="application"><span class="ast-extra">=&gt;</span><span class="binary-op"><span class="reference">count</span><span class="ast-extra"> &gt; </span><span class="number">10</span></span></span><span class="ast-extra">)</span></span><span class="ast-extra"> </span><span class="application"><span class="ast-extra">=&gt;</span><span class="reference">name</span></span><span class="ast-extra">)</span></span><span class="ast-extra"> </span><span class="string">', '</span><span class="ast-extra">)</span></span></span></code></li>
+<li><code><span class="ast-nodes"><span class="call"><span class="ast-extra">pipe(</span><span class="reference">things</span><span class="ast-extra"> </span><span class="call"><span class="ast-extra">filter(</span><span class="application"><span class="ast-extra">=&gt;</span><span class="binary-op"><span class="reference">count</span><span class="ast-extra"> &gt; </span><span class="number">10</span></span></span><span class="ast-extra">)</span></span><span class="ast-extra"> </span><span class="call"><span class="ast-extra">map(</span><span class="application"><span class="ast-extra">=&gt;</span><span class="reference">name</span></span><span class="ast-extra">)</span></span><span class="ast-extra"> </span><span class="call"><span class="ast-extra">join(</span><span class="string">', '</span><span class="ast-extra">)</span></span><span class="ast-extra">)</span></span></span></code></li>
+</ul>
+<p>The latter is a bit longer, but considerably more easy to follow.</p>
+</div>
+
+<h2 id="flow-control">Flow Control</h2>
+<div class=indent>
+<h3 id="block">block</h3>
+<p>A block isn&#39;t really flow control, but being an expression-based language, a way to execute a number of expressions ignoring results until the final expression is quite useful. The <code>block</code> operator does just that. The built-in syntax for a block operation is one or more expressions placed with <code>{}</code>s, separated by whitespace and/or <code>;</code>s.</p>
+<p>Blocks introduce their own lexical scope, so any variables declared within them will not escape their scope. You can still access parent contexts though, so it is possible to <code>let</code> variables from any context that is parent to the block scope using the appropriate reference.</p>
+<p>Exmaple: <code><span class="ast-nodes"><span class="block"><span class="ast-extra">{ </span><span class="let"><span class="ast-extra">let </span><span class="reference">a</span><span class="ast-extra"> = </span><span class="number">10</span></span><span class="ast-extra">; </span><span class="let"><span class="ast-extra">let </span><span class="reference">b</span><span class="ast-extra"> = </span><span class="number">20</span></span><span class="ast-extra">; </span><span class="binary-op"><span class="reference">a</span><span class="ast-extra"> + </span><span class="reference">b</span></span><span class="ast-extra"> }</span></span></span></code></p>
+<h3 id="if">if</h3>
+<p>The primary form of conditional flow control is handled by the <code>if</code> operator, which takes a conditional argument followed by a truth case expression, any number of additional conditional and truth case expressions, and then an optional alternate expression. As an operator, <code>if</code> may be called as any other operator, but there is also built-in syntax to make it slightly more readable in the form <code>if</code> followed by a condition expression, followed by any number of alternate conditions and expressions in the form <code>else if</code> or <code>elseif</code> or <code>elsif</code> or <code>elif</code> followed by <code>then</code> and the value expression, optionally followed by <code>else</code> and a final alternate value expression.</p>
+<p>The result of an <code>if</code> expression is the value of the value expression paired with the first matching conditional branch, the value of the final alternate branch if no conditions matched, or <code>undefined</code> if there were no matches and no final alternate value.</p>
+<p>If an <code>if</code> needs to be nested in a way that may make further conditionals ambiguous, the expression can be ended with <code>end</code> or <code>fi</code>. The value expression of a branch may also be a block, which will also remove any ambiguity.</p>
+<p>Example: <code><span class="ast-nodes"><span class="conditional"><span class="ast-extra">if </span><span class="binary-op"><span class="reference">count</span><span class="ast-extra"> &gt; </span><span class="number">23</span></span><span class="ast-extra"> then </span><span class="string">'there are dozens of us!'</span><span class="ast-extra"> elif </span><span class="binary-op"><span class="reference">count</span><span class="ast-extra"> &lt; </span><span class="number">0</span></span><span class="ast-extra"> then </span><span class="string">'not sure what happened'</span><span class="ast-extra"> else </span><span class="string">'something else'</span></span></span></code>, <code><span class="ast-nodes"><span class="conditional"><span class="ast-extra">if </span><span class="binary-op"><span class="reference">a</span><span class="ast-extra"> &gt; </span><span class="reference">b</span></span><span class="ast-extra"> then </span><span class="conditional"><span class="ast-extra">if </span><span class="binary-op"><span class="reference">b</span><span class="ast-extra"> &lt; </span><span class="number">12</span></span><span class="ast-extra"> then </span><span class="string">:c</span><span class="ast-extra"> else </span><span class="string">:d</span><span class="ast-extra"> end</span></span><span class="ast-extra"> elif </span><span class="binary-op"><span class="reference">b</span><span class="ast-extra"> &gt; </span><span class="reference">a</span></span><span class="ast-extra"> then </span><span class="string">:e</span><span class="ast-extra"> else </span><span class="string">:f</span></span></span></code></p>
+<h3 id="unless">unless</h3>
+<p>Unless is a negated <code>if</code>. If the conditional expression evaluates to a truthy value, then the value expression will be the result. <code>unless</code> also allows for an alternate value expression but does not allow additional condition cases. The built-in unless syntax starts with <code>unless</code> followed by a conditional expression, followed by <code>then</code> and a value expression, optionally followed by <code>else</code> and an alternate value expression, optionally followed by <code>end</code>.</p>
+<p>Example: <code><span class="ast-nodes"><span class="conditional"><span class="ast-extra">unless </span><span class="reference">loggedIn</span><span class="ast-extra"> then </span><span class="string">'Please log in'</span></span></span></code></p>
+<h3 id="case">case</h3>
+<p>REL also has a case operator that allows for an alternate branch style that may be more comprehensible in some cases. Each branch condition is evaluated lazily, and if it is an expression will have the value being evaluated available as the special <code>@case</code> reference. If using the built-in syntax, <code>_</code> will also evaluate to <code>@case</code>. <code>case</code> expressions begin with <code>case</code> followed by a value expression, followed by any number of branches that start with <code>when</code> followed by a conditional value or expression, followed by <code>when</code> and a value expression, and finally optionally ending with an alternate <code>else</code> and value expression and optional <code>end</code> or <code>esac</code>.</p>
+<p>Example:</p>
+<pre><code><span class="ast-nodes"><span class="ast-extra">case </span><span class="reference">age</span><span class="ast-extra">
+  when </span><span class="binary-op"><span class="reference">_</span><span class="ast-extra"> &lt; </span><span class="number">13</span></span><span class="ast-extra"> then </span><span class="string">'ask a parent'</span><span class="ast-extra">
+  when </span><span class="number">15</span><span class="ast-extra"> then </span><span class="string">'happy quinceanera'</span><span class="ast-extra">
+  when </span><span class="number">99</span><span class="ast-extra"> then </span><span class="string">'last year for legos, friend'</span><span class="ast-extra">
+  when </span><span class="binary-op"><span class="reference">_</span><span class="ast-extra"> &gt;= </span><span class="number">18</span></span><span class="ast-extra"> then </span><span class="string">'ok'</span><span class="ast-extra">
+  else </span><span class="string">'NaN, I guess'</span></span>
+</code></pre>
+</div>
+
+</body>
+</html>`;
