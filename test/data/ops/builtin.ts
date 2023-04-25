@@ -543,7 +543,48 @@ q.test('pipe', t => {
 // TODO: replace-all
 // TODO: replace
 // TODO: reverse
-// TODO: round
+
+q.test('round', t => {
+  t.equal(evaluate('round(10.4)'), 10);
+  t.equal(evaluate('round(10.5)'), 11);
+  t.equal(evaluate('round(10.125, 2)'), 10.12);
+  t.equal(evaluate('round(10.135, 2)'), 10.14);
+  t.equal(evaluate('round(-10.125, 2)'), -10.12);
+  t.equal(evaluate('round(-10.135, 2)'), -10.14);
+  t.equal(evaluate('round(10.125, 2, :half-odd)'), 10.13);
+  t.equal(evaluate('round(10.135, 2, :half-odd)'), 10.13);
+  t.equal(evaluate('round(-10.125, 2, :half-odd)'), -10.13);
+  t.equal(evaluate('round(-10.135, 2, :half-odd)'), -10.13);
+  t.equal(evaluate('round(10.125, 2, :half-up)'), 10.13);
+  t.equal(evaluate('round(10.135, 2, :half-up)'), 10.14);
+  t.equal(evaluate('round(-10.125, 2, :half-up)'), -10.12);
+  t.equal(evaluate('round(-10.135, 2, :half-up)'), -10.13);
+  t.equal(evaluate('round(10.125, 2, :half-down)'), 10.12);
+  t.equal(evaluate('round(10.135, 2, :half-down)'), 10.13);
+  t.equal(evaluate('round(-10.125, 2, :half-down)'), -10.13);
+  t.equal(evaluate('round(-10.135, 2, :half-down)'), -10.14);
+  t.equal(evaluate('round(10.125, 2, :to-0)'), 10.12);
+  t.equal(evaluate('round(10.135, 2, :to-0)'), 10.13);
+  t.equal(evaluate('round(-10.125, 2, :to-0)'), -10.12);
+  t.equal(evaluate('round(-10.135, 2, :to-0)'), -10.13);
+  t.equal(evaluate('round(10.125, 2, :from-0)'), 10.13);
+  t.equal(evaluate('round(10.135, 2, :from-0)'), 10.14);
+  t.equal(evaluate('round(-10.125, 2, :from-0)'), -10.13);
+  t.equal(evaluate('round(-10.135, 2, :from-0)'), -10.14);
+  t.equal(evaluate('round(10.1259, 2, :half-even)'), 10.12);
+  t.equal(evaluate('round(10.1359, 2, :half-even)'), 10.14);
+  t.equal(evaluate('round(-10.1259, 2, :half-even)'), -10.12);
+  t.equal(evaluate('round(-10.1359, 2, :half-even)'), -10.14);
+  evaluate('set-defaults(:round places:3 all-numeric:1 method::half-odd)');
+  t.equal(evaluate('round(10.4)'), 10.4);
+  t.equal(evaluate('round(10.5)'), 10.5);
+  t.equal(evaluate('round(10.12459)'), 10.125);
+  t.equal(evaluate('round(10.13559)'), 10.135);
+  t.equal(evaluate('round(10.5, 0)'), 11);
+  t.equal(evaluate('round(11.5, 0)'), 11);
+  evaluate('set-defaults(:round places:2 all-numeric:0 method::half-even)');
+});
+
 // TODO: set
 // TODO: set-defaults
 // TODO: similar

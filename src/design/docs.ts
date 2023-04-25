@@ -369,12 +369,14 @@ export const operators = `[
 	]}
 	{ op:'round' sig:[
 		{ proto:'number => number' desc:'Rounds the given number to the nearest integer.' }
-	]}
+		{ proto:'(number, number, string) => number' desc:'Rounds the given number to the nearest decimal specified by the second number using the method specified by the string, defaulting to half-even. Supported methods are half-up, half-down, to-0, from-0, half-even, and half-odd.' }
+	] note:"By default, the single-number signature will round to an integer, but if the round defaults are updated to include all-numeric as true, then it will return numbers rounded to the nearest default place. Round defaults are { places:2 all-numeric:false method::half-even }."}
 	{ op:'set' sig:[
 		{ proto:'(string, any) => interval' desc:'Sets the root value specified by the given path in the first argument the value supplied as the second argument and returns the value that was replaced, if any.' }
 	]}
 	{ op:'set-defaults' sig:[
-		{ proto:'(string, string) => any' desc:'Sets the defaults for the given class and name of a defaulted thing. Currently, only format is supported as a class, and the name provided should be the name of the format for which to set defaults. Defaults should be passed in as named options.' }
+		{ proto:"('format', string) => any" desc:'Sets the defaults for the given named formatter. Defaults should be passed in as named options that depend on the decorator.' }
+		{ proto:"('round') => any" desc:'Sets the defaults for rounding operations. Defaults should be passed in as named options, which can be places, all-numeric, and method.' }
 	]}
 	{ op:'similar' sig:[
 		{ proto:'(string, string, number = 0.5, number = 2) => [string, string, number]' desc:'Finds the first similar substrings within the two given strings based on a threshhold (3rd argument, defaults to 50%) and fudge factor (4th argument, defaults to 2). The two similar substrings are returned in a tuple with the similarity percentage.' }

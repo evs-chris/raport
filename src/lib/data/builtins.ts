@@ -21,6 +21,28 @@ const spanMap = {
   d: [2, 24],
 };
 
+const roundDefaults = {
+  places: 2,
+  'all-numeric': false,
+  method: 'half-even' as 'half-up'|'half-down'|'half-even'|'half-odd'|'to-0'|'from-0',
+};
+export function round(amt: string|number, place = roundDefaults.places, type = roundDefaults.method): string {
+  const n = (+amt).toFixed(place + 2);
+  const l = n.slice(-2, -1);
+  if (+l <= 4) return n.slice(0, -2);
+  else if (+l > 5) return (+amt).toFixed(place);
+  else {
+    const p = n.slice(0, -2);
+    const f = place === 0 ? n.slice(-4, -3) : n.slice(-3, -2);
+    if (type === 'half-odd') return (+`${p}${+f % 2 === 1 ? 4 : 6}`).toFixed(place);
+    else if (type === 'half-up') return (+`${p}${+p > 0 ? 6 : 4}`).toFixed(place);
+    else if (type === 'half-down') return (+`${p}${+p > 0 ? 4 : 6}`).toFixed(place);
+    else if (type === 'to-0') return (+`${p}4`).toFixed(place);
+    else if (type === 'from-0') return (+`${p}6`).toFixed(place);
+    else return (+`${p}${+f % 2 === 0 ? 4 : 6}`).toFixed(place);
+  }
+}
+
 const hasNum = /^[^\d]*(\d+(?:\.\d*)?)/;
 
 const space = /^\s*$/;
@@ -603,8 +625,9 @@ registerOperator(
     if (typeof values[0] !== 'number') return values[0];
     return Math.abs(values[0]);
   }),
-  simple(['round'], (_name: string, values: [number]): number => {
-    return Math.round(values[0]);
+  simple(['round'], (_name: string, [num, precision, method]: [number, number, string]): number => {
+    if (precision !== undefined || roundDefaults['all-numeric']) return +round(num, precision, method as any);
+    else return Math.round(num);
   }),
   simple(['floor'], (_name: string, values: [number]): number => {
     return Math.floor(values[0]);
@@ -817,6 +840,8 @@ registerOperator(
     if (type === 'format' && typeof name === 'string') {
       const fmt = formats[name];
       if (fmt) return Object.assign(fmt.defaults, opts);
+    } else if (type === 'round') {
+      Object.assign(roundDefaults, opts);
     }
   }),
   simple(['parse'], (_name: string, args: any[], opts: any): any => {
