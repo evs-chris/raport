@@ -1,6 +1,8 @@
 import { Delimited, Page, DataSet, PageSizes, parse, parseTemplate, stringify } from 'raport/index';
-import { ReportDesigner, } from 'design/index';
+import { ReportDesigner, highlight } from 'design/index';
 import Ractive, { InitOpts, ContextHelper } from 'ractive';
+
+globalThis.highlight = highlight;
 
 class App extends Ractive {
   delimited: Delimited;

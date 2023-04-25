@@ -11,6 +11,8 @@ import { debounce } from './util';
 
 import { operators as operator_docs } from './docs';
 
+export { highlight } from './Editor';
+
 export interface OperatorDoc {
   op: string|string[];
   note?: string;

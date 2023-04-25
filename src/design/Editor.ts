@@ -234,3 +234,11 @@ function breakLines(src: string, width: number) {
 
   return res;
 }
+
+const _highlight = new Ractive({ template: { v: template.v, t: [{ t: 8, r: 'ast-node', c: { r: 'ast' } }], p: { 'ast-node': template.p['ast-node'] } } });
+export function highlight(src: string): string {
+  const ast = parse(src, { tree: true, compact: true }) as any;
+  ast.name = 'ast-nodes';
+  _highlight.set({ ast, src });
+  return _highlight.toHTML();
+}
