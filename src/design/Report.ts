@@ -41,7 +41,22 @@ export interface FormatDoc {
 
 export const docs = {
   operators: evaluate(operator_docs) as Array<OperatorDoc>,
+  operatorText: {} as { [op: string]: string },
 };
+for (const doc of docs.operators) {
+  const op = Array.isArray(doc.op) ? doc.op[0] : doc.op;
+  const txt = `${op}${Array.isArray(doc.op) ? ` (alias ${doc.op.filter(n => n !== op).join(', ')})` : ''}
+---${doc.note ? `
+NOTE: ${doc.note}
+` : ''}
+${doc.sig.map(s => `${s.proto}${s.bin ? '        (can be binary)' : ''}${s.un ? '        (can be unary)' : ''}\n  ${s.desc}\n`).join('\n')}${doc.opts ? `
+
+Options
+---
+${doc.opts.map(o => `${Array.isArray(o.name) ? `${o.name[0]} (alias ${o.name.slice(1).join(', ')})` : o.name} - ${o.type}\n  ${o.desc}\n`).join('\n')}` : ''}`;
+  const all = Array.isArray(doc.op) ? doc.op : [doc.op];
+  all.forEach(n => docs.operatorText[n] = txt);
+}
 
 let sourceTm: any;
 
@@ -1235,17 +1250,7 @@ export class Designer extends Ractive {
   }
 
   getOperatorDoc(op: string) {
-    const doc = docs.operators.find(d => d.op === op || Array.isArray(d.op) && d.op.includes(op));
-    if (doc) return `${op}${Array.isArray(doc.op) ? ` (alias ${doc.op.filter(n => n !== op).join(', ')})` : ''}
----${doc.note ? `
-NOTE: ${doc.note}
-` : ''}
-${doc.sig.map(s => `${s.proto}${s.bin ? '        (can be binary)' : ''}${s.un ? '        (can be unary)' : ''}\n  ${s.desc}\n`).join('\n')}${doc.opts ? `
-
-Options
----
-${doc.opts.map(o => `${Array.isArray(o.name) ? `${o.name[0]} (alias ${o.name.slice(1).join(', ')})` : o.name} - ${o.type}\n  ${o.desc}\n`).join('\n')}` : ''}`;
-    else return `<no documentation available> ${op} may be a designer-only, undesirable, or custom operator`;
+    return docs.operatorText[op] || `<no documentation available> ${op} may be a designer-only, undesirable, or custom operator`;
   }
 
   showOperatorDoc(op: string) {
@@ -1301,9 +1306,12 @@ const designerOpts: ExtendOpts<Designer> = {
     operators() {
       const map = getOperatorMap();
       const search = this.get('opsearch');
-      let keys = Object.keys(map).sort();
-      if (search) keys = keys.filter(k => ~k.indexOf(search));
-      return keys.reduce((a, c) => (a[c] = map[c], a), {} as typeof map);
+      let ops = evaluate({ list: Object.entries(map) }, 'sort(list =>_.0)');
+      if (search) {
+        const re = new RegExp(search.replace(/([*.\\\/$^()[\]{}+])/g, '\\$1'), 'i');
+        ops = ops.filter(p => re.test(p[0]) || re.test(docs.operatorText[p[0]]));
+      }
+      return ops;
     },
     inWatermark() {
       return /^report.water/.test(this.get('temp.widget'));

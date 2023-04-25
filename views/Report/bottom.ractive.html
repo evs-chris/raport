@@ -169,9 +169,9 @@
       <div class-panel class-scrolled-wrapper><div as-scrolled>
         {{~/temp.expr.tab === 'ast' && @context.decorators.scrolled && @context.decorators.scrolled.invalidate() || '' && ''}}
         {{#each ~/operators}}
-          <div class-entry-details title="{{@.getOperatorDoc(@key)}}">
-            <button class-expr-operator on-click="@event.shiftKey ? @.showOperatorDoc(@key) : @.insertOp(@key)">{{@key}}</button>
-            <div class-entry-type>{{.type}}</div>
+          <div class-entry-details title="{{@.getOperatorDoc(this.0)}}">
+            <button class-expr-operator on-click="@event.shiftKey ? @.showOperatorDoc(this.0) : @.insertOp(this.0)">{{this.0}}</button>
+            <div class-entry-type>{{this.1.type}}</div>
           </div>
         {{/each}}
       </div></div>
@@ -259,7 +259,7 @@
 </div>
 
 <datalist id="operators">
-  {{#each ~/operators}}<option value="{{@key}}" />{{/each}}
+  {{#each ~/operators}}<option value="{{this.0}}" />{{/each}}
 </datalist>
 
 <template id="ast-node">
