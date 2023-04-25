@@ -85,7 +85,7 @@ export const localpath = map(seq(read('^'), pathident, rep(alt<string|Value>('ke
 export const parsePath = makeParser(keypath);
 export const parseLetPath = makeParser(localpath);
 
-const illegalRefs = ['if', 'else', 'elif', 'elseif', 'elsif', 'unless', 'then', 'case', 'when', 'not', 'gte', 'gt', 'lte', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is-not', 'is', 'strict-is-not', 'strict-is', 'deep-is-not', 'deep-is', 'and', 'or'];
+const illegalRefs = ['if', 'else', 'elif', 'elseif', 'elsif', 'fi', 'esac', 'unless', 'then', 'case', 'when', 'not', 'gte', 'gt', 'lte', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is-not', 'is', 'strict-is-not', 'strict-is', 'deep-is-not', 'deep-is', 'and', 'or', 'end', 'with', 'each'];
 export const ref = map(keypath, (r, err) => {
   if (r.k.length === 1 && !r.p && !r.u && illegalRefs.includes(r.k[0] as string)) err(`invalid reference name '${r.k[0] as string}'`);
   return { r };
