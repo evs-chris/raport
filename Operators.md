@@ -32,8 +32,8 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Do a deep inequality check on the first two arguments using loose equality for primitives.</dd>
-<dt><code>(any, any, 'strict'|'loose'|application) => boolean' desc:'Do a deep inequality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</code></dt>
-<dd></dd>
+<dt><code>(any, any, 'strict'|'loose'|application) => boolean</code></dt>
+<dd>Do a deep inequality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</dd>
 </dl>
 
 </dl>
@@ -235,8 +235,8 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Do a deep equality check on the first two arguments using loose equality for primitives.</dd>
-<dt><code>(any, any, 'strict'|'loose'|application) => boolean' desc:'Do a deep equality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</code></dt>
-<dd></dd>
+<dt><code>(any, any, 'strict'|'loose'|application) => boolean</code></dt>
+<dd>Do a deep equality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</dd>
 </dl>
 
 </dl>
@@ -560,8 +560,8 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Do a deep equality check on the first two arguments using loose equality for primitives.</dd>
-<dt><code>(any, any, 'strict'|'loose'|application) => boolean' desc:'Do a deep equality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</code></dt>
-<dd></dd>
+<dt><code>(any, any, 'strict'|'loose'|application) => boolean</code></dt>
+<dd>Do a deep equality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</dd>
 </dl>
 
 </dl>
@@ -578,8 +578,8 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Do a deep inequality check on the first two arguments using loose equality for primitives.</dd>
-<dt><code>(any, any, 'strict'|'loose'|application) => boolean' desc:'Do a deep inequality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</code></dt>
-<dd></dd>
+<dt><code>(any, any, 'strict'|'loose'|application) => boolean</code></dt>
+<dd>Do a deep inequality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</dd>
 </dl>
 
 </dl>

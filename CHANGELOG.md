@@ -1,3 +1,32 @@
+## 0.19.0
+
+2023-04-28
+
+### Render
+
+* __BREAKING__: Container context will now capture locals, so any locals set while evaluating the context expression will be available to any nested context as well.
+
+### Data
+
+* __BUG__: The deep equality operators will no longer break if given a null.
+* __BUG__: The `string` and `parse` operators will once again properly use named arguments in addition to supporting a second option object, which takes precedent over named arguments.
+* The `date` operator will now return `undefined` rather than an invalid date.
+* The basic equality check will now compare JS dates and raport dates if possible.
+* The `block` operator now has an `implicit` mode that use the parent context locals, so any locals that are set within the implicit block will remain with the parent context.
+
+### Parser
+
+* __BREAKING__: `end`, `with`, `each`, `esac`, and `fi` are now illegal references.
+* The final type alias in a schema may now include a trailing `;`.
+* `unless` expressions can now be closed with `end` to allow disambiguation in a nested conditional.
+
+### Designer
+
+* External provided sources are now longer cached for report runs. This limits churn while navigating context while ensuring correct data is available when the report is run.
+* There is now an export `highlight` function that accepts an expression string and returns classified HTML.
+* The designer now includes a language reference on a tab next to the evaluation pane.
+
+
 ## 0.18.1
 
 2023-04-12
