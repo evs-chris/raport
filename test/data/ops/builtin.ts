@@ -1,4 +1,4 @@
-import { evaluate, registerOperator, unregisterOperator, Operator, Root, parse } from '../../../src/lib/index';
+import { evaluate, registerOperator, unregisterOperator, Operator, Root, parse, extend } from '../../../src/lib/index';
 
 const q = QUnit;
 
@@ -95,6 +95,12 @@ q.test('block', t => {
   t.equal(evaluate(`{ let j = 20; j + 10 }; j + 'a'`), 'a');
   t.equal(evaluate(`map([{ foo::bar }] =>{ { let j = 20; j + 10 }; j + 'a' })[0]`), 'a');
   t.equal(evaluate(`let a = map([{ foo::bar }] =>{ { let j = 20; j + 10 }; let b = :no; j + 'a' })[0]; a + b`), 'a');
+
+  const r = extend(new Root(), {});
+  t.equal(evaluate(r, 'block(let i = 10, 10 + i)'), 20);
+  t.equal(r.locals, undefined);
+  t.equal(evaluate(r, 'let i = 10; 10 + i'), 20);
+  t.equal(r?.locals?.i, 10);
 });
 
 q.test('call', t => {

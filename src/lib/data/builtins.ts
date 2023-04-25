@@ -1096,12 +1096,14 @@ registerOperator({
 }, {
   type: 'aggregate',
   names: ['block'],
-  apply(_name: string, _arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
+  apply(_name: string, _arr: any[], args: ValueOrExpr[], opts, ctx: Context) {
     const last = args.length - 1;
     if (last < 0) return;
-    const c = extend(ctx, { locals: {}, fork: !ctx.locals });
+    const c = extend(ctx, { locals: opts && opts.implicit ? ctx.locals || {} : {}, fork: !ctx.locals });
     for (let i = 0; i < last; i++) evalParse(c, args[i]);
-    return evalParse(c, args[last]);
+    const res = evalParse(c, args[last]);
+    if (opts && opts.implicit) ctx.locals = c.locals;
+    return res;
   },
   value: true,
 });
