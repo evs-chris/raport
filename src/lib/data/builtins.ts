@@ -452,9 +452,10 @@ registerOperator(
       } else return span;
     }
   }),
-  simple(['string', 'unparse'], (name: string, args: any[]): string => {
+  simple(['string', 'unparse'], (name: string, args: any[], opts: any): string => {
     const [value] = args;
-    let opts = args.slice(-1)[0] || {};
+    opts = opts || args[1] || {};
+    if (!opts || typeof opts !== 'object') opts = {};
     if (name === 'unparse') opts = Object.assign({}, opts, { raport: 1 });
     if (opts.raport && opts.tpl) opts.template = 1;
     if (!opts && (value === null || value === undefined)) return '';
@@ -818,9 +819,9 @@ registerOperator(
       if (fmt) return Object.assign(fmt.defaults, opts);
     }
   }),
-  simple(['parse'], (_name: string, args: any[]): any => {
-    let opts = args.slice(-1)[0] || {};
-    if (typeof opts !== 'object') opts = {};
+  simple(['parse'], (_name: string, args: any[], opts: any): any => {
+    opts = opts || args[1] || {};
+    if (!opts || typeof opts !== 'object') opts = {};
     const [v] = args;
 
     if (opts.date) return parseDate(v, opts);
