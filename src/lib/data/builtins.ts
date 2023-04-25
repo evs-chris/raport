@@ -793,6 +793,7 @@ registerOperator(
       res = rdt;
     }
 
+    if (res instanceof Date && isNaN(+res)) return undefined;
     return res;
   }),
   simple(['interval'], (_name: string, [v]: any[], _opts, ctx: Context): DateRel => {
