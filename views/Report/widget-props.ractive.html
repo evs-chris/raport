@@ -65,18 +65,18 @@
     <span class-toggle class-active="typeof .margin === 'object' && 'x' in .margin" {{#if !.margin || .margin.x === undefined}}on-click="@context.set('.margin', { x: '' })"{{/if}}>Expression</span>
   </div>
   {{#if typeof .margin === 'number'}}
-    <input type=number value="{{.margin}}" />
+    <input type=number lazy value="{{.margin}}" />
   {{elseif .margin.length === 2}}
     <div class=sides>
-      <span /><input type=number value="{{.margin[0]}}" /><span />
-      <span /><div class=square /><input type=number value="{{.margin[1]}}" />
+      <span /><input lazy type=number value="{{.margin[0]}}" /><span />
+      <span /><div class=square /><input lazy type=number value="{{.margin[1]}}" />
       <span /><span /><span />
     </div>
   {{elseif .margin.length === 4}}
     <div class=sides>
-      <span /><input type=number value="{{.margin[0]}}" /><span />
-      <input type=number value="{{.margin[3]}}" /><div class=square /><input type=number value="{{.margin[1]}}" />
-      <span /><input type=number value="{{.margin[2]}}" /><span />
+      <span /><input lazy type=number value="{{.margin[0]}}" /><span />
+      <input lazy type=number value="{{.margin[3]}}" /><div class=square /><input lazy type=number value="{{.margin[1]}}" />
+      <span /><input lazy type=number value="{{.margin[2]}}" /><span />
     </div>
   {{elseif .margin.x !== undefined}}
     <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.margin.x}} tabout /></div>
@@ -99,22 +99,22 @@
     <span class-toggle class-active="typeof .border === 'string'" {{#if typeof .border !== 'string'}}on-click="@context.set('.border', '')"{{/if}}>Expression</span>
   </div>
   {{#if typeof .border === 'number'}}
-    <input type=number value="{{.border}}" />
+    <input lazy type=number value="{{.border}}" />
   {{elseif typeof .border === 'string'}}
     <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.border}} tabout /></div>
   {{elseif .border.length === 1}}
-    <input type=number value="{{.border[0]}}" />
+    <input lazy type=number value="{{.border[0]}}" />
   {{elseif .border.length === 2}}
     <div class=sides>
-      <span /><input type=number value="{{.border[0]}}" /><span />
-      <span /><div class=square /><input type=number value="{{.border[1]}}" />
+      <span /><input lazy type=number value="{{.border[0]}}" /><span />
+      <span /><div class=square /><input lazy type=number value="{{.border[1]}}" />
       <span /><span /><span />
     </div>
   {{elseif .border.length === 4}}
     <div class=sides>
-      <span /><input type=number value="{{.border[0]}}" /><span />
-      <input type=number value="{{.border[3]}}" /><div class=square /><input type=number value="{{.border[1]}}" />
-      <span /><input type=number value="{{.border[2]}}" /><span />
+      <span /><input lazy type=number value="{{.border[0]}}" /><span />
+      <input lazy type=number value="{{.border[3]}}" /><div class=square /><input lazy type=number value="{{.border[1]}}" />
+      <span /><input lazy type=number value="{{.border[2]}}" /><span />
     </div>
   {{/if}}
 </span></label>
@@ -161,7 +161,7 @@
     {{#if typeof .font.size === 'object'}}
       <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.font.size.x}} tabout /></div>
     {{else}}
-      <input type=number value="{{.font.size}}" />
+      <input lazy type=number value="{{.font.size}}" />
     {{/if}}
   </span></label>
 {{/if}}
@@ -172,7 +172,7 @@
     {{#if typeof .font.line === 'object'}}
       <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.font.line.x}} tabout /></div>
     {{else}}
-      <input type=number value="{{.font.line}}" />
+      <input lazy type=number value="{{.font.line}}" />
     {{/if}}
   </span></label>
 {{/unless}}
@@ -230,7 +230,7 @@
     {{/if}}
   </span></label>
 {{#if !.margin}}
-<label><span title="Padding to add to the right side of the {{.type}}, which is useful for right-aligned text">Right Pad</span><span><input type=number value="{{.font.right}}" /></span></label>
+<label><span title="Padding to add to the right side of the {{.type}}, which is useful for right-aligned text">Right Pad</span><span><input lazy type=number value="{{.font.right}}" /></span></label>
 {{/if}}
 
 <template id="page-props">
