@@ -15,8 +15,8 @@
       </select>
       <button title="Add {{~/add}} to {{~/temp.widget}}" on-click="@.addWidget(~/add)" class=add>+</button>
     {{/if}}
-    {{#if ~/copy}}<button class="ico large" on-click="@.set('copy', undefined)" title="Cancel copy">{{>copy, true as cancel}}</button>{{/if}}
-    {{#if ~/reparent}}<button class="ico large" on-click="@.set('reparent', undefined)" title="Cancel move">{{>reparent, true as cancel}}</button>{{/if}}
+    {{#if ~/copy}}<button class="ico large" on-click="@.set('copy', undefined)" title="Cancel copy [Esc]">{{>copy, true as cancel}}</button>{{/if}}
+    {{#if ~/reparent}}<button class="ico large" on-click="@.set('reparent', undefined)" title="Cancel move [Esc]">{{>reparent, true as cancel}}</button>{{/if}}
     <button class="ico large" on-click="@.treeScrollToActive()" title="Scroll active widget into view">{{>scrollto}}</button>
   </div>
   <div class="scrolled-wrapper widget-tree">

@@ -468,6 +468,28 @@ export class Designer extends Ractive {
     target.push('.widgets', obj);
   }
 
+  move(target: ContextHelper) {
+    const w: ContextHelper = this.get('reparent');
+    this.set('reparent', undefined);
+    if (!w || !target) return;
+    const idx = target.get('@index');
+
+    const container = target.get('../../');
+    if (!container || container.type !== 'container' && container !== this.get('report')) return;
+
+    let layout: any[];
+    if (Array.isArray(w.get('../../layout'))) {
+      layout = w.splice('../../layout', w.get('@index'), 1).result[0];
+    }
+
+    if (Array.isArray(target.get('../../layout'))) {
+      target.splice('../../layout', idx, 0, layout || [0, 0]);
+    }
+
+    const obj = w.splice('../', w.get('@index'), 1).result[0];
+    target.splice('../../widgets', idx, 0, obj);
+  }
+
   paste(target: ContextHelper) {
     const w: ContextHelper = this.get('copy');
       this.set('copy', undefined);
@@ -480,6 +502,36 @@ export class Designer extends Ractive {
       if (Array.isArray(w.get('^^/layout'))) target.push('layout', w.get(`^^/layout.${w.get('@index')}`))
       else target.push('layout', [0, 0]);
     }
+  }
+
+  pasteBefore(target: ContextHelper) {
+    const w: ContextHelper = this.get('copy');
+      this.set('copy', undefined);
+    if (!w || !target) return;
+
+    const container = target.get('../../');
+    if (!container || container.type !== 'container' && container !== this.get('report')) return;
+
+    const idx = target.get('@index');
+
+    const obj = cloneDeep(w.get());
+    target.splice('../../widgets', idx, 0, obj);
+
+    if (Array.isArray(target.get('../../layout'))) {
+      if (Array.isArray(w.get('^^/layout'))) target.splice('../../layout', idx, 0, w.get(`^^/layout.${w.get('@index')}`))
+      else target.splice('../../layout', idx, 0, [0, 0]);
+    }
+  }
+
+  clickWidget(target: ContextHelper) {
+    const keypath = target.get('@keypath');
+    const type = target.get('.type');
+    if (!this.event?.event?.ctrlKey && this.get('reparent') && type === 'container' && keypath.indexOf(this.get('reparent').resolve()) === -1) this.reparent(target);
+    else if (this.get('reparent')) this.move(target);
+    else if (!this.event?.event?.ctrlKey && this.get('~/copy') && type === 'container') this.paste(target);
+    else if (this.get('~/copy')) this.pasteBefore(target);
+    else this.selectWidget(keypath);
+    return false;
   }
 
   fillArray(count: number) {
@@ -1537,6 +1589,10 @@ const designerOpts: ExtendOpts<Designer> = {
             ev.stopPropagation();
             ev.preventDefault();
           }
+        } else if (ev.key === 'Escape' && this.get('reparent')) {
+          this.set('reparent', undefined);
+        } else if (ev.key === 'Escape' && this.get('copy')) {
+          this.set('copy', undefined);
         }
       }, { capture: true });
       this.loadProjects();
