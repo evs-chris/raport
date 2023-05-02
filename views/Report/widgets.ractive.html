@@ -32,8 +32,14 @@
         <span>{{.type}}{{>widget-info}}</span>
         {{#if !~/reparent && !~/copy}}
           <span class=actions>
-            <button class=ico title="Copy {{.type}}" on-click="@.set('copy', @context), false">{{>copy}}</button>
-            <button class=ico title="Move widget" on-click="@.set('reparent', @context), false">{{>reparent}}</button>
+            {{#if .type === 'repeater'}}
+              {{#if !.header}}<button class=ico title="Add header" on-click="@context.set('.header', { type: 'container' }), false">+H</button>{{/if}}
+              <button class=ico title="Add group {{#if .group}}level{{/if}}" on-click=".group ? [@context.push('.group', { type: 'container' }), @context.splice('.groupEnds', -1, 0, true)] : @context.set({ '.group': [{ type: 'container' }], '.groupEnds': [true, true] }), false">+G</button>
+              {{#if !.alternate}}<button class=ico title="Add alternate" on-click="@context.set('.alternate', { type: 'container' }), false">+A</button>{{/if}}
+              {{#if !.footer}}<button class=ico title="Add footer" on-click="@context.set('.footer', { type: 'container' }), false">+F</button>{{/if}}
+            {{/if}}
+            <button class=ico title="Copy {{.type || 'widget'}}" on-click="@.set('copy', @context), false">{{>copy}}</button>
+            <button class=ico title="Move {{.type || 'widget'}}" on-click="@.set('reparent', @context), false">{{>reparent}}</button>
             <button class="ico up-arrow" title="Move up (hold the shift key to move to first{{#if Array.isArray(^^/layout)}}, hold the control key to swap layout coordinate too{{/if}})" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined], @index, @event.shiftKey), false">{{>arrow}}</button>
             <button class="ico down-arrow" title="Move down (hold the shift key to move to last{{#if Array.isArray(^^/layout)}}, hold the control key to swap layout coordinates too{{/if}})" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', !@event.ctrlKey && Array.isArray(^^/layout) ? '^^/layout' : undefined], @index, @event.shiftKey), false">{{>arrow}}</button>
           </span>
@@ -353,6 +359,12 @@
     border-width: 1px;
   }
 
+  .properties .tree .node.hover > .line button.ico {
+    color: {{@style.bg}};
+  }
+  .properties .tree .node.hover > .line button.ico:hover {
+    color: {{@style.fg}};
+  }
   .line button.ico svg,
   .line button.ico.remove:hover svg,
   .hover .line .actions button.ico svg {

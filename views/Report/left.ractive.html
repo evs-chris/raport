@@ -22,7 +22,20 @@
   <div class="scrolled-wrapper widget-tree">
     <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
       {{#with report}}
-      <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : ~/copy ? @.paste(@context) : @.selectWidget('report')"><span class-line on-mouseover="@.set('temp.hover', 'report'), false">Report</span>
+      <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : ~/copy ? @.paste(@context) : @.selectWidget('report')">
+        <span class-line on-mouseover="@.set('temp.hover', 'report'), false">
+          Report
+          <span class=actions>
+            {{#if .type != 'delimited'}}
+              {{#if !.header}}<button class=ico title="Add page header" on-click="@context.set('.header', { type: 'container' }), false">+H</button>{{/if}}
+              {{#if !.footer}}<button class=ico title="Add page footer" on-click="@context.set('.footer', { type: 'container'}), false">+F</button>{{/if}}
+              {{#if !.watermark}}<button class=ico title="Add page watermark" on-click="@context.set('.watermark', { type: 'container' }), false">+W</button>{{/if}}
+              {{#if !.overlay}}<button class=ico title="Add page overlay" on-click="@context.set('.overlay', { type: 'container' }), false">+O</button>{{/if}}
+            {{else}}
+              {{#if !.headers}}<button class=ico title="Add headers" on-click="@.addHeader(), false">+H</button>{{/if}}
+            {{/if}}
+          </span>
+        </span>
         {{#if report.type === 'delimited'}}
           {{>delimited-fields}}
         {{else}}
