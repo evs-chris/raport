@@ -332,7 +332,7 @@
 
 <template id="expr-context">
   {{#each .fields}}{{#if !~/ctxsearch || .fields || ~.name.indexOf(~/ctxsearch)}}
-    <div class-context-entry class-expanded="~/exprExpand[@keypath]">
+    <div class-context-entry class-entry-local=".meta.local" class-expanded="~/exprExpand[@keypath]">
       <div class-entry-details>
         <div>
           {{#if .fields}}<button class-expand on-click="@.exprToggle(@keypath)">{{~/exprExpand[@keypath] ? '-' : '+'}}</button>{{/if}}
@@ -569,6 +569,10 @@
   .ast-op-name, .ast-content-value, .ast-content-ref {
     display: flex;
     justify-content: space-between;
+  }
+
+  .entry-local .entry-name {
+    font-style: italic;
   }
 
   .entry-details {

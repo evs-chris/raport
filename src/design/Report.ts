@@ -757,20 +757,36 @@ export class Designer extends Ractive {
 
     (this.get('report.parameters') || []).forEach((p: Parameter) => pl.fields.push({ name: `!${p.name}`, type: p.type }));
 
+    const stack: Context[] = [];
     if (c !== c.root) {
       while (c) {
         c = c.parent;
         if (c === c.root) prefix = '~';
         else prefix += '^';
         if (last === c.value) continue;
+        stack.push(c);
 
         t = inspect(c.value, c !== c.root);
         (t.fields || []).forEach(f => (f.name = `${prefix}${f.name}`, pl.fields.push(f)));
         last = c.value;
 
+        if (c.locals) {
+          t = inspect(c.locals);
+          if (t.fields) t.fields.forEach(f => (f.meta = { local: true }, f.name = `${prefix === '~' ? '^' : prefix}${f.name}`, pl.fields.push(f)));
+        }
+
         if (c === c.root) break;
       }
     }
+
+    stack.push(ctx);
+
+    const locals: any = {};
+    stack.forEach(c => {
+      if (c.locals) for (const k in c.locals) locals[k] = c.locals[k];
+    });
+    t = inspect(locals);
+    t.fields.forEach(f => (f.meta = { local: true }, pl.fields.push(f)));
 
     return base;
   }

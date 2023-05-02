@@ -72,6 +72,8 @@ export interface Field extends Schema {
   required?: true;
   /** A user-friendly name for the field */
   label?: string;
+  /** Additional information for special use cases */
+  meta?: any;
 }
 
 export interface Operation {
