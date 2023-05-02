@@ -369,7 +369,7 @@ export const operators = `[
 	]}
 	{ op:'round' sig:[
 		{ proto:'number => number' desc:'Rounds the given number to the nearest integer.' }
-		{ proto:'(number, number, string) => number' desc:'Rounds the given number to the nearest decimal specified by the second number using the method specified by the string, defaulting to half-even. Supported methods are half-up, half-down, to-0, from-0, half-even, and half-odd.' }
+		{ proto:'(number, number, string) => number' desc:'Rounds the given number to the nearest decimal specified by the second number using the method specified by the string, defaulting to half-even. Supported methods are half-up, half-down, to-0, from-0, half-even, and half-odd. If the number of places negative, the number will be rounded left from the decimal point.' }
 	] note:"By default, the single-number signature will round to an integer, but if the round defaults are updated to include all-numeric as true, then it will return numbers rounded to the nearest default place. Round defaults are { places:2 all-numeric:false method::half-even }."}
 	{ op:'set' sig:[
 		{ proto:'(string, any) => interval' desc:'Sets the root value specified by the given path in the first argument the value supplied as the second argument and returns the value that was replaced, if any.' }
