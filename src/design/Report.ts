@@ -1015,12 +1015,19 @@ export class Designer extends Ractive {
 
   removeWidget(ctx: ContextHelper) {
     const path = ctx.resolve();
+    const pathArr = Ractive.splitKeypath(path);
+    const key = pathArr.pop();
+    const keyup = pathArr.pop();
     let link: ReadLinkResult;
     if (this.get('temp.widget') === path) this.set('temp.widget', 'report');
     if ((link = this.readLink('widget')) && link.keypath === path) this.unlink('widget');
     this.checkLink('expr', ctx.resolve());
-    if (ctx.get('^^/groupEnds')) ctx.splice('^^/groupEnds', ctx.get('^^/groupEnds') - 1 - ctx.get('@index'), 1);
-    if (ctx.get('../type') === 'repeater') ctx.set('^^/' + ctx.get('@key'), undefined); 
+    if (ctx.get('^^/type') === 'repeater' && keyup === 'group') {
+      if (ctx.get('^^/groupEnds')) ctx.splice('^^/groupEnds', ctx.get('@index'), 1);
+      if (ctx.get('^^/group')) ctx.splice('^^/group', ctx.get('@index'), 1);
+      if (ctx.get('^^/group.length') === 0) ctx.set({ '^^/group': undefined, '^^/groupEnds': undefined });
+    }
+    else if (ctx.get('../type') === 'repeater') ctx.set('../' + key, undefined); 
     else if (path === 'report.header' || path === 'report.footer' || path === 'report.watermark' || path === 'report.overlay') this.set(path, undefined);
     else {
       if (Array.isArray(ctx.get('^^/layout'))) ctx.splice('^^/layout', ctx.get('@index'), 1);
