@@ -172,7 +172,10 @@
 
 <template id="widget-info">
   {{#if .type === 'label'}}
+    {{#if .id != null}}<span class=widget-id>.{{.id}}</span>{{/if}}
     <span class="widget-info">{{.text}}</span>
+  {{elseif .type === 'repeater'}}
+    <span class="widget-info">{{.source && typeof .source === 'object' && 'x' in .source ? .source.x : (.source.name || .source.source || '(None)')}}</span>
   {{elseif .widgets.length}}
     <span class="widget-info">({{.widgets.length}} child{{#if .widgets.length !== 1}}ren{{/if}})</span>
   {{/if}}
@@ -370,6 +373,15 @@
     fill: {{@style.fg}};
   }
 
+  span.widget-id {
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+    max-width: 20%;
+    font-weight: bold;
+    opacity: 0.5;
+  }
   span.widget-info {
     display: inline-block;
     overflow: hidden;
