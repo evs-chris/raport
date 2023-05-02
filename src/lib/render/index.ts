@@ -1,4 +1,4 @@
-import { Displayed, Layout, Placement, Widget, Margin, MeasureFont, Computed } from '../report';
+import { Displayed, Layout, Placement, Widget, Margin, MeasureFont, Computed, Borders } from '../report';
 import { extend as extendContext, Context, ExtendOptions as ContextExtendOptions, evaluate, isValueOrExpr } from '../data/index';
 
 export interface RenderContext {
@@ -280,7 +280,7 @@ export function getWidth(w: Widget, placement: Placement, context: RenderContext
     width = +((width.percent / 100) * (placement.maxX || 51)).toFixed(4);
     pct = true;
   }
-  if (typeof width === 'number' && (w.box === 'contain' || pct && w.box !== 'expand')) {
+  if (typeof width === 'number' && (w.box === 'contain' || (pct || width === placement.availableX) && w.box !== 'expand')) {
     if (m) width -= m[1] + m[3];
     else if (w.font && w.font.right) width -= w.font.right;
   }
@@ -322,15 +322,11 @@ export function getHeight(w: Widget, placement: Placement, context: RenderContex
     pct = true;
   }
   else if (h === 'auto' || (computed && !h)) return computed || NaN;
-  else if (h === 'grow') {
-    r = placement.availableY || 0;
-    if (w.margin) {
-      const m = expandMargin(w, context, placement);
-      r -= m[0] + m[2];
-    }
-  }
+  else if (h === 'grow') r = placement.availableY || 0;
 
-  if (typeof r === 'number' && (w.box === 'contain' || pct && w.box !== 'expand') && m) r -= m[0] + m[2];
+  if (typeof r === 'number' && (w.box === 'contain' || (pct || r === placement.availableY) && w.box !== 'expand')) {
+    if (m) r -= m[0] + m[2];
+  }
 
   return r;
 }
@@ -362,4 +358,20 @@ export function expandMargin(w: { margin?: Margin|Computed }, context: RenderCon
   }
 
   return [0, 0, 0, 0];
+}
+
+export function expandBorder(w: { border?: number|number[]|Borders|string }, context: RenderContext, placement: Placement): [number, number, number, number] {
+  let b = w.border;
+  let res: [number, number, number, number] = [0, 0, 0, 0];
+  if (typeof b === 'string' || (b && !Array.isArray(b) && typeof b === 'object' && ('v' in b || 'r' in b || 'op' in b))) b = evaluate(extendContext(context.context, { special: { widget: w, placement } }), b as string);
+  if (typeof b === 'number') res = [0, 0, b, 0];
+  else if (Array.isArray(b)) {
+    if (b.length === 1) res = [b[0], b[0], b[0], b[0]];
+    else if (b.length === 2) res = [b[0], b[1], b[0], b[1]];
+    else if (b.length === 3) res = [b[0], b[1], b[2], b[1]];
+    else if (b.length >= 4) res = [b[0], b[1], b[2], b[3]];
+  } else if (b && typeof b === 'object') res = [b.top || 0, b.right || 0, b.bottom || 0, b.left || 0]
+
+  for (let i = 0; i < 4; i++) res[i] = res[i] * 0.0625;
+  return res;
 }
