@@ -137,6 +137,11 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
     if (placement.availableY) placement.availableY -= m[0] + m[2];
   }
 
+  if (w.border && !h) {
+    const b = expandBorder(w, context, placement)
+    extraHeight += b[0] + b[2];
+  }
+
   const r = renderer.render(w, context, placement, state);
   if (typeof r === 'string') return { output: r, height: h, width: getWidthWithMargin(w, placement, context) };
   
@@ -161,10 +166,14 @@ export function registerLayout(name: string, layout: (widget: Widget, offset: nu
 
 registerLayout('row', (w, o, m, p, ps, context) => {
   let n: Placement;
-  const availableX = p.maxX - ps[0][0] - ps[0][2];
+  let br = isComputed(w.br) ? evaluate(extendContext(context.context, { special: { placement: p, widget: w } }), w.br.x) : w.br;
+  let availableX = p.maxX - ps[0][0] - ps[0][2] + ps[ps.length - 1][0];
+  if (availableX <= 0) {
+    availableX = p.maxX;
+    br = true;
+  }
   const nw = getWidthWithMargin(w, { x: p.x, y: p.y, maxX: p.maxX, maxY: p.maxY, availableY: p.availableY, availableX }, context);
-  const br = isComputed(w.br) ? evaluate(extendContext(context.context, { special: { placement: p, widget: w } }), w.br.x) : w.br;
-  if (br || ps[0][0] + ps[0][2] + nw > p.maxX) {
+  if (br || ps[0][0] + ps[0][2] + nw - ps[ps.length - 1][0] > p.maxX) {
     n = { x: m[3], y: maxYOffset(ps), availableX: p.maxX, maxX: p.maxX };
   } else {
     n = { x: ps[0][0] + ps[0][2], y: ps[0][1], availableX, maxX: p.maxX };
@@ -188,6 +197,13 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
     ps[0][0] += m[3];
     ps[0][1] += m[0];
 
+    if (widget.border) {
+      const b = expandBorder(widget, context, placement);
+      if (placement.maxX) placement.maxX -= b[1] + b[3];
+      if (placement.availableX) placement.availableX -= b[1] + b[3];
+      if (placement.maxY) placement.maxY -= b[0] + b[2];
+      if (placement.availableY) placement.availableY -= b[0] + b[2];
+    }
     for (let i = state && state.last || 0; i < widget.widgets.length; i++) {
       const w: Widget = widget.widgets[i];
       if (w.hide && evaluate(extendContext(context.context, { special: { widget: w, placement } }), w.hide)) continue;
@@ -207,11 +223,17 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
         if (!lp[0]) lp[0] = 0;
         if (!lp[1]) lp[1] = 0;
         let p: Placement = Array.isArray(lp) ? { x: lp[0] < 0 ? lp[0] : lp[0] + m[3], y: lp[1] < 0 ? lp[1] : lp[1] + m[0], maxX: placement.maxX } : (lp || placement);
-        if (Array.isArray(lp)) p.availableX = p.maxX - p.x;
+        if (Array.isArray(lp)) p.availableX = p.maxX;
 
         if (!layout || typeof layout === 'string') {
           const l = layout ? layouts[layout as string] || layouts.row : layouts.row;
           p = l(w, offset, m, placement, ps, context);
+          if (h > p.availableY) {
+            const offset = maxYOffset(ps);
+            state = state || { offset };
+            state.last = i;
+            return { output: s, continue: state, height: offset };
+          }
         }
 
         p.maxX = p.maxX || placement.maxX;
@@ -313,16 +335,20 @@ export function getHeight(w: Widget, placement: Placement, context: RenderContex
   let r = 1;
   let h = isComputed(w.height) ? evaluate(extendContext(context.context, { special: { widget: w, placement, computed, linesize } }), w.height.x) : w.height;
   const m = w.margin && expandMargin(w, context, placement);
+  const b = w.border && expandBorder(w, context, placement);
   let pct = false;
   if (h == null && linesize) h = maxFontSize(w);
 
   if (typeof h === 'number') r = h;
-  else if (typeof h === 'object' && 'percent' in h && h.percent && placement.maxY) {
+  else if (h && typeof h === 'object' && 'percent' in h && h.percent && placement.maxY) {
     r = +(placement.maxY * (h.percent / 100)).toFixed(4);
     pct = true;
+  } else if (h === 'auto' || (computed && !h)) {
+    if (b) return computed + b[0] + b[2] || NaN;
+    return computed || NaN;
+  } else if (h === 'grow') {
+    r = placement.availableY || 0;
   }
-  else if (h === 'auto' || (computed && !h)) return computed || NaN;
-  else if (h === 'grow') r = placement.availableY || 0;
 
   if (typeof r === 'number' && (w.box === 'contain' || (pct || r === placement.availableY) && w.box !== 'expand')) {
     if (m) r -= m[0] + m[2];

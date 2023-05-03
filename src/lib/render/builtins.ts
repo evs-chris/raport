@@ -157,7 +157,10 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 
         if (r.width && r.width <= availableX - usedX && r.width !== availableX) {
           usedX += r.width;
-          if (r.height > usedY) usedY = r.height;
+          if (r.height > usedY) {
+            usedY = r.height;
+            if (r.height > availableY) initY -= r.height;
+          }
         } else if (r.width && usedX && r.width > availableX - usedX) {
           y += usedY;
           initY = y;
