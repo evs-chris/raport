@@ -1,3 +1,35 @@
+## 0.19.1
+
+2023-05-05
+
+### Render
+
+* __BUG:__ Widgets that use their remaining container space on either axis will now automatically contain unless they are explicitly set to expand. This makes full width widgets with borders become considerably less irritating to place.
+* __BUG:__ Percentage and grow widths and heights within sized containers are now more accurate.
+* __BUG:__ Containers now handle multiple large children that can break across pages more safely.
+* __BUG:__ Containers with auto height will now account for borders when sizing to their contents.
+* __BUG:__ Containers with 100% or grow dimensions will now account for their borders when rendering their children.
+* __BUG:__ The first grow width element in an auto layout container will no longer shrink by the container's margin.
+
+### Data
+
+* The `round` operator now supports alternate rounding methods half even, half odd, half up, half down, to 0, and from 0.
+* The `round` operator can now round to the nearest whole number place by specifing a negative number of digits where -1 is to the nearest 10, -2 is the nearest 100, etc.
+* The `set-defaults` operator can now set defaults for the `round` operator.
+
+### Designer
+
+* __BUG:__ Numeric widget properties now use a lazy binding to avoid type switches for 0 and decimal values that don't immediately parse to a valid number.
+* __BUG:__ Repeater groups, header, footer, and alternate can now be removed using the x in the widget tree.
+* The local context for widget expressions in the evaluation pane now more closely matches what it is at runtime.
+* Local variables are now shown in the evaluation pane.
+* There is now a language reference in the bottom pane on a tab next to the expression evaluator.
+* The operator search now includes the operator docs when matching.
+* The widget tree will now show a repeater's data source and a label's ID.
+* Moving and copying elements can now be done against any widget. If the target widget is not a container, clicking it will place the source element above it. If it is a container, the source will be appended to its children. If the CTRL key is being held and the target is a container, the source will be placed above the target.
+* Headers, footers, groups, overlays, watermarks, and alternates can now be added to the report and repeaters from the widget tree.
+
+
 ## 0.19.0
 
 2023-04-28

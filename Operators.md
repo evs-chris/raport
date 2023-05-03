@@ -1822,9 +1822,13 @@
 </dt>
 <dd>
 
+__NOTE:__ By default, the single-number signature will round to an integer, but if the round defaults are updated to include all-numeric as true, then it will return numbers rounded to the nearest default place. Round defaults are { places:2 all-numeric:false method::half-even }.
+
 <dl>
 <dt><code>number => number</code></dt>
 <dd>Rounds the given number to the nearest integer.</dd>
+<dt><code>(number, number, string) => number</code></dt>
+<dd>Rounds the given number to the nearest decimal specified by the second number using the method specified by the string, defaulting to half-even. Supported methods are half-up, half-down, to-0, from-0, half-even, and half-odd. If the number of places negative, the number will be rounded left from the decimal point.</dd>
 </dl>
 
 </dl>
@@ -1855,8 +1859,10 @@
 <dd>
 
 <dl>
-<dt><code>(string, string) => any</code></dt>
-<dd>Sets the defaults for the given class and name of a defaulted thing. Currently, only format is supported as a class, and the name provided should be the name of the format for which to set defaults. Defaults should be passed in as named options.</dd>
+<dt><code>('format', string) => any</code></dt>
+<dd>Sets the defaults for the given named formatter. Defaults should be passed in as named options that depend on the decorator.</dd>
+<dt><code>('round') => any</code></dt>
+<dd>Sets the defaults for rounding operations. Defaults should be passed in as named options, which can be places, all-numeric, and method.</dd>
 </dl>
 
 </dl>
