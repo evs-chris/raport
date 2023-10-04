@@ -167,7 +167,6 @@ export interface Computed {
 // Widgets
 export interface Widget extends Style {
   type: string;
-  [key: string]: any;
   width?: Dimension|Computed|'grow'; // default 100%
   height?: Dimension|'auto'|Computed|'grow'; // optional, defaulting to 1
   margin?: Margin|Computed;
@@ -176,6 +175,35 @@ export interface Widget extends Style {
   br?: boolean|Computed;
   bg?: ValueOrExpr;
   radius?: ValueOrExpr;
+
+  // container
+  widgets?: Widget[];
+  layout?: Layout;
+  context?: ValueOrExpr;
+  bridge?: boolean;
+
+  // label
+  text?: ValueOrExpr|Array<ValueOrExpr|Span>;
+  format?: LabelFormat;
+  id?: string;
+
+  // image
+  url?: ValueOrExpr;
+  fit?: 'cover'|'stretch'|Computed;
+
+  // html
+  html?: ValueOrExpr;
+
+  // repeater
+  source?: PartSource|ValueOrExpr;
+  header?: Container;
+  group?: Container[];
+  groupEnds?: boolean[];
+  groupHeaders?: boolean[];
+  row?: Container;
+  footer?: Container;
+  alternate?: Container;
+  headerPerPage?: boolean;
 }
 
 export interface Container extends Widget {
@@ -216,6 +244,7 @@ export interface Repeater extends Widget {
   header?: Container;
   group?: Container[];
   groupEnds?: boolean[];
+  groupHeaders?: boolean[];
   row: Container;
   footer?: Container;
   alternate?: Container;

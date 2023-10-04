@@ -276,6 +276,9 @@
 
 <template id="container-props">
   {{#with ~/[@.split(~/temp.widget, 2)] as repeater, @.lastKey(~/temp.widget) as index}}
+  {{#if repeater.header && repeater.group[index]}}
+    <label><span title="If enabled, show the repeater header for this grouping of rows. You can use the @level reference to modify the header for different levels within the repeater.">Show Header?</span><span><input type=checkbox checked="{{repeater.groupHeaders[repeater.group.length - 1 - index]}}" /></span></label>
+  {{/if}}
   {{#if repeater.footer && repeater.group[index]}}
     <label><span title="If enabled, show the repeater footer for this grouping of rows. You can use the @level reference to modify the footer for different levels within the repeater.">Show Footer?</span><span><input type=checkbox checked="{{repeater.groupEnds[repeater.group.length - 1 - index]}}" /></span></label>
   {{/if}}
@@ -320,6 +323,12 @@
     {{#if typeof .source !== 'string'}}<select value="{{.source.source}}"><option value="">(None)</option>{{#each ~/report.sources}}<option value="{{.name || .source}}">{{.label || .name || .source}}</option>{{/each}}</select>{{/if}}
   </span></label>
   {{#with ~/[@.split(~/temp.widget)] as repeater}}
+  {{#if repeater.header && ~/report.type === 'page'}}
+    <label><span title="If enabled, the header will be rerendered at the beginning of each new page.">Header Per Page?</span><span><input type=checkbox twoway=false on-change="@context.toggle('.headerPerPage')" checked="{{.headerPerPage !== false}}" /></span></label>
+  {{/if}}
+  {{#if repeater.header && repeater.group.length}}
+    <label><span title="If enabled, the header will be rendered before all of the groups.">Show Header?</span><span><input type=checkbox checked="{{repeater.groupHeaders[repeater.group.length]}}" /></span></label>
+  {{/if}}
   {{#if repeater.footer && repeater.group.length}}
     <label><span title="If enabled, the footer will be rendered again after all of the groups. You can use the @level reference to render different footers for different group levels within the repeater.">Show Footer?</span><span><input type=checkbox checked="{{repeater.groupEnds[repeater.group.length]}}" /></span></label>
   {{/if}}

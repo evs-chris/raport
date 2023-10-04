@@ -68,7 +68,7 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
   return r;
 }, { container: true });
 
-type RepeatState = { part: 'group'|'header'|'body'|'footer'; group?: 'header'|'body'; src: Group|any[]; current: number; context?: RenderContext };
+type RepeatState = { part: 'group'|'header'|'body'|'footer'; group?: 'header'|'body'; src: Group|any[]; current: number; context?: RenderContext; newPage?: boolean };
 registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) => {
   addStyle(ctx, 'container', `.container {position:absolute;box-sizing:border-box;}`);
   if (!w.height) w.height = 'auto';
@@ -83,6 +83,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   availableY -= y;
   let group: Group;
   let groupNo: number|boolean = false;
+  const newPage = state && state.state && state.state.newPage;
 
   let src: Group|any[] = state && state.state && state.state.src;
   if (!src) {
@@ -106,28 +107,44 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
     arr = src;
   }
 
-  if (group && (!state || !state.state || state.state.part === 'group')) {
-    if (groupNo !== false) r = renderWidget(w.group[groupNo], extend(ctx, { value: group, special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: true, group: group.group } }), { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
+  if (w.header && (newPage || !state || !state.state || state.state.part === 'header' || state.state.part === 'group')) {
+    const hctx = state && state.state && state.state.context && state.state.context.context;
 
-    if (r) {
-      if (r.height > availableY) return { output: '', height: 0, continue: { offset: 0, state: { part: 'group', src, current: 0 } } }
+    if (group) {
+      const c = extend(ctx, { special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: groupNo !== false, group: group && group.group, values: (hctx && hctx.special || {}).values } });
+
+      if (w.group && groupNo !== false && (!state || !state.state || state.state.part === 'group')) {
+        r = renderWidget(w.group[groupNo], extend(ctx, { value: group, special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: true, group: group.group } }), { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
+
+        if (r) {
+          if (r.height > availableY) {
+            if (html) html = `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`;
+            return { output: html, height: y, continue: { offset: 0, state: { part: 'group', src, current: 0, newPage: true } } }
+          } else availableY -= r.height;
+
+          html += r.output;
+          y += r.height;
+        }
+      }
+
+      if (w.groupHeaders && w.groupHeaders[group.grouped] && (!state || !state.state || !state.state.current) || newPage && w.headerPerPage !== false) r = renderWidget(w.header, c, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
+      else r = { output: '', height: 0 };
+
+      if (r.height > availableY) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'header', src, current: 0, context: ctx, newPage: true } } }
+      else availableY -= r.height;
+
+      html += r.output;
+      y += r.height;
+    } else {
+      if (!state || newPage && w.headerPerPage !== false) r = renderWidget(w.header, ctx, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
+      else r = { output: '', height: 0 };
+
+      if (r.height > availableY) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'header', src, current: 0, context: ctx, newPage: true } } }
       else availableY -= r.height;
 
       html += r.output;
       y += r.height;
     }
-  }
-
-  if (w.header && ((state && state.state && state.state.part === 'body' && w.headerPerPage !== false && (!group || !group.grouped)) || (!group || !group.grouped) && (!state || !state.state || state.state.part === 'header' || state.state.part === 'group'))) {
-    r = renderWidget(w.header, ctx, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
-
-    if (r.height > availableY) {
-      if (html) html = `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`;
-      return { output: html, height: y, continue: { offset: 0, state: { part: 'header', src, current: 0 } } }
-    } else availableY -= r.height;
-
-    html += r.output;
-    y += r.height;
   }
 
   let rctx: RenderContext = state && state.state && state.state.context || extend(ctx, { special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: groupNo !== false, group: group && group.group, values: {}, last: arr.length - 1, count: arr.length } });
@@ -138,7 +155,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
     if (!arr.length && w.alternate) {
       if (w.alternate) {
         r = renderWidget(w.alternate, rctx, { x: usedX, y, availableX: availableX - usedX, maxX: placement.maxX, availableY, maxY: placement.maxY }, state ? state.child : undefined);
-        if (r.height > availableY) return { output: html, height: 0, continue: { offset: 0, state: { part: 'body', src, current: 0 } } }
+        if (r.height > availableY) return { output: html, height: 0, continue: { offset: 0, state: { part: 'body', src, current: 0, newPage: true } } }
         else availableY -= r.height;
 
         html += r.output;
@@ -175,8 +192,8 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 
         if (r.height > availableY || r.cancel) {
           if (initY === y && usedY) y += usedY;
-          if (commit) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx }, child: r.continue } };
-          else return { output: '', height: y, continue: { offset: y, state: { part: state && state.state && state.state.part || 'body', src, current: i, context: rctx }, child: r.continue } };
+          if (commit) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx, newPage: !r.continue || !r.continue.state || !r.continue.state.newPage }, child: r.continue } };
+          else return { output: '', height: y, continue: { offset: y, state: { part: state && state.state && state.state.part || 'body', src, current: i, context: rctx, newPage: !r.continue || !r.continue.state || !r.continue.state.newPage }, child: r.continue } };
         }
 
         if (!usedY) {
@@ -206,7 +223,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
       else r = { output: '', height: 0 };
     } else r = renderWidget(w.footer, c, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
 
-    if (r.height > availableY) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'footer', src, current: 0, context: rctx } } }
+    if (r.height > availableY) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'footer', src, current: 0, context: rctx, newPage: true } } }
 
     html += r.output;
     y += r.height;

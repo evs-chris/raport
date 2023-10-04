@@ -202,7 +202,8 @@ export class Designer extends Ractive {
       if (w.font && !isComputed(w.font.size) && w.font.size > n) n = w.font.size;
       if (Array.isArray(w.text)) {
         for (let i = 0; i < w.text.length; i++) {
-          if (typeof w.text[0] === 'object' && w.text[0].font && w.text[0].font.size > n) n = w.text[0].font.size;
+          const t = w.text[i];
+          if (typeof t === 'object' && 'font' in t && t.font && t.font.size > n) n = +t.font.size;
         }
       }
       return `${n}rem`;
@@ -1911,7 +1912,7 @@ function stripDefaults(json: any): any {
   const res: any = {};
   for (const k in json) {
     const v = json[k];
-    if (v === false && k !== 'classifyStyles') continue;
+    if (v === false && k !== 'classifyStyles' && k !== 'headerPerPage') continue;
     else if ((k === 'hide' || k === 'br') && !v) continue;
     else if (k === 'height' && v === 'auto' && (json.type === 'container' || json.type === 'repeater')) continue;
     else if (Array.isArray(v)) {
@@ -1957,6 +1958,11 @@ function stripDefaults(json: any): any {
   if (res.type === 'delimited') {
     delete res.size;
     delete res.widgets;
+  }
+  if (res.type === 'repeater') {
+    if (!res.header || res.headerPerPage) delete res.headerPerPage;
+    if (!res.header || !res.group || !res.group.length) delete res.groupHeaders;
+    if (!res.footer || !res.group || !res.group.length) delete res.groupEnds;
   }
   if (res.source) {
     if (!res.filter) delete res.filter;

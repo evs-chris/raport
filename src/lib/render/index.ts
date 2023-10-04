@@ -325,7 +325,8 @@ function maxFontSize(w: Widget) {
   if (w.font && w.font.size > n) n = w.font.size;
   if ('text' in w && Array.isArray(w.text)) {
     for (let i = 0; i < w.text.length; i++) {
-      if (typeof w.text[i] === 'object' && w.text[i].font && w.text[i].font.size > n) n = w.text[i].font.size;
+      const t = w.text[i];
+      if (typeof t === 'object' && 'font' in t && t.font && t.font.size > n) n = t.font.size;
     }
   }
   return n;
