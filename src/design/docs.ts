@@ -614,90 +614,116 @@ __NOTE:__ {note}
 '`;
 
 export const languageReference = `<html>
-<head><title>Raport Expression Language Reference</title></head>
+<head><title>Raport Expression Language Reference</title>
 <style>
   html {
-	font-family: sans-serif;
-	font-size: 1em;
-	background-color: #eee;
+    font-family: sans-serif;
+    font-size: 1em;
   }
   h1 { text-align: center; }
   h2 { margin-top: 3em; }
   h3 { margin-top: 1.5em; }
   body { padding: 1em; }
+  body.dark { color: #ccc; }
+  body.light { color: #222; }
   code {
-	font-family: monospace;
-	padding: 0.4em;
-	vertical-align: baseline;
-	font-size: 1.1em;
-	line-height: 1em;
-	box-sizing: border-box;
-	display: inline-block;
-	border: 1px solid #ddd;
-	background-color: #f0f0f0;
+    font-family: monospace;
+    padding: 0.4em;
+    vertical-align: baseline;
+    font-size: 1.1em;
+    line-height: 1em;
+    box-sizing: border-box;
+    display: inline-block;
+    border: 1px solid;
   }
+  .dark code { border-color: #777; }
+  .light code { border-color: #ddd; }
 
   div.indent {
-	padding-left: 1em;
+    padding-left: 1em;
   }
 
   .ast-nodes .reference {
-	color: #43b;
-	font-weight: 500;
+    color: #43b;
+    font-weight: 500;
   }
+  .dark .ast-nodes .reference { color: #98d; }
 
   .ast-nodes .primitive,
   .ast-nodes .number,
   .ast-nodes .date,
   .ast-nides .timespan {
-	color: #087;
-	font-weight: 500;
+    color: #087;
+    font-weight: 500;
+  }
+  .dark .ast-nodes .primitive,
+  .dark .ast-nodes .number,
+  .dark .ast-nodes .date,
+  .dark .ast-nides .timespan {
+    color: #0ca;
   }
 
   .ast-nodes .format-op {
-	color: #e81;
+    color: #e81;
   }
 
   .ast-nodes .string,
   .ast-nodes .string > .ast-extra {
-	color: #170;
+    color: #170;
+  }
+  .dark .ast-nodes .string,
+  .dark .ast-nodes .string > .ast-extra {
+    color: #1a0;
   }
 
   .ast-nodes .string > .string-interpolation {
-	font-style: oblique;
+    font-style: oblique;
   }
 
   .ast-nodes .binary-op > .ast-extra,
   .ast-nodes .conditional > .ast-extra {
-	color: #a66;
+    color: #a66;
+  }
+  .dark .ast-nodes .binary-op > .ast-extra,
+  .dark .ast-nodes .conditional > .ast-extra {
+    color: #b88;
   }
 
   .ast-nodes .typelit,
   .ast-nodes .typelit > .ast-extra {
-	color: #361;
+    color: #361;
+  }
+  .dark .ast-nodes .typelit,
+  .dark .ast-nodes .typelit > .ast-extra {
+    color: #491;
   }
 
   .ast-nodes .typelit .type {
-	color: #67f;
-	font-weight: 500;
+    color: #67f;
+    font-weight: 500;
   }
 
   .ast-nodes .typelit .key,
   .ast-nodes .typelit .literal {
-	font-weight: 500;
-	color: #557;
+    font-weight: 500;
+    color: #557;
+  }
+  .dark .ast-nodes .typelit .key,
+  .dark .ast-nodes .typelit .literal {
+    font-weight: 500;
+    color: #99b;
   }
 
   .ast-nodes .typelit .key {
-	color: #b61;
+    color: #b61;
   }
 
   .ast-nodes .typelit .condition {
-	font-weight: 700;
+    font-weight: 700;
   }
 
   .ast-nodes .ast-fail {
-	color: #f00;
+    color: #f00;
   }
 
   .ast-nodes .interpolator,
@@ -706,23 +732,42 @@ export const languageReference = `<html>
   .ast-nodes .unless-block > .ast-extra,
   .ast-nodes .case-block > .ast-extra,
   .ast-nodes .with-block > .ast-extra {
-	font-weight: 600;
+    font-weight: 600;
   }
 
   .ast-nodes .each-block > .ast-extra {
-	color: #4bc;
+    color: #4bc;
   }
 
   .ast-nodes .case-block > .ast-extra,
   .ast-nodes .unless-block > .ast-extra,
   .ast-nodes .if-block > .ast-extra {
-	color: #1de;
+    color: #1de;
   }
 
   .ast-nodes .with-block > .ast-extra {
-	color: #29c;
+    color: #29c;
   }
 </style>
+<script>
+  window.addEventListener('message', ev => {
+    const msg = ev.data;
+    if (!msg || typeof msg !== 'object') return;
+    switch (msg.action) {
+      case 'theme':
+        const cls = document.body.classList;
+        if (msg.theme === 'dark') {
+          if (cls.contains('light')) cls.remove('light');
+          if (!cls.contains('dark')) cls.add('dark');
+        } else {
+          if (!cls.contains('light')) cls.add('light');
+          if (cls.contains('dark')) cls.remove('dark');
+        }
+        break;
+    }
+  });
+</script>
+</head>
 <body>
 
 <h1 id="raport-expression-language-reference">Raport Expression Language Reference</h1>

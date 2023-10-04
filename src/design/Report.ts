@@ -1313,6 +1313,10 @@ export class Designer extends Ractive {
       dark = ml.matches;
       Ractive.styleSet(ml.matches ? darkTheme : lightTheme);
     }
+    Ractive.styleSet('theme', dark ? 'dark' : 'light');
+
+    const langref: any = document.getElementById('langref');
+    if (langref) langref.contentWindow.postMessage({ action: 'theme', theme: dark ? 'dark' : 'light' }, '*');
 
     if (settings.outTheme === 'dark') Ractive.styleSet('out', darkTheme);
     else if (settings.outTheme === 'light') Ractive.styleSet('out', lightTheme);
@@ -1643,7 +1647,10 @@ const designerOpts: ExtendOpts<Designer> = {
       this._undoWatch.cancel();
     },
     render() {
-      setTimeout(() => this._onChange(this.get('report')), 100);
+      setTimeout(() => {
+        this._onChange(this.get('report'));
+        this.applySettings();
+      }, 100);
     }
   },
   decorators: {
