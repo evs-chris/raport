@@ -121,8 +121,10 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   if (w.header && ((state && state.state && state.state.part === 'body' && w.headerPerPage !== false && (!group || !group.grouped)) || (!group || !group.grouped) && (!state || !state.state || state.state.part === 'header' || state.state.part === 'group'))) {
     r = renderWidget(w.header, ctx, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
 
-    if (r.height > availableY) return { output: '', height: 0, continue: { offset: 0, state: { part: 'header', src, current: 0 } } }
-    else availableY -= r.height;
+    if (r.height > availableY) {
+      if (html) html = `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`;
+      return { output: html, height: y, continue: { offset: 0, state: { part: 'header', src, current: 0 } } }
+    } else availableY -= r.height;
 
     html += r.output;
     y += r.height;
