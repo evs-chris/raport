@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { ExtendOpts, InitOpts, ContextHelper, ReadLinkResult, ObserverHandle } from 'ractive';
-import { Report, ReportSource, Literal, run, parse, stringify, initParameters, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, getOperatorMap, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap, Parameter, StringifyOpts } from 'raport/index';
+import { Report, ReportSource, Literal, run, parse, stringify, initParameters, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap, Parameter, StringifyOpts } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 import { Editor, Viewer } from './Editor';
@@ -9,15 +9,16 @@ import autosize from './autosize';
 import { trackfocus, getLastFocus } from './trackfocus';
 import { debounce } from './util';
 
-import { operators as operator_docs, languageReference as langref } from './docs';
+import { operators as operator_docs, formats as format_docs, languageReference as langref } from './docs';
 
 export { highlight } from './Editor';
 
 export interface OperatorDoc {
   op: string|string[];
+  alias?: boolean;
   note?: string;
   sig: Array<{
-    bin?: 1; un?: 1; agg?: 1;
+    bin?: 1; un?: 1; agg?: 1; fmt?: 1;
     proto: string;
     desc: string;
     eg?: string|string[];
@@ -31,21 +32,25 @@ export interface OperatorDoc {
 
 export interface FormatDoc {
   name: string|string[];
+  alias?: boolean;
   desc: string;
   opts?: Array<{
     name: string;
+    req?: 1;
     type: string;
     desc: string;
   }>;
 }
 
 export const docs = {
-  operators: evaluate(operator_docs) as Array<OperatorDoc>,
+  operators: [] as Array<OperatorDoc>,
   operatorText: {} as { [op: string]: string },
 };
-for (const doc of docs.operators) {
-  const op = Array.isArray(doc.op) ? doc.op[0] : doc.op;
-  const txt = `${op}${Array.isArray(doc.op) ? ` (alias ${doc.op.filter(n => n !== op).join(', ')})` : ''}
+{
+  const ops = evaluate(operator_docs) as Array<OperatorDoc>;
+  for (const doc of ops) {
+    const op = Array.isArray(doc.op) ? doc.op[0] : doc.op;
+    const txt = `${op}${Array.isArray(doc.op) ? ` (alias ${doc.op.filter(n => n !== op).join(', ')})` : ''}
 ---${doc.note ? `
 NOTE: ${doc.note}
 ` : ''}
@@ -54,8 +59,29 @@ ${doc.sig.map(s => `${s.proto}${s.bin ? '        (can be binary)' : ''}${s.un ? 
 Options
 ---
 ${doc.opts.map(o => `${Array.isArray(o.name) ? `${o.name[0]} (alias ${o.name.slice(1).join(', ')})` : o.name} - ${o.type}\n  ${o.desc}\n`).join('\n')}` : ''}`;
-  const all = Array.isArray(doc.op) ? doc.op : [doc.op];
-  all.forEach(n => docs.operatorText[n] = txt);
+    const all = Array.isArray(doc.op) ? doc.op : [doc.op];
+    all.forEach((n, i) => {
+      docs.operatorText[n] = txt;
+      docs.operators.push(Object.assign({}, doc, i === 0 ? { op: n } : { op: n, alias: true }));
+    });
+  }
+
+  const fmts = evaluate(format_docs) as Array<FormatDoc>;
+  for (const f of fmts) {
+    const all = Array.isArray(f.name) ? f.name : [f.name];
+    all.forEach((n, i) => {
+      const op = `#${n}`;
+      const val: any = { op, sig: [{ fmt: 1, proto: op, desc: f.desc }], opts: f.opts };
+      if (i > 0) val.alias = true;
+      docs.operators.push(val);
+      const txt = `${n}${all.length > 1 ? ` (alias: ${all.filter(nn => n !== nn).join(', ')})`: ''}${f.opts ? ` - #${n},${f.opts.map(o => `${o.name}${o.req ? '' : '?'}`).join(',')}` : ''}
+${f.opts ? `
+Arguments
+---
+${f.opts.map(o => `${o.name} - ${o.type}\n  ${o.desc}\n`).join('\n')}` : ''}`;
+      docs.operatorText[op] = txt;
+    });
+  }
 }
 
 let sourceTm: any;
@@ -843,6 +869,9 @@ export class Designer extends Ractive {
       if (binops.includes(name)) {
         rep = ` ${name} `;
         cursor = pos[0] + rep.length;
+      } else if (name[0] === '#') {
+        rep = `${name}`;
+        cursor = pos[0] + rep.length;
       } else {
         rep = `${name}(${rep})`
         cursor = pos[0] + rep.length - 1;
@@ -1384,9 +1413,9 @@ const designerOpts: ExtendOpts<Designer> = {
   },
   computed: {
     operators() {
-      const map = getOperatorMap();
+      const map: Array<[string, OperatorDoc]> = docs.operators.reduce((a, c) => (Array.isArray(c.op) ? c.op.forEach(o => a.push([o, c])) : a.push([c.op, c]), a), []);
+      let ops: typeof map = evaluate({ map }, `sort(map =>if _.0[0] == '#' then 'zz[_.0]' elif _.0[0] == '|' then ' {_.0}' else _.0)`)
       const search = this.get('opsearch');
-      let ops = evaluate({ list: Object.entries(map) }, 'sort(list =>_.0)');
       if (search) {
         const re = new RegExp(search.replace(/([*.\\\/$^()[\]{}+])/g, '\\$1'), 'i');
         ops = ops.filter(p => re.test(p[0]) || re.test(docs.operatorText[p[0]]));

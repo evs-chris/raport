@@ -1547,7 +1547,7 @@
 
 <dl>
 <dt><code>(...(string, any)) => object</code></dt>
-<dd>Returns an object assembled from the arguments where each odd argument is a key and the subsequent event argument is its value.</dd>
+<dd>Returns an object assembled from the arguments where each odd argument is a key and the subsequent even argument is its value.</dd>
 <dd>e.g. <code>object(:key1 99 :key2 73)</code></dd>
 </dl>
 
@@ -2650,7 +2650,18 @@ How to display negative values. Sign shows a leading minus symbol. Wrap wraps th
 
 Renders the first argument if the value is not truthy.
 
+<dl><dt>
 
+#### <ins>Options</ins>
+
+</dt><dd><dl>
+
+<dt><code>alt</code> - <code>any</code></dt><dd>
+
+The value to return in place of the falsey target.
+
+</dd>
+</dl></dd></dl>
 </dd></dl>
 <br/>
 

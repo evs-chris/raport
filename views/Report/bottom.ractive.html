@@ -165,13 +165,13 @@
       </div></div>
     </div>
     <div class-ops style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
-      <div class-header title="All of the registered operators know at design time. Click an operator to insert it into the expression. Hover over an operator for a tooltip with its documentation. Hold the shift key and click an operator for popup with its documentation."><span>Operators</span><span><input placeholder="Search..." value="{{~/opsearch}}" lazy=500 /></span></div>
+      <div class-header title="All of the builtin operators. Click an operator to insert it into an active text field. Hover over an operator for a tooltip with its documentation. Hold the shift key and click an operator for popup with its documentation."><span>Operators</span><span><input placeholder="Search..." value="{{~/opsearch}}" lazy=500 /></span></div>
       <div class-panel class-scrolled-wrapper><div as-scrolled>
         {{~/temp.expr.tab === 'ast' && @context.decorators.scrolled && @context.decorators.scrolled.invalidate() || '' && ''}}
         {{#each ~/operators}}
           <div class-entry-details title="{{@.getOperatorDoc(this.0)}}">
             <button class-expr-operator on-click="@event.shiftKey ? @.showOperatorDoc(this.0) : @.insertOp(this.0)">{{this.0}}</button>
-            <div class-entry-type>{{this.1.type}}</div>
+            <div class-entry-type>{{this.1.sig.0.bin && !this.1.alias ? 'binary' : ''}} {{this.1.sig.0.fmt ? 'format' : ''}} {{this.1.sig.0.agg ? 'aggregate' : ''}} {{this.1.sig.0.unary && !this.1.sig.alias ? 'unary' : ''}} {{this.1.alias ? 'alias' : ''}}</div>
           </div>
         {{/each}}
       </div></div>

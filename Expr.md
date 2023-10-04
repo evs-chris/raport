@@ -80,7 +80,7 @@ Schemas describe the type structure of a value. They consist of any number of ty
 * Type unions are composed by separating types with a `|` e.g. `string|number` will match a string or number.
 * Object types are specified as object literals with types as the values of their pairs e.g. `{ a:number b:string }` will match the value `{ a:21 b::sure }`.
   * Any key within an object type may be marked as optional by following its name with a `?` e.g. `{ a:number b?:date }` will match the value `{ a:21 }`.
-  * All remaining keys can be matched with the special key `...` to ensure that any other keys within an object arematch a certain type e.g. `{ a:number ...:string }` will match any object with an `a` key that is a number and all other keys, if any, that have string values.
+  * All remaining keys can be matched with the special key `...` to ensure that any other keys within an object match a certain type e.g. `{ a:number ...:string }` will match any object with an `a` key that is a number and all other keys, if any, that have string values.
 * Type aliases may be defined using the `type` keyword followed by a name and a definition e.g. `type Foo = { a:number b:string }`, followed by at least one whitespace or `;`. Type aliases may be used anywhere a primitive type would be, including in unions, tuples, and with array specifiers.
 * Any type may have conditions that are specified as applications that receive the value being validated and return true or false. Conditions are specified with a trailing `?` and application e.g. `type LargeNumber = number ? => _ > 100000000`. More than one condition may be applied to a type.
 
@@ -102,9 +102,11 @@ Exmaple: `'1, 3, 5, 7, >10'`, `'22-33 44 55-66'`
 
 REL is built around contexts that are somewhat analogous to stack frames that have an inherent base value. When an expression is being evaluated there is usually some value that is currently in scope as the focus of the context. The value of at the base of the current scope is available as the special reference `@value` or `_`. If the value happens to have properties, they can be referenced directly by their names e.g. in a context with a value of `{ foo: 21, bar: 22 }`, the reference `foo` will resolve to `21` when evaluated.
 
-If the context value happens to have a nested structure built of object and/or arrays, further children of the primary property can be accessed using dotted path or bracketed path notation e.g. `foo.bar`, `array.1.prop` or `array[1].prop`, and `foo[:ba + :r]`. The bracketed notation allows for expressions to be used when resolving names. References are always resolved safely to `undefined`, so doing something like `{ foo::bar }.baz.bat` does not cause an error.
+Each context also has a local lexical scope attached to it that is not directly connected with the underlying data in the context. This allows for passing named arguments to applications or utilyzing locally scoped variables without clobbering the associated data in the context. Some operators will introduce a new lexical scope while retaining the exising context, while others may introduce both a new context and a new lexical scope.
 
-Contexts may also have defined local variables, such as named arguments passed to an application, or any names defined by the `let` operator. These take precedent over context value properties in their scope, so to access a property with the same name as a local variable, you would have to use a special reference e.g. `_.foo`.
+If the value resolved by a reference happens to have a nested structure built of object and/or arrays, further children of the primary property can be accessed using dotted path or bracketed path notation e.g. `foo.bar`, `array.1.prop` or `array[1].prop`, and `foo[:ba + :r]`. The bracketed notation allows for expressions to be used when resolving names. References are always resolved safely to `undefined`, so doing something like `{ foo::bar }.baz.bat` does not cause an error.
+
+Any variables defined in the lexical scope will take precedent over values of the same name in the local context. To access a value in the context that has the same name as a local variable, you can start from the context special reference e.g. `_.foo` would refer to the context `foo` value where `foo` refers to a local variable.
 
 ### Prefixes
 
@@ -142,7 +144,7 @@ Operators are the foundational component of REL, as everything within REL other 
 * `if foo > 10 then :large elif foo < 5 then :small else :medium`
 * `if foo > 10 { :large } elif foo < 5 { :small } else { :medium }`
 
-Most operators are limited to LISP and call syntax because that's how they're most reasonably used. `+` and `not` are available as unary operators. Supported binary operators in order of precedence are exponentiation (`**`), mutiplication/division/modulus/int division (`*`, `/`, `%`, `/%`), addition/subtraction (`+`, `-`), comparison (`>=`, `>`, `<=`, `<`, `ilike`, `in`, `like`, `not-ilike`, `not-like`, `not-in`, `contains`, `does-not-contain`, `gt`, `gte`, `lt`, `lte`), equality (`is`, `is-not`, `==`, `!=`, `deep-is`, `deep-is-not`, `strict-is`, `strict-is-not`, `===`, `!==`), boolean and (`and`, `&&`), and boolean or (`or`, `\|\|`) and nullish coalescing (`??`). At least one space is required on either side of a binary operator.
+Most operators are limited to LISP and call syntax because that's how they're most reasonably used. `+` and `not` are available as unary operators. Supported binary operators in order of precedence are exponentiation (`**`), mutiplication/division/modulus/int division (`*`, `/`, `%`, `/%`), addition/subtraction (`+`, `-`), comparison (`>=`, `>`, `<=`, `<`, `ilike`, `in`, `like`, `not-ilike`, `not-like`, `not-in`, `contains`, `does-not-contain`, `gt`, `gte`, `lt`, `lte`), equality (`is`, `is-not`, `==`, `!=`, `deep-is`, `deep-is-not`, `strict-is`, `strict-is-not`, `===`, `!==`), boolean and (`and`, `&&`), boolean or (`or`, `\|\|`) and nullish coalescing (`??`). At least one space is required on either side of a binary operator.
 
 Most operators take a number of arguments, which are passed within their `()`s. Some operators will evaluate their arguments lazily, like `and` and `or`, and others will evaluate all of their arguments before processing them. Some operators will implicitly operate on their nearest data source, and these are internally configured as aggregate operators, including `sum` and `avg`.
 
@@ -182,7 +184,7 @@ Exmaple: `{ let a = 10; let b = 20; a + b }`
 
 ### if
 
-The primary form of conditional flow control is handled by the `if` operator, which takes a conditional argument followed by a truth case expression, any number of additional conditional and truth case expressions, and then an optional alternate expression. As an operator, `if` may be called as any other operator, but there is also built-in syntax to make it slightly more readable in the form `if` followed by a condition expression, followed by any number of alternate conditions and expressions in the form `else if` or `elseif` or `elsif` or `elif` followed by `then` and the value expression, optionally followed by `else` and a final alternate value expression.
+The primary form of conditional flow control is handled by the `if` operator, which takes a conditional argument followed by a truth case expression, any number of additional conditional and truth case expressions, and then an optional alternate expression. As an operator, `if` may be called as any other operator, but there is also built-in syntax to make it slightly more readable in the form `if` followed by a condition, `then`, and an expression; followed by any number of alternate conditions and expressions in the form `else if` or `elseif` or `elsif` or `elif` followed by `then` and the value expression; optionally followed by `else` and a final alternate value expression.
 
 The result of an `if` expression is the value of the value expression paired with the first matching conditional branch, the value of the final alternate branch if no conditions matched, or `undefined` if there were no matches and no final alternate value.
 
@@ -198,7 +200,7 @@ Example: `unless loggedIn 'Please log in'`
 
 ### case
 
-REL also has a case operator that allows for an alternate branch style that may be more comprehensible in some cases. Each branch condition is evaluated lazily, and if it is an expression will have the value being evaluated available as the special `@case` reference. If using the built-in syntax, `_` will also evaluate to `@case`. `case` expressions begin with `case` followed by a value expression, followed by any number of branches that start with `when` followed by a conditional value or expression, followed by `when` and a value expression, and finally optionally ending with an alternate `else` and value expression and optional `end` or `esac`.
+REL also has a case operator that allows for an alternate branch style that may be more comprehensible in some cases. Each branch condition is evaluated lazily, and if it is an expression will have the value being evaluated available as the special `@case` reference. If using the built-in syntax, `_` will also evaluate to `@case`. `case` expressions begin with `case` followed by a value expression, followed by any number of branches that start with `when` followed by a conditional value or expression, followed by `then` and a value expression, and finally optionally ending with an alternate `else` and value expression and optional `end` or `esac`.
 
 Example:
 ```
