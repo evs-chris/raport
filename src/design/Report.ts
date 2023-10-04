@@ -301,7 +301,7 @@ export class Designer extends Ractive {
 
   selectWidget(path: string) {
     this.link(path, 'widget');
-    this.set('temp.name', (path === 'report' ? 'Report' : (this.get(path + '.type') || '')) + ' ');
+    this.set('temp.name', nameForWidget(this.get(path + '.type'), path));
     this.set('temp.widget', path);
     const w: Widget = this.get('widget');
     if (w.type === 'html') this.editExpr(`${path}.html`, { html: true });
@@ -1848,6 +1848,24 @@ const designerOpts: ExtendOpts<Designer> = {
   },
 }
 Ractive.extendWith(Designer, designerOpts);
+
+function nameForWidget(type: string, path: string): string {
+  if (path === 'report') return 'report ';
+  else if (path === 'report.header') return 'Page Header ';
+  else if (path === 'report.footer') return 'Page Footer ';
+  else if (path === 'report.watermark') return 'Watermark ';
+  else if (path === 'report.overlay') return 'Overlay ';
+  if (type === 'container') {
+    const p = Ractive.splitKeypath(path);
+    const prop = p.pop();
+    if (prop === 'header') return 'Repeater Header ';
+    else if (prop === 'footer') return 'Repeater Footer ';
+    else if (prop === 'alternate') return 'Repeater Alternate ';
+    else if (prop === 'row') return 'Repeater Row ';
+    else if (!isNaN(+prop) && p.pop() === 'group') return `Repeater Group ${+prop + 1} `;
+  }
+  return `${type} `;
+}
 
 function tryParseData(str: string, header?: boolean): any {
   try {
