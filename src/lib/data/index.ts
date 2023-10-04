@@ -776,6 +776,7 @@ export function extend(context: Context, opts: ExtendOptions): Context {
 }
 
 export const formats: { [name: string]: { apply: (value: any, args?: any[], opts?: OperatorOptions) => string, defaults: { [key: string]: any } } } = {};
+export const virtualFormats: { [name: string]: { defaults: { [key: string]: any } } } = {};
 export function registerFormat<T = any>(name: string|string[], format: (value: T, args?: any[], opts?: OperatorOptions) => string, defaults: { [key: string]: any } = {}) {
   if (Array.isArray(name)) name.forEach(n => formats[n] = { apply: format, defaults });
   else formats[name] = { apply: format, defaults };

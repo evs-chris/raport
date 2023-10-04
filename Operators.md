@@ -2405,6 +2405,20 @@ __NOTE:__ The schema of an error is @[{ error: string; type?: 'strict'; path?: s
 
 <dl><dt>
 
+### `[operator]`
+---
+
+</dt>
+<dd>
+
+Calls the named operator as a formatter, passing the target value as the first argument with any arguments to the formatter following. Any set defaults for the formatter are passed as options to the operator.
+
+
+</dd></dl>
+<br/>
+
+<dl><dt>
+
 ### `case`
 ---
 
@@ -2642,31 +2656,6 @@ How to display negative values. Sign shows a leading minus symbol. Wrap wraps th
 
 <dl><dt>
 
-### `or`
----
-
-</dt>
-<dd>
-
-Renders the first argument if the value is not truthy.
-
-<dl><dt>
-
-#### <ins>Options</ins>
-
-</dt><dd><dl>
-
-<dt><code>alt</code> - <code>any</code></dt><dd>
-
-The value to return in place of the falsey target.
-
-</dd>
-</dl></dd></dl>
-</dd></dl>
-<br/>
-
-<dl><dt>
-
 ### `ordinal`
 ---
 
@@ -2684,93 +2673,6 @@ Render the value as an ordinal number.
 <dt><code>group</code> - <code>string</code></dt><dd>
 
 The string to use as a grouping divider.
-
-</dd>
-</dl></dd></dl>
-</dd></dl>
-<br/>
-
-<dl><dt>
-
-### `pad`
----
-
-</dt>
-<dd>
-
-Renders the given value as a string and ensures it is at least the given length by padding both ends with a configurable string that defaults to a single space.
-
-<dl><dt>
-
-#### <ins>Options</ins>
-
-</dt><dd><dl>
-
-<dt><code>len</code> - <code>number</code></dt><dd>
-
-Minimum length for the formatted string.
-
-</dd><dt><code>pad</code> - <code>number</code></dt><dd>
-
-The string to use for padding.
-
-</dd>
-</dl></dd></dl>
-</dd></dl>
-<br/>
-
-<dl><dt>
-
-### `padl`
----
-
-</dt>
-<dd>
-
-Renders the given value as a string and ensures it is at least the given length by padding the beginning with a configurable string that defaults to a single space.
-
-<dl><dt>
-
-#### <ins>Options</ins>
-
-</dt><dd><dl>
-
-<dt><code>len</code> - <code>number</code></dt><dd>
-
-Minimum length for the formatted string.
-
-</dd><dt><code>pad</code> - <code>number</code></dt><dd>
-
-The string to use for padding.
-
-</dd>
-</dl></dd></dl>
-</dd></dl>
-<br/>
-
-<dl><dt>
-
-### `padr`
----
-
-</dt>
-<dd>
-
-Renders the given value as a string and ensures it is at least the given length by padding the end with a configurable string that defaults to a single space.
-
-<dl><dt>
-
-#### <ins>Options</ins>
-
-</dt><dd><dl>
-
-<dt><code>len</code> - <code>number</code></dt><dd>
-
-Minimum length for the formatted string.
-
-</dd><dt><code>pad</code> - <code>number</code></dt><dd>
-
-The string to use for padding.
 
 </dd>
 </dl></dd></dl>
@@ -2899,20 +2801,6 @@ The format template to apply.
 
 </dd>
 </dl></dd></dl>
-</dd></dl>
-<br/>
-
-<dl><dt>
-
-### `trim`
----
-
-</dt>
-<dd>
-
-Removes any whitespace from the ends of the value.
-
-
 </dd></dl>
 <br/>
 

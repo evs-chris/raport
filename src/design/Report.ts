@@ -75,6 +75,8 @@ ${doc.opts.map(o => `${Array.isArray(o.name) ? `${o.name[0]} (alias ${o.name.sli
       if (i > 0) val.alias = true;
       docs.operators.push(val);
       const txt = `${n}${all.length > 1 ? ` (alias: ${all.filter(nn => n !== nn).join(', ')})`: ''}${f.opts ? ` - #${n},${f.opts.map(o => `${o.name}${o.req ? '' : '?'}`).join(',')}` : ''}
+${f.desc ? `${f.desc}
+` : ''}
 ${f.opts ? `
 Arguments
 ---

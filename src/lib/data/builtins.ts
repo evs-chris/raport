@@ -1,4 +1,4 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, evaluate, evalApply, evalValue, evalParse, extend, formats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator, OperatorOptions, sort, toDataSet } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, evaluate, evalApply, evalValue, evalParse, extend, formats, virtualFormats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator, OperatorOptions, sort, toDataSet } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseExpr, parse } from './parse';
 import { parse as parseTemplate } from './parse/template';
@@ -888,16 +888,32 @@ registerOperator(
     v = v == null ? '' : v;
     return name === 'upper' ? `${v}`.toUpperCase() : `${v}`.toLowerCase();
   }),
-  simple(['format', 'fmt'], (_name: string, args: any[], opts): string => {
-    let [n, v, ...s] = args;
-    const fmt = formats[v];
-    if (!fmt) return `${n}`;
-    else return fmt.apply(n, s, (opts || fmt.defaults) as any);
+  simple(['format', 'fmt'], (_name: string, args: any[], opts, ctx): string => {
+    let [v, fmt, ...s] = args;
+    const op = formats[fmt];
+    if (!op) {
+      const op = getOperator(fmt);
+      if (op) {
+        const args = [v, ...s];
+        if (op.type === 'aggregate') return op.apply(fmt, v, s.map(v => ({ v })), (opts || virtualFormats[fmt]) as any, ctx);
+        if (op.type === 'checked') {
+          for (let i = 0; i < args.length; i++) {
+            const res = op.checkArg(fmt, i, args.length - 1, args[i], (opts || virtualFormats[fmt]) as any, ctx, { v: args[i] });
+            if (typeof res !== 'object' || !('result' in res)) continue;
+            else return res.result;
+          }
+          return op.apply(fmt, args, (opts || virtualFormats[fmt]) as any, ctx);
+        }
+        return op.apply(fmt, args, (opts || virtualFormats[fmt]) as any, ctx);
+      } else return `${v}`;
+    } else return op.apply(v, s, (opts || op.defaults) as any);
   }),
   simple(['set-defaults'], (_name: string, [type, name]: any[], opts) => {
     if (type === 'format' && typeof name === 'string') {
       const fmt = formats[name];
       if (fmt) return Object.assign(fmt.defaults, opts);
+      const vfmt = virtualFormats[name];
+      if (vfmt) return Object.assign(vfmt.defaults, opts);
     } else if (type === 'round') {
       Object.assign(roundDefaults, opts);
     }
@@ -1248,27 +1264,6 @@ registerFormat('ordinal', function(n, [group], opts) {
 
 registerFormat('phone', n => {
   return phone(n);
-});
-
-registerFormat('or', (n, [v]) => {
-  return n || v;
-});
-
-registerFormat('padl', function(n, [count, val], opts) {
-  return pad('l', n, count ?? opts?.len, val ?? opts?.pad ?? this.defaults.pad);
-}, { pad: ' ' });
-
-registerFormat('padr', function(n, [count, val], opts) {
-  return pad('r', n, count ?? opts?.len, val ?? opts?.pad ?? this.defaults.pad);
-}, { pad: ' ' });
-
-registerFormat('pad', function(n, [count, val], opts) {
-  return pad('c', n, count ?? opts?.len, val ?? opts?.pad ?? this.defaults.pad);
-}, { pad: ' ' });
-
-registerFormat('trim', n => {
-  if (!n) return n;
-  else return `${n}`.trim();
 });
 
 {

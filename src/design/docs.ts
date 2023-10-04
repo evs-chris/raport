@@ -505,23 +505,8 @@ export const formats = `let dateparts = 'Available placeholders are:\\n\\n* y - 
 		{ name:'group' type:'string' desc:'The string to use as a grouping divider.' }
 		{ name:'neg' type:"'sign'|'wrap'|'both'" desc:'How to display negative values. Sign shows a leading minus symbol. Wrap wraps the value in parenteses.' }
 	]}
-	{ name:'or' desc:'Renders the first argument if the value is not truthy.' opts:[
-		{ name:'alt' req:1 type:'any' desc:'The value to return in place of the falsey target.' }
-	]}
 	{ name:'ordinal' desc:'Render the value as an ordinal number.' opts:[
 		{ name:'group' type:'string' desc:'The string to use as a grouping divider.' }
-	]}
-	{ name:'pad' desc:'Renders the given value as a string and ensures it is at least the given length by padding both ends with a configurable string that defaults to a single space.' opts: [
-		{ name:'len' req:1 type:'number' desc:'Minimum length for the formatted string.' }
-		{ name:'pad' type:'number' desc:'The string to use for padding.' }
-	]}
-	{ name:'padl' desc:'Renders the given value as a string and ensures it is at least the given length by padding the beginning with a configurable string that defaults to a single space.' opts: [
-		{ name:'len' req:1 type:'number' desc:'Minimum length for the formatted string.' }
-		{ name:'pad' type:'number' desc:'The string to use for padding.' }
-	]}
-	{ name:'padr' desc:'Renders the given value as a string and ensures it is at least the given length by padding the end with a configurable string that defaults to a single space.' opts: [
-		{ name:'len' req:1 type:'number' desc:'Minimum length for the formatted string.' }
-		{ name:'pad' type:'number' desc:'The string to use for padding.' }
 	]}
 	{ name:'phone' desc:'Formats the value as phone number e.g. 111-2222, (111) 222-3333, 1-888-777-6666' }
 	{ name:'time' desc:'Formats a date value as a time string using placeholder characters, where repeated characters render more descriptive or padded values. Any non-placeholder characters are rendered as entered. The default format is HH:mm:ss. {dateparts}' opts:[
@@ -533,7 +518,7 @@ export const formats = `let dateparts = 'Available placeholders are:\\n\\n* y - 
 	{ name:'timestamptz' desc:'Formats a date value as a timestamp with timezone offset using placeholder characters, where repeated characters render more descriptive or padded values. Any non-placeholder characters are rendered as entered. The default format is yyyy-MM-dd HH:mm:sszzz. {dateparts}' opts:[
 		{ name:'format' type:'string' desc:'The format template to apply.'}
 	]}
-	{ name:'trim' desc:'Removes any whitespace from the ends of the value.' }
+	{ name:'[operator]', desc:'Calls the named operator as a formatter, passing the target value as the first argument with any arguments to the formatter following. Any set defaults for the formatter are passed as options to the operator.' }
 ]`;
 
 export const generateMarkdown = `let mkarr = =>if count(_) then _ else [_]
