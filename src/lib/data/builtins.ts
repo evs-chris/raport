@@ -892,7 +892,7 @@ registerOperator(
     let [n, v, ...s] = args;
     const fmt = formats[v];
     if (!fmt) return `${n}`;
-    else return fmt.apply(n, s, opts);
+    else return fmt.apply(n, s, (opts || fmt.defaults) as any);
   }),
   simple(['set-defaults'], (_name: string, [type, name]: any[], opts) => {
     if (type === 'format' && typeof name === 'string') {
