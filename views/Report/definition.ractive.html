@@ -9,6 +9,7 @@
       {{#if ~/tmp.js}}<label class-spacer title="Render report definition strings as JSON strings or template literals"><select value="{{~/tmp.strings}}"><option>json</option><option>template</option></select></label>{{/if}}
       <label class-spacer title="Switch the formatter into compact mode"><input type=checkbox checked="{{~/tmp.nowrap}}" /> Compact format?</label>
       <button class="ico text" on-click="@.fmtAll()" title="Reformat all expressions">Format All</button>
+      <button class="ico text" style="margin-left: 2em;" on-click="@.copyToClipboard(@.reportToString(~/tmp.compact, ~/tmp.js, ~/tmp.strings))" title="Copy definition to clipboard">Copy Text</button>
     </div>
     <div class-json>
       <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate="@.autosize(@node)" twoway=false value="{{@.reportToString(~/tmp.compact, ~/tmp.js, ~/tmp.strings)}}" on-change="@.loadReportString(@node.value), @.update('temp')" /></div></div>
