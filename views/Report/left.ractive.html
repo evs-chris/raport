@@ -69,6 +69,7 @@
                 <option>landscape</option>
                 <option>portrait</option>
               </select></span></label>
+              {{>margin-prop report}}
             {{else}}
               <label><span title="An optional width in rem for this report.">Width</span><span><input type=number value="{{report.width}}" /></span></label>
               {{#if !report.width}}

@@ -78,10 +78,11 @@ export interface Flow<T = {}> extends Displayed<T> {
 // page
 export interface Page<T = {}> extends Displayed<T> {
   type: 'page';
-  header?: Container;
-  footer?: Container;
+  header?: Container & { outer?: boolean };
+  footer?: Container & { outer?: boolean };
   size: PageSize;
   orientation?: PageOrientation;
+  margin?: Margin;
 }
 
 export type Dimension = number|{ percent: number };
@@ -338,34 +339,41 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
   let size: PageSize = report.orientation !== 'portrait' ? { width: report.size.height, height: report.size.width, margin: [report.size.margin[1], report.size.margin[0]] } : report.size;
 
   const ctx: RenderContext = { context, report, styles: {}, styleMap: { ids: {}, styles: {} } };
+  const margin = expandMargin(report, ctx, { x: 0, y: 0 });
   context.special = context.special || {};
   context.special.page = 0;
   context.special.pages = 0;
 
   const pages: string[] = [''];
   let page = 0;
-  let availableY = size.height - 2 * size.margin[0];
+  const printX = size.width - 2 * size.margin[1];
+  const printY = size.height - 2 * size.margin[0];
+  let availableY = printY - margin[0] - margin[2];
   const pageY = availableY;
   let maxY = availableY;
   let y = 0;
-  const availableX = size.width - 2 * size.margin[1];
+  const availableX = printX - margin[1] - margin[3];
   let state: RenderState<any> = null;
 
   let headSize = 0;
   if (report.header) {
     const r = renderWidget(report.header, ctx, { x: 0, y: 0, availableX, availableY, maxX: availableX, maxY });
     headSize = r.height;
-    availableY -= headSize;
-    maxY -= headSize;
-    y += headSize;
+    if (!report.header?.outer) {
+      availableY -= headSize;
+      maxY -= headSize;
+      y += headSize;
+    }
   }
 
   let footSize = 0;
   if (report.footer) {
     const r = renderWidget(report.footer, ctx, { x: 0, y: 0, availableX, availableY, maxX: availableX, maxY });
     footSize = r.height;
-    availableY -= footSize;
-    maxY -= footSize;
+    if (!report.footer?.outer) {
+      availableY -= footSize;
+      maxY -= footSize;
+    }
   }
 
   for (const w of report.widgets) {
@@ -376,8 +384,8 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
       if (r.continue) {
         page++;
         pages[page] = '';
-        y = headSize;
-        availableY = size.height - 2 * size.margin[0] - headSize - footSize;
+        y = report.header?.outer ? 0 : headSize;
+        availableY = printY - (report.header?.outer ? 0 : headSize) - (report.footer?.outer ? 0 : footSize) - margin[0] - margin[2];
         state = r.continue;
       } else {
         y += r.height;
@@ -388,27 +396,32 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
   }
 
   context.special.pages = pages.length;
-  const footTop = size.height - 2 * size.margin[0] - footSize;
+  const footPlace = report.footer?.outer ?
+    { x: 0, y: printY - footSize, maxX: printX, maxY: printY } :
+    { x: 0 + margin[3], y: printY - margin[0] - footSize, maxX: printX - margin[3] - margin[1], maxY: printY - margin[0] - margin[2] };
+  const headPlace = report.header?.outer ?
+    { x: 0, y: 0, maxX: printX, maxY: printY } :
+    { x: 0 + margin[3], y: margin[0], maxX: printX - margin[3] - margin[1], maxY: printY - margin[0] - margin[2] };
 
   context.special.size = { x: availableX, y: pageY };
   pages.forEach((p, i) => {
     let n = `<div class="page-back pb${i}"><div${styleClass(ctx, ['page', `ps${i}`], ['', ''], '', 'p')}>\n`;
     context.special.page = i + 1;
     if (report.watermark) {
-      const r = renderWidget(report.watermark, ctx, { x: 0, y: 0, maxX: availableX, maxY: pageY });
+      const r = renderWidget(report.watermark, ctx, { x: 0, y: 0, maxX: printX, availableX: printX, maxY: printY, availableY: printY });
       n += r.output + '\n';
     }
     if (report.header) {
-      const r = renderWidget(report.header, ctx, { x: 0, y: 0, maxX: availableX, maxY });
+      const r = renderWidget(report.header, ctx, headPlace);
       n += r.output + '\n';
     }
-    n += p;
+    n += `<div class="page-inner">${p}</div>`;
     if (report.footer) {
-      const r = renderWidget(report.footer, ctx, { x: 0, y: footTop, maxX: availableX, maxY });
+      const r = renderWidget(report.footer, ctx, footPlace);
       n += r.output + '\n';
     }
     if (report.overlay) {
-      const r = renderWidget(report.overlay, ctx, { x: 0, y: 0, maxX: availableX, maxY: pageY });
+      const r = renderWidget(report.overlay, ctx, { x: 0, y: 0, maxX: printX, availableX: printX, maxY: printY, availableY: printY });
       n += r.output + '\n';
     }
     n += '\n</div></div>';
@@ -416,7 +429,8 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
   });
 
   return `<html style="font-size:100%;margin:0;padding:0;"><head><style>
-    .page { width: ${size.width - 2 * size.margin[1]}rem; height: ${size.height - 2 * size.margin[0]}rem; position: absolute; overflow: hidden; left: ${size.margin[1]}rem; top: ${size.margin[0]}rem; ${report.font ? styleFont(report.font, ctx) : ''} }
+    .page { width: ${printX}rem; height: ${printY}rem; position: absolute; overflow: hidden; left: ${size.margin[1]}rem; top: ${size.margin[0]}rem; ${report.font ? styleFont(report.font, ctx) : ''} }
+    .page-inner { position: absolute; width: ${printX - margin[1] - margin[3]}rem; height: ${printY - margin[0] - margin[2]}rem; left: ${margin[3]}rem; top: ${margin[0]}rem; }
     .page-back { width: ${size.width}rem; height: ${size.height}rem; }
     body { font-size: 0.83rem; }
     @media screen {

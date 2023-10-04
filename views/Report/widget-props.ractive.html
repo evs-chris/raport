@@ -50,38 +50,7 @@
     </span></label>
   {{/if}}
 {{/with}}
-<label><span title="If this evaluates to true, the {{.type}} will be hidden and not affect automatic layouts">Hidden <button class-hide /><button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')">{{>pencil}}</button></span><span>
-    <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.hide}} tabout /></div>
-  </span></label>
-<label><span title="Additional padding within the borders of the {{.type}}. The base value for this property is a four number tuple with values for the top, right, bottom, and left. A two number tuple is converted to top/bottom and left/right. A single number specifies the same number for all sides.">
-    Margin
-    {{#if typeof .margin === 'object' && 'x' in .margin}}<button class-hide /><button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.margin.x'), false">{{>pencil}}</button>{{/if}}
-  </span><span>
-  <div class=toggles>
-    <span class-toggle class-active="typeof .margin === 'undefined'" {{#if typeof .margin !== 'undefined'}}on-click="@context.set('.margin', undefined)"{{/if}}>None</span>
-    <span class-toggle class-active="typeof .margin === 'number'" {{#if typeof .margin !== 'number'}}on-click="@context.set('.margin', 1)"{{/if}}>All</span>
-    <span class-toggle class-active=".margin.length === 2" {{#if .margin.length !== 2}}on-click="@context.set('.margin', [1, 1])"{{/if}}>Paired</span>
-    <span class-toggle class-active=".margin.length === 4" {{#if .margin.length !== 4}}on-click="@context.set('.margin', [1, 1, 1, 1])"{{/if}}>Individual</span>
-    <span class-toggle class-active="typeof .margin === 'object' && 'x' in .margin" {{#if !.margin || .margin.x === undefined}}on-click="@context.set('.margin', { x: '' })"{{/if}}>Expression</span>
-  </div>
-  {{#if typeof .margin === 'number'}}
-    <input type=number lazy value="{{.margin}}" />
-  {{elseif .margin.length === 2}}
-    <div class=sides>
-      <span /><input lazy type=number value="{{.margin[0]}}" /><span />
-      <span /><div class=square /><input lazy type=number value="{{.margin[1]}}" />
-      <span /><span /><span />
-    </div>
-  {{elseif .margin.length === 4}}
-    <div class=sides>
-      <span /><input lazy type=number value="{{.margin[0]}}" /><span />
-      <input lazy type=number value="{{.margin[3]}}" /><div class=square /><input lazy type=number value="{{.margin[1]}}" />
-      <span /><input lazy type=number value="{{.margin[2]}}" /><span />
-    </div>
-  {{elseif .margin.x !== undefined}}
-    <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.margin.x}} tabout /></div>
-  {{/if}}
-</span></label>
+{{>margin-prop}}
 <label><span title="Setting box to contain will make the margins fit within the designated size. Setting box to expand will expand the width to include the margin. The default depends on the type of sizing, with contain for percentages and expand for others.">Box</span><span>
   <select value="{{.box}}">
     <option value="{{undefined}}">Default</option>
@@ -238,6 +207,41 @@
 
 <template id="sure" src="./test.ractive.html" />
 
+<template id="margin-prop">
+  <label><span title="If this evaluates to true, the {{.type}} will be hidden and not affect automatic layouts">Hidden <button class-hide /><button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')">{{>pencil}}</button></span><span>
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.hide}} tabout /></div>
+    </span></label>
+  <label><span title="Additional padding within the borders of the {{.type}}. The base value for this property is a four number tuple with values for the top, right, bottom, and left. A two number tuple is converted to top/bottom and left/right. A single number specifies the same number for all sides.">
+      Margin
+      {{#if typeof .margin === 'object' && 'x' in .margin}}<button class-hide /><button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.margin.x'), false">{{>pencil}}</button>{{/if}}
+    </span><span>
+    <div class=toggles>
+      <span class-toggle class-active="typeof .margin === 'undefined'" {{#if typeof .margin !== 'undefined'}}on-click="@context.set('.margin', undefined)"{{/if}}>None</span>
+      <span class-toggle class-active="typeof .margin === 'number'" {{#if typeof .margin !== 'number'}}on-click="@context.set('.margin', 1)"{{/if}}>All</span>
+      <span class-toggle class-active=".margin.length === 2" {{#if .margin.length !== 2}}on-click="@context.set('.margin', [1, 1])"{{/if}}>Paired</span>
+      <span class-toggle class-active=".margin.length === 4" {{#if .margin.length !== 4}}on-click="@context.set('.margin', [1, 1, 1, 1])"{{/if}}>Individual</span>
+      <span class-toggle class-active="typeof .margin === 'object' && 'x' in .margin" {{#if !.margin || .margin.x === undefined}}on-click="@context.set('.margin', { x: '' })"{{/if}}>Expression</span>
+    </div>
+    {{#if typeof .margin === 'number'}}
+      <input type=number lazy value="{{.margin}}" />
+    {{elseif .margin.length === 2}}
+      <div class=sides>
+        <span /><input lazy type=number value="{{.margin[0]}}" /><span />
+        <span /><div class=square /><input lazy type=number value="{{.margin[1]}}" />
+        <span /><span /><span />
+      </div>
+    {{elseif .margin.length === 4}}
+      <div class=sides>
+        <span /><input lazy type=number value="{{.margin[0]}}" /><span />
+        <input lazy type=number value="{{.margin[3]}}" /><div class=square /><input lazy type=number value="{{.margin[1]}}" />
+        <span /><input lazy type=number value="{{.margin[2]}}" /><span />
+      </div>
+    {{elseif .margin.x !== undefined}}
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.margin.x}} tabout /></div>
+    {{/if}}
+  </span></label>
+</template>
+
 <template id="label-props">
   <label><span title="The text to appear in this label. This is an expression, so literal text will need to be specified as a string expression.">Text <button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.text', { label: true })">{{>pencil}}</button></span><span>{{#if Array.isArray(.text)}}<button class-plain on-click="@context.set('.text', @.getPartStrings(.text)), @.editExpr('.text', { label: true })">Convert to Text</button>{{else}}
       <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.text}} tabout /></div>
@@ -276,6 +280,9 @@
     <label><span title="If enabled, show the repeater footer for this grouping of rows. You can use the @level reference to modify the footer for different levels within the repeater.">Show Footer?</span><span><input type=checkbox checked="{{repeater.groupEnds[repeater.group.length - 1 - index]}}" /></span></label>
   {{/if}}
   {{/with}}
+  {{#if ~/report.type === 'page' && (~/temp.widget === 'report.header' || ~/temp.widget === 'report.footer') && ~/report.margin}}
+    <label><span title="If enabled, render the {{@.lastKey(~/temp.widget)}} at the outer edge of the page margin rather than within the inner boundaries of the page margin.">Render in margin?</span><span><input type=checkbox checked="{{.outer}}" /></span></label>
+  {{/if}}
   <label><span title="Auto layout containers position their children from top to bottom, left to right, along the x axis, with children wrapping below the tallest child on the line above. Manual layout containers must have x and y coordinates specified for each child, allowing overlap and defaulting to 0, 0.">Layout</span><span>
     <select twoway="false" value="{{Array.isArray(.layout) ? 'manual' : 'auto'}}" on-change="@context.set('.layout', @node.value === 'manual' ? @.fillArray(.widgets.length) : undefined)">
       <option value="auto">Auto</option>
