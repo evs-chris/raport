@@ -1940,7 +1940,7 @@ function stripDefaults(json: any): any {
     if (!res.header || !Object.keys(res.header).length || !Array.isArray(res.header.widgets) || !res.header.widgets.length) delete res.header;
     if (!res.footer || !Object.keys(res.footer).length || !Array.isArray(res.footer.widgets) || !res.footer.widgets.length) delete res.footer;
     if (!res.width) delete res.width;
-    if (!res.margin || !res.margin.length) delete res.margin;
+    if (!res.margin || (Array.isArray(res.margin)) && !res.margin.length) delete res.margin;
     if (!res.source) delete res.source;
     if (!res.headers || !res.headers.length) delete res.headers;
     if (!res.record) delete res.record;
