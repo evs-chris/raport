@@ -750,7 +750,7 @@ registerOperator(
     }
   }),
   simple(['len', 'length'], (_name: string, [src]: any[]) => {
-    if (src && 'length' in src) return src.length;
+    if (typeof src === 'string' || src && 'length' in src) return src.length;
     return 0;
   }),
   simple(['replace', 'replace-all'], (name: string, [str, find, rep, flags]: any[]) => {
