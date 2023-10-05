@@ -895,7 +895,7 @@ registerOperator(
       const op = getOperator(fmt);
       if (op) {
         const args = [v, ...s];
-        if (op.type === 'aggregate') return op.apply(fmt, v, s.map(v => ({ v })), (opts || virtualFormats[fmt]) as any, ctx);
+        if (op.type === 'aggregate') return op.apply(fmt, Array.isArray(v) ? v : [v], s.map(v => ({ v })), (opts || virtualFormats[fmt]) as any, ctx);
         if (op.type === 'checked') {
           for (let i = 0; i < args.length; i++) {
             const res = op.checkArg(fmt, i, args.length - 1, args[i], (opts || virtualFormats[fmt]) as any, ctx, { v: args[i] });
