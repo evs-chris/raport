@@ -1,3 +1,12 @@
+## 0.20.1
+
+2023-10-07
+
+### Render
+
+* __BUG:__ Repeaters with per-page headers and groups will now render the per-page header.
+
+
 ## 0.20.0
 
 2023-10-07
