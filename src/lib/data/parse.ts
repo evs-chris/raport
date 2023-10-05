@@ -308,13 +308,14 @@ export const sexp = map(bracket(
 }, { primary: true, name: 's-expression' });
 
 function fmt_op(parser: Parser<Value>): Parser<Value> {
-  return map(seq(parser, opt(seq(str('#'), ident, opt(alt<[Value[], Value]>(
+  return map(seq(parser, rep(seq(str('#'), ident, opt(alt<[Value[], Value]>(
     map(seq(str(','), rep1sep(value, str(','), 'allow')), ([, value]) => [value, undefined]),
     bracket_op(args),
   ))), { primary: true, name: 'format-op' })), ([value, fmt]) => {
-    if (!fmt) return value;
-    if (fmt[2]) return { op: 'fmt', args: [value, { v: fmt[1] }, ...(fmt[2][0] || [])], opts: fmt[2][1] };
-    else return { op: 'fmt', args: [value, { v: fmt[1] }] };
+    if (!fmt || !fmt.length) return value;
+    return fmt.reduce((a, c) => c[2] ?
+      { op: 'fmt', args: [a, { v: c[1] }, ...(c[2][0] || [])], opts: c[2][1] } :
+      { op: 'fmt', args: [a, { v: c[1] }] }, value);
   }, 'fmt-op');
 }
 
