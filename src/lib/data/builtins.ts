@@ -342,6 +342,7 @@ registerOperator(
     const [l, r] = values;
     const c = extend(ctx, { value: l });
     if (isKeypath(r)) return safeGet(c, r);
+    else if (typeof r === 'number') return safeGet(c, '' + r);
     else return evaluate(c, r);
   }),
   simple(['array'], (_name: string, values: any[]) => {
