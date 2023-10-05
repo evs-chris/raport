@@ -1,3 +1,37 @@
+## 0.20.0
+
+2023-10-07
+
+### Render
+
+* __BREAKING:__ Grouped repeaters can now have headers enabled per group and at the top level.
+* __BUG:__ Grouped repeater headers that happen to use the remaining space on a page will no longer be lost.
+* Reports now have configurable margins. The page header and footer can potionally be included in the margin.
+
+### Data
+
+* __BUG:__ Formatters will now receive their default ops when called in postfix sugar mode.
+* Operators can now be called as formatters, and `set-defaults` can set options for operators called as formatters. This allows operators like `round`, `join`, `uppoer`, and `lower` to be used directtly as formatters.
+* The `eval` operator now has an option to evaluate the string as a template, and a context can be given for evaluation.
+* The `length` operator now properly supports strings.
+* The `get` operator now supports numeric indices.
+
+### Designer
+
+* Specialized containers now have their specialized name as a heading above their properties rather than just 'Container'.
+* Empty margins now compact more compactly.
+* The language reference colors will now follow the designer theme mode.
+* The definition tab now includes a button to quickly copy the definition to the clipboard.
+* Formatters are now listed as operators, and the operator listing is sourced entirely from the documentation.
+* There is now a version number and link to the source repository at the top of the designer.
+* There is now a way to close a project.
+* Data source imports no longer try to import on change. There is now a button to process the import.
+
+### Parser
+
+* Format ops can now be chained if they use parenthetical or no argument lists.
+
+
 ## 0.19.1
 
 2023-05-05

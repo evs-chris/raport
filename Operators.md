@@ -701,6 +701,11 @@
 <dd>Evaluates the given string as an expression.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>template</code></dt><dd>Evaluate the given string as a template in the current context.</dd><dt><code>context</code></dt><dd>The context in which to evaluate the expression. If not given, the current context will be used.</dd>
+</dl>
 </dl>
 <br/>
 
