@@ -192,8 +192,8 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 
         if (r.height > availableY || r.cancel) {
           if (initY === y && usedY) y += usedY;
-          if (commit) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx, newPage: !r.continue || !r.continue.state || !r.continue.state.newPage }, child: r.continue } };
-          else return { output: '', height: y, continue: { offset: y, state: { part: state && state.state && state.state.part || 'body', src, current: i, context: rctx, newPage: !r.continue || !r.continue.state || !r.continue.state.newPage }, child: r.continue } };
+          if (commit) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx, newPage: !group || groupNo === false }, child: r.continue } };
+          else return { output: '', height: y, continue: { offset: y, state: { part: state && state.state && state.state.part || 'body', src, current: i, context: rctx, newPage: !group || groupNo === false }, child: r.continue } };
         }
 
         if (!usedY) {
@@ -206,7 +206,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 
         if (r.continue) {
           if (initY === y && usedY) y += usedY;
-          return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx }, child: r.continue } };
+          return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx, newPage: !group || groupNo === false }, child: r.continue } };
         }
       }
     }
