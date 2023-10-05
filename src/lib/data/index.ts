@@ -300,6 +300,9 @@ export function template(root: string|Context|{ context: Context }|any, template
   } else if (root && typeof root === 'object' && 'context' in root && isContext(root.context)) {
     r = root.context;
     t = template || '';
+  } else if (root && typeof root !== 'string') {
+    r = new Root(root);
+    t = template || '';
   } else {
     r = new Root();
     t = root;
@@ -765,7 +768,7 @@ export interface ExtendOptions {
 
 export function extend(context: Context, opts: ExtendOptions): Context {
   return {
-    parent: opts.fork ? context.parent : context,
+    parent: opts.fork ? (context.parent || context.root) : context,
     root: context.root,
     path: opts.path || '',
     value: 'value' in opts ? opts.value : context.value,

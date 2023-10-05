@@ -1,4 +1,4 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, evaluate, evalApply, evalValue, evalParse, extend, formats, virtualFormats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator, OperatorOptions, sort, toDataSet } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, evaluate, evalApply, evalValue, evalParse, template, extend, formats, virtualFormats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator, OperatorOptions, sort, toDataSet } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseExpr, parse } from './parse';
 import { parse as parseTemplate } from './parse/template';
@@ -726,8 +726,9 @@ const triml = /^\s*/;
 const trimr = /\s*$/;
 const escapeRe = /([\.\[\]\{\}\(\)\^\$\*\+\-])/g;
 registerOperator(
-  simple(['eval'], (_name: string, [v], _opts, ctx: Context): any => {
-    return evaluate(ctx, v);
+  simple(['eval'], (_name: string, [v], opts, ctx: Context): any => {
+    if (opts?.template) return template(opts?.context || ctx, v);
+    else return evaluate(opts?.context || ctx, v);
   }),
   simple(['padl', 'padr', 'pad'], (name: string, args: any[]): string => {
     let [str, count, val] = args;

@@ -140,6 +140,9 @@ export const operators = `[
 	]}
 	{ op:'eval' sig:[
 		{ proto:'string => any' desc:'Evaluates the given string as an expression.' }
+	] opts: [
+		{ name:'template' type:'boolean' desc:'Evaluate the given string as a template in the current context.' }
+		{ name:'context' type:'Context' desc:'The context in which to evaluate the expression. If not given, the current context will be used.' }
 	]}
 	{ op:'filter' sig:[
 		{ proto:'(any[], application) => any[]' desc:'Filters the given array using the given application to remove entries that return a false-y result.' }
