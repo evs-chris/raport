@@ -1288,6 +1288,14 @@ export class Designer extends Ractive {
     this.resetUndo();
   }
 
+  unlinkProject() {
+    this.unlink('report');
+    this.unlink('sources');
+    this.unlink('project');
+    this.checkLinks();
+    this.resetUndo();
+  }
+
   resetUndo() {
     this._undo = [];
     this._redo = [];
