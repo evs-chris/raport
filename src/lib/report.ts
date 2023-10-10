@@ -204,6 +204,9 @@ export interface Widget extends Style {
   footer?: Container;
   alternate?: Container;
   headerPerPage?: boolean;
+
+  // repeater row
+  elide?: boolean|Computed;
 }
 
 export interface Container extends Widget {
@@ -211,6 +214,7 @@ export interface Container extends Widget {
   layout?: Layout;
   context?: ValueOrExpr;
   bridge?: boolean;
+  elide?: boolean|Computed;
 }
 
 export interface Image extends Widget {

@@ -282,6 +282,18 @@
   {{#if repeater.footer && repeater.group[index]}}
     <label><span title="If enabled, show the repeater footer for this grouping of rows. You can use the @level reference to modify the footer for different levels within the repeater.">Show Footer?</span><span><input type=checkbox checked="{{repeater.groupEnds[repeater.group.length - 1 - index]}}" /></span></label>
   {{/if}}
+  {{#if repeater && index === 'row'}}
+    <label><span title="If enabled, the row will be rendered internally to update data gathered labels as rows render, but the row will not be added to the report.">Elide? <button class-hide /><button class-ico on-click="@context.set('.elide', typeof .elide === 'object' ? false : { x: ''})" title="{{typeof .elide === 'object' ? 'Change to Boolean' : 'Change to Expression'}}">
+    {{>switch}}
+    </button>{{#if typeof .elide === 'object' && 'x' in .elide}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.elide.x'), false">{{>pencil}}</button>{{/if}}
+  </span><span>
+      {{#if typeof .elide !== 'object'}}
+        <input type=checkbox checked="{{.elide}}" />
+      {{elseif typeof .elide === 'object'}}
+        <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.elide.x}} tabout /></div>
+      {{/if}}
+    </span></label>
+  {{/if}}
   {{/with}}
   {{#if ~/report.type === 'page' && (~/temp.widget === 'report.header' || ~/temp.widget === 'report.footer') && ~/report.margin}}
     <label><span title="If enabled, render the {{@.lastKey(~/temp.widget)}} at the outer edge of the page margin rather than within the inner boundaries of the page margin.">Render in margin?</span><span><input type=checkbox checked="{{.outer}}" /></span></label>

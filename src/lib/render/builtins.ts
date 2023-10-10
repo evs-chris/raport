@@ -2,7 +2,7 @@ import { Container, Label, Repeater, Image, MeasuredLabel, HTML } from '../repor
 import { evaluate, filter, Group, ValueOrExpr, isValueOrExpr, extend as extendData } from '../data/index';
 import { parse as parseTemplate } from '../data/parse/template';
 
-import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin, getWidthWithMargin } from './index';
+import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin, getWidthWithMargin, isComputed } from './index';
 import { styleClass, style, styleFont, styleImage, styleExtra } from './style';
 
 registerRenderer<Label>('label', (w, ctx, placement) => {
@@ -148,11 +148,13 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   }
 
   let rctx: RenderContext = state && state.state && state.state.context || extend(ctx, { special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: groupNo !== false, group: group && group.group, values: {}, last: arr.length - 1, count: arr.length } });
+  const elide = w.row && (isComputed(w.row.elide) ? evaluate(extend(rctx, { special: { placement, widget: w } }), w.row.elide.x) : w.row.elide);
+
   if (!state || !state.state || state.state.part !== 'footer') {
     let usedX = 0;
     let usedY = 0;
     let initY = y;
-    if (!arr.length && w.alternate) {
+    if (!elide && !arr.length && w.alternate) {
       if (w.alternate) {
         r = renderWidget(w.alternate, rctx, { x: usedX, y, availableX: availableX - usedX, maxX: placement.maxX, availableY, maxY: placement.maxY }, state ? state.child : undefined);
         if (r.height > availableY) return { output: html, height: 0, continue: { offset: 0, state: { part: 'body', src, current: 0, newPage: true } } }
@@ -170,7 +172,14 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
         if (group && group.grouped) {
           const s: RenderState<RepeatState> = (state && state.child) || { offset: 0, state: { current: 0, src: arr[i], part: 'group' } };
           r = renderWidget(w, c, { x: 0, y, availableX: availableX - usedX, availableY, maxX: placement.maxX, maxY: placement.maxY }, s);
-        } else r = renderWidget(w.row, c, { x: usedX, y, availableX: availableX - usedX, maxX: placement.maxX, availableY, maxY: placement.maxY }, state ? state.child : undefined);
+        } else {
+          if (elide) {
+            renderWidget(w.row, c, { x: 0, y: 0, availableX: placement.maxX, maxX: placement.maxX, availableY: placement.maxY, maxY: placement.maxY }, state ? state.child : undefined);
+            continue;
+          } else {
+            r = renderWidget(w.row, c, { x: usedX, y, availableX: availableX - usedX, maxX: placement.maxX, availableY, maxY: placement.maxY }, state ? state.child : undefined);
+          }
+        }
 
         if (state) state.child = null;
 
