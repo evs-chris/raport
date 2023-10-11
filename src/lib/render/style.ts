@@ -51,8 +51,7 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
 
   const line = w.font && maybeComputed(w.font.line, context);
   const size = w.font && maybeComputed(w.font.size, context);
-
-  s += `${!opts || !opts.container || line ? `line-height:${(line || size) || getHeight(w, placement, context, opts && opts.computedHeight, opts && opts.lineSize)}rem;` : ''}`;
+  if (line != null || size != null) s += `line-height: ${line ?? size}rem;`;
 
   if (w.margin) {
     const m = expandMargin(w, context, placement);
