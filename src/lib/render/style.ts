@@ -100,7 +100,8 @@ export function styleFont(f: Font, context: RenderContext): string {
 
   if (t = maybeComputed(f.weight, context)) s += `font-weight:${t};`;
   if (t = maybeComputed(f.pre, context)) s += `white-space:pre-wrap;`;
-  if (t = maybeComputed(f.clamp, context)) s += `white-space:nowrap;overflow:hidden;`;
+  const pre = t;
+  if (t = maybeComputed(f.clamp, context)) s += `${pre ? '' : 'white-space:nowrap;'}overflow:hidden;`;
   return s;
 }
 
