@@ -146,7 +146,7 @@
   </span></label>
 {{/unless}}
 {{#if .type !== 'image'}}
-  <label><span text="The font family for text appearing within this {{.type}}. Browser safe fonts are recommended e.g. serif, sans-serif, monospace.">Font Family <button class-hide /><button class-ico on-click="@context.set('.font.family', typeof .font.family === 'object' ? undefined : { x: '' })" title="{{typeof .font.family === 'object' ? 'Change to value' : 'Change to Expression'}}">
+  <label><span title="The font family for text appearing within this {{.type}}. Browser safe fonts are recommended e.g. serif, sans-serif, monospace.">Font Family <button class-hide /><button class-ico on-click="@context.set('.font.family', typeof .font.family === 'object' ? undefined : { x: '' })" title="{{typeof .font.family === 'object' ? 'Change to value' : 'Change to Expression'}}">
       {{>switch}}
     </button>{{#if typeof .font.family === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.font.family.x')">{{>pencil}}</button>{{/if}}</span><span>
     {{#if typeof .font.family === 'object'}}
