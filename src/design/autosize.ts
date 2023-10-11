@@ -5,10 +5,10 @@ export default function autosize(node: HTMLElement) {
   helper.style.position = 'absolute';
   helper.style.left = '-110%';
   helper.style.zIndex = '-1';
-  helper.style.height = '14px';
-  helper.style.fontSize = '14px';
-  helper.style.lineHeight = '14px';
-  helper.style.padding = '14px';
+  helper.style.height = '0.875rem';
+  helper.style.fontSize = '0.875rem';
+  helper.style.lineHeight = '0.875rem';
+  helper.style.padding = '0.875rem';
   helper.style.wordBreak = 'break-all';
   helper.style.whiteSpace = 'pre-wrap';
   document.body.appendChild(helper);

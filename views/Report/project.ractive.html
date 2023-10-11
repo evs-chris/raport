@@ -13,6 +13,7 @@
           <option value=dark>Dark</option>
           <option value=light>Light</option>
         </select></label>
+        <label class=input>UI Scaling<br/><div style="float: right; line-height: 2.5em;">%</div><input type=number step=1 value="{{~/settings.scale}}" style="width: calc(100% - 1.5em)" lazy=1000 /></label>
         <label class="check" title="Automatically save an open project when leaving the page?"><input type=checkbox checked="{{~/settings.autosave}}" /> Auto save on leave?</label>
         <br/><br/>
         <label class="input" title="The base wrap length for the code formatter (default 40)">Format Wrap<input type=number value="{{~/settings.format.wrap}}" /></label>

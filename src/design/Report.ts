@@ -183,6 +183,7 @@ export class Designer extends Ractive {
           html.scrolled-top:before { opacity: 0; }
           html.scrolled-bottom:after { opacity: 0; }
 
+          html { font-size: ${this.get('settings.scale')}% !important;
           body {
             background-color: ${this.get('@style.out.dark') || this.get('@style.dark')};
             padding: 2em;
@@ -1354,6 +1355,13 @@ export class Designer extends Ractive {
       Ractive.styleSet(ml.matches ? darkTheme : lightTheme);
     }
     Ractive.styleSet('theme', dark ? 'dark' : 'light');
+
+    let scale = +settings.scale;
+    if (isNaN(scale) || scale < 25 || scale > 300) {
+      scale = 100;
+      setTimeout(() => this.set('settings.scale', scale), 500);
+    }
+    if (document?.body?.parentElement?.style) document.body.parentElement.style.fontSize = `${scale}%`;
 
     const langref: any = document.getElementById('langref');
     if (langref) langref.contentWindow.postMessage({ action: 'theme', theme: dark ? 'dark' : 'light' }, '*');
