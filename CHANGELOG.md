@@ -1,3 +1,18 @@
+## 0.21.0
+
+2023-10-12
+
+### Render
+
+* __BREAKING:__ Line heights will not be set to match widget height. The property tip for line height indicates that it will be set to font size, so the behavior matches that indication.
+* __BUG:__ Preventing overflow will no longer interfere with significant space. Previous behavior would force the content into a single line with both enabled.
+* Repeater rows can now be elided using a boolean or expression. The rows are still rendered, so any data collected through IDed labels is available in the footer, making this quite the same effect as hiding the row container.
+
+### Designer
+
+* There is now an option to scale the UI between 25 and 300%.
+
+
 ## 0.20.1
 
 2023-10-07
