@@ -1,3 +1,17 @@
+## 0.22.0
+
+2023-12-08
+
+### Render
+
+* __BUG:__ Labels containing html will now properly escape the html.
+* Labels can now support inline styled text using a new styled markup parser that is also available to the `string` operator and as a formatter.
+
+### Designer
+
+* __BUG:__ The data source import editor should no longer get a cached string stuck for all data sources.
+
+
 ## 0.21.0
 
 2023-10-12
