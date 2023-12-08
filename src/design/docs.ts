@@ -419,6 +419,7 @@ export const operators = `[
 	] opts: [
 		{ name:'json' type:'boolean' desc:'Forces the output string to be JSON.' }
 		{ name:'raport' type:'boolean' desc:'Forces the output string to be a raport expresion. This can be paired with any options to the stringify function supplied by raport.' }
+		{ name:'string' type:'boolean' desc:'Processes the value as a styled string.' }
 	]}
 	{ op:'sum' sig:[
 		{ agg:1 proto: '() => number' desc:'Computes the sum of the current source.' }
@@ -515,6 +516,7 @@ export const formats = `let dateparts = 'Available placeholders are:\\n\\n* y - 
 	{ name:'time' desc:'Formats a date value as a time string using placeholder characters, where repeated characters render more descriptive or padded values. Any non-placeholder characters are rendered as entered. The default format is HH:mm:ss. {dateparts}' opts:[
 		{ name:'format' type:'string' desc:'The format template to apply.'}
 	]}
+	{ name:'styled' desc:'Processes the value as a styled string.' }
 	{ name:'timestamp' desc:'Formats a date value as a timestamp using placeholder characters, where repeated characters render more descriptive or padded values. Any non-placeholder characters are rendered as entered. The default format is yyyy-MM-dd HH:mm:ss. {dateparts}' opts:[
 		{ name:'format' type:'string' desc:'The format template to apply.'}
 	]}
@@ -626,6 +628,7 @@ export const languageReference = `<html>
     display: inline-block;
     border: 1px solid;
   }
+  li { margin: 0.5rem 0; line-height: 1.75rem; }
   .dark code { border-color: #777; }
   .light code { border-color: #ddd; }
 
@@ -912,6 +915,44 @@ export const languageReference = `<html>
   when </span><span class="binary-op"><span class="reference">_</span><span class="ast-extra"> &gt;= </span><span class="number">18</span></span><span class="ast-extra"> then </span><span class="string">'ok'</span><span class="ast-extra">
   else </span><span class="string">'NaN, I guess'</span></span>
 </code></pre>
+</div>
+
+<h2>Styled Text</h2>
+<div class=indent>
+<p>Reports often benefit from styled text, and while most of the raport controls include properties that style their rendered text, it is usually only easily applied to the entire string at once. Labels can be split into an array of parts that are individually styled, but that makes interpolation within the label text difficult when flow control and styling interleave. To address this, raport also provides a light markup language that can be used to apply styling to plain text.</p>
+<p>The syntax consists of markup tags interspersed within the text, where each tag may include multiple properties that are inline or block and boolean or valued. Inline properties are typically boolean and can be enabled and disabled at any place within the text. Block properties are grouped with other block properties within in their tag and are enabled and disabled together. Boolean properties are toggled with each tag, and valued properties form a stack.</p>
+<p>A tag is delimited by <code>|</code>s, and the properties within are delimited with <code>,</code>s. Valued properties specify their value with an <code>=</code>, which pushes a value onto the stack. Valued properties specified without a value will pop a value from the stack. Properties are named as identifiers, some of which also have shorthand aliases.</p>
+<h3>Inline Properties</h3>
+<p>Inline properties are treated as a flat structure, so that they can be interleaved. For instance, <code>this |b|is |i|a|b| test|i| string</code> will yield <code>this</code> plain, <code>is</code> bolded, <code>a</code> bolded and italicized, test italicized, and string plain. <code>|b,u|this is bold and underlined</code> will render the entire text bolded and underlined.</p>
+<ul>
+<li><code>background</code>, <code>back</code>, <code>bg</code> - sets the background color of the marked text to the given color specified in hexadecimal <code>rgb</code>, <code>rgba</code>, <code>rrggbb</code>, or <code>rrggbbaa</code>, optionally prefixed with a <code>#</code> e.g., <code>|bg=000|</code> or <code>|bg=#08296b|</code>.</li>
+<li><code>bold</code>, <code>b</code> - bolds the marked text</li>
+<li><code>br</code> - a special tag that inserts a line break. Multiple <code>br</code> tags may appear together to insert multiple line breaks e.g., <code>|br,br,br|</code> produces three line breaks.</li>
+<li><code>color</code>, <code>fore</code>, <code>fg</code> - sets the text color of the marked text to the given color specified in hexadecimal <code>rgb</code>, <code>rgba</code>, <code>rrggbb</code>, or <code>rrggbbaa</code>, optionally prefixed with a <code>#</code> e.g., <code>|fg=#f00|</code>.</li>
+<li><code>font</code> - sets the font for the marked text to the given value, which is read up to the next <code>,</code> or <code>|</code> e.g., <code>|font=liberation sans narrow|</code>.</li>
+<li><code>italic</code>, <code>i</code> - italicizes the marked text</li>
+<li><code>line</code> - sets the line height of the marked text to the given value in <code>rem</code> e.g., <code>|line=2.2|</code> sets the line height to 220% of the default 1rem. The decimal is optional.</li>
+<li><code>overline</code> - adds an overline to the marked text</li>
+<li><code>pre</code> - treats the marked text as white space sensitive</li>
+<li><code>size</code> - sets the font size of the marked text to the given size in <code>rem</code> e.g., <code>|font=2.2|</code> sets the font size to 220% of the default. The decimal is optional.</li>
+<li><code>strike</code> - adds a strike-through to the marked text</li>
+<li><code>sub</code> - sets the marked text as subscripted</li>
+<li><code>sup</code> - sets the marked text as superscript</li>
+<li><code>valign</code> - sets the marked text to vertically align with surrounding text to the given value, which may be <code>top</code>, <code>middle</code>, <code>base</code>, or <code>bottom</code>, corresponding to the top, center, baseline, and bottom e.g., <code>|valign=bottom|</code>.</li>
+</ul>
+<h3>Block Properties</h3>
+<p>Block properties create a block around their content and contain any subsequent content until a closing property for one of the values in the initial tag is encountered e.g., <code>|w=10,align=middle center,border=1|this is in the block.|i|as is this.|w| this is not, but is still italicized</code>. By default, the contents of a block may not exceed its bounds.</p>
+<ul>
+<li><code>align</code> - sets the vertical and/or horizontal alignment of the block content. One or two values may be specified in any order with <code>top</code>, <code>middle</code>, <code>base</code>, and <code>bottom</code> specifying vertical alignment and <code>left</code>, <code>center</code>, and <code>right</code> specifying horizontal alignment.</li>
+<li><code>background</code>, <code>back</code>, <code>bg</code> - sets the background color of the block. This is a special case of the inline <code>bg</code> property that will also end with the block.</li>
+<li><code>border</code> - sets the border of block. The value given for a border property must include at least one width, but the rest of the properties are optional. The full signature is <code>[solid|dash|dot|double] &lt;width1&gt; [width2] [width3] [width4] [/ &lt;radius&gt; [radius2] [radius3] [radius4]] [color]</code>. If a type is not specified, it defaults to <code>solid</code>. The behavior of width1-4 depends on how many are supplied: 1 makes all four borders to width1; 2 sets the top and bottom to width1 and the left and right to width2; 3 sets top to width 1, right and left to width2, and bottom to width3; and 4 sets the top, right, bottom, and left to width1, width2, width3, and width4, respectively. Width values are integers and specify pixels. The radius value behaves similarly, but corresponds to the top-left, top-right, bottom-right, and bottom-left radii. Radius values can be decimals and specify <code>rem</code>. The color can be specified in hexadecimal <code>rgb</code>, <code>rgba</code>, <code>rrggbb</code>, or <code>rrggbbaa</code> with an optional leading <code>#</code>.</li>
+<li><code>height</code>, <code>h</code> - sets the height of the block in <code>rem</code>, e.g., <code>|h=10|this is 10rem tall</code>. The height does not include any padding or margin, in contrast to the behavior of the height and margin properties of raport widgets. Height may also be set as a percentage of its container, making it easier to align text within a widget e.g., <code>|h=100%,align=middle|this is centered in the container</code>.</li>
+<li><code>margin</code> - sets the margin of the block in <code>rem</code>. The value specified may be a decimal, and up to four values may be provided. If one is provided, all four sides will have the given value. If two are specified, the top and left will be set to the first, and the left and right will be set to the second. If three are specified, the top will be set to the first, the left and right will be set to the second, and the bottom will be set to the third. If four are specified, they will correspond to the top, right, bottom, and left values. Margins will add to any height or width values given.</li>
+<li><code>nowrap</code> - specifies that text within the block should not wrap.</li>
+<li><code>overflow</code> - specifies that the contents of the block may exceed its bounds.</li>
+<li><code>pad</code> - sets the padding of the block in <code>rem</code>. The value specified may be a decimal, and up to four values may be provided. If one is provided, all four sides will have the given value. If two are specified, the top and left will be set to the first, and the left and right will be set to the second. If three are specified, the top will be set to the first, the left and right will be set to the second, and the bottom will be set to the third. If four are specified, they will correspond to the top, right, bottom, and left values. Padding will add to any height or width values given.</li>
+<li><code>width</code>, <code>w</code> - sets the width of the block in <code>rem</code>, e.g., <code>|w=10|this is 10rem wide</code>. The width does not include any padding or margin, in contrast to the behavior of the width and margin properties of raport widgets. Width may also be set as a percentage of its container, making it easier to align text within a widget e.g., <code>|w=100%,align=center|this is centered in the container</code>.</li>
+</ul>
 </div>
 
 </body>

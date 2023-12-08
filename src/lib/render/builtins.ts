@@ -1,6 +1,7 @@
 import { Container, Label, Repeater, Image, MeasuredLabel, HTML } from '../report';
 import { evaluate, filter, Group, ValueOrExpr, isValueOrExpr, extend as extendData } from '../data/index';
 import { parse as parseTemplate } from '../data/parse/template';
+import { style as styleText } from '../data/parse/style';
 
 import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin, getWidthWithMargin, isComputed } from './index';
 import { styleClass, style, styleFont, styleImage, styleExtra } from './style';
@@ -20,7 +21,7 @@ registerRenderer<Label>('label', (w, ctx, placement) => {
     }
     str += val;
     sval = val;
-    if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font, ctx) + styleExtra(v, ctx), ''])}>${val}</span>`;
+    if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font, ctx) + styleExtra(v, ctx), ''])}>${escapeHTML(val)}</span>`;
     else return val;
   }).join('');
   if (w.id) {
@@ -34,7 +35,8 @@ registerRenderer<Label>('label', (w, ctx, placement) => {
     const args: ValueOrExpr[] = [{ v: !Array.isArray(w.text) || w.text.length === 1 ? sval : val }, { v: w.format.name }];
     val = evaluate(ctx, { op: 'format', args: args.concat(w.format.args || []) });
   }
-  return `<span${styleClass(ctx, ['label'], style(w, placement, ctx, { lineSize: true }))}>${escapeHTML(val)}</span>`
+  if (typeof val === 'string' && w.styled) return `<span${styleClass(ctx, ['label'], style(w, placement, ctx, { lineSize: true }))}>${styleText(escapeHTML(val))}</span>`
+  else return `<span${styleClass(ctx, ['label'], style(w, placement, ctx, { lineSize: true }))}>${escapeHTML(val)}</span>`
 });
 
 registerRenderer<Container>('container', (w, ctx, placement, state) => {

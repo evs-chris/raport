@@ -8,6 +8,7 @@ import { range as parseRange } from './parse/range';
 import { validate, inspect, isSchema } from './schema';
 import { diff, deepEqual, labelDiff } from './diff';
 import { detect as csvDetect, parse as csvParse } from './csv';
+import { style } from './parse/style';
 
 function simple(names: string[], apply: (name: string, values: any[], opts: OperatorOptions, ctx: Context) => any): ValueOperator {
   return {
@@ -541,12 +542,14 @@ registerOperator(
     if (opts.raport && opts.tpl) opts.template = 1;
     if (!opts && (value === null || value === undefined)) return '';
 
-    if (typeof opts === 'object' && opts.json) return JSON.stringify(value);
-    if (typeof opts === 'object' && opts.schema) return unparseSchema(value);
-    else if (typeof opts === 'object' && opts.raport) {
-      let v = stringify(value, opts);
-      if (v === undefined) v = stringify({ v: value }, opts);
-      return v;
+    if (typeof opts === 'object') {
+      if (opts.json) return JSON.stringify(value);
+      if (opts.schema) return unparseSchema(value);
+      else if (opts.raport) {
+        let v = stringify(value, opts);
+        if (v === undefined) v = stringify({ v: value }, opts);
+        return v;
+      } else if (typeof value === 'string' && opts.styled) return style(value);
     }
 
     if (Array.isArray(value)) return value.join(', ');
@@ -1266,6 +1269,10 @@ registerFormat('ordinal', function(n, [group], opts) {
 
 registerFormat('phone', n => {
   return phone(n);
+});
+
+registerFormat('styled', n => {
+  return style(n);
 });
 
 {

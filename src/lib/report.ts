@@ -237,6 +237,7 @@ export interface Label extends Widget {
   text: ValueOrExpr|Array<ValueOrExpr|Span>;
   format?: LabelFormat;
   id?: string;
+  styled?: boolean;
 }
 
 export interface HTML extends Widget {

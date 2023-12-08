@@ -25,6 +25,7 @@ export { parse, parsePath, parseTime, parseDate } from './data/parse';
 export { stringify, StringifyOpts } from './data/parse/stringify';
 export { parse as parseTemplate } from './data/parse/template';
 export { range as parseRange } from './data/parse/range';
+export { style as styled } from './data/parse/style';
 
 export { parseSchema, unparseSchema } from './data/parse/schema';
 

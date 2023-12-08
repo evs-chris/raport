@@ -254,6 +254,7 @@
       {{/if}}
     </span><span>{{#if .id != null}}<input value="{{.id}}" />{{/if}}</span></label>
   {{/if}}
+  <label><span title="Process the text of the label for inline styles.">Styled?</span><span><input type=checkbox checked="{{.styled}}" /></span></label>
   <label><span title="The name of a formatter to apply to the computed Text value of this label.">Format <button class-hide />{{#if .format != null}}
       <button class-ico title="Remove format" on-click="@context.set('.format', undefined)">{{>times}}</button>
     {{else}}

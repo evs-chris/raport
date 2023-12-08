@@ -2035,7 +2035,7 @@ __NOTE:__ By default, the single-number signature will round to an integer, but 
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>json</code></dt><dd>Forces the output string to be JSON.</dd><dt><code>raport</code></dt><dd>Forces the output string to be a raport expresion. This can be paired with any options to the stringify function supplied by raport.</dd>
+<dt><code>json</code></dt><dd>Forces the output string to be JSON.</dd><dt><code>raport</code></dt><dd>Forces the output string to be a raport expresion. This can be paired with any options to the stringify function supplied by raport.</dd><dt><code>string</code></dt><dd>Processes the value as a styled string.</dd>
 </dl>
 </dl>
 <br/>
@@ -2693,6 +2693,20 @@ The string to use as a grouping divider.
 <dd>
 
 Formats the value as phone number e.g. 111-2222, (111) 222-3333, 1-888-777-6666
+
+
+</dd></dl>
+<br/>
+
+<dl><dt>
+
+### `styled`
+---
+
+</dt>
+<dd>
+
+Processes the value as a styled string.
 
 
 </dd></dl>
