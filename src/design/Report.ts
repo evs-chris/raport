@@ -969,6 +969,10 @@ export class Designer extends Ractive {
     input.click();
   }
 
+  getImportText() {
+    return this._importText?.value || '';
+  }
+
   tryImport(str: string) {
     if (!str || !this.readLink('data')) return;
     this.set('data.input', str);
@@ -977,6 +981,7 @@ export class Designer extends Ractive {
       if (typeof json === 'object' && 'type' in json && json.type === 'fetch') this.set('data', json);
       else {
         if (Array.isArray(json) || !Array.isArray(json.value)) this.set('data.data', { value: json });
+        else if (Object.keys(json).length === 1 && 'value' in json) this.set('data.data', json.value);
         else this.set('data.data', json);
       }
     } else {

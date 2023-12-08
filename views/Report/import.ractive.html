@@ -4,7 +4,7 @@
     <div class-actions>
       <button class="ico text" class-spacer on-click="@.loadImportFile()" title="Import data from a file">Load</button>
       <label><input type="checkbox" style="vertical-align: middle;" checked="{{data.type === 'fetch'}}" twoway=false on-change="@.set('data.type', @node.checked ? 'fetch' : undefined)" /> Fetch request?</label>
-      <label title="If the data is delimited text, use the first record to convert the remaining records to objects with keys named the matching field offset header." style="margin-left: 1em;"><input type="checkbox" style="vertical-align: middle;" checked="{{data.header}}" twoway=false on-change="@.set('data.header', @node.checked ? 1 : undefined), @.tryImport(@._importText.value)" /> Delimited header?</label>
+      <label title="If the data is delimited text, use the first record to convert the remaining records to objects with keys named the matching field offset header." style="margin-left: 1em;"><input type="checkbox" style="vertical-align: middle;" checked="{{data.header}}" twoway=false on-change="@.set('data.header', @node.checked ? 1 : undefined), @.tryImport(@.getImportText())" /> Delimited header?</label>
     </div>
     {{#if data.type === 'fetch'}}
       <div>
@@ -41,8 +41,10 @@
       </div>
     {{/if}}
     <div class-json style="position: relative;">
-      <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate="@.autosize(@node)" as-tracked=`_importText`></textarea></div></div>
-      <button class=plain style="position: absolute; top: 0.5em; right: 0.5em;" on-click="@.tryImport(@._importText.value)">Apply Changes</button>
+      <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate-focus-blur="@.autosize(@node), console.log(@event)" as-tracked=`_importText` on-change-input="@.set('_importdirty', true), console.log('change', @event)"></textarea></div></div>
+      {{#if ~/_importdirty}}
+        <button class=plain style="position: absolute; top: 0.5em; right: 0.5em;" on-click="@.tryImport(@.getImportText()), @.set('_importdirty', false)">Apply Changes</button>
+      {{/if}}
     </div>
   </div>
 </div>
