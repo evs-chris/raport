@@ -36,7 +36,7 @@ export function extend(context: RenderContext, opts: ExtendOptions): RenderConte
   return { report: context.report, context: extendContext(context.context, opts), styles: context.styles, styleMap: context.styleMap };
 }
 
-const htmlChars = /\>\<\&/g;
+const htmlChars = /[><&]/g;
 const htmlReplace = { '<': '&lt;', '>': '&gt;', '&': '&amp;' };
 export function escapeHTML(html: string): string {
   return ('' + html).replace(htmlChars, m => htmlReplace[m] || '');
