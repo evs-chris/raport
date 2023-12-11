@@ -16,8 +16,10 @@ const sp = read1(' \r\n\t');
 const ws = read(' \r\n\t');
 const hex = '0123456789abcdef';
 const integer = map(read1('0123456789'), v => +v);
-const number = map(seq(read1('0123456789'), opt(seq(str('.'), read1('0123456789')))), ([n, d]) => +[n, d?.[0], d?.[1]].filter(v => v).join(''));
+const number = map(seq(opt(str('-')), read1('0123456789'), opt(seq(str('.'), read1('0123456789')))), ([m, n, d]) => +[m, n, d?.[0], d?.[1]].filter(v => v).join(''));
 const color = map(seq(opt(str('#')), alt(chars(8, hex), chars(6, hex), chars(4, hex), chars(3, hex))), ([, color]) => `#${color}`);
+const remOrPercent = map(seq(number, opt(str('%'))), ([n, p]) => `${n}${p ? '%' : 'rem'}`);
+const places = str('left', 'right', 'top', 'bottom', 'center');
 
 const align = map(seq(str('align'), opt(seq(str('='), alt(
   seq(str('top', 'middle', 'bottom', 'base'), opt(seq(sp, str('left', 'right', 'center')))),
@@ -27,13 +29,15 @@ const valign = map(seq(str('valign'), opt(seq(str('='), str('top', 'middle', 'bo
 
 const pad = map(seq(str('pad'), opt(seq(str('='), rep1sep(number, sp)))), ([, v]) => ({ tag: 'pad', value: v ? v[1] : null }));
 const margin = map(seq(str('margin'), opt(seq(str('='), rep1sep(number, sp)))), ([, v]) => ({ tag: 'margin', value: v ? v[1] : null }));
-const width = map(seq(str('width', 'w'), opt(seq(str('='), number, opt(str('%'))))), ([,v]) => ({ tag: 'width', value: v ? v[2] ? `${v[1]}%` : `${v[1]}rem` : null }));
-const height = map(seq(str('height', 'h'), opt(seq(str('='), number, opt(str('%'))))), ([,v]) => ({ tag: 'height', value: v ? v[2] ? `${v[1]}%` : `${v[1]}rem` : null }));
+const width = map(seq(str('width', 'w'), opt(seq(str('='), remOrPercent))), ([,v]) => ({ tag: 'width', value: v ? v[1] : null }));
+const height = map(seq(str('height', 'h'), opt(seq(str('='), remOrPercent))), ([,v]) => ({ tag: 'height', value: v ? v[1] : null }));
 const line = map(seq(str('line'), opt(seq(str('='), number))), ([,v]) => ({ tag: 'line', value: v ? v[1] : null }));
 const fg = map(seq(str('fg', 'color', 'fore'), opt(seq(str('='), color))), ([,v]) => ({ tag: 'fg', value: v ? v[1] : null }));
 const bg = map(seq(str('bg', 'background', 'back'), opt(seq(str('='), color))), ([,v]) => ({ tag: 'bg', value: v ? v[1] : null }));
 const size = map(seq(str('size'), opt(seq(str('='), number))), ([,v]) => ({ tag: 'size', value: v ? v[1] : null }));
 const font = map(seq(str('font'), opt(seq(str('='), read1To(',|')))), ([,v]) => ({ tag: 'font', value: v ? v[1] : null }));
+const rotate = map(seq(str('rotate'), opt(seq(str('='), number, ws, opt(str('left', 'right')), opt(seq(sp, alt(remOrPercent, places), sp, alt(remOrPercent, places)))))), ([,v]) => ({ tag: 'rotate', value: v ? { turn: v[1] * (v[3] === 'left' ? -1 : 1), origin: v[4] ? [v[4][1], v[4][3]] : undefined } : null }));
+const move = map(seq(str('move'), opt(seq(str('='), remOrPercent, sp, remOrPercent))), ([,v]) => ({ tag: 'move', value: v ? { x: v[1], y: v[3] } : null }));
 
 const trash = map(readTo(',|'), v => ({ tag: 'trash', value: v }));
 
@@ -44,7 +48,7 @@ const border = map(seq(
 
 const bools = map(alt(str('sub', 'sup', 'bold', 'italic', 'underline', 'strike', 'overline', 'overflow', 'nowrap', 'pre', 'br', 'b', 'i', 'u')), tag => ({ tag }));
 
-const tag: Parser<Style[]> = map(seq(str('|'), ws, rep1sep(alt(border, align, fg, bg, valign, size, line, font, pad, margin, width, height, bools, trash), seq(ws, str(','), ws), 'allow'), readTo('|'), str('|')), ([, , tags]) => tags.filter(t => t.tag !== 'trash'));
+const tag: Parser<Style[]> = map(seq(str('|'), ws, rep1sep(alt(border, align, fg, bg, valign, size, line, font, pad, margin, width, height, bools, rotate, move, trash), seq(ws, str(','), ws), 'allow'), readTo('|'), str('|')), ([, , tags]) => tags.filter(t => t.tag !== 'trash'));
 const text = map(rep1(alt(read1To('\\|', true), map(str('\\|'), () => '|'))), txts => txts.join(''));
 
 const all = rep(alt<Style[]|string>(text, tag))
@@ -56,7 +60,7 @@ interface State {
   value: { [key: string]: any[] }
 }
 
-const blocks = ['border', 'width', 'height', 'pad', 'margin', 'align', 'overflow', 'nowrap'];
+const blocks = ['border', 'width', 'height', 'pad', 'margin', 'align', 'overflow', 'nowrap', 'rotate', 'move'];
 
 const aliases = {
   b: 'bold',
@@ -98,8 +102,10 @@ function process(stuff: Array<Style[]|string>): string {
       open = true;
       if (drop) {
         const frame = blockstack.pop();
-        res += '</span>';
-        for (const b of frame) (state.value[b] || (state.value[b] = [])).pop();
+        if (frame) {
+          res += '</span>';
+          for (const b of frame) (state.value[b] || (state.value[b] = [])).pop();
+        }
       }
       if (block) {
         blockstack.push(block);
@@ -169,6 +175,8 @@ function getStyle(state: State, which: 'inline'|string[]) {
     res += `display:inline-flex;box-sizing:content-box;overflow:hidden;`;
     const vs = state.value;
 
+    let transforms: string[];
+
     if (which.includes('align') && Array.isArray(vs.align)) {
       const v = vs.align[vs.align.length - 1];
       if (Array.isArray(v)) {
@@ -234,6 +242,21 @@ function getStyle(state: State, which: 'inline'|string[]) {
       const v = vs.bg[vs.bg.length - 1];
       if (v) res += `background-color:${v};`;
     }
+
+    if (which.includes('rotate') && Array.isArray(vs.rotate)) {
+      const v: { turn: number; origin?: [string, string] } = vs.rotate[vs.rotate.length - 1];
+      if (v) {
+        if (v.origin) res += `transform-origin:${v.origin[0]} ${v.origin[1]};`;
+        (transforms || (transforms = []))[which.indexOf('rotate')] = `rotate(${v.turn}turn)`;
+      }
+    }
+
+    if (which.includes('move') && Array.isArray(vs.move)) {
+      const v: { x: string; y: string } = vs.move[vs.move.length - 1];
+      if (v) (transforms || (transforms = []))[which.indexOf('move')] = `translate(${v.x}, ${v.y})`;
+    }
+
+    if (transforms) res += `transform:${transforms.filter(v => v).join(' ')};`;
 
     if (which.includes('nowrap')) res += `white-space:nowrap;`;
     if (which.includes('overflow')) res += `overflow:visible;`;
