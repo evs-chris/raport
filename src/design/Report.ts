@@ -281,14 +281,14 @@ export class Designer extends Ractive {
     const b = w.border;
     if (!b) return '';
     const color = this.get('@style.border');
-    if (typeof b === 'number') return `border-bottom: ${b * 0.0625}rem solid ${color};`;
+    if (typeof b === 'number') return `border-bottom:${b * 0.0625}rem solid ${color};`;
     else if (Array.isArray(b)) {
-      if (b.length === 1) return `border: ${b[0] * 0.0625}rem solid ${color};`;
-      else if (b.length === 2) return `border-style: solid; border-width: ${b[0] * 0.0625}rem ${b[1] * 0.0625}rem`;
-      else if (b.length === 4) return `border-style: solid; border-width: ${b[0] * 0.0625}rem ${b[1] * 0.0625}rem ${b[2] * 0.0625}rem ${b[3] * 0.0625}rem`;
+      if (b.length === 1) return `border:${b[0] * 0.0625}rem solid ${color};`;
+      else if (b.length === 2) return `border-style:solid;border-width:${b[0] * 0.0625}rem ${b[1] * 0.0625}rem;`;
+      else if (b.length === 4) return `border-style:solid;border-width:${b[0] * 0.0625}rem ${b[1] * 0.0625}rem ${b[2] * 0.0625}rem ${b[3] * 0.0625}rem;`;
     } else if (typeof b === 'string') {
       return `border: 1px dotted green;`;
-    } else return `border-style: solid; border-width: ${(b.top || 0) * 0.0625}rem ${(b.right || 0) * 0.0625}rem ${(b.bottom || 0) * 0.0625}rem ${(b.left || 0) * 0.0625}rem;`;
+    } else return `border-style:solid;border-width:${(b.top || 0) * 0.0625}rem ${(b.right || 0) * 0.0625}rem ${(b.bottom || 0) * 0.0625}rem ${(b.left || 0) * 0.0625}rem;`;
     return '';
   }
 
@@ -1087,7 +1087,7 @@ export class Designer extends Ractive {
     else {
       if (Array.isArray(ctx.get('^^/layout'))) ctx.splice('^^/layout', ctx.get('@index'), 1);
       const idx: number = ctx.get('@index');
-      ctx.splice('../', idx, 1);
+      if (Array.isArray(ctx.get('../'))) ctx.splice('../', idx, 1);
       if (path.startsWith('report.fields') && ctx.get('../headers')) ctx.splice('../headers', idx, 1);
       else if (path.startsWith('report.headers')) ctx.splice('../fields', idx, 1);
     }
