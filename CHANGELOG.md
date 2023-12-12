@@ -1,3 +1,16 @@
+## 0.22.1
+
+2023-12-12
+
+### Render
+
+* Styled text now supports a rotate tag, which takes a number of turns and an optional direction to rotate the block. It may also optionally specify a translation origin as a set of x/y coordinates that may be numbers, percent, or positional e.g. top left.
+* Styled text now supports a move tag, which takes an x and y position and performs translation. x and y may be specified as numbers or percent.
+* The order in which move and rotate tags appear matter, as the one that appears first will be applied first.
+* Styled tag values that are numeric may now be negative.
+* __EXPERIMENTAL:__ Containers can now be configured as macros, which allows them to evaluate an expression in the local context that returns properties and/or contents.
+
+
 ## 0.22.0
 
 2023-12-08
