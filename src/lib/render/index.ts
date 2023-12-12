@@ -205,7 +205,8 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
       if (placement.availableY) placement.availableY -= b[0] + b[2];
     }
     for (let i = state && state.last || 0; i < widget.widgets.length; i++) {
-      const w: Widget = widget.widgets[i];
+      let w: Widget = widget.widgets[i];
+      if (w.macro) w = expandMacro(w.macro, w, context, placement, state);
       if (w.hide && evaluate(extendContext(context.context, { special: { widget: w, placement } }), w.hide)) continue;
 
       // allow widgets that are taller than max height to be dropped
@@ -401,4 +402,14 @@ export function expandBorder(w: { border?: number|number[]|Borders|string }, con
 
   for (let i = 0; i < 4; i++) res[i] = res[i] * 0.0625;
   return res;
+}
+
+export function expandMacro(macro: string, w: Widget, ctx: RenderContext, placement: Placement, state: RenderState): Widget {
+  const res = evaluate(extendContext(ctx.context, { special: { widget: w, placement, state } }), macro);
+  const orig = w;
+  if (res && !Array.isArray(res) && typeof res === 'object') {
+    if ('content' in res || 'props' in res || 'properties' in res) w = Object.assign({}, w, res.props, res.properties, { widgets: Array.isArray(res.content) ? res.content : res.content ? [res.content] : w.widgets, macro: undefined });
+    else w = Object.assign({}, w, { widgets: [res], macro: undefined });
+  } else if (Array.isArray(res)) w = Object.assign({}, w, { widgets: res, macro: undefined });
+  return w;
 }

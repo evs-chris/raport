@@ -276,6 +276,9 @@
 </template>
 
 <template id="container-props">
+  <label><span title="Render this container as a macro with its properties and/or children supplied at render time.">Macro <button title="Edit in Expression Editor" class-ico on-click="@.editExpr('.macro')">{{>pencil}}</button></span><span>
+      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.macro}} tabout /></div>
+  </span></label>
   {{#with ~/[@.split(~/temp.widget, 2)] as repeater, @.lastKey(~/temp.widget) as index}}
   {{#if repeater.header && repeater.group[index]}}
     <label><span title="If enabled, show the repeater header for this grouping of rows. You can use the @level reference to modify the header for different levels within the repeater.">Show Header?</span><span><input type=checkbox checked="{{repeater.groupHeaders[repeater.group.length - 1 - index]}}" /></span></label>

@@ -181,6 +181,7 @@ export interface Widget extends Style {
   layout?: Layout;
   context?: ValueOrExpr;
   bridge?: boolean;
+  macro?: string;
 
   // label
   text?: ValueOrExpr|Array<ValueOrExpr|Span>;
@@ -215,6 +216,7 @@ export interface Container extends Widget {
   context?: ValueOrExpr;
   bridge?: boolean;
   elide?: boolean|Computed;
+  macro?: string;
 }
 
 export interface Image extends Widget {

@@ -237,6 +237,7 @@ export class Designer extends Ractive {
       }
       return `${n}rem`;
     } else if (w.type !== 'container' && w.type !== 'repeater') return '1rem';
+    else if ((w as any).macro) return '1rem';
     else return 'min-content';
   }
 

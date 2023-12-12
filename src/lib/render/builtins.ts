@@ -3,7 +3,7 @@ import { evaluate, filter, Group, ValueOrExpr, isValueOrExpr, extend as extendDa
 import { parse as parseTemplate } from '../data/parse/template';
 import { style as styleText } from '../data/parse/style';
 
-import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin, getWidthWithMargin, isComputed } from './index';
+import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin, getWidthWithMargin, isComputed, maybeComputed, expandMacro } from './index';
 import { styleClass, style, styleFont, styleImage, styleExtra } from './style';
 
 registerRenderer<Label>('label', (w, ctx, placement) => {
