@@ -1,25 +1,8 @@
 import { Displayed, Layout, Placement, Widget, Margin, MeasureFont, Computed, Borders } from '../report';
 import { extend as extendContext, Context, ExtendOptions as ContextExtendOptions, evaluate, isValueOrExpr } from '../data/index';
+import { error, RenderContext, addStyle } from './error';
 
-export interface RenderContext {
-  report: Displayed;
-  styles: StyleRegistry;
-  styleMap: StyleMap;
-  context: Context;
-}
-
-export interface StyleRegistry {
-  [id: string]: string;
-}
-
-interface StyleMap {
-  ids: { [id: string]: number };
-  styles: StyleRegistry;
-}
-
-export function addStyle(context: RenderContext, id: string, style: string) {
-  if (!context.styles[id]) context.styles[id] = style;
-}
+export { RenderContext, error, addStyle } from './error';
 
 export function isComputed(v: any): v is Computed {
   return typeof v === 'object' && isValueOrExpr(v.x);
@@ -122,10 +105,7 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   if (!('height' in w) && renderer.container) w.height = 'auto'; 
   const h = getHeightWithMargin(w, placement, context);
 
-  if (placement.maxY && !isNaN(h) && h > placement.maxY) {
-    addStyle(context, 'error', `.error { position: absolute; box-sizing: border-box; color: red; border: 1px dotted; width: 100%; height: 2rem; padding: 0.5rem; }`);
-    return { output: `<div class="error" style="top: ${placement.y}rem;">Widget overflow error</div>`, height: 2 };
-  }
+  if (placement.maxY && !isNaN(h) && h > placement.maxY) return error(context, placement);
 
   if (placement.availableY && h > placement.availableY) return { output: '', continue: { offset: 0 }, cancel: true };
 
@@ -145,10 +125,8 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   const r = renderer.render(w, context, placement, state);
   if (typeof r === 'string') return { output: r, height: h, width: getWidthWithMargin(w, placement, context) };
   
-  if (placement.maxY && r.height > placement.maxY) {
-    addStyle(context, 'error', `.error { position: absolute; box-sizing: border-box; color: red; border: 1px dotted; width: 100%; height: 2rem; padding: 0.5rem; }`);
-    return { output: `<div class="error" style="top: ${placement.y}rem;">Widget overflow error</div>`, height: 2 };
-  }
+  if (placement.maxY && r.height > placement.maxY) return error(context, placement);
+
   if (isNaN(h) && placement.availableY && r.height > placement.availableY) return { output: '', continue: { offset: 0 }, height: r.height, cancel: true };
 
   r.height = r.height || 0;
@@ -265,10 +243,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
             state = state || { offset };
             state.last = i;
             state.attempt = (+state.attempt || 0) + 1;
-            if (state.attempt > 1) {
-              addStyle(context, 'error', `.error { position: absolute; box-sizing: border-box; color: red; border: 1px dotted; width: 100%; height: 2rem; padding: 0.5rem; }`);
-              return { output: `<div class="error" style="bottom: 0rem;">Widget overflow error</div>`, height: 2 };
-            }
+            if (state.attempt > 1) return error(context, placement);
             return { output: s, continue: state, height: offset };
           }
           s += r.output;

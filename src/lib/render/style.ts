@@ -1,6 +1,6 @@
 import { Borders, Font, Placement, Widget } from '../report';
-import { expandMargin, expandBorder, getHeightWithMargin, maybeComputed, getWidthWithMargin, getHeight, RenderContext } from './index';
-import { evaluate, ValueOrExpr } from '../data/index';
+import { expandMargin, expandBorder, getHeightWithMargin, maybeComputed, getWidthWithMargin, RenderContext } from './index';
+import { ValueOrExpr } from '../data/index';
 
 export interface StyleOptions {
   computedHeight?: number;

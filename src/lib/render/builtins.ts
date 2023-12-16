@@ -2,6 +2,7 @@ import { Container, Label, Repeater, Image, MeasuredLabel, HTML } from '../repor
 import { evaluate, filter, Group, ValueOrExpr, isValueOrExpr, extend as extendData } from '../data/index';
 import { parse as parseTemplate } from '../data/parse/template';
 import { style as styleText } from '../data/parse/style';
+import { error } from './error';
 
 import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin, getWidthWithMargin, isComputed, maybeComputed, expandMacro } from './index';
 import { styleClass, style, styleFont, styleImage, styleExtra } from './style';
@@ -62,6 +63,8 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
     state.offset = 0;
     // must start over
     delete state.last;
+    state.attempt = (state.attempt || 0) + 1;
+    if (state.attempt > 1) return error(ctx, placement);
     return { continue: state, output: '' };
   } else if (r.continue) {
     if (w.context) r.continue.state = { ctx: wctx.context };
