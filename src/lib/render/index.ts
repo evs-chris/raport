@@ -5,7 +5,7 @@ import { error, RenderContext, addStyle } from './error';
 export { RenderContext, error, addStyle } from './error';
 
 export function isComputed(v: any): v is Computed {
-  return typeof v === 'object' && isValueOrExpr(v.x);
+  return v && typeof v === 'object' && isValueOrExpr(v.x);
 }
 
 export function maybeComputed<V, T = Exclude<V, Computed>>(v: V, context: RenderContext): T {
@@ -318,11 +318,11 @@ export function getHeight(w: Widget, placement: Placement, context: RenderContex
   else if (h && typeof h === 'object' && 'percent' in h && h.percent && placement.maxY) {
     r = +(placement.maxY * (h.percent / 100)).toFixed(4);
     pct = true;
-  } else if (h === 'auto' || (computed && !h)) {
-    if (b) return computed + b[0] + b[2] || NaN;
-    return computed || NaN;
   } else if (h === 'grow') {
     r = placement.availableY || 0;
+  } else if (h === 'auto' || typeof h === 'string' || (h == null && w.type === 'container') || (computed && !h)) {
+    if (b) return computed + b[0] + b[2] || NaN;
+    return computed || NaN;
   }
 
   if (typeof r === 'number' && (w.box === 'contain' || (pct || r === placement.availableY) && w.box !== 'expand')) {
