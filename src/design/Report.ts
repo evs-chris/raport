@@ -1977,6 +1977,7 @@ function stripDefaults(json: any): any {
         if (Object.values(v).find(v => v != null && v !== '' && v !== false) !== undefined) {
           const font: any = {};
           fontKeys.forEach(f => v[f] != null && v[f] !== '' && v[f] !== false && (font[f] = v[f]));
+          if (typeof font.weight === 'string') font.weight = +font.weight;
           if (json.type === 'html' && Object.keys(font).length === 1 && font.line === 0) continue;
           res.font = font;
         } else continue;
