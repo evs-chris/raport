@@ -150,8 +150,7 @@ registerLayout('row', (w, o, m, p, ps, context) => {
     availableX = p.maxX;
     br = true;
   }
-  const nw = getWidthWithMargin(w, { x: p.x, y: p.y, maxX: p.maxX, maxY: p.maxY, availableY: p.availableY, availableX }, context);
-  if (br || ps[0][0] + ps[0][2] + nw - ps[ps.length - 1][0] > p.maxX) {
+  if (br || ps[0][0] + ps[0][2] + getWidthWithMargin(w, { x: p.x, y: p.y, maxX: p.maxX, maxY: p.maxY, availableY: p.availableY, availableX }, context) - ps[ps.length - 1][0] > p.maxX) {
     n = { x: m[3], y: maxYOffset(ps), availableX: p.maxX, maxX: p.maxX };
     n.availableY = p.availableY - (n.y - o);
   } else {
@@ -230,7 +229,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
         const r = renderWidget(w, context, p, state && state.child);
 
         // skip empty output
-        if (typeof r === 'string' && !r || (!r.cancel && !r.output && !r.height)) continue;
+        if (typeof r === 'string' && !r || (!r.cancel && !r.output && !r.continue && !r.height)) continue;
 
         if (typeof r === 'string') {
           s += r;
