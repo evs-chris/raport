@@ -127,7 +127,7 @@ export interface Font {
   family?: string|Computed;
   weight?: number|Computed;
   color?: string|Computed;
-  align?: 'left'|'right'|'center'|Computed;
+  align?: 'left'|'right'|'center'|'justify'|Computed;
   line?: number|Computed;
   right?: number;
   pre?: boolean|Computed;
