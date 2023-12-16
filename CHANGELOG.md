@@ -1,4 +1,16 @@
-## 0.22.1
+## 0.22.3
+
+2023-12-16
+
+### Render
+
+* Auto layout containers with a set height will no longer prematurely limit the available vertical space for children when the first wrap occurs.
+* Containers with a fixed height and contents that overflow it will now render an error rather than trying to fit the container on a new page until the heat death of the universe or the engine kills the script, whichever comes first.
+
+### Designer
+
+* The container height property can now be set to and show the `auto` setting.
+
 
 2023-12-12
 
