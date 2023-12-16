@@ -175,13 +175,12 @@ registerLayout('row', (w, o, m, p, ps, context) => {
   const nw = getWidthWithMargin(w, { x: p.x, y: p.y, maxX: p.maxX, maxY: p.maxY, availableY: p.availableY, availableX }, context);
   if (br || ps[0][0] + ps[0][2] + nw - ps[ps.length - 1][0] > p.maxX) {
     n = { x: m[3], y: maxYOffset(ps), availableX: p.maxX, maxX: p.maxX };
+    n.availableY = p.availableY - (n.y - o);
   } else {
-    n = { x: ps[0][0] + ps[0][2], y: ps[0][1], availableX, maxX: p.maxX };
+    n = { x: ps[0][0] + ps[0][2], y: ps[0][1], availableX, maxX: p.maxX, availableY: p.availableY };
   }
 
   n.y -= o;
-
-  if (p.availableY) n.availableY = p.availableY - ps[0][1] - n.y;
 
   return n;
 });
