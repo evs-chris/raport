@@ -115,6 +115,7 @@ function process(stuff: Array<Style[]|string>): string {
     }
   }
   if (open) res += `</span>`;
+  for (const f of blockstack) res += '</span>';
   return res;
 }
 
