@@ -1142,10 +1142,13 @@ registerOperator({
         else if (pair.length === 1) k = pair[0];
         else (k = pair[0], v = pair[1]);
       } else k = pair;
-      if (many) {
-        if (k in a) a[k].push(v);
-        else a[k] = [v];
-      } else a[k] = v;
+      const keys = Array.isArray(k) ? k : [k];
+      for (const k of keys) {
+        if (many) {
+          if (k in a) a[k].push(v);
+          else a[k] = [v];
+        } else a[k] = v;
+      }
       return a;
     }, {});
   },
