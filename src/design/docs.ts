@@ -31,11 +31,11 @@ export const operators = `[
 	]}
 	{ op:['==' 'is'] sig:[
 		{ bin:1 proto:'(any, any) => boolean' desc:'Returns true if the given values are equal (not strict).' }
-    { bin:1 proto:'(any, schema) => boolean' desc:'(Only applies to the \\'is\\' alias) Returns true if the given value loosely conforms to the given schema.' }
+		{ bin:1 proto:'(any, schema) => boolean' desc:'(Only applies to the \\'is\\' alias) Returns true if the given value loosely conforms to the given schema.' }
 	]}
 	{ op:['!=' 'is-not'] sig:[
 		{ bin:1 proto:'(any, any) => boolean' desc:'Returns true if the given values are not equal (not strict).' }
-    { bin:1 proto:'(any, schema) => boolean' desc:'(Only applies to the \\'is-not\\' alias) Returns true if the given value does not loosely conform to the given schema.' }
+		{ bin:1 proto:'(any, schema) => boolean' desc:'(Only applies to the \\'is-not\\' alias) Returns true if the given value does not loosely conform to the given schema.' }
 	]}
 	{ op:['===' 'deep-is'] sig:[
 		{ bin:1 proto: '(any, any) => boolean' desc:'Do a deep equality check on the first two arguments using loose equality for primitives.' }
@@ -201,9 +201,9 @@ export const operators = `[
 	{ op:'inspect' sig:[
 		{ proto:'(any) => schema' desc:'Inspects the given value and returns a schema based on its contents.' }
 	] opts:[
-    { name:'mode' type:"'schema'" desc:"If set to 'schema' the result will be unparsed into a schema literal." }
-    { name:'flat' type:'boolean' desc:'If enabled, deeply introspect objects to include nested types in the schema.' }
-  ]}
+		{ name:'mode' type:"'schema'" desc:"If set to 'schema' the result will be unparsed into a schema literal." }
+		{ name:'flat' type:'boolean' desc:'If enabled, deeply introspect objects to include nested types in the schema.' }
+	]}
 	{ op:'intersect' sig:[
 		{ proto:'(any[], any[]) => any[]' desc:'Returns the intersection of the two given arrays with no duplicates.' }
 	]}
@@ -231,8 +231,8 @@ export const operators = `[
 	{ op:'label-diff' sig:[
 		{ proto:'(Diff, LabelMap) => Diff' desc:'Takes the given diff and label map and swaps out paths in the diff for labels in the map. The label map is a nested object with the keys being single key paths in the diff and the values being a label or tuple of a label and label map for nested sub structures.' eg:'label-diff(d { foo:[:Company { bar::Address }] }) where d = { :foo.bar: [:street :avenue] } will result in { "Company Address": [:street :avenue] }' }
 	] opts:[
-    { name:'omit' type:'boolean' desc:'Remove any unlabelled diff entries from the output.' }
-  ]}
+		{ name:'omit' type:'boolean' desc:'Remove any unlabelled diff entries from the output.' }
+	]}
 	{ op:'last' sig:[
 		{ proto:'any[] => any' desc:'Returns the last element in the given array.' }
 		{ agg:1 proto:'() => any' desc:'Returns the last element in the current source.' }
@@ -276,9 +276,9 @@ export const operators = `[
 		{ agg:1 proto:'application => number' desc:'Returns the smallest entry in the applications for the current source.' }
 		{ proto:'...number => number' desc:'Returns the smallest entry in the given list of number arguments. If no arguments are given the result will be 0.' }
 	]}
-  { op:'not' sig:[
-    { un:1 proto:'any => boolean' desc:'Negates the truthiness of the given value.' }
-  ]}
+	{ op:'not' sig:[
+		{ un:1 proto:'any => boolean' desc:'Negates the truthiness of the given value.' }
+	]}
 	{ op:'not-ilike' sig:[
 		{ bin:1 proto:'(string, string) => any' desc:'Checks to see if the first string does not match the second string used as a pattern case insensitively.' }
 		{ bin:1 proto:'(string[], string) => any' desc:'Checks to see if all of the strings in the first argument array do not match the second string used as a pattern case insensitively.' }
