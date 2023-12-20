@@ -1,16 +1,37 @@
 ## 0.22.3
 
+2023-12-19
+
+### Render
+
+* __BUG:__ Continuations in an auto layout will no longer be dropped.
+* __BUG:__ Open blocks in styled text are now properly closed if left hanging at the end of the input.
+* Computations that are undefined will no longer be computed.
+* Text alignment can now be `justified`.
+
+### Data
+
+* The `index` operator can now index the same value by multiple keys, index multiple values from the same array entry, and has alternate forms of result to make certain operations easier to track.
+
+### Designer
+
+* __BUG:__ The font weight properly will now be set to numbers rather than strings.
+
+
+## 0.22.2
+
 2023-12-16
 
 ### Render
 
-* Auto layout containers with a set height will no longer prematurely limit the available vertical space for children when the first wrap occurs.
-* Containers with a fixed height and contents that overflow it will now render an error rather than trying to fit the container on a new page until the heat death of the universe or the engine kills the script, whichever comes first.
+* __BUG:__ Auto layout containers with a set height will no longer prematurely limit the available vertical space for children when the first wrap occurs.
+* __BUG:__ Containers with a fixed height and contents that overflow it will now render an error rather than trying to fit the container on a new page until the heat death of the universe or the engine kills the script, whichever comes first.
 
 ### Designer
 
-* The container height property can now be set to and show the `auto` setting.
+* __BUG:__ The container height property can now be set to and show the `auto` setting.
 
+## 0.22.1
 
 2023-12-12
 
