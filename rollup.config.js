@@ -3,10 +3,13 @@ import typescript from '@rollup/plugin-typescript';
 import node from '@rollup/plugin-node-resolve';
 import sourcemaps from 'rollup-plugin-sourcemaps';
 import { terser } from 'rollup-plugin-terser'
+import replace from '@rollup/plugin-replace';
+const { version } = require('./package.json');
 
 const configs = [];
 
 if (process.env.ENV === 'dev') {
+  const replaceOpts = { values: { RAPORT_VERSION: `${version}-dev` }, preventAssignment: false, delimiters: ['', ''] };
   // build lib es and umd
   configs.push({
     input: 'src/lib/index.ts',
@@ -70,6 +73,7 @@ if (process.env.ENV === 'dev') {
       }),
       sourcemaps(),
       node(),
+      replace(replaceOpts),
     ],
   });
 
@@ -97,9 +101,11 @@ if (process.env.ENV === 'dev') {
       }),
       sourcemaps(),
       node(),
+      replace(replaceOpts),
     ],
   });
 } else if (process.env.ENV === 'prod') {
+  const replaceOpts = { values: { RAPORT_VERSION: `${version}` }, preventAssignment: false, delimiters: ['', ''] };
   // build lib es and umd with min
   configs.push({
     input: 'src/lib/index.ts',
@@ -196,6 +202,7 @@ if (process.env.ENV === 'dev') {
       }),
       sourcemaps(),
       node(),
+      replace(replaceOpts),
     ],
   });
 
@@ -214,6 +221,7 @@ if (process.env.ENV === 'dev') {
       sourcemaps(),
       node(),
       terser(),
+      replace(replaceOpts),
     ],
   });
 }
