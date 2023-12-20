@@ -194,9 +194,9 @@ export const operators = `[
 		{ bin:1 proto:'(number, range) => boolean' desc:'Returns true if the first argument is a falls within the second argument range.' }
 	]}
 	{ op:'index' sig:[
-		{ agg:1 proto:'(array, application) => object' desc:'Returns a map of the given array keyed on the result of the application. If the application returns a tuple, the values in the map will be the second value in the tuple and the keys will be the first. If the key portion of the tuple is an array, the value will be set for each key in the keys array. If the application returns an empty tuple, the value in the array will be omitted from the result.' }
+		{ agg:1 proto:'(array, application) => object' desc:'Returns a map of the given array keyed on the result of the application. If the application returns a tuple, the values in the map will be the second value in the tuple and the keys will be the first. If the key portion of the tuple is an array, the value will be set for each key in the keys array. If the application returns an empty tuple, the value in the array will be omitted from the result. The value may also be an object with a "key" or "keys" key and, optionally, a "value" key. The value may also be an object with a "many" key with an array value of multiple entries of any of the previous types to be added to the map.' }
 	] opts: [
-		{ name:'many' type::boolean desc:'If enabled, the values will be lists of values with matching keys.' }
+		{ name:'many' type::boolean desc:'If enabled, the values in the map will be arrays aggregating all of the values with the same key. Otherwise, the last entry for a key will be the value for that key in the map.' }
 	]}
 	{ op:'inspect' sig:[
 		{ proto:'(any) => schema' desc:'Inspects the given value and returns a schema based on its contents.' }

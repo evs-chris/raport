@@ -1134,23 +1134,7 @@ registerOperator({
   apply(_name: string, arr: any[], args: ValueOrExpr[], opts, ctx: Context) {
     if (!args[0]) return {};
     const many = opts && opts.many;
-    return arr.reduce((a, c, i) => {
-      const pair = evalApply(ctx, args[0], [c, i], { index: i, all: a });
-      let k: any, v = c;
-      if (Array.isArray(pair)) {
-        if (pair.length === 0) return a;
-        else if (pair.length === 1) k = pair[0];
-        else (k = pair[0], v = pair[1]);
-      } else k = pair;
-      const keys = Array.isArray(k) ? k : [k];
-      for (const k of keys) {
-        if (many) {
-          if (k in a) a[k].push(v);
-          else a[k] = [v];
-        } else a[k] = v;
-      }
-      return a;
-    }, {});
+    return arr.reduce((a, c, i) => _indexPair(a, evalApply(ctx, args[0], [c, i], { index: i, all: a }), c, many), {});
   },
 }, {
   type: 'aggregate',
@@ -1231,6 +1215,38 @@ function _parseRange(ctx: Context, range: string) {
   const map = (ctx.root as any)._ranges || ((ctx.root as any)._ranges = {})
   if (range in map) return map[range];
   return (map[range] = parseRange(range));
+}
+
+function _indexPair(res: any, value: any, current: any, many: boolean): any {
+  if (Array.isArray(value)) {
+    if (value.length === 0) return res;
+    else if (value.length === 2) {
+      const [k, v] = value;
+      if (Array.isArray(k)) {
+        for (const kk of k) {
+          if (many) {
+            if (kk in res) res[kk].push(v)
+            else res[kk] = [v];
+          } else res[kk] = v;
+        }
+      } else {
+        if (many) {
+          if (k in res) res[k].push(v);
+          else res[k] = [v];
+        } else res[k] = v;
+      }
+    }
+  } else if (typeof value === 'object') {
+    const v = value as any;
+    if ('many' in v && Array.isArray(v.many)) for (const i of v.many) _indexPair(res, i, current, many);
+    else if ('key' in v || 'keys' in v) _indexPair(res, [v.key || v.keys, v.value || current], current, many);
+  } else {
+    if (many) {
+      if (value in res) res[value].push(current);
+      else res[value] = [current];
+    } else res[value] = current;
+  }
+  return res;
 }
 
 // basic formats
