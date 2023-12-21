@@ -6,7 +6,7 @@ export ENV=prod
 rollup -c rollup.config.js &
 export PID=$!
 
-for i in 1 2 3 4 5; do
+for i in 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5; do
   sleep 5;
   ps -p $PID > /dev/null
   if [ $? -ne 0 ]; then

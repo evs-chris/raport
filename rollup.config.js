@@ -104,6 +104,32 @@ if (process.env.ENV === 'dev') {
       replace(replaceOpts),
     ],
   });
+
+  // build differ
+  configs.push({
+    input: 'src/play/diff.ts',
+    external: ['ractive', /^raport/, /^design/],
+    output: {
+      file: 'play/diff.js',
+      format: 'iife',
+      name: 'diff',
+      sourcemap: true,
+      globals: {
+        'ractive': 'Ractive',
+        'raport': 'Raport',
+        'raport/index': 'Raport',
+      }
+    },
+    plugins: [
+      typescript({
+        include: ['src/**/*.ts'],
+        sourceMap: true,
+      }),
+      sourcemaps(),
+      node(),
+      replace(replaceOpts),
+    ],
+  });
 } else if (process.env.ENV === 'prod') {
   const replaceOpts = { values: { RAPORT_VERSION: `${version}` }, preventAssignment: false, delimiters: ['', ''] };
   // build lib es and umd with min

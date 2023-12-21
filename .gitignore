@@ -3,5 +3,6 @@
 /lib
 /design
 play/index*js*
+play/diff*js*
 src/play/
 .views
