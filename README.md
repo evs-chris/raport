@@ -213,6 +213,8 @@ Report sources define the way a data set should be mapped into a report. A repor
 
 There is a generated list of operators and formatters [here](./Operators.md). This is generated from the same source that is used to show operator tooltips in the designer.
 
+One of the built-in operators, [`diff`](./Operators.md#diff), happens to be useful enough that it has a [tool built around it](https://evs-chris.github.io/raport/diff) to find the differences between two pieces of JSON-ish data.
+
 ## Templates
 
 There is a second mode available for the raport parser that reads templates similar to mustache/handlebars templates. In this mode, interpolators are surrounded by `{{` and `}}`, and there are four special interpolators for conditionals, context, and looping. All of the special interpolators must be closed with an end tag `{{/}}`, where there may be any text between the `/` and the `}}`. Each block level has all of its contents concatenated, so this mode is effectively equivalent to bulding expression trees with concatenation operations.
