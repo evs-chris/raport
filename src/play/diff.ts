@@ -12,7 +12,7 @@ class App extends Ractive {
   diff(left: string, right: string) {
     const diff = evaluate({ left, right }, 'diff(parse(left) parse(right))')
     const res = {} as any;
-    for (const k in diff) res[k.substr(2)] = diff[k];
+    for (const k in diff) res[k.replace(/^v\./, '')] = diff[k];
     return res;
   }
 
