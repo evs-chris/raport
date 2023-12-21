@@ -125,9 +125,9 @@ function fill(char: string, len: number): string {
 }
 
 function _stringify(value: ValueOrExpr): string {
-  if (value == null) return '';
   if (typeof value === 'string') return value;
   let stringed: string;
+  if (value == null || typeof value === 'number' || typeof value === 'boolean') return `${value}`;
   if (_tpl && ('op' in value || 'r' in value)) {
     if ('op' in value) {
       if (value.op === 'if' || value.op === 'with' || value.op === 'unless' || value.op === 'each') {
