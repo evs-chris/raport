@@ -15,7 +15,7 @@
           const diff = index.evaluate({ left, right }, 'diff(parse(left) parse(right))');
           const res = {};
           for (const k in diff)
-              res[k.substr(2)] = diff[k];
+              res[k.replace(/^v\./, '')] = diff[k];
           return res;
       }
       string(val, comp) {
