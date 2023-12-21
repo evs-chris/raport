@@ -665,7 +665,18 @@ q.test('source', t => {
 // TODO: split
 // TODO: strict-is
 // TODO: strict-is-not
-// TODO: string
+
+q.test('string', t => {
+  t.equal(evaluate('string(null)'), '');
+  t.equal(evaluate('string(null raport:1)'), 'null');
+  t.equal(evaluate('string(undefined raport:1)'), 'undefined');
+  t.equal(evaluate('string(undefined)'), '');
+  t.equal(evaluate('string(10)'), '10');
+  t.equal(evaluate('string(10 raport:1)'), '10');
+  t.equal(evaluate('string(10 json:1)'), '10');
+  t.equal(evaluate('string("|b|hello" styled:1)'), '<span style="font-weight:bold;">hello</span>');
+});
+
 // TODO: sum
 
 q.test('time-span', t => {

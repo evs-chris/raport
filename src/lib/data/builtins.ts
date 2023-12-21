@@ -550,6 +550,7 @@ registerOperator(
         if (v === undefined) v = stringify({ v: value }, opts);
         return v;
       } else if (typeof value === 'string' && opts.styled) return style(value);
+      else if (value == null) return '';
     }
 
     if (Array.isArray(value)) return value.join(', ');
