@@ -1,3 +1,21 @@
+## 0.22.4
+
+2023-12-26
+
+### Project
+
+* __BUG:__ The Widget type now has a field for `styled` so that styled labels will type check in definitions.
+* There is a new diff tool next to the designer that uses the `diff` operator to compare to chunks of data.
+
+### Data
+
+* The `string` operator with a `raport` flag will now properly stringify numbers, booleans, null, and undefined.
+
+### Render
+
+* __BUG:__ Template interpolators that result in `undefined` will once again render an empty string.
+
+
 ## 0.22.3
 
 2023-12-19
