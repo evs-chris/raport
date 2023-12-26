@@ -187,6 +187,7 @@ export interface Widget extends Style {
   text?: ValueOrExpr|Array<ValueOrExpr|Span>;
   format?: LabelFormat;
   id?: string;
+  styled?: boolean;
 
   // image
   url?: ValueOrExpr;
