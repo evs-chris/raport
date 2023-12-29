@@ -1255,6 +1255,8 @@ export class Designer extends Ractive {
       if (str) cb(str);
     } else {
       const input: HTMLInputElement = this.find('#project-file') as any;
+      if (single) input.accept = '.raport-proj,.json';
+      else input.accept = '.json';
       let load: () => void;
       load = () => {
         input.removeEventListener('change', load);
