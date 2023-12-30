@@ -25,7 +25,8 @@ export function dollar(v: string, alt: string, dec: number = 2, group: string = 
 }
 
 export function phone(v: string|number): string {
-  if (typeof v === 'number') v = v.toString();
+  if (!v) v = '';
+  if (typeof v !== 'string') v = v.toString();
   v = v || '';
   v = v.replace(/[^\d]/g, '');
 
