@@ -8,7 +8,7 @@ import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, rend
 import { styleClass, style, styleFont, styleImage, styleExtra } from './style';
 
 registerRenderer<Label>('label', (w, ctx, placement) => {
-  addStyle(ctx, 'label', `.label {position:absolute;box-sizing:border-box;}`);
+  addStyle(ctx, 'label', `.label {position:absolute;box-sizing:border-box;white-space:normal;}`);
   let str = '';
   let sval: any;
   let val = (Array.isArray(w.text) ? w.text : [w.text]).map(v => {
