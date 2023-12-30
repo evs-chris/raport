@@ -48,8 +48,8 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
   const wctx = ((state || {}).state || {}).ctx ? Object.assign({}, ctx, { context: state.state.ctx }) : ctx;
   if (w.context && !((state || {}).state || {}).ctx) {
     if (!wctx.context.locals) wctx.context.locals = {};
-    const value = evaluate(wctx, w.context);
-    if (value) wctx.context = extendData(wctx.context, { value });
+    const value = evaluate(extend(wctx, { special: { placement, widget: w }, locals: wctx.context.locals }), w.context);
+    if (value) wctx.context = extendData(wctx.context, { value, special: { placement, widget: w } });
   }
   const cw = getWidth(w, placement, ctx) || placement.availableX;
   const r = renderWidgets(w, wctx, { x: 0, y: 0, availableX: cw, availableY: h || placement.availableY, maxX: cw, maxY: h != null ? h : placement.maxY }, state, w.layout);
