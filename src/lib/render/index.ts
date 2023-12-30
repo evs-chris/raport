@@ -45,6 +45,7 @@ const avgs = {
 export function measureEstimate(text: string, width: number, context: RenderContext, font?: MeasureFont): number {
   const family = (font && maybeComputed(font.family, context)) || 'sans';
   const size = (font && maybeComputed(font.size, context)) || 0.83;
+  const line = (font && maybeComputed(font.line, context)) || size;
   const avg = (((font && maybeComputed(font.metric, context)) || ((family === 'mono' || /fixed|mono/i.test(family) ? avgs.mono :
     family === 'narrow' || /narrow|condensed/i.test(family) ? avgs.narrow :
       family === 'sans' || /sans|arial|helvetica/i.test(family) ? avgs.sans :
@@ -63,7 +64,7 @@ export function measureEstimate(text: string, width: number, context: RenderCont
       return a;
     }, [0, 0]);
     return a + ((lines + (word > 0 ? 1 : 0)) || 1);
-  }, 0) * size;
+  }, 0) * line;
 }
 
 /** Text height measurement function for the given text, font, available width in rem, and line height in rem.
