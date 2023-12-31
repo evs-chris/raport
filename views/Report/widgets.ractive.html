@@ -57,12 +57,13 @@
 
 <template id="widget">
   {{#with @.calcWidthWithMargin(., @context) as widthMargin, @.calcHeightWithMargin(.) as heightMargin}}
+  {{#if .br === true}}<div class=break />{{/if}}
   <div as-widget=.type style="{{#if label !== 'page footer'}}width: {{widthMargin}};{{else}}position: absolute; width: auto; left: {{~/pageSize.margin[1] || 0}}rem; right: {{~/pageSize.margin[1] || 0}}rem; bottom: {{~/pageSize.margin[0] || 0}}rem;{{/if}} {{#if (.height && .height !== 'auth') || .type !== 'container'}}{{.type === 'container' ? 'min-' : ''}}height: {{heightMargin}};{{/if}}"
     {{#if Array.isArray(^^/layout)}}
       style="{{@.calcManualLayout(^^/layout[@index], widthMargin, heightMargin)}}"
       {{#if ~/temp.widget === @keypath}}as-moveable{{/if}}
     {{else}}
-      style="{{#if .br === true}}break-after: always;{{/if}}{{#if .width === 'grow'}}flex-grow: 1; break-after: always;{{/if}}"
+      style="{{#if .width === 'grow'}}flex-grow: 1; break-after: always;{{/if}}"
     {{/if}}
     class-macro=".macro"
     {{#if .margin}}style="{{@.calcMargin(.)}}"{{/if}}
