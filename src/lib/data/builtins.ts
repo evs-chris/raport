@@ -9,7 +9,7 @@ import { validate, inspect, isSchema } from './schema';
 import { diff, deepEqual, labelDiff } from './diff';
 import { detect as csvDetect, parse as csvParse } from './csv';
 import { style } from './parse/style';
-import { measure } from '../render/index';
+import { measure, escapeHTML } from '../render/index';
 
 function simple(names: string[], apply: (name: string, values: any[], opts: OperatorOptions, ctx: Context) => any): ValueOperator {
   return {
@@ -959,7 +959,8 @@ registerOperator(
     else if (opts.csv) {
       if (opts.detect) opts = Object.assign(csvDetect(v), opts);
       return csvParse(v, opts);
-    } else return parse(v, opts);
+    } else if (opts.base64) return atob(v);
+    else return parse(v, opts);
   }),
   simple(['detect-delimiters'], (_name: string, [data]: any[]) => {
     if (typeof data !== 'string') return {};
@@ -1348,3 +1349,58 @@ registerFormat('styled', n => {
     return str;
   });
 }
+
+registerFormat('hex', val => {
+  if (typeof val === 'number') return val.toString(16);
+  else {
+    const str = `${val}`;
+    const te = new TextEncoder();
+    return Array.from(te.encode(str)).map(c => c.toString(16).padStart(2, '0')).join('');
+  }
+});
+
+registerFormat('base', (val, [n]) => {
+  try {
+    val.toString(n);
+  } catch {
+    return val;
+  }
+});
+
+registerFormat('noxml', val => escapeHTML(`${val}`));
+
+registerFormat('xml', (val, [n]) => {
+  if (val && typeof val === 'object') return objectToXML(val, n);
+  else return val;
+});
+
+function objectToXML(object: object, indent: number|undefined = undefined) {
+  if (Array.isArray(object)) return _objectToXML({ values: { value: object } }, 0, indent);
+  const keys = Object.keys(object);
+  if (keys.length > 1) return _objectToXML({ root: object }, 0, indent);
+  if (keys.length < 1) return '<root />';
+  if (Array.isArray(object[keys[0]])) return _objectToXML({ root: object }, 0, indent);
+  return _objectToXML(object, 0, indent);
+}
+
+function _objectToXML(val: any, depth: number, indent: number|undefined, propname: string|undefined = undefined) {
+  if (Array.isArray(val)) {
+    return val.reduce((xml, entry) => {
+      const val = _objectToXML(entry, depth + 1, indent, propname);
+      const tag = val === '' || val === undefined ? `<${propname} />` : `<${propname}>${val}</${propname}>`;
+      return `${xml}${indent && depth ? '\n' + pad('l', '', depth * indent, ' ') : ''}${tag}`;
+    }, '');
+  }
+  if (val && typeof val === 'object') {
+    return Object.entries(val).reduce((xml, [name, value]) => {
+      const val = _objectToXML(value, depth + (Array.isArray(value) ? 0 : 1), indent, name);
+      const tag = val === '' ? `${indent && depth ? '\n' + pad('l', '', depth * indent, ' ') : ''}<${name} />` : Array.isArray(value) ? val : `${indent && depth ? '\n' + pad('l', '', depth * indent, ' ') : ''}<${name}>${val}${indent && /\n/.test(val) ? '\n' + pad('l', '', depth * indent, ' ') : ''}</${name}>`;
+      return `${xml}${tag}`;
+    }, '');
+  }
+  return escapeHTML(val);
+}
+
+registerFormat('base64', val => {
+  return btoa(`${val}`);
+});

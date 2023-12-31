@@ -337,6 +337,7 @@ export const operators = `[
 		{ name:'template' type:'boolean' desc:'Use the template parser rather than the expression parser.' }
 		{ name:'time' type:'boolean' desc:'Use the time parser rather than the expression parser.' }
 		{ name:'schema' type:'boolean' desc:'Use the schema parser rather than the expression parser.' }
+    { name:'base64' type:'boolean' desc:'Use a base64 parser to decode a base64 encoded string.' }
 		{ name:'csv' type:'boolean' desc:'Use the delimited text parser rather than the expression parser.' }
 		{ name:'detect' type:'boolean' desc:'If using the delimited parser, detect the delimiters and use them to parse.' }
 		{ name:'header' type:'boolean' desc:'If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.' }
@@ -498,6 +499,10 @@ export const operators = `[
 
 export const formats = `let dateparts = 'Available placeholders are:\\n\\n* y - year\\n* M - month\\n* d - date\\n* E - day of week\\n* H - hour (24 hour)\\n* h or k - hour (12 hour)\\n* m - minute\\n* s - second\\n* S - millisecond\\n* a - AM/PM\\n* z - timezone offset'
 [
+  { name:'base' desc:'Converts the given number to the given base' opts:[
+    { name:'base' req:1 type:'number' desc:'The target base e.g. 2 or 8 or 16.' }
+	]}
+  { name:'base64' desc:'Converts the given value to a base64 encoded string.' }
 	{ name:'case' desc:'Change the casing of the value.' opts:[
 		{ name:'case' req:1 type:"'upper'|'lower'|'snake'|'kebab'|'pascal'|'camel'|'proper'" desc:'The case format to use.'}
 	]}
@@ -510,11 +515,13 @@ export const formats = `let dateparts = 'Available placeholders are:\\n\\n* y - 
 		{ name:'sign' type:'string' desc:'The currency symbol to render.' }
 		{ name:'neg' type:"'sign'|'wrap'|'both'" desc:'How to display negative values. Sign shows a leading minus symbol. Wrap wraps the value in parenteses.' }
 	]}
+  { name:['hex'] desc:'Formats the given number in hexadecimal, or if the value is not a number, encodes it as string in hexadecimal.' }
 	{ name:['int' 'integer'] desc:'Formats the value as an integer.' opts:[
 		{ name:'group' type:'string' desc:'The string to use as a grouping divider.' }
 		{ name:'neg' type:"'sign'|'wrap'|'both'" desc:'How to display negative values. Sign shows a leading minus symbol. Wrap wraps the value in parenteses.' }
 	]}
 	{ name:'iso8601' desc:'Formats the value as an ISO-8601 timestamp.' }
+  { name:'noxml' desc:'Escapes special XML characters so that the value may be safely rendered into xml.' }
 	{ name:['num' 'number'] desc:'Formats the value as an number.' opts:[
 		{ name:'dec' type:'number' desc:'The number of decimal places to render.' }
 		{ name:'group' type:'string' desc:'The string to use as a grouping divider.' }
@@ -533,8 +540,11 @@ export const formats = `let dateparts = 'Available placeholders are:\\n\\n* y - 
 	]}
 	{ name:'timestamptz' desc:'Formats a date value as a timestamp with timezone offset using placeholder characters, where repeated characters render more descriptive or padded values. Any non-placeholder characters are rendered as entered. The default format is yyyy-MM-dd HH:mm:sszzz. {dateparts}' opts:[
 		{ name:'format' type:'string' desc:'The format template to apply.'}
-	]}
-	{ name:'[operator]', desc:'Calls the named operator as a formatter, passing the target value as the first argument with any arguments to the formatter following. Any set defaults for the formatter are passed as options to the operator.' }
+  ]}
+  { name:'xml' desc:'Converts the given value to XML if possible.' opts:[
+    { name:'indent' type:'number' desc:'Indent each successive set of child nodes with this number of spaces.' }
+  ]}
+ 	{ name:'[operator]' desc:'Calls the named operator as a formatter, passing the target value as the first argument with any arguments to the formatter following. Any set defaults for the formatter are passed as options to the operator.' }
 ]`;
 
 export const generateMarkdown = `let mkarr = =>if count(_) then _ else [_]
