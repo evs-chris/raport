@@ -1,7 +1,7 @@
 import { css, template } from 'views/Report';
 
 import Ractive, { ExtendOpts, InitOpts, ContextHelper, ReadLinkResult, ObserverHandle } from 'ractive';
-import { Report, ReportSource, Literal, run, parse, stringify, initParameters, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap, Parameter, StringifyOpts } from 'raport/index';
+import { Report, ReportSource, Literal, run, parse, stringify, initParameters, PageSizes, PageSize, PageOrientation, Widget, Root, Context, extend, filter, applySources, evaluate, inspect, parseTemplate, isComputed, registerOperator, ValueOrExpr, Span, Computed, isValueOrExpr, SourceMap, Parameter, StringifyOpts, parseXML } from 'raport/index';
 import { nodeForPosition, ParseNode, ParseError } from 'sprunge';
 
 import { Editor, Viewer } from './Editor';
@@ -1943,6 +1943,11 @@ function tryParseData(str: string, header?: boolean): any {
   try {
     return JSON.parse(str);
   } catch {
+    if (str.trim()[0] === '<') {
+      const data = parseXML(str);
+      if (data) return data;
+    }
+
     const csv = evaluate({ str, header }, `parse(str, { csv:1 detect:1 header:header })`);
     if (!csv.length && str.length) {
       const res = evaluate(str);
