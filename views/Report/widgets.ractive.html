@@ -185,9 +185,11 @@
 </template>
 
 <template id="widget-info">
-  {{#if .type === 'label'}}
+  {{#if .type === 'label' || .type === 'measured'}}
     {{#if .id != null}}<span class=widget-id>.{{.id}}</span>{{/if}}
     <span class="widget-info">{{.text}}</span>
+  {{elseif .type === 'image'}}
+    <span class="widget-info">{{.url}}</span>
   {{elseif .type === 'repeater'}}
     <span class="widget-info">{{.source && typeof .source === 'object' && 'x' in .source ? .source.x : (.source.name || .source.source || '(None)')}}</span>
   {{elseif .macro}}
