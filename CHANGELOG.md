@@ -1,3 +1,34 @@
+## 0.23.0
+
+### Render
+
+* __BREAKING BUG:__ At some point setting a widget to break changed from breaking after the widget to breaking before the widget. Since it changed in a much earlier version, this just notice that the docs were incorrect about how breaking widgets worked. The docs have been updated to reflect actual behavior.
+* __BUG:__ Labels will no longer stop wrapping if they are children of containers that prevent overflow.
+* The `@widget` and `@placement` special references are now available to context expressions.
+* Line height is now used for measuring the height of text if available.
+* Measured labels will now break words only if they can't fit on a single line by themselves. This matches the expectations of the measuring function.
+* The measuring function for measured labels now also handles wrapping words that need to break.
+
+### Data
+
+* __BUG:__ The `phone` formatter will no longer break rendering if it's given a value that isn't a string or number.
+* The measuring function for measured labels is now exposed as the `wrap-count` operator.
+* There are a few new formatters available:
+  * `base` - converts a number to a different base as a string.
+  * `base64` - encodes a value as base64.
+  * `hex` - converts a number to hex or a string to a hex encoding.
+  * `noxml` - escapes lt, gt, and amp in a string so that it can be safely included in xml.
+  * `xml` - renders a value as xml with optional indenting.
+* The `parse` operator can now parse base64.
+
+### Designer
+
+* File imports and exports now default to `*.raport` for design files and `*.raport-proj` for project files.
+* Ctrl-Shift-Enter key events in the output iframe are now forwarded to the designer to rerun the report.
+* Measured labels can now have a line height set.
+* Images and measured labels now have a preview string shown in the widget tree.
+
+
 ## 0.22.4
 
 2023-12-26

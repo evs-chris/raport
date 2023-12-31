@@ -1661,7 +1661,7 @@
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd>
+<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd>
 </dl>
 </dl>
 <br/>
@@ -2390,6 +2390,27 @@ __NOTE:__ The schema of an error is @[{ error: string; type?: 'strict'; path?: s
 
 <dl><dt>
 
+### `wrap-count`
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>string,number?,font?</code></dt>
+<dd>Calculates the number of lines that the given string will occupy in the given width in rem using the given font. If the width is not specified, the @widget.width or @placement.availableX will be used. If the font is not specified, the @widget.font will be used. Inherited fonts are not considered.</dd>
+</dl>
+
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>width</code></dt><dd>A named version of the second positional argument.</dd><dt><code>font</code></dt><dd>A named version of the third positional argument. This is an object with the relevant parts of the interface conforming to { family?:string, size?:number, line?:number, metric?: number }. family defaults to "sans", size defaults to 0.83, line defaults to size, and metric defaults to the constant pixel width of the font at 16px per em e.g. sans: 7.4, serif: 6.7, mono: 7.85, and narrow: 5.9.</dd><dt><code>family</code></dt><dd>Overrides the given font family.</dd><dt><code>size</code></dt><dd>Overrides the given font size.</dd><dt><code>line</code></dt><dd>Overrides the given font line height.</dd><dt><code>metric</code></dt><dd>Overrides the given font metric.</dd><dt><code>break-word</code></dt><dd>Determines whether words that exceed the width should be broken, defaulting to true.</dd>
+</dl>
+</dl>
+<br/>
+
+<dl><dt>
+
 ### `||` (alias `or`)
 ---
 
@@ -2417,6 +2438,45 @@ __NOTE:__ The schema of an error is @[{ error: string; type?: 'strict'; path?: s
 <dd>
 
 Calls the named operator as a formatter, passing the target value as the first argument with any arguments to the formatter following. Any set defaults for the formatter are passed as options to the operator.
+
+
+</dd></dl>
+<br/>
+
+<dl><dt>
+
+### `base`
+---
+
+</dt>
+<dd>
+
+Converts the given number to the given base
+
+<dl><dt>
+
+#### <ins>Options</ins>
+
+</dt><dd><dl>
+
+<dt><code>base</code> - <code>number</code></dt><dd>
+
+The target base e.g. 2 or 8 or 16.
+
+</dd>
+</dl></dd></dl>
+</dd></dl>
+<br/>
+
+<dl><dt>
+
+### `base64`
+---
+
+</dt>
+<dd>
+
+Converts the given value to a base64 encoded string.
 
 
 </dd></dl>
@@ -2523,6 +2583,20 @@ How to display negative values. Sign shows a leading minus symbol. Wrap wraps th
 
 <dl><dt>
 
+### `hex`
+---
+
+</dt>
+<dd>
+
+Formats the given number in hexadecimal, or if the value is not a number, encodes it as string in hexadecimal.
+
+
+</dd></dl>
+<br/>
+
+<dl><dt>
+
 ### `int` (alias `integer`)
 ---
 
@@ -2588,6 +2662,20 @@ How to display negative values. Sign shows a leading minus symbol. Wrap wraps th
 <dd>
 
 Formats the value as an ISO-8601 timestamp.
+
+
+</dd></dl>
+<br/>
+
+<dl><dt>
+
+### `noxml`
+---
+
+</dt>
+<dd>
+
+Escapes special XML characters so that the value may be safely rendered into xml.
 
 
 </dd></dl>
@@ -2817,6 +2905,31 @@ Formats a date value as a timestamp with timezone offset using placeholder chara
 <dt><code>format</code> - <code>string</code></dt><dd>
 
 The format template to apply.
+
+</dd>
+</dl></dd></dl>
+</dd></dl>
+<br/>
+
+<dl><dt>
+
+### `xml`
+---
+
+</dt>
+<dd>
+
+Converts the given value to XML if possible.
+
+<dl><dt>
+
+#### <ins>Options</ins>
+
+</dt><dd><dl>
+
+<dt><code>indent</code> - <code>number</code></dt><dd>
+
+Indent each successive set of child nodes with this number of spaces.
 
 </dd>
 </dl></dd></dl>
