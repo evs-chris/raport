@@ -206,6 +206,9 @@ export class Designer extends Ractive {
         html.addEventListener('scroll', listener, { passive: true });
         window.addEventListener('resize', listener);
         window.addEventListener('scroll', listener);
+        window.addEventListener('keydown', ev => {
+          if (ev.ctrlKey && ev.shiftKey && ev.key === 'Enter') window.parent.postMessage('run', '*');
+        });
         html.classList.add('scrolled-top');
       </script>
     `;
@@ -1678,6 +1681,12 @@ const designerOpts: ExtendOpts<Designer> = {
           this.set('copy', undefined);
         }
       }, { capture: true });
+      window.addEventListener('message', ev => {
+        if (ev.data === 'run') {
+          this.run();
+          this.set('tab', 'result');
+        }
+      });
       this.loadProjects();
       if (settings.autosave) {
         let save: any = window.localStorage.getItem('autosave');
