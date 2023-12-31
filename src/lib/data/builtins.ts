@@ -1389,7 +1389,7 @@ function _objectToXML(val: any, depth: number, indent: number|undefined, propnam
   if (Array.isArray(val)) {
     return val.reduce((xml, entry) => {
       const val = _objectToXML(entry, depth + 1, indent, propname);
-      const tag = val === '' || val === undefined ? `<${propname} />` : `<${propname}>${val}</${propname}>`;
+      const tag = val === '' || val === undefined ? `<${propname} />` : `<${propname}>${val}${indent && /\n/.test(val) ? '\n' + pad('l', '', depth * indent, ' ') : ''}</${propname}>`;
       return `${xml}${indent && depth ? '\n' + pad('l', '', depth * indent, ' ') : ''}${tag}`;
     }, '');
   }
