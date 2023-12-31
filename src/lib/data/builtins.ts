@@ -957,7 +957,7 @@ registerOperator(
     else if (opts.expr) return parseExpr(v, opts);
     else if (opts.schema) return parseSchema(v);
     else if (opts.range) return parseRange(v, opts);
-    else if (opts.xml) return parseXML(v);
+    else if (opts.xml) return parseXML(v, opts.strict);
     else if (opts.csv) {
       if (opts.detect) opts = Object.assign(csvDetect(v), opts);
       return csvParse(v, opts);

@@ -339,6 +339,7 @@ export const operators = `[
     { name:'schema' type:'boolean' desc:'Use the schema parser rather than the expression parser.' }
     { name:'base64' type:'boolean' desc:'Use a base64 parser to decode a base64 encoded string.' }
     { name:'xml' type:'boolean' desc:'Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.' }
+    { name:'strict' type:'boolean' desc:'For the XML parser, be less forgiving about malformed content. Defaults to false.' }
     { name:'csv' type:'boolean' desc:'Use the delimited text parser rather than the expression parser.' }
     { name:'detect' type:'boolean' desc:'If using the delimited parser, detect the delimiters and use them to parse.' }
     { name:'header' type:'boolean' desc:'If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.' }

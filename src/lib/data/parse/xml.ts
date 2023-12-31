@@ -48,7 +48,7 @@ function put(target: object, prop: string, value: any) {
   }
 }
 
-export function parse(str: string): any {
+export function parse(str: string, strict?: boolean): any {
   const stack: any[] = [];
   const names: string[] = [];
   const res: any[] = [];
@@ -58,6 +58,7 @@ export function parse(str: string): any {
 
   function close(end: string) {
     const val = stack.pop();
+    if (!val) return;
     const name = names.pop();
     if (!stack.length) {
       res.push(val);
@@ -82,9 +83,12 @@ export function parse(str: string): any {
         stack.push(val);
       }
     } else if ('close' in p) {
+      if (strict && p.name !== names[names.length - 1]) return;
       close(p.name);
     }
   }
+
+  if (names.length && !strict) close(names[0]);
 
   return res.length > 1 ? res : res.length === 1 ? res[0] : undefined;
 }
