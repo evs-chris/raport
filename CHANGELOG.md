@@ -1,4 +1,15 @@
+## 0.23.1
+
+2023-12-31
+
+### Data
+
+* The `parse` operator can now parse basic well-formed XML with a new `xml` option. The parser is also exported from the library as `parseXML`.
+
+
 ## 0.23.0
+
+2023-12-31
 
 ### Render
 
