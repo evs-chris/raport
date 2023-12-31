@@ -268,6 +268,8 @@ export interface MeasureFont {
   line?: number|Computed;
   /** Average width in px at font-size 16px. If this is supplied, it won't be guessed based on the font name. */
   metric?: number|Computed;
+  /** Break words that exceed the line length */
+  'break-word'?: boolean;
 }
 
 export interface MeasuredLabel extends Widget {

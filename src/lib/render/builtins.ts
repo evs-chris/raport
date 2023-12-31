@@ -258,7 +258,7 @@ registerRenderer<Image>('image', (w, ctx, placement) => {
 });
 
 registerRenderer<MeasuredLabel>('measured', (w, ctx, placement, state) => {
-  addStyle(ctx, 'measured', `.measured {position:absolute;box-sizing:border-box;white-space:pre-wrap;font-family:serif;font-size:0.83rem}`);
+  addStyle(ctx, 'measured', `.measured {position:absolute;box-sizing:border-box;white-space:pre-wrap;font-family:serif;font-size:0.83rem;word-break:break-word;}`);
   const text = evaluate(ctx, w.text);
   const height = measure(text, getWidth(w, placement, ctx) || placement.availableX, ctx, w.font);
   

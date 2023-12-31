@@ -99,7 +99,7 @@ export function styleFont(f: Font, context: RenderContext): string {
   else if (size) s += `line-height:${size}rem;`;
 
   if (t = maybeComputed(f.weight, context)) s += `font-weight:${t};`;
-  if (t = maybeComputed(f.pre, context)) s += `white-space:pre-wrap;`;
+  if (t = maybeComputed(f.pre, context)) s += `white-space:pre-wrap;word-break:break-word;`;
   const pre = t;
   if (t = maybeComputed(f.clamp, context)) s += `${pre ? '' : 'white-space:nowrap;'}overflow:hidden;`;
   return s;

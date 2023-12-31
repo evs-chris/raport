@@ -421,6 +421,17 @@ export const operators = `[
 		{ name:'raport' type:'boolean' desc:'Forces the output string to be a raport expresion. This can be paired with any options to the stringify function supplied by raport.' }
 		{ name:'string' type:'boolean' desc:'Processes the value as a styled string.' }
 	]}
+  { op:'wrap-count' sig:[
+    { proto:'string,number?,font?' desc:'Calculates the number of lines that the given string will occupy in the given width in rem using the given font. If the width is not specified, the @widget.width or @placement.availableX will be used. If the font is not specified, the @widget.font will be used. Inherited fonts are not considered.' }
+  ] opts: [
+    { name:'width' type:'number' desc:'A named version of the second positional argument.' }
+    { name:'font' type:'font' desc:'A named version of the third positional argument. This is an object with the relevant parts of the interface conforming to { family?:string, size?:number, line?:number, metric?: number }. family defaults to "sans", size defaults to 0.83, line defaults to size, and metric defaults to the constant pixel width of the font at 16px per em e.g. sans: 7.4, serif: 6.7, mono: 7.85, and narrow: 5.9.' }
+    { name:'family' type:'string' desc:'Overrides the given font family.' }
+    { name:'size' type:'number' desc:'Overrides the given font size.' }
+    { name:'line' type:'number' desc:'Overrides the given font line height.' }
+    { name:'metric' type:'string' desc:'Overrides the given font metric.' }
+    { name:'break-word' type:'boolean' desc:'Determines whether words that exceed the width should be broken, defaulting to true.' }
+  ]}
 	{ op:'sum' sig:[
 		{ agg:1 proto: '() => number' desc:'Computes the sum of the current source.' }
 		{ proto:'number[] => number' desc:'Computes the sum of the given array of numbers.' }

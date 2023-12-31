@@ -9,6 +9,7 @@ import { validate, inspect, isSchema } from './schema';
 import { diff, deepEqual, labelDiff } from './diff';
 import { detect as csvDetect, parse as csvParse } from './csv';
 import { style } from './parse/style';
+import { measure } from '../render/index';
 
 function simple(names: string[], apply: (name: string, values: any[], opts: OperatorOptions, ctx: Context) => any): ValueOperator {
   return {
@@ -774,6 +775,26 @@ registerOperator(
     } else if (Array.isArray(src)) {
       return src.reverse();
     }
+  }),
+  simple(['wrap-count'], (_name: string, [str, width, font], opts, ctx): number => {
+    let w = width || opts?.width;
+    const avail = safeGet(ctx, '@placement.availableX') || 48;
+    if (ctx.special?.widget) {
+      const ww = ctx.special.widget.width;
+      if (ww) {
+        if (ww === 'grow') w = avail;
+        else if (typeof ww === 'number') w = ww;
+        else if (typeof ww === 'object' && typeof ww.percent === 'number') w = (ww.percent / 100) * avail; 
+        else if (typeof ww === 'object' && typeof ww.x === 'string') w = evaluate(ctx, ww.x);
+      }
+    }
+    if (!w) w = avail;
+    font = font || opts?.font || safeGet(ctx, '@widget.font');
+    if (opts) {
+      font = Object.assign({}, font);
+      for (const k of ['family', 'size', 'line', 'metric', 'break-word']) if (k in opts) font[k] = opts[k];
+    }
+    return measure(str, w, { context: ctx } as any, font);
   }),
   simple(['keys'], (_name: string, [src, proto]): string[] => {
     if (!src) return [];

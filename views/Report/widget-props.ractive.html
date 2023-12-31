@@ -137,7 +137,7 @@
     {{/if}}
   </span></label>
 {{/if}}
-{{#unless .type === 'measured' || .type === 'image'}}
+{{#unless .type === 'image'}}
   <label><span title="The height of lines within this {{.type}} in rem. This defaults to the text size if it is set and a line height is not supplied.">Line Height <button class-hide /><button class-ico on-click="@context.set('.font.line', typeof .font.line === 'object' ? undefined : { x: '' })" title="{{typeof .font.line === 'object' ? 'Change to value' : 'Change to Expression'}}">
       {{>switch}}
     </button>{{#if typeof .font.line === 'object'}}<button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.font.line.x')">{{>pencil}}</button>{{/if}}</span><span>

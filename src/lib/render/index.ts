@@ -46,6 +46,7 @@ export function measureEstimate(text: string, width: number, context: RenderCont
   const family = (font && maybeComputed(font.family, context)) || 'sans';
   const size = (font && maybeComputed(font.size, context)) || 0.83;
   const line = (font && maybeComputed(font.line, context)) || size;
+  const brw = font && 'break-word' in font ? font['break-word'] : true;
   const avg = (((font && maybeComputed(font.metric, context)) || ((family === 'mono' || /fixed|mono/i.test(family) ? avgs.mono :
     family === 'narrow' || /narrow|condensed/i.test(family) ? avgs.narrow :
       family === 'sans' || /sans|arial|helvetica/i.test(family) ? avgs.sans :
@@ -53,11 +54,19 @@ export function measureEstimate(text: string, width: number, context: RenderCont
   
   const lines = text.split(/\r?\n/g);
   return lines.reduce((a, c) => {
-    const [word, lines] = c.split(/\s/g).reduce((a, c) => {
+    const [word, lines] = c.split(/\s|-/g).reduce((a, c) => {
       const wlen = (c.length + 1) * avg;
       if (a[0] + wlen > width) {
-        a[0] = wlen;
-        a[1]++;
+        if (a[0] === 0 || wlen > width) {
+          if (brw) {
+            a[0] = (wlen - (width - a[0])) % width;
+            if (wlen > width) a[1] += Math.floor(wlen / width);
+          }
+          a[1]++;
+        } else {
+          a[0] = wlen;
+          a[1]++;
+        }
       } else {
         a[0] += wlen;
       }
