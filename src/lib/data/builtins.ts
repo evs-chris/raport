@@ -9,6 +9,7 @@ import { validate, inspect, isSchema } from './schema';
 import { diff, deepEqual, labelDiff } from './diff';
 import { detect as csvDetect, parse as csvParse } from './csv';
 import { style } from './parse/style';
+import { parse as parseXML } from './parse/xml';
 import { measure, escapeHTML } from '../render/index';
 
 function simple(names: string[], apply: (name: string, values: any[], opts: OperatorOptions, ctx: Context) => any): ValueOperator {
@@ -956,6 +957,7 @@ registerOperator(
     else if (opts.expr) return parseExpr(v, opts);
     else if (opts.schema) return parseSchema(v);
     else if (opts.range) return parseRange(v, opts);
+    else if (opts.xml) return parseXML(v);
     else if (opts.csv) {
       if (opts.detect) opts = Object.assign(csvDetect(v), opts);
       return csvParse(v, opts);

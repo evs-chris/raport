@@ -31,6 +31,8 @@ export { parseSchema, unparseSchema } from './data/parse/schema';
 
 export { csv as parseCSV, detect as detectCSV, CSVOptions, DEFAULTS as CSV_DEFAULTS } from './data/csv';
 
+export { parse as parseXML } from './data/parse/xml';
+
 export {
   registerLayout, registerRenderer, isComputed,
 } from './render/index';
