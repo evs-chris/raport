@@ -2,7 +2,7 @@
   <div class=properties-pull on-click="@.toggle('~/show.props')">
     <button class="ico large {{~/show.props ? 'left' : 'right'}}-arrow">{{>arrow}}</button>
   </div>
-  <div class-header style-height=3rem>
+  <div class-header style="height: 3rem; margin-top: 0;">
     <h3>{{#if ~/reparent}}Moving...{{else}}Widgets{{/if}}</h3>
     {{#if ~/report.type !== 'delimited' && (~/widget.type === 'container' || ~/temp.widget === 'report')}}
       <select value="{{~/add}}" on-change="@.addWidget(@node.value)">
