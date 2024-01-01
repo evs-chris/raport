@@ -5,7 +5,7 @@
       <button title="Run report (CTRL+Shift+Enter)" disabled="{{report.type === 'delimited' && report.sources.length < 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>{{>play}}</button>
       <button title="Design report: modify layout and widgets" on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'context' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">Designer</button>
       {{#if result}}
-        <button title="View report output" on-click="@.set('tab', 'result')" class-tab class-active="tab === 'result'">Output</button>
+        <button title="View report output" on-click="@.set('tab', 'result')" class="tab output-tab" class-active="tab === 'result'">Output</button>
       {{/if}}
       <button title="Set up initial report data" on-click="@.set('tab', 'context')" class-tab class-active="tab === 'context'">Context</button>
       <button title="Import/export report definition as plain text" on-click="@.set('tab', 'definition')" class-tab class-active="tab === 'definition'">Definition</button>
@@ -331,6 +331,11 @@
     border: none;
     border-top: 2px solid {{@style.highlight}};
     margin-bottom: -1px;
+  }
+
+  .actions .tab.output-tab.active {
+    background-color: {{@style.out.dark || @style.dark}};
+    color: {{@style.out.fg || @style.fg}};
   }
 
   .bottom-pane .actions .tab {
