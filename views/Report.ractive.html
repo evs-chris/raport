@@ -20,6 +20,7 @@
         <a href="https://github.com/evs-chris/raport" target="_blank">Raport vRAPORT_VERSION</a>
       </div>
       <div class=right>
+        {{#if ~/showProjects && ~/project.name}}<span style="display: inline-block; margin: 0 1em; font-size: 0.8em; height: 1rem; vertical-align: middle;">{{~/project.name}}</span>{{/if}}
         {{#if ~/projectChanged}}<span class="ico error" title="There are unsaved changes to this project ({{~/project.name}})">{{>warning}}</span>{{/if}}
         <button title="Manage projects and designer settings" on-click="@.set('tab', 'project')" class-tab class-active="tab === 'project'">{{~/showProjects ? 'Project' : 'Settings'}}</button>
       </div>
