@@ -1,260 +1,264 @@
-<div class-top class-actions>
-  {{#if ~/report.parameters.length}}<span title="Set values for report parameters" class-tab class-active="~/temp.bottom.tab === 'params'" on-click="@.set('temp.bottom.tab', 'params'), @.set('show.bottom', true)">Parameters</span>{{/if}}
-  <span title="Evaluate expressions" class-tab class-active="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'" on-click="@.set('temp.bottom.tab', 'expr'), @.set('show.bottom', true)">{{#if ~/temp.expr.path}}Expression{{else}}Evaluate{{/if}}</span>
-  <span title="Expression language reference" class-tab class-active="~/temp.bottom.tab === 'langref'" on-click="@.set('temp.bottom.tab', 'langref'), @.set('show.bottom', true)">Reference</span>
-  {{#if ~/temp.bottom.param}}<span title="Modify report parameter {{~/param.name}}" class-tab class-active="~/temp.bottom.tab === 'param'" on-click="@.set('temp.bottom.tab', 'param'), @.set('show.bottom', true)">Parameter</span>{{/if}}
-  {{#if ~/temp.bottom.source}}<span title="Modify data source {{~/source.name || ~/source.source}}" class-tab class-active="~/temp.bottom.tab === 'source'" on-click="@.set('temp.bottom.tab', 'source'), @.set('show.bottom', true)">Source</span>{{/if}}
-  <span class-which>
-    {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button title="Close expression for {{~/temp.expr.path}}" class-ico on-click="@.checkLink('expr')">{{>times}}</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
-    {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button title="Close parameter editor for {{~/param.name}}" class-ico on-click="@.checkLink('param')">{{>times}}</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
-    {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button title="Close source editor for {{~/temp.bottom.source}}" class-ico on-click="@.checkLink('source')">{{>times}}</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
-  </span>
-  {{#if ~/show.bottom}}<button title="{{#if ~/max.bottom}}Shrink{{else}}Embiggen{{/if}} the bottom pane" on-click="@.toggle('max.bottom')" class-ico style-height="2.5rem" class="{{#if ~/max.bottom}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>{{/if}}
-  <button title="{{#if ~/show.bottom}}Hide{{else}}Show{{/if}} the bottom pane" on-click="@.toggle('show.bottom')" class-ico style-height="2.5rem" class="{{#if ~/show.bottom}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>
-</div>
-<div class-bottom>
-  <div class-tab class-active-tab="~/temp.bottom.tab === 'langref'">
-    <iframe srcdoc="{{langref}}" id=langref />
+<div class="bottom-bar" class-shrinkleft="~/show.shrinkleft">
+  <div class-actions>
+    {{#if ~/report.parameters.length}}<span title="Set values for report parameters" class-tab class-active="~/temp.bottom.tab === 'params'" on-click="@.set('temp.bottom.tab', 'params'), @.set('show.bottom', true)">Parameters</span>{{/if}}
+    <span title="Evaluate expressions" class-tab class-active="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'" on-click="@.set('temp.bottom.tab', 'expr'), @.set('show.bottom', true)">{{#if ~/temp.expr.path}}Expression{{else}}Evaluate{{/if}}</span>
+    <span title="Expression language reference" class-tab class-active="~/temp.bottom.tab === 'langref'" on-click="@.set('temp.bottom.tab', 'langref'), @.set('show.bottom', true)">Reference</span>
+    {{#if ~/temp.bottom.param}}<span title="Modify report parameter {{~/param.name}}" class-tab class-active="~/temp.bottom.tab === 'param'" on-click="@.set('temp.bottom.tab', 'param'), @.set('show.bottom', true)">Parameter</span>{{/if}}
+    {{#if ~/temp.bottom.source}}<span title="Modify data source {{~/source.name || ~/source.source}}" class-tab class-active="~/temp.bottom.tab === 'source'" on-click="@.set('temp.bottom.tab', 'source'), @.set('show.bottom', true)">Source</span>{{/if}}
+    <span class-which>
+      {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button title="Close expression for {{~/temp.expr.path}}" class-ico on-click="@.checkLink('expr')">{{>times}}</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
+      {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button title="Close parameter editor for {{~/param.name}}" class-ico on-click="@.checkLink('param')">{{>times}}</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
+      {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button title="Close source editor for {{~/temp.bottom.source}}" class-ico on-click="@.checkLink('source')">{{>times}}</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
+    </span>
+    {{#if ~/show.bottom}}<button title="{{#if ~/max.bottom}}Shrink{{else}}Embiggen{{/if}} the bottom pane" on-click="@.toggle('max.bottom')" class-ico class="{{#if !~/max.bottom}}off{{/if}}">{{>max}}</button>{{/if}}
+    <button title="{{#if ~/show.bottom}}Hide{{else}}Show{{/if}} the bottom pane" on-click="@.toggle('show.bottom')" class-ico class="{{#if ~/show.bottom}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>
   </div>
-  <div class-tab class-active-tab="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'">
-    <div class-editor>
-      <div class-actions>
-        <button title="Evaluate the current expression (CTRL+Enter)" disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>{{>play}}</button>
-        <button title="Modify the current expression" class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">{{#if ~/temp.expr.template}}Template{{else}}Text{{/if}}</button>
-        {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.template}}<button title="Format the current expression" class="ico text" on-click="@.fmt()">Format</button>{{/if}}
-        {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.path}}<label style="margin-left: 1em;" title="Enable to treat the current expression as a template"><input type=checkbox checked="{{~/temp.expr.template}}" /> Template?</label>{{/if}}
-        {{#if ~/temp.expr.tab === 'parsed'}}
-          <div class-editor-buttons>
-            <div class=toggles>{{#with ~/temp.expr.parsedtype as t}}
-              <span class-toggle class-active="!t || t === 'json'" {{#if t && t !== 'json'}}on-click="@.set('temp.expr.parsedtype', 'json')"{{/if}} title="Show the AST as JSON. Double click to copy the JSON to the clipboard." on-dblclick="@.copyToClipboard(JSON.stringify(~/temp.expr.ast))">JSON</span>
-              <span class-toggle class-active="t === 'raport'" {{#if t !== 'raport'}}on-click="@.set('temp.expr.parsedtype', 'raport')"{{/if}} title="Show the AST as a Raport expression.">Raport</span>
-            {{/with}}</div>
-          </div>
-          {{#if ~/temp.expr.parsedtype === 'json' || !~/temp.expr.parsedtype}}
-            <label style="margin-left: 2em;"><input type=checkbox bind-checked="~/temp.expr.jsonsquash" title="Enable to display JSON with no additional whitespace" /> Compact?</label>
+</div>
+<div class-bottom-pane class-active="~/show.bottom" class-max="~/max.bottom" class-shrinkleft="~/show.shrinkleft">
+  <div class-bottom>
+    <div class-tab class-active-tab="~/temp.bottom.tab === 'langref'">
+      <iframe srcdoc="{{langref}}" id=langref />
+    </div>
+    <div class-tab class-active-tab="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'">
+      <div class-editor>
+        <div class-actions>
+          <button title="Evaluate the current expression (CTRL+Enter)" disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>{{>play}}</button>
+          <button title="Modify the current expression" class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">{{#if ~/temp.expr.template}}Template{{else}}Text{{/if}}</button>
+          {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.template}}<button title="Format the current expression" class="ico text" on-click="@.fmt()">Format</button>{{/if}}
+          {{#if ~/temp.expr.tab === 'text' && !~/temp.expr.path}}<label style="margin-left: 1em;" title="Enable to treat the current expression as a template"><input type=checkbox checked="{{~/temp.expr.template}}" /> Template?</label>{{/if}}
+          {{#if ~/temp.expr.tab === 'parsed'}}
+            <div class-editor-buttons>
+              <div class=toggles>{{#with ~/temp.expr.parsedtype as t}}
+                <span class-toggle class-active="!t || t === 'json'" {{#if t && t !== 'json'}}on-click="@.set('temp.expr.parsedtype', 'json')"{{/if}} title="Show the AST as JSON. Double click to copy the JSON to the clipboard." on-dblclick="@.copyToClipboard(JSON.stringify(~/temp.expr.ast))">JSON</span>
+                <span class-toggle class-active="t === 'raport'" {{#if t !== 'raport'}}on-click="@.set('temp.expr.parsedtype', 'raport')"{{/if}} title="Show the AST as a Raport expression.">Raport</span>
+              {{/with}}</div>
+            </div>
+            {{#if ~/temp.expr.parsedtype === 'json' || !~/temp.expr.parsedtype}}
+              <label style="margin-left: 2em;"><input type=checkbox bind-checked="~/temp.expr.jsonsquash" title="Enable to display JSON with no additional whitespace" /> Compact?</label>
+            {{/if}}
           {{/if}}
-        {{/if}}
-        <button title="Modify the current HTML template" class-tab style-display="{{~/temp.expr.html ? '' : 'none'}}" class-active="~/temp.expr.tab === 'html'" on-click="@.set('temp.expr.tab', 'html')">HTML</button>
-        <div style-flex-grow=2 />
-        <button title="View the result of the current expression's execution" class-tab class-active="~/temp.expr.tab === 'result'" on-click="@.set('temp.expr.tab', 'result')">Result</button>
-        {{#if ~/temp.expr.parsed}}
-          <button title="View the parse tree of the current expression" class-tab class-active="~/temp.expr.tab === 'parsed'" class-error="~/temp.expr.error" on-click="@.set('temp.expr.tab', 'parsed')">Parsed</button>
-        {{/if}}
-      </div>
-      <div class-tab class-text class-active-tab="!~/temp.expr.tab || ~/temp.expr.tab === 'text'">
-        {{#with ~/temp.expr}}
-          {{#if .label}}
-            {{#if Array.isArray(.str)}}
-              <div style="display: flex; justify-content: space-between;">
-                <button title="Convert multipart label text into a single expression" class-plain on-click="@context.set('.str', @.getPartStrings(.str))">Convert to Text</button>
-                <button title="Add another part to this multipart label text" class-ico class-large on-click="@context.push('.str', '')">+</button>
-              </div>
-              <div class-scrolled-wrapper style-flex-grow=1>
-                <div as-scrolled>
-                  {{#each .str}}
-                    <div class-label-part>
-                      <button class-ico class-spacer on-click="@context.splice('../', @index, 1)" title="Remove part">{{>times}}</button>
-                      <button class-ico class-up-arrow disabled="{{@index === 0}}" on-click="@.moveUp(@context)" title="Move up">{{>arrow}}</button>
-                      <button class-ico class-spacer class-down-arrow disabled="{{@index === @last}}" on-click="@.moveDown(@context)" title="Move down">{{>arrow}}</button>
-                      {{#if typeof . === 'string'}}
-                        <button class-ico on-click="@context.set('.', { text: . })" title="Format part">F</button>
-                        <Editor src="{{.}}" primary="{{@index === 0}}" />
-                      {{else}}
-                        <button class-ico class-spacer on-click="@context.set('.', .text)" title="Convert to a plain text part with no formatting">T</button>
-                        <input value="{{.id}}" placeholder="Tracking ID" title="Track this value by assigning it a unique ID" />
-                        <Editor src="{{.text}}" primary="{{@index === 0}}" />
-                        <input title="Font Family" placeholder="Font Family" value="{{.font.family}}" />
-                        <input title="Color" placeholder="Color" value="{{.font.color}}" />
-                        <input title="Size" placeholder="Size (1)" value="{{.font.size}}" type="number" />
-                        <input title="Line Height" placeholder="Line Height ({{.font.size == null ? 1 : .font.size}})" value="{{.font.line}}" type="number" />
-                        <select title="Font Weight" value="{{.font.weight}}">
-                          <option value="{{undefined}}">Font Weight</option>
-                          <option value="400">light</option>
-                          <option value="500">normal</option>
-                          <option value="600">bold</option>
-                          <option value="700">bolder</option>
-                        </select>
-                        <label><input type="checkbox" checked="{{.font.pre}}" /> Significant whitespec?</label>
-                        <input title="Background Color" placeholder="Background" value="{{.bg}}" />
-                        <input title="Border Radius" placeholder="Radius" value="{{.radius}}" />
-                      {{/if}}
-                    </div>
-                  {{/each}}
+          <button title="Modify the current HTML template" class-tab style-display="{{~/temp.expr.html ? '' : 'none'}}" class-active="~/temp.expr.tab === 'html'" on-click="@.set('temp.expr.tab', 'html')">HTML</button>
+          <div style-flex-grow=2 />
+          <button title="View the result of the current expression's execution" class-tab class-active="~/temp.expr.tab === 'result'" on-click="@.set('temp.expr.tab', 'result')">Result</button>
+          {{#if ~/temp.expr.parsed}}
+            <button title="View the parse tree of the current expression" class-tab class-active="~/temp.expr.tab === 'parsed'" class-error="~/temp.expr.error" on-click="@.set('temp.expr.tab', 'parsed')">Parsed</button>
+          {{/if}}
+        </div>
+        <div class-tab class-text class-active-tab="!~/temp.expr.tab || ~/temp.expr.tab === 'text'">
+          {{#with ~/temp.expr}}
+            {{#if .label}}
+              {{#if Array.isArray(.str)}}
+                <div style="display: flex; justify-content: space-between;">
+                  <button title="Convert multipart label text into a single expression" class-plain on-click="@context.set('.str', @.getPartStrings(.str))">Convert to Text</button>
+                  <button title="Add another part to this multipart label text" class-ico class-large on-click="@context.push('.str', '')">+</button>
                 </div>
-              </div>
+                <div class-scrolled-wrapper style-flex-grow=1>
+                  <div as-scrolled>
+                    {{#each .str}}
+                      <div class-label-part>
+                        <button class-ico class-spacer on-click="@context.splice('../', @index, 1)" title="Remove part">{{>times}}</button>
+                        <button class-ico class-up-arrow disabled="{{@index === 0}}" on-click="@.moveUp(@context)" title="Move up">{{>arrow}}</button>
+                        <button class-ico class-spacer class-down-arrow disabled="{{@index === @last}}" on-click="@.moveDown(@context)" title="Move down">{{>arrow}}</button>
+                        {{#if typeof . === 'string'}}
+                          <button class-ico on-click="@context.set('.', { text: . })" title="Format part">F</button>
+                          <Editor src="{{.}}" primary="{{@index === 0}}" />
+                        {{else}}
+                          <button class-ico class-spacer on-click="@context.set('.', .text)" title="Convert to a plain text part with no formatting">T</button>
+                          <input value="{{.id}}" placeholder="Tracking ID" title="Track this value by assigning it a unique ID" />
+                          <Editor src="{{.text}}" primary="{{@index === 0}}" />
+                          <input title="Font Family" placeholder="Font Family" value="{{.font.family}}" />
+                          <input title="Color" placeholder="Color" value="{{.font.color}}" />
+                          <input title="Size" placeholder="Size (1)" value="{{.font.size}}" type="number" />
+                          <input title="Line Height" placeholder="Line Height ({{.font.size == null ? 1 : .font.size}})" value="{{.font.line}}" type="number" />
+                          <select title="Font Weight" value="{{.font.weight}}">
+                            <option value="{{undefined}}">Font Weight</option>
+                            <option value="400">light</option>
+                            <option value="500">normal</option>
+                            <option value="600">bold</option>
+                            <option value="700">bolder</option>
+                          </select>
+                          <label><input type="checkbox" checked="{{.font.pre}}" /> Significant whitespec?</label>
+                          <input title="Background Color" placeholder="Background" value="{{.bg}}" />
+                          <input title="Border Radius" placeholder="Radius" value="{{.radius}}" />
+                        {{/if}}
+                      </div>
+                    {{/each}}
+                  </div>
+                </div>
+              {{else}}
+                <div>
+                  <button title="Convert a single expression label text into a multipart label text that can have individual properties set per part" class-plain on-click="@context.set('.str', [.str])">Convert to Parts</button>
+                </div>
+                <div class-scrolled-wrapper style-flex-grow=1>
+                  <div as-scrolled>
+                    <Editor src="{{.str}}" template="{{.html || .template}}" on-run="~/temp.expr.tab === 'result' ? @.set('temp.expr.tab', 'text') : @.eval()" primary />
+                  </div>
+                </div>
+              {{/if}}
             {{else}}
-              <div>
-                <button title="Convert a single expression label text into a multipart label text that can have individual properties set per part" class-plain on-click="@context.set('.str', [.str])">Convert to Parts</button>
-              </div>
               <div class-scrolled-wrapper style-flex-grow=1>
                 <div as-scrolled>
                   <Editor src="{{.str}}" template="{{.html || .template}}" on-run="~/temp.expr.tab === 'result' ? @.set('temp.expr.tab', 'text') : @.eval()" primary />
                 </div>
               </div>
             {{/if}}
-          {{else}}
-            <div class-scrolled-wrapper style-flex-grow=1>
-              <div as-scrolled>
-                <Editor src="{{.str}}" template="{{.html || .template}}" on-run="~/temp.expr.tab === 'result' ? @.set('temp.expr.tab', 'text') : @.eval()" primary />
-              </div>
+          {{/with}}
+        </div>
+        <div class-tab class-html class-active-tab="~/temp.expr.tab === 'html'">
+          <div class-editor-buttons>
+            <button on-click="@.command('bold')" title="Bold"><strong>B</strong></button>
+            <button on-click="@.command('italic')" title="Italic"><em>I</em></button>
+            <button on-click="@.command('underline')" title="Underline"><span style="text-decoration: underline;">U</span></button>
+            <button on-click="@.command('strikeThrough')" title="Strike Through"><span style="text-decoration: line-through;">S</span></button>
+            <select value="{{~/temp.fontSize}}" on-change="@.setHTMLFontSize()" title="Change Font Size">
+              <option value=''>(font size)</option>
+              <option value="{{1}}">smallest</option>
+              <option value="{{2}}">smaller</option>
+              <option value="{{3}}">small</option>
+              <option value="{{4}}">regular</option>
+              <option value="{{5}}">large</option>
+              <option value="{{6}}">larger</option>
+              <option value="{{7}}">largest</option>
+            </select>
+          </div>
+          <div class-scrolled-wrapper><div as-scrolled>
+            <div contenteditable=true class-html-editor value="{{~/temp.expr.htmlstr}}" id="expr-html" />
+          </div></div>
+        </div>
+        <div class-tab class-result class-active-tab="~/temp.expr.tab === 'result'">
+          <div class-editor-buttons>
+            <div class=toggles>{{#with ~/temp.expr.resulttype as t}}
+              <span class-toggle class-active="!t || t === 'plain'" {{#if t && t !== 'plain'}}on-click="@.set('temp.expr.resulttype', 'plain')"{{/if}} title="Show result as a plain string. Double click to copy the text to the clipboard." on-dblclick="@.copyToClipboard(~/temp.expr.result)">Plain</span>
+              <span class-toggle class-active="t === 'json'" {{#if t !== 'json'}}on-click="@.set('temp.expr.resulttype', 'json')"{{/if}} title="Show result as JSON">JSON</span>
+              <span class-toggle class-active="t === 'raport'" {{#if t !== 'raport'}}on-click="@.set('temp.expr.resulttype', 'raport')"{{/if}} title="Show result as a Raport expression">Raport</span>
+              <span class-toggle class-active="t === 'html'" {{#if t !== 'html'}}on-click="@.set('temp.expr.resulttype', 'html')"{{/if}} title="Show result as HTML">HTML</span>
+            {{/with}}</div>
+            <div style="margin-left: 2em;">
+              {{#if ~/temp.expr.resulttype === 'json'}}<label><input type=checkbox bind-checked="~/temp.expr.jsonsquash" title="Enable to display JSON with no additional whitespace" /> Compact?</label>{{/if}}
             </div>
-          {{/if}}
-        {{/with}}
-      </div>
-      <div class-tab class-html class-active-tab="~/temp.expr.tab === 'html'">
-        <div class-editor-buttons>
-          <button on-click="@.command('bold')" title="Bold"><strong>B</strong></button>
-          <button on-click="@.command('italic')" title="Italic"><em>I</em></button>
-          <button on-click="@.command('underline')" title="Underline"><span style="text-decoration: underline;">U</span></button>
-          <button on-click="@.command('strikeThrough')" title="Strike Through"><span style="text-decoration: line-through;">S</span></button>
-          <select value="{{~/temp.fontSize}}" on-change="@.setHTMLFontSize()" title="Change Font Size">
-            <option value=''>(font size)</option>
-            <option value="{{1}}">smallest</option>
-            <option value="{{2}}">smaller</option>
-            <option value="{{3}}">small</option>
-            <option value="{{4}}">regular</option>
-            <option value="{{5}}">large</option>
-            <option value="{{6}}">larger</option>
-            <option value="{{7}}">largest</option>
-          </select>
-        </div>
-        <div class-scrolled-wrapper><div as-scrolled>
-          <div contenteditable=true class-html-editor value="{{~/temp.expr.htmlstr}}" id="expr-html" />
-        </div></div>
-      </div>
-      <div class-tab class-result class-active-tab="~/temp.expr.tab === 'result'">
-        <div class-editor-buttons>
-          <div class=toggles>{{#with ~/temp.expr.resulttype as t}}
-            <span class-toggle class-active="!t || t === 'plain'" {{#if t && t !== 'plain'}}on-click="@.set('temp.expr.resulttype', 'plain')"{{/if}} title="Show result as a plain string. Double click to copy the text to the clipboard." on-dblclick="@.copyToClipboard(~/temp.expr.result)">Plain</span>
-            <span class-toggle class-active="t === 'json'" {{#if t !== 'json'}}on-click="@.set('temp.expr.resulttype', 'json')"{{/if}} title="Show result as JSON">JSON</span>
-            <span class-toggle class-active="t === 'raport'" {{#if t !== 'raport'}}on-click="@.set('temp.expr.resulttype', 'raport')"{{/if}} title="Show result as a Raport expression">Raport</span>
-            <span class-toggle class-active="t === 'html'" {{#if t !== 'html'}}on-click="@.set('temp.expr.resulttype', 'html')"{{/if}} title="Show result as HTML">HTML</span>
-          {{/with}}</div>
-          <div style="margin-left: 2em;">
-            {{#if ~/temp.expr.resulttype === 'json'}}<label><input type=checkbox bind-checked="~/temp.expr.jsonsquash" title="Enable to display JSON with no additional whitespace" /> Compact?</label>{{/if}}
           </div>
-        </div>
-        <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
-          {{#if ~/temp.expr.result === undefined}}
-            <span style="color: {{@style.code.c12}};">undefined</span>
-          {{else}}
-            {{#if ~/temp.expr.resulttype === 'html'}}
-              {{{~/temp.expr.result}}}
-            {{elseif ~/temp.expr.resulttype === 'json'}}
-              <code><pre>{{JSON.stringify(~/temp.expr.result, null, ~/temp.expr.jsonsquash ? undefined : '  ')}}</pre></code>
-            {{elseif ~/temp.expr.resulttype === 'raport'}}
-              <code><pre>{{@.unparse(~/temp.expr.result)}}</pre></code>
+          <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
+            {{#if ~/temp.expr.result === undefined}}
+              <span style="color: {{@style.code.c12}};">undefined</span>
             {{else}}
-              <code><pre>{{~/temp.expr.result}}</pre></code>
+              {{#if ~/temp.expr.resulttype === 'html'}}
+                {{{~/temp.expr.result}}}
+              {{elseif ~/temp.expr.resulttype === 'json'}}
+                <code><pre>{{JSON.stringify(~/temp.expr.result, null, ~/temp.expr.jsonsquash ? undefined : '  ')}}</pre></code>
+              {{elseif ~/temp.expr.resulttype === 'raport'}}
+                <code><pre>{{@.unparse(~/temp.expr.result)}}</pre></code>
+              {{else}}
+                <code><pre>{{~/temp.expr.result}}</pre></code>
+              {{/if}}
             {{/if}}
+          </div></div>
+        </div>
+        <div class-tab class-parsed class-active-tab="~/temp.expr.tab === 'parsed'">
+          <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
+            <code><pre style-margin="1em">{{#if ~/temp.expr.errormsg}}{{~/temp.expr.errormsg}}{{else}}{{#if ~/temp.expr.parsedtype === 'raport'}}{{@.unparse(~/temp.expr.ast)}}{{else}}{{JSON.stringify(~/temp.expr.ast, null, ~/temp.expr.jsonsquash ? '' : '  ')}}{{/if}}{{/if}}</pre></code>
+          </div></div>
+        </div>
+      </div>
+      <div class-context style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
+        <div class-header title="The approximate data that should be available in this expression's context"><span>Context</span><span><input placeholder="Filter..." value="{{~/ctxsearch}}" lazy=500 /></span></div>
+        <div class-panel class-scrolled-wrapper><div as-scrolled>
+          {{#if ~/temp.expr.ctx}}
+            {{>expr-context ~/temp.expr.ctx}}
           {{/if}}
         </div></div>
       </div>
-      <div class-tab class-parsed class-active-tab="~/temp.expr.tab === 'parsed'">
-        <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
-          <code><pre style-margin="1em">{{#if ~/temp.expr.errormsg}}{{~/temp.expr.errormsg}}{{else}}{{#if ~/temp.expr.parsedtype === 'raport'}}{{@.unparse(~/temp.expr.ast)}}{{else}}{{JSON.stringify(~/temp.expr.ast, null, ~/temp.expr.jsonsquash ? '' : '  ')}}{{/if}}{{/if}}</pre></code>
+      <div class-ops style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
+        <div class-header title="All of the builtin operators. Click an operator to insert it into an active text field. Hover over an operator for a tooltip with its documentation. Hold the shift key and click an operator for popup with its documentation."><span>Operators</span><span><input placeholder="Search..." value="{{~/opsearch}}" lazy=500 /></span></div>
+        <div class-panel class-scrolled-wrapper><div as-scrolled>
+          {{~/temp.expr.tab === 'ast' && @context.decorators.scrolled && @context.decorators.scrolled.invalidate() || '' && ''}}
+          {{#each ~/operators}}
+            <div class-entry-details title="{{@.getOperatorDoc(this.0)}}">
+              <button class-expr-operator on-click="@event.shiftKey ? @.showOperatorDoc(this.0) : @.insertOp(this.0)">{{this.0}}</button>
+              <div class-entry-type>{{this.1.sig.0.bin && !this.1.alias ? 'binary' : ''}} {{this.1.sig.0.fmt ? 'format' : ''}} {{this.1.sig.0.agg ? 'aggregate' : ''}} {{this.1.sig.0.unary && !this.1.sig.alias ? 'unary' : ''}} {{this.1.alias ? 'alias' : ''}}</div>
+            </div>
+          {{/each}}
         </div></div>
       </div>
     </div>
-    <div class-context style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
-      <div class-header title="The approximate data that should be available in this expression's context"><span>Context</span><span><input placeholder="Filter..." value="{{~/ctxsearch}}" lazy=500 /></span></div>
-      <div class-panel class-scrolled-wrapper><div as-scrolled>
-        {{#if ~/temp.expr.ctx}}
-          {{>expr-context ~/temp.expr.ctx}}
+    <div class-tab class-active-tab="~/temp.bottom.tab === 'param'" class-properties>
+      {{#with ~/param}}
+        <label title="The name used to reference this parameter e.g. !name"><span>Name</span><input value="{{.name}}" /></label>
+        <label><span>Type</span><select value="{{.type}}">{{>types}}</select></label>
+        {{#if .type === 'string'}}<label><span>Refine</span><select value="{{.refine}}">
+          <option value="{{undefined}}">(none)</option>
+          <option value="text">Multiline Text</option>
+          <option value="code">Expression</option>
+        </select></label>{{/if}}
+        <label><input type=checkbox checked="{{.required}}" /> Require?</label>
+        <label title="An alternative to the name to show in the parameter fill interface"><span>Label</span><input value="{{.label}}" /></label>
+        {{#if .init === undefined}}
+          <label title="Add an Initialization expression to provide a default for the parameter"><input type=checkbox twoway=false on-change="@context.set('.init', '')" /> Initialization expression?</label>
+        {{else}}
+          <label title="Add an Initialization expression to provide a default for the parameter"><input type=checkbox twoway=false checked on-change="@context.set('.init', undefined)" /> Initialization expression?</label>
+          <div style="height: 5em; border: 1px solid #ccc; overflow: auto; margin-right: 1em;"><Editor src="{{.init}}" /></div>
         {{/if}}
-      </div></div>
-    </div>
-    <div class-ops style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
-      <div class-header title="All of the builtin operators. Click an operator to insert it into an active text field. Hover over an operator for a tooltip with its documentation. Hold the shift key and click an operator for popup with its documentation."><span>Operators</span><span><input placeholder="Search..." value="{{~/opsearch}}" lazy=500 /></span></div>
-      <div class-panel class-scrolled-wrapper><div as-scrolled>
-        {{~/temp.expr.tab === 'ast' && @context.decorators.scrolled && @context.decorators.scrolled.invalidate() || '' && ''}}
-        {{#each ~/operators}}
-          <div class-entry-details title="{{@.getOperatorDoc(this.0)}}">
-            <button class-expr-operator on-click="@event.shiftKey ? @.showOperatorDoc(this.0) : @.insertOp(this.0)">{{this.0}}</button>
-            <div class-entry-type>{{this.1.sig.0.bin && !this.1.alias ? 'binary' : ''}} {{this.1.sig.0.fmt ? 'format' : ''}} {{this.1.sig.0.agg ? 'aggregate' : ''}} {{this.1.sig.0.unary && !this.1.sig.alias ? 'unary' : ''}} {{this.1.alias ? 'alias' : ''}}</div>
+        <label title="Set up options to render the parameter as a select"><input type=checkbox twoway=false checked="{{Array.isArray(.options)}}" on-change="@context.set('.options', Array.isArray(.options) ? undefined : [])" /> Options?</label>
+        {{#if Array.isArray(.options)}}
+          <div class-options style="height: 100%; width: 30rem;">
+            <h3>Options</h3>
+            <div class="option-entry">
+              {{#with @local as ctx}}
+                <label><span>Label</span><br/><input value="{{ctx.label}}" /></label>
+                <label><span>Value</span><br/><input value="{{ctx.value}}" /></label>
+                <button disabled="{{!ctx.value}}" class-ico class-large on-click="@context.push('.options', !ctx.label ? ctx.value : { label: ctx.label, value: ctx.value }), @context.set({ 'ctx.label': '', 'ctx.value': '' })">+</button>
+              {{/with}}
+            </div>
+            {{#if .options}}
+              <div class-scrolled-wrapper><div as-scrolled>
+                {{#each .options}}
+                  <div>
+                    {{#if typeof . === 'string'}}<input value="{{.}}" />
+                    {{else}}<input value="{{.label}}" /> <input value="{{.value}}" />{{/if}}
+                    <button class-ico on-click="@context.splice('../', @index, 1)">{{>times}}</button>
+                  </div>
+                {{/each}}
+              </div></div>
+            {{/if}}
           </div>
-        {{/each}}
-      </div></div>
+        {{/if}}
+      {{/with}}
     </div>
-  </div>
-  <div class-tab class-active-tab="~/temp.bottom.tab === 'param'" class-properties>
-    {{#with ~/param}}
-      <label title="The name used to reference this parameter e.g. !name"><span>Name</span><input value="{{.name}}" /></label>
-      <label><span>Type</span><select value="{{.type}}">{{>types}}</select></label>
-      {{#if .type === 'string'}}<label><span>Refine</span><select value="{{.refine}}">
-        <option value="{{undefined}}">(none)</option>
-        <option value="text">Multiline Text</option>
-        <option value="code">Expression</option>
-      </select></label>{{/if}}
-      <label><input type=checkbox checked="{{.required}}" /> Require?</label>
-      <label title="An alternative to the name to show in the parameter fill interface"><span>Label</span><input value="{{.label}}" /></label>
-      {{#if .init === undefined}}
-        <label title="Add an Initialization expression to provide a default for the parameter"><input type=checkbox twoway=false on-change="@context.set('.init', '')" /> Initialization expression?</label>
-      {{else}}
-        <label title="Add an Initialization expression to provide a default for the parameter"><input type=checkbox twoway=false checked on-change="@context.set('.init', undefined)" /> Initialization expression?</label>
-        <div style="height: 5em; border: 1px solid #ccc; overflow: auto; margin-right: 1em;"><Editor src="{{.init}}" /></div>
-      {{/if}}
-      <label title="Set up options to render the parameter as a select"><input type=checkbox twoway=false checked="{{Array.isArray(.options)}}" on-change="@context.set('.options', Array.isArray(.options) ? undefined : [])" /> Options?</label>
-      {{#if Array.isArray(.options)}}
-        <div class-options style="height: 100%; width: 30rem;">
-          <h3>Options</h3>
-          <div class="option-entry">
-            {{#with @local as ctx}}
-              <label><span>Label</span><br/><input value="{{ctx.label}}" /></label>
-              <label><span>Value</span><br/><input value="{{ctx.value}}" /></label>
-              <button disabled="{{!ctx.value}}" class-ico class-large on-click="@context.push('.options', !ctx.label ? ctx.value : { label: ctx.label, value: ctx.value }), @context.set({ 'ctx.label': '', 'ctx.value': '' })">+</button>
-            {{/with}}
-          </div>
-          {{#if .options}}
+    <div class-tab class-active-tab="~/temp.bottom.tab === 'params'" class-properties>
+      {{>bottom-parameters}}
+    </div>
+    <div class-tab class-active-tab="~/temp.bottom.tab === 'source'" class-properties>
+      {{#with ~/source}}
+        <label title="Expose this source to the report context with this name. If none is provided, this source will be named based on its upstream source."><span>Name</span><input value="{{.name}}" /></label>
+        {{#if ~~/temp.bottom.source.indexOf('widget')}}
+          <label title="The upstream source that this source should be based on."><span>Source</span><select value="{{.source}}">{{#each ~/report.sources}}<option>{{.name}}</option>{{/each}}</select></label>
+        {{else}}
+          <label title="The upstream source that this source should be based on."><span>Source</span><select value="{{.source}}">{{#each ~/sources}}<option>{{.name}}</option>{{/each}}</select></label>
+        {{/if}}
+        <label title="An expression providing the base data for this source. This will override the upstream source."><span>Base <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.base')">{{>pencil}}</button></span><textarea rows=1>{{.base}}</textarea></label>
+        <label title="A filter expression to apply to the source before it is used."><span>Filter <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.filter')">{{>pencil}}</button></span><textarea rows=1>{{.filter}}</textarea></label>
+        <label title="A sort expression to apply to the source before it is used. This should be an array of applications or config objects with by keys having application values."><span>Sort <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.sort')">{{>pencil}}</button></span><textarea rows=1>{{.sort}}</textarea></label>
+        {{#if Array.isArray(.group)}}
+          <div class-options style="height: 100%; width: 20rem;">
+            <h3>
+              <button class-ico class-large title="Add group expression" style-float=right on-click="@context.push('.group', '')">+</button>
+              <label><input type="checkbox" checked="{{.group}}" twoway=false on-change="@context.set('.group', undefined)" /> Groups</label>
+            </h3>
             <div class-scrolled-wrapper><div as-scrolled>
-              {{#each .options}}
-                <div>
-                  {{#if typeof . === 'string'}}<input value="{{.}}" />
-                  {{else}}<input value="{{.label}}" /> <input value="{{.value}}" />{{/if}}
-                  <button class-ico on-click="@context.splice('../', @index, 1)">{{>times}}</button>
+              {{#each .group}}
+                <div class-group-edit>
+                  <span>{{@index + 1}}</span>
+                  <textarea rows=1>{{.}}</textarea>
+                  <button title="Edit group expression" class-ico on-click="@.editExpr('~/' + @keypath)">{{>pencil}}</button>
+                  <button title="Remove group expression" class-ico on-click="@context.splice('../', @index, 1)">{{>times}}</button>
                 </div>
               {{/each}}
             </div></div>
-          {{/if}}
-        </div>
-      {{/if}}
-    {{/with}}
-  </div>
-  <div class-tab class-active-tab="~/temp.bottom.tab === 'params'" class-properties>
-    {{>bottom-parameters}}
-  </div>
-  <div class-tab class-active-tab="~/temp.bottom.tab === 'source'" class-properties>
-    {{#with ~/source}}
-      <label title="Expose this source to the report context with this name. If none is provided, this source will be named based on its upstream source."><span>Name</span><input value="{{.name}}" /></label>
-      {{#if ~~/temp.bottom.source.indexOf('widget')}}
-        <label title="The upstream source that this source should be based on."><span>Source</span><select value="{{.source}}">{{#each ~/report.sources}}<option>{{.name}}</option>{{/each}}</select></label>
-      {{else}}
-        <label title="The upstream source that this source should be based on."><span>Source</span><select value="{{.source}}">{{#each ~/sources}}<option>{{.name}}</option>{{/each}}</select></label>
-      {{/if}}
-      <label title="An expression providing the base data for this source. This will override the upstream source."><span>Base <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.base')">{{>pencil}}</button></span><textarea rows=1>{{.base}}</textarea></label>
-      <label title="A filter expression to apply to the source before it is used."><span>Filter <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.filter')">{{>pencil}}</button></span><textarea rows=1>{{.filter}}</textarea></label>
-      <label title="A sort expression to apply to the source before it is used. This should be an array of applications or config objects with by keys having application values."><span>Sort <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.sort')">{{>pencil}}</button></span><textarea rows=1>{{.sort}}</textarea></label>
-      {{#if Array.isArray(.group)}}
-        <div class-options style="height: 100%; width: 20rem;">
-          <h3>
-            <button class-ico class-large title="Add group expression" style-float=right on-click="@context.push('.group', '')">+</button>
-            <label><input type="checkbox" checked="{{.group}}" twoway=false on-change="@context.set('.group', undefined)" /> Groups</label>
-          </h3>
-          <div class-scrolled-wrapper><div as-scrolled>
-            {{#each .group}}
-              <div class-group-edit>
-                <span>{{@index + 1}}</span>
-                <textarea rows=1>{{.}}</textarea>
-                <button title="Edit group expression" class-ico on-click="@.editExpr('~/' + @keypath)">{{>pencil}}</button>
-                <button title="Remove group expression" class-ico on-click="@context.splice('../', @index, 1)">{{>times}}</button>
-              </div>
-            {{/each}}
-          </div></div>
-        </div>
-      {{else}}
-        <label><input title="Group the rows in this source by one or more expression? This should be coordinated with the sort expression, as groups are produced by sequentially processing the source data." type=checkbox on-change="@context.set('.group', [''])" /> Group?</label>
-      {{/if}}
-    {{/with}}
+          </div>
+        {{else}}
+          <label><input title="Group the rows in this source by one or more expression? This should be coordinated with the sort expression, as groups are produced by sequentially processing the source data." type=checkbox on-change="@context.set('.group', [''])" /> Group?</label>
+        {{/if}}
+      {{/with}}
+    </div>
   </div>
 </div>
 
@@ -367,12 +371,10 @@
     flex-grow: 1;
     flex-shrink: 1;
     overflow: hidden;
-    border: 1px solid {{@style.border}};
   }
 
   .bottom-pane .bottom > .tab {
     display: flex;
-    padding: 0.5rem;
     flex-grow: 0;
     border: none;
     display: none;

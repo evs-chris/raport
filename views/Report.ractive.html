@@ -1,6 +1,6 @@
-<div class-raport-report as-trackfocus>
+<div as-trackfocus class=raport-wrapper>
   {{>left}}
-  <div class=layout on-keys('z', { ctrl: true })="@.undo(), true" on-keys('Z', { ctrl: true, shift: true })="@.redo(), true" class-pad-me="~/show.pad">
+  <div class="top-bar" class-shrinkleft="~/show.shrinkleft">
     <div class="design actions">
       <button title="Run report (CTRL+Shift+Enter)" disabled="{{report.type === 'delimited' && report.sources.length < 1}}" on-click="@.run() && @.set('tab', 'result')" class-ico class-large>{{>play}}</button>
       <button title="Design report: modify layout and widgets" on-click="@.set('tab', 'design')" class-tab class-active="tab !== 'result' && tab !== 'context' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">Designer</button>
@@ -25,28 +25,30 @@
         <button title="Manage projects and designer settings" on-click="@.set('tab', 'project')" class-tab class-active="tab === 'project'">{{~/showProjects ? 'Project' : 'Settings'}}</button>
       </div>
     </div>
-    <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'context' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">
-      {{>design}}
-    </div>
-    <div class-tab class-report-context class-active-tab="tab === 'context'">
-      {{>context}}
-    </div>
-    <div class-tab class-report-definition class-active-tab="tab === 'definition'">
-      {{>definition}}
-    </div>
-    <div class-tab class-data-import class-active-tab="tab === 'import'">
-      {{>data-import}}
-    </div>
-    <div class-result class-tab class-active-tab="tab === 'result'">
-<iframe id=result srcdoc="{{~/report.type === 'delimited' ? `<style>pre { padding: 0.5rem; } code { display: block; color: ${@style.out.fg || @style.fg}; background-color: ${@style.out.bg || @style.bg}; }</style><code><pre>` + result + '</pre></code>' + @.frameExtra() : result}}"></iframe>
-    </div>
-    <div class-project class-tab class-active-tab="tab === 'project'">
-      {{>project}}
+  </div>
+  <div class="raport-report center-pane" class-shrinkleft="~/show.shrinkleft" class-shrinkbottom="~/show.shrinkbottom">
+    <div class=layout on-keys('z', { ctrl: true })="@.undo(), true" on-keys('Z', { ctrl: true, shift: true })="@.redo(), true" class-pad-me="~/show.pad">
+      <div class-tab class-designer class-active-tab="tab !== 'result' && tab !== 'context' && tab !== 'definition' && tab !== 'import' && tab !== 'project'">
+        {{>design}}
+      </div>
+      <div class-tab class-report-context class-active-tab="tab === 'context'">
+        {{>context}}
+      </div>
+      <div class-tab class-report-definition class-active-tab="tab === 'definition'">
+        {{>definition}}
+      </div>
+      <div class-tab class-data-import class-active-tab="tab === 'import'">
+        {{>data-import}}
+      </div>
+      <div class-result class-tab class-active-tab="tab === 'result'">
+        <iframe id=result srcdoc="{{~/report.type === 'delimited' ? `<style>pre { padding: 0.5rem; } code { display: block; color: ${@style.out.fg || @style.fg}; background-color: ${@style.out.bg || @style.bg}; }</style><code><pre>` + result + '</pre></code>' + @.frameExtra() : result}}"></iframe>
+      </div>
+      <div class-project class-tab class-active-tab="tab === 'project'">
+        {{>project}}
+      </div>
     </div>
   </div>
-  <div class-bottom-pane class-active="~/show.bottom" class-max="~/max.bottom">
-    {{>bottom}}
-  </div>
+  {{>bottom}}
   <div style="position: absolute; left: -1000px; width: 1rem; height: 1rem;" id="sizer" />
   <div style="position: absolute; left: -1000px; width: 5rem; height: 5rem; overflow: auto;">
     <textarea id="text-helper" style="padding: 0.5em;" />
@@ -88,6 +90,119 @@
     font-size: 0.875rem;
   }
 
+  .raport-wrapper {
+    font-family: sans-serif;
+  }
+
+  .left-bar {
+    position: absolute;
+    left: 0;
+    width: 2rem;
+    top: 0;
+    bottom: 0;
+    z-index: 10;
+    background-color: {{@style.bg}};
+    display: flex;
+    flex-direction: column;
+    padding-top: 0.5rem;
+    align-items: center;
+  }
+
+  .left-bar .ico {
+    margin-bottom: 1.5rem;
+  }
+  .ico.off svg {
+    opacity: 0.3;
+  }
+
+  .left-pop {
+    transform: translateX(-105%);
+    position: absolute;
+    left: 2rem;
+    top: 0;
+    bottom: 0;
+    z-index: 9 !important;
+    transition: transform 0.2s ease-in-out;
+  }
+  .left-pop.popped {
+    transform: translateX(0);
+  }
+
+  .top-bar {
+    position: absolute;
+    top: 0;
+    left: 2rem;
+    right: 0;
+    height: 2.1rem;
+    background-color: {{@style.bg}};
+    color: {{@style.fg}};
+    overflow-x: auto;
+  }
+  .top-bar > .actions {
+    min-width: max-content;
+    height: 2.1rem;
+  }
+
+  .bottom-bar {
+    position: absolute;
+    left: 2rem;
+    right: 0;
+    bottom: 0;
+    height: 2rem;
+    background-color: {{@style.bg}};
+    z-index: 10;
+    padding: 0 0.5rem;
+    color: {{@style.fg}};
+  }
+
+  @media screen and (min-width: 60rem) {
+    .top-bar.shrinkleft {
+      left: {{(@style.leftwidth || 28) + 2}}rem;
+    }
+    .bottom-bar.shrinkleft {
+      left: {{(@style.leftwidth || 28) + 2}}rem;
+    }
+    .center-pane.shrinkleft {
+      left: {{(@style.leftwidth || 28) + 2}}rem;
+    }
+    .bottom-pane.shrinkleft {
+      left: {{(@style.leftwidth || 28) + 2}}rem;
+    }
+  }
+
+  @media screen and (max-width: 60rem) {
+    .left-pop {
+      box-shadow: 0 0 1rem #000;
+    }
+  }
+
+  .bottom-pop {
+    position: absolute;
+    left: 2rem;
+    right: 0;
+    z-index: 9 !important;
+    bottom: 2rem;
+    transform: translateY(-100%);
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .bottom-pop.popped {
+    transform: translateY(0);
+  }
+
+  .center-pane {
+    position: absolute;
+    left: 2rem;
+    right: 0;
+    bottom: 2rem;
+    top: 2.1rem;
+    z-index: 5;
+  }
+
+  .center-pane.shrinkbottom {
+    bottom: calc(33vh + 2rem);
+  }
+
   button.plain {
     text-decoration: none;
     text-align: center;
@@ -126,8 +241,8 @@
     background-color: transparent;
     cursor: pointer;
     outline: none;
-    width: 1.2em;
-    height: 1.2em;
+    width: 1.2rem;
+    height: 1.2rem;
     margin-left: 0.1rem;
     box-sizing: content-box;
     color: {{@style.fg}};
@@ -136,11 +251,13 @@
   span.ico svg,
   button.ico svg {
     fill: {{@style.fg}};
+    stroke: {{@style.fg}};
   }
 
   span.ico.error svg,
   button.ico.error svg {
     fill: {{@style.error}};
+    stroke: {{@style.error}};
   }
 
   button.ico.text {
@@ -201,13 +318,9 @@
     flex-grow: 1;
     flex-shrink: 1;
     font-family: sans-serif;
-    height: 100%;
-    width: 100%;
     box-sizing: border-box;
-    padding: 0.5em;
     color: {{@style.fg}};
     background-color: {{@style.bg}};
-    position: relative;
     overflow: hidden;
   }
 
@@ -243,10 +356,8 @@
     flex-direction: column;
     flex-grow: 2;
     flex-shrink: 1;
-    margin: 0 0.5em;
     box-sizing: border-box;
     overflow: hidden;
-    padding-bottom: 1.75rem;
   }
   .layout.pad-me {
     padding-bottom: 32.5vh;
@@ -302,7 +413,7 @@
   }
 
   .actions span.ico {
-    vertical-align: middle;
+    vertical-align: sub;
   }
 
   .actions .center {
@@ -373,6 +484,10 @@
   }
 
   .bottom-pane {
+    position: absolute;
+    left: 2rem;
+    right: 0;
+    bottom: 2rem;
     height: 33vh;
     overflow: hidden;
     flex-shrink: 0;
@@ -380,20 +495,17 @@
     flex-direction: column;
     flex-grow: 0;
     box-sizing: border-box;
-    position: absolute;
-    right: 0.5rem;
-    width: calc(100% - 29rem);
-    bottom: 0;
-    transition: transform 0.2s ease-in-out;
-    transform: translateY(calc(33vh - 2.25rem));
     background-color: {{@style.bg}};
-    padding: 0.5rem;
-    z-index: 1998;
+    transform: translateY(105%);
+    transition: transform 0.2s ease-in-out;
+    z-index: 8;
+    border-style: solid;
+    border-color: {{@style.border}};
+    border-width: 0 0 1px 1px;
   }
 
   .bottom-pane.max {
-    height: 90vh;
-    transform: translateY(calc(90vh - 2.25rem));
+    height: calc(100vh - 2rem);
   }
 
   .bottom-pane.active {
@@ -707,43 +819,6 @@
   .scrolled.scroll-bottom:after {
     opacity: 0;
     transition: opacity 0s linear;
-  }
-
-  @media screen and (max-width: 96em) {
-    .properties.left {
-      position: absolute;
-      top: 0;
-      height: 100%;
-      left: -28rem;
-      z-index: 1999;
-      transition: transform 0.2s ease-in-out;
-      overflow-x: visible;
-      box-sizing: border-box;
-    }
-    .properties.popped {
-      transform: translateX(28rem);
-      box-shadow: 4px 5px 0.5rem #0005;
-    }
-    .properties .properties-pull {
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      position: absolute;
-      width: 2.5em;
-      height: 3em;
-      right: -2.5em;
-      top: 3em;
-      border-radius: 0 2rem 2rem 0;
-      border: 1px solid {{@style.border}};
-      background-color: {{@style.bg}};
-      border-left-color: {{@style.bg}};
-      box-shadow: 4px 5px 0.5rem #0005;
-    }
-
-    .bottom-pane {
-      width: calc(100% - 1rem);
-      right: 0.5rem;
-    }
   }
 
   @media screen and (max-width: 72em) {

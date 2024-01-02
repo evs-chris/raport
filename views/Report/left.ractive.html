@@ -1,51 +1,55 @@
-<div class="left properties" class-popped="~/show.props">
-  <div class=properties-pull on-click="@.toggle('~/show.props')">
-    <button class="ico large {{~/show.props ? 'left' : 'right'}}-arrow">{{>arrow}}</button>
-  </div>
-  <div class-header style="height: 3rem; margin-top: 0;">
-    <h3>{{#if ~/reparent}}Moving...{{else}}Widgets{{/if}}</h3>
-    {{#if ~/report.type !== 'delimited' && (~/widget.type === 'container' || ~/temp.widget === 'report')}}
-      <select value="{{~/add}}" on-change="@.addWidget(@node.value)">
-        <option>container</option>
-        <option>label</option>
-        <option>repeater</option>
-        <option>html</option>
-        <option>image</option>
-        <option>measured</option>
-      </select>
-      <button title="Add {{~/add}} to {{~/temp.widget}}" on-click="@.addWidget(~/add)" class=add>+</button>
-    {{/if}}
-    {{#if ~/copy}}<button class="ico large" on-click="@.set('copy', undefined)" title="Cancel copy [Esc]">{{>copy, true as cancel}}</button>{{/if}}
-    {{#if ~/reparent}}<button class="ico large" on-click="@.set('reparent', undefined)" title="Cancel move [Esc]">{{>reparent, true as cancel}}</button>{{/if}}
-    <button class="ico large" on-click="@.treeScrollToActive()" title="Scroll active widget into view">{{>scrollto}}</button>
-  </div>
-  <div class="scrolled-wrapper widget-tree">
-    <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
-      {{#with report}}
-      <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : ~/copy ? @.paste(@context) : @.selectWidget('report')">
-        <span class-line on-mouseover="@.set('temp.hover', 'report'), false">
-          Report
-          <span class=actions>
-            {{#if .type != 'delimited'}}
-              {{#if !.header}}<button class=ico title="Add page header" on-click="@context.set('.header', { type: 'container' }), false">+H</button>{{/if}}
-              {{#if !.footer}}<button class=ico title="Add page footer" on-click="@context.set('.footer', { type: 'container'}), false">+F</button>{{/if}}
-              {{#if !.watermark}}<button class=ico title="Add page watermark" on-click="@context.set('.watermark', { type: 'container' }), false">+W</button>{{/if}}
-              {{#if !.overlay}}<button class=ico title="Add page overlay" on-click="@context.set('.overlay', { type: 'container' }), false">+O</button>{{/if}}
-            {{else}}
-              {{#if !.headers}}<button class=ico title="Add headers" on-click="@.addHeader(), false">+H</button>{{/if}}
-            {{/if}}
-          </span>
-        </span>
-        {{#if report.type === 'delimited'}}
-          {{>delimited-fields}}
-        {{else}}
-          {{>widget-tree}}
-        {{/if}}
-      </div>
-      {{/with}}
+<div class="left-bar">
+  <button class="large ico {{~/show.props ? 'left' : 'right'}}-arrow" on-click="@.toggle('show.props')" title="{{#if ~/show.props}}Hide{{else}}Show{{/if}} the left pane">{{>arrow}}</button>
+  <button class="large ico {{~/show.hidetree ? 'off' : ''}}" on-click="@.set('show.props', true), @.toggle('show.hidetree'), !~/show.hidetree && ~/show.hideprops ? @.set('show.hideprops', false) : ''" title="{{#if ~/show.hidetree}}Show{{else}}Hide{{/if}} widget tree">{{>tree}}</button>
+  <button class="large ico {{~/show.hideprops ? 'off' : ''}}" on-click="@.set('show.props', true), @.toggle('show.hideprops'), !~/show.hideprops && ~/show.hidetree ? @.set('show.hidetree', false) : ''" title="{{#if ~/show.hideprops}}Show{{else}}Hide{{/if}} widget properties">{{>cog}}</button>
+</div>
+<div class="left properties left-pop" class-popped="~/show.props">
+  {{#if !~/show.hidetree}}
+    <div class-header style="height: 3rem; margin-top: 0;">
+      <h3>{{#if ~/reparent}}Moving...{{else}}Widgets{{/if}}</h3>
+      {{#if ~/report.type !== 'delimited' && (~/widget.type === 'container' || ~/temp.widget === 'report')}}
+        <select value="{{~/add}}" on-change="@.addWidget(@node.value)">
+          <option>container</option>
+          <option>label</option>
+          <option>repeater</option>
+          <option>html</option>
+          <option>image</option>
+          <option>measured</option>
+        </select>
+        <button title="Add {{~/add}} to {{~/temp.widget}}" on-click="@.addWidget(~/add)" class=add>+</button>
+      {{/if}}
+      {{#if ~/copy}}<button class="ico large" on-click="@.set('copy', undefined)" title="Cancel copy [Esc]">{{>copy, true as cancel}}</button>{{/if}}
+      {{#if ~/reparent}}<button class="ico large" on-click="@.set('reparent', undefined)" title="Cancel move [Esc]">{{>reparent, true as cancel}}</button>{{/if}}
+      <button class="ico large" on-click="@.treeScrollToActive()" title="Scroll active widget into view">{{>scrollto}}</button>
     </div>
-  </div>
-  {{#if ~/temp.widget}}
+    <div class="scrolled-wrapper widget-tree">
+      <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
+        {{#with report}}
+        <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : ~/copy ? @.paste(@context) : @.selectWidget('report')">
+          <span class-line on-mouseover="@.set('temp.hover', 'report'), false">
+            Report
+            <span class=actions>
+              {{#if .type != 'delimited'}}
+                {{#if !.header}}<button class=ico title="Add page header" on-click="@context.set('.header', { type: 'container' }), false">+H</button>{{/if}}
+                {{#if !.footer}}<button class=ico title="Add page footer" on-click="@context.set('.footer', { type: 'container'}), false">+F</button>{{/if}}
+                {{#if !.watermark}}<button class=ico title="Add page watermark" on-click="@context.set('.watermark', { type: 'container' }), false">+W</button>{{/if}}
+                {{#if !.overlay}}<button class=ico title="Add page overlay" on-click="@context.set('.overlay', { type: 'container' }), false">+O</button>{{/if}}
+              {{else}}
+                {{#if !.headers}}<button class=ico title="Add headers" on-click="@.addHeader(), false">+H</button>{{/if}}
+              {{/if}}
+            </span>
+          </span>
+          {{#if report.type === 'delimited'}}
+            {{>delimited-fields}}
+          {{else}}
+            {{>widget-tree}}
+          {{/if}}
+        </div>
+        {{/with}}
+      </div>
+    </div>
+  {{/if}}
+  {{#if ~/temp.widget && !~/show.hideprops}}
   <div class="scrolled-wrapper"><div as-scrolled>
     <div class=header>
       <h3>{{~/temp.name[0].toUpperCase()}}{{~/temp.name.substr(1)}} Properties</h3>
@@ -173,7 +177,7 @@
       </div></div>
     {{/if}}
   </div></div>
-  {{else}}
+  {{elseif !~/show.hideprops}}
     <div class-placeholder>Click on a Widget</div>
   {{/if}}
 </div>
@@ -195,10 +199,11 @@
 
 <style rel=ractive>
   .properties {
-    width: 28em;
+    width: {{@style.leftwidth || 28}}rem;
     flex-grow: 0;
     flex-shrink: 0;
     border: 1px solid {{@style.border}};
+    border-width: 0 1px;
     color: {{@style.fg}};
     background-color: {{@style.bg}};
     display: flex;

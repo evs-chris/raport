@@ -1592,11 +1592,6 @@ const designerOpts: ExtendOpts<Designer> = {
       init: false,
       strict: true,
     },
-    'show.bottom'(v: boolean) {
-      setTimeout(() => this.resetScrollers());
-      if (v) setTimeout(() => this.set('show.pad', true), 300);
-      else this.set('show.pad', false);
-    },
     settings(v) {
       if (!this._inited) return;
       this.applySettings();
@@ -1628,6 +1623,23 @@ const designerOpts: ExtendOpts<Designer> = {
         this.set('temp.tree', {});
       },
       strict: true
+    },
+    'show.props'(v) {
+      if (v) setTimeout(() => this.set('show.shrinkleft', true), 200);
+      else this.set('show.shrinkleft', false);
+    },
+    'show.bottom'(v) {
+      setTimeout(() => this.resetScrollers());
+      if (v) setTimeout(() => this.set('show.shrinkbottom', true), 200);
+      else this.set('show.shrinkbottom', false);
+    },
+    'settings.leftwidth'(v) {
+      Ractive.styleSet('leftwidth', v);
+    },
+    'settings.leftwidth windowWidthInRem'(v) {
+      const left = this.get('settings.leftwidth');
+      const wnd = this.get('windowWidthInRem');
+      this.set('show.props', v && left && v > 2.5 * (left + 2));
     },
   },
   on: {
@@ -1715,6 +1727,25 @@ const designerOpts: ExtendOpts<Designer> = {
       setTimeout(() => {
         this._onChange(this.get('report'));
         this.applySettings();
+        const getSize = () => {
+          const el = document.createElement('div');
+          el.style.position = 'absolute';
+          el.style.width = '1rem';
+          document.body.appendChild(el);
+          const rem = el.clientWidth;
+          el.remove();
+          const wrapper = this.find('.raport-wrapper');
+          if (wrapper) return wrapper.clientWidth / rem;
+          return 0;
+        }
+        this.set('windowWidthInRem', getSize());
+        const resize = () => {
+          this.set('windowWidthInRem', getSize());
+        };
+        window.addEventListener('resize', resize);
+        this.once('unrender', () => {
+          window.removeEventListener('resize', resize);
+        });
       }, 100);
     }
   },
