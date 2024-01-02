@@ -10,10 +10,10 @@
       <button title="Set up initial report data" on-click="@.set('tab', 'context')" class-tab class-active="tab === 'context'">Context</button>
       <button title="Import/export report definition as plain text" on-click="@.set('tab', 'definition')" class-tab class-active="tab === 'definition'">Definition</button>
       {{#if data && @.readLink('data')}}
-        <button title="Manage data for the {{data.name}} provided source" on-click="@.set('tab', 'import')" class-tab class-active="tab === 'import'">Import Data</button>
+        <button title="Manage data for the {{data.name}} provided source" on-click="@.set('tab', 'import')" class-tab class-active="tab === 'import'">Source Data</button>
       {{/if}}
       {{#if data && tab === 'import'}}
-        <span class-which><button class="ico" on-click="@.checkLink('import')">{{>times}}</button> Close Import</span>
+        <span class-which on-click="@.checkLink('import')"><button class="ico">{{>times}}</button> Close {{data.name}} Source Data</span>
       {{/if}}
       {{#if tab === 'result'}}<button class="ico text" on-click="@.download((~/report.name || 'report') + (~/report.type === 'delimited' ? '.csv' : '.html'), ~/result, ~/report.type === 'delimited' ? 'text/csv' : 'text/html')" title="Save output to a file">Save Output</button>{{/if}}
       <div class="center">
@@ -304,13 +304,15 @@
   }
 
   span.which {
-    flex-grow: 1;
+    flex-grow: 0;
     line-height: 2em;
     display: flex;
     align-items: center;
+    cursor: pointer;
   }
   .bottom-pane span.which {
     line-height: 2.7em;
+    margin-right: auto;
   }
 
   .raport-report {
@@ -571,6 +573,11 @@
   .active-widget > .bar,  .hover-widget > .bar, .bar.active, .bar.hover {
     opacity: 1;
   } 
+
+  .shiftKey.paper .widget .bar {
+    pointer-events: none;
+  }
+
   .bar * {
     margin: 0 0.5em 0 0;
   }
@@ -662,7 +669,6 @@
 
   .hover-widget > .bar, .bar.hover {
     background-color: {{@style.hover}} !important;
-    z-index: 888;
     z-index: 888;
   }
 

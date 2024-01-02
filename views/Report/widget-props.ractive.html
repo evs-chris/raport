@@ -283,10 +283,10 @@
       <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.macro}} tabout /></div>
   </span></label>
   {{#with ~/[@.split(~/temp.widget, 2)] as repeater, @.lastKey(~/temp.widget) as index}}
-  {{#if repeater.header && repeater.group[index]}}
+  {{#if repeater.header && repeater.group && repeater.group[index]}}
     <label><span title="If enabled, show the repeater header for this grouping of rows. You can use the @level reference to modify the header for different levels within the repeater.">Show Header?</span><span><input type=checkbox checked="{{repeater.groupHeaders[repeater.group.length - 1 - index]}}" /></span></label>
   {{/if}}
-  {{#if repeater.footer && repeater.group[index]}}
+  {{#if repeater.footer && repeater.group && repeater.group[index]}}
     <label><span title="If enabled, show the repeater footer for this grouping of rows. You can use the @level reference to modify the footer for different levels within the repeater.">Show Footer?</span><span><input type=checkbox checked="{{repeater.groupEnds[repeater.group.length - 1 - index]}}" /></span></label>
   {{/if}}
   {{#if repeater && index === 'row'}}

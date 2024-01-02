@@ -5,11 +5,11 @@
     <span title="Expression language reference" class-tab class-active="~/temp.bottom.tab === 'langref'" on-click="@.set('temp.bottom.tab', 'langref'), @.set('show.bottom', true)">Reference</span>
     {{#if ~/temp.bottom.param}}<span title="Modify report parameter {{~/param.name}}" class-tab class-active="~/temp.bottom.tab === 'param'" on-click="@.set('temp.bottom.tab', 'param'), @.set('show.bottom', true)">Parameter</span>{{/if}}
     {{#if ~/temp.bottom.source}}<span title="Modify data source {{~/source.name || ~/source.source}}" class-tab class-active="~/temp.bottom.tab === 'source'" on-click="@.set('temp.bottom.tab', 'source'), @.set('show.bottom', true)">Source</span>{{/if}}
-    <span class-which>
-      {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<button title="Close expression for {{~/temp.expr.path}}" class-ico on-click="@.checkLink('expr')">{{>times}}</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}{{/if}}
-      {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<button title="Close parameter editor for {{~/param.name}}" class-ico on-click="@.checkLink('param')">{{>times}}</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}{{/if}}
-      {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<button title="Close source editor for {{~/temp.bottom.source}}" class-ico on-click="@.checkLink('source')">{{>times}}</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}{{/if}}
-    </span>
+    
+    {{#if ~/temp.expr.path && (!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr')}}<span class-which on-click="@.checkLink('expr')" title="Close expression for {{~/temp.expr.path}}"><button class-ico>{{>times}}</button> {{~/temp.expr.path.replace(/\./g, ' \u232a ')}}</span>{{/if}}
+    {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<span class-which on-click="@.checkLink('param')" title="Close parameter editor for {{~/param.name}}"><button class-ico>{{>times}}</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}</span>{{/if}}
+    {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<span class-which on-click="@.checkLink('source')" title="Close source editor for {{~/temp.bottom.source}}"><button class-ico>{{>times}}</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}</span>{{/if}}
+    <div style="flex-grow: 1;" />
     {{#if ~/show.bottom}}<button title="{{#if ~/max.bottom}}Shrink{{else}}Embiggen{{/if}} the bottom pane" on-click="@.toggle('max.bottom')" class-ico class="{{#if !~/max.bottom}}off{{/if}}">{{>max}}</button>{{/if}}
     <button title="{{#if ~/show.bottom}}Hide{{else}}Show{{/if}} the bottom pane" on-click="@.toggle('show.bottom')" class-ico class="{{#if ~/show.bottom}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>
   </div>

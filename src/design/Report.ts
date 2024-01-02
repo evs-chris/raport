@@ -334,6 +334,9 @@ export class Designer extends Ractive {
   }
 
   selectWidget(path: string) {
+    const two = (path || '').split('.')[1] || 'report';
+    const base = `report${two === 'overlay' || two === 'watermark' ? `.${two}` : ''}`;
+    if (this.readLink('widget', { canonical: false })?.keypath === path) path = base;
     this.link(path, 'widget');
     this.set('temp.name', nameForWidget(this.get(path + '.type'), path));
     this.set('temp.widget', path);
@@ -1799,20 +1802,10 @@ const designerOpts: ExtendOpts<Designer> = {
       }
       const selectObserver = ctx.observe('~/temp.widget', select);
       const hoverObserver = ctx.observe('~/temp.hover', hover);
-      const listener = ctx.listen('click', ev => {
-        const p = ctx.resolve();
-        this.link(p, 'widget');
-        this.set('temp.widget', p);
-        this.set('temp.name', `${ctx.get('label') || ctx.get('type')} `);
-        ev.stopPropagation();
-        ev.preventDefault();
-        return false;
-      });
       return {
         teardown() {
           selectObserver.cancel();
           hoverObserver.cancel();
-          listener.cancel();
           node.classList.remove(type);
           node.classList.remove('widget');
         }
@@ -1893,7 +1886,6 @@ const designerOpts: ExtendOpts<Designer> = {
         if (ev.key === 'Escape') {
           up();
           ctx.set({ [`^^/layout.${idx}.0`]: sx, [`^^/layout.${idx}.1`]: sy });
-          console.log('ESCAPE!');
         }
       }
       return {

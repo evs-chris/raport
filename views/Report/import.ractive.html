@@ -41,7 +41,7 @@
       </div>
     {{/if}}
     <div class-json style="position: relative;">
-      <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate-focus-blur="@.autosize(@node), console.log(@event)" as-tracked=`_importText` on-change-input="@.set('_importdirty', true), console.log('change', @event)"></textarea></div></div>
+      <div class-scrolled-wrapper><div as-scrolled><textarea as-invalidated on-change-input-invalidate-focus-blur="@.autosize(@node)" as-tracked=`_importText` on-change-input="@.set('_importdirty', true), console.log('change', @event)"></textarea></div></div>
       {{#if ~/_importdirty}}
         <button class=plain style="position: absolute; top: 0.5em; right: 0.5em;" on-click="@.tryImport(@.getImportText()), @.set('_importdirty', false)">Apply Changes</button>
       {{/if}}

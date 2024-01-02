@@ -41,8 +41,8 @@
   </div></div></div>
 {{else}}
   <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled><div style="padding: 3rem; min-width: min-content;">
-    <div class="paper" style="{{@.paperSize()}}" on-click="@event.target === @node ? @.selectWidget(~/inOverlay ? 'report.overlay' : ~/inWatermark ? 'report.watermark' : 'report') : true" on-mouseleave="@.set('temp.hover', ''), false">
-      <div class="bar report-paper" style-cursor=pointer on-click="@.unlink('widget'), @.unlink('expr'), @.set('temp', { name: 'report ', widget: ~/inOverlay ? 'report.overlay' : ~/inWatermark ? 'report.watermark' : 'report', tree: ~/temp.tree })" class-active="temp.widget === 'report' || temp.widget === 'report.watermark' || temp.widget === 'report.overlay'" class-hover="temp.hover === 'report' || temp.hover === 'report.watermark' || temp.hover === 'report.overlay'" on-mouseover="@.set('temp.hover', ~/inWatermark ? 'report.watermark' : ~/inOverlay ? 'report.overlay' : 'report'), false" on-mouseleave="@.set('temp.hover', ''), false">
+    <div class="paper" style="{{@.paperSize()}}" on-click="@event.target === @node ? @.selectWidget(~/inOverlay ? 'report.overlay' : ~/inWatermark ? 'report.watermark' : 'report') : true" on-mouseleave="@.set('temp.hover', ''), false" on-mousemove="@event.shiftKey !== ~/shiftKey ? @.set('shiftKey', @event.shiftKey) : ''" class-shiftKey="~/shiftKey">
+      <div class="bar report-paper" style-cursor=pointer on-click="@.unlink('widget'), @.unlink('expr'), @.set('temp', { name: 'report ', widget: ~/inOverlay ? 'report.overlay' : ~/inWatermark ? 'report.watermark' : 'report', tree: ~/temp.tree })" class-active="temp.widget === 'report' || temp.widget === 'report.watermark' || temp.widget === 'report.overlay'" class-hover="temp.hover === 'report' || temp.hover === 'report.watermark' || temp.hover === 'report.overlay'" on-mouseover="@.set('temp.hover', ~/inWatermark ? 'report.watermark' : ~/inOverlay ? 'report.overlay' : 'report'), false" on-mouseleave="@.set('temp.hover', ''), false" style="z-index: 9;">
         <span class-name>
           {{#if ~/inWatermark}}Watermark
           {{elseif ~/inOverlay}}Overlay
@@ -118,6 +118,7 @@
     background-color: {{@style.bg}};
     color: {{@style.fg}};
     position: relative;
+    user-select: none;
   }
 
   .report-paper.bar {

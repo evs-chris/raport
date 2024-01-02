@@ -69,7 +69,7 @@
     {{#if .margin}}style="{{@.calcMargin(.)}}"{{/if}}
     {{#if .border}}style="{{@.calcBorder(.)}}"{{/if}}
     {{#if .font}}style="{{@.calcFont(.)}}"{{/if}}
-    on-click="@.selectWidget(@keypath)"
+    on-click="@.clickWidget(@context)"
   >
     {{#if Array.isArray(../)}}<span class="remove btn" title="Remove {{.type}}" on-click="@.removeWidget(@context, false)">{{>times}}</span>{{/if}}
     {{>.type}}
@@ -93,7 +93,7 @@
       </select>
     </div>
     {{/with}}
-    <div class-widgets class-manual="Array.isArray(.layout)" style="height: {{heightMargin}};">
+    <div class-widgets class-manual="Array.isArray(.layout)" style="height: {{heightMargin}};" on-mouseover="@.set('temp.hover', @keypath)">
       {{#each .widgets}}
         {{>widget false as label}}
       {{/each}}
