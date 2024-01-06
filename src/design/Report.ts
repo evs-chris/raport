@@ -15,7 +15,7 @@ export { highlight } from './Editor';
 
 export interface OperatorDoc {
   op: string|string[];
-  alias?: boolean;
+  alias?: string;
   note?: string;
   sig: Array<{
     bin?: 1; un?: 1; agg?: 1; fmt?: 1;
@@ -62,7 +62,7 @@ ${doc.opts.map(o => `${Array.isArray(o.name) ? `${o.name[0]} (alias ${o.name.sli
     const all = Array.isArray(doc.op) ? doc.op : [doc.op];
     all.forEach((n, i) => {
       docs.operatorText[n] = txt;
-      docs.operators.push(Object.assign({}, doc, i === 0 ? { op: n } : { op: n, alias: true }));
+      docs.operators.push(Object.assign({}, doc, i === 0 ? { op: n } : { op: n, alias: all[0] }));
     });
   }
 
