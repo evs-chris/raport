@@ -160,6 +160,12 @@ export const operators = `[
     { proto:'any[] => any' desc:'Returns the first element in the given array.' }
     { agg:1 proto:'() => any' desc:'Returns the first element in the current source.' }
   ]}
+  { op:'flatten' sig:[
+    { agg:1 proto:'any[] => any[]' desc:'Flattens nested arrays into a single non-nested array.' }
+    { agg:1 proto:'(any[], number) => any[]' desc:'Flattens nested arrays into a single non-nested array, up to as many levels as specified by the second argument.' }
+  ], opts: [
+    { name:'flat' type:'number' desc:'The number of levels of nested arrays to flatten. If this is not supplied or not a number, it defaults to 1.' }
+  ]}
   { op:'floor' sig:[
     { proto:'number => number' desc:'Returns the given number rounded down to the nearest integer.' }
   ]}
@@ -261,6 +267,7 @@ export const operators = `[
   ] opts: [
     { name:'array' type:'boolean' desc:'When truthy for an object map call, this will cause the result to be the array of application results rather than an object. The application in this case should only return result values.'}
     { name:'entries' type:'boolean' desc:'When truthy for an object map call, this will cause the result to be the array of resulting application entries rather than an object. The same handling for object entries still applies to this option as the operation without it.'}
+    { name:'flat' type:'number' desc:'When applied to an array or an object call that results in an array, this will cause the array to be flattened up to the level specified by the value of the option. If the value is not a number but still truthy, the number defaults to 1.' }
   ]}
   { op:'max' sig:[
     { agg:1 proto: '() => number' desc:'Returns the largest entry in the current source.' }

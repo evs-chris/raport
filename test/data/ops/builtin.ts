@@ -267,6 +267,13 @@ q.test('find', t => {
 });
 
 // TODO: first
+
+
+q.test('flatten', t => {
+  t.deepEqual(evaluate('flatten([:a :b [:c :d :e] :f :g])'), 'abcdefg'.split(''));
+  t.deepEqual(evaluate('flatten([:a :b [:c [:d] :e] :f :g] 2)'), 'abcdefg'.split(''));
+});
+
 // TODO: floor
 
 q.test('format', t => {
@@ -431,6 +438,8 @@ q.test('map', t => {
   t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if @key == :a then null else _ * 2)`), { b: 4, c: 6 });
   t.deepEqual(evaluate(`map({ a:1 b:2 c:3 } =>if @key == :a then [:d 69] else _ * 2)`), { d: 69, b: 4, c: 6 });
   t.equal(evaluate({ outer: [{ foo: 'bar' }] }, `map(outer =>{ let joe = :joe; let sam = :mas { let sam = :sam; joe + sam + ^sam + foo } })[0]`), 'joesammasbar');
+  t.deepEqual(evaluate('map([:a :b [:c :d :e] :f :g] =>_ flat:1)'), 'abcdefg'.split(''));
+  t.deepEqual(evaluate('map([:a :b [:c [:d] :e] :f [[[:g]]]] =>_ flat:9)'), 'abcdefg'.split(''));
 });
 
 q.test('max', t => {

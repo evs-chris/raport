@@ -1133,9 +1133,17 @@ registerOperator({
     let app: any;
     if (isApplication(args[0])) v = arr, app = evalParse(ctx, args[0]);
     else if (isApplication(args[1])) v = evalParse(ctx, args[0]), app = evalParse(ctx, args[1]);
-    if ((Array.isArray(v) || v && '0' in v) && isApplication(app)) return Array.prototype.map.call(v, (e: any, i: number) => evalApply(ctx, app, [e, i], { index: i, key: i }));
+    if ((Array.isArray(v) || v && '0' in v) && isApplication(app)) {
+      const res = Array.prototype.map.call(v, (e: any, i: number) => evalApply(ctx, app, [e, i], { index: i, key: i }));
+      if (opts && opts.flat) return flatten(res, opts.flat);
+      return res;
+    }
     else if (v && typeof v === 'object' && isApplication(app)) {
-      if (opts && opts.array) return Object.entries(v as object).map((p, i) => evalApply(ctx, app, [p[1], i, p[0]], { index: i, key: p[0] }));
+      if (opts && opts.array) {
+        const res = Object.entries(v as object).map((p, i) => evalApply(ctx, app, [p[1], i, p[0]], { index: i, key: p[0] }));
+        if (opts && opts.flat) return flatten(res, opts.flat);
+        return res;
+      }
       if (opts && opts.entries) return Object.entries(v as object).reduce((a, p, i) => {
         const r = evalApply(ctx, app, [p[1], i, p[0]], { index: i, key: p[0] });
         if (r === null) return a;
@@ -1215,6 +1223,12 @@ registerOperator({
   }
 }, {
   type: 'aggregate',
+  names: ['flatten'],
+  apply(_name: string, arr: any[], args: ValueOrExpr[], opts, ctx) {
+    return flatten(arr, (args.length > 0 ? evalParse(ctx, args[0]) : 0) || opts?.flat);
+  }
+}, {
+  type: 'aggregate',
   names: ['block'],
   apply(_name: string, _arr: any[], args: ValueOrExpr[], opts, ctx: Context) {
     const last = args.length - 1;
@@ -1227,6 +1241,16 @@ registerOperator({
   },
   value: true,
 });
+
+function flatten(n: any[], levels: any = 1): any[] {
+  let res = n || [];
+  const count = typeof levels !== 'number' ? 1 : levels;
+  for (let i = 0; i < count; i++) {
+    if (res.find(v => Array.isArray(v))) res = [].concat(...res);
+    else return res;
+  }
+  return res;
+}
 
 function fmtDate(n: any, fmt: string): string {
   if (typeof n === 'string') {
