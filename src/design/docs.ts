@@ -775,7 +775,7 @@ export function languageReference(zoom = 100, theme = 'dark') {
 </head>
 <body class="${theme}">
 
-<h2 id="raport-expression-language-reference" style="text-align: center;">Raport Expression Language Reference</h2>
+<h2 id="raport-expression-language-reference" style="text-align: center; margin-top: 1rem;">Raport Expression Language Reference</h2>
 <p>As implied by Raport Expression Language (REL), the language is composed entirely of expessions. There are no statements. The expressions are composed only of operations and values.</p>
 <h2 id="syntax">Syntax</h2>
 <div class=indent>
