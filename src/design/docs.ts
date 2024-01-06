@@ -635,7 +635,7 @@ __NOTE:__ {note}
 ')}
 '`;
 
-export function languageReference(zoom = 100) {
+export function languageReference(zoom = 100, theme = 'dark') {
   return `<html>
 <head><title>Raport Expression Language Reference</title>
 <style>
@@ -772,26 +772,8 @@ export function languageReference(zoom = 100) {
     color: #29c;
   }
 </style>
-<script>
-  window.addEventListener('message', ev => {
-    const msg = ev.data;
-    if (!msg || typeof msg !== 'object') return;
-    switch (msg.action) {
-      case 'theme':
-        const cls = document.body.classList;
-        if (msg.theme === 'dark') {
-          if (cls.contains('light')) cls.remove('light');
-          if (!cls.contains('dark')) cls.add('dark');
-        } else {
-          if (!cls.contains('light')) cls.add('light');
-          if (cls.contains('dark')) cls.remove('dark');
-        }
-        break;
-    }
-  });
-</script>
 </head>
-<body>
+<body class="${theme}">
 
 <h2 id="raport-expression-language-reference" style="text-align: center;">Raport Expression Language Reference</h2>
 <p>As implied by Raport Expression Language (REL), the language is composed entirely of expessions. There are no statements. The expressions are composed only of operations and values.</p>

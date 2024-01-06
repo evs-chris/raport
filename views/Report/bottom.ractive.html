@@ -18,7 +18,7 @@
 <div class-bottom-pane class-active="~/show.bottom" class-max="~/max.bottom" class-shrinkleft="~/show.shrinkleft">
   <div class-bottom>
     <div class-tab class-active-tab="~/temp.bottom.tab === 'langref'">
-      <iframe srcdoc="{{@.langref(~/settings.scale)}}" id=langref />
+      <iframe srcdoc="{{@.langref(~/settings.scale, @style.theme)}}" id=langref />
     </div>
     <div class-tab class-active-tab="~/temp.bottom.tab === 'opref'">
       <div style="width: 10em; position: absolute; right: 0; top: 0; background-color: {{@style.bg}}; padding: 0.5rem; border: 1px solid; border-radius: 0 0 0 0.5em; border-width: 0 0 1px 1px;">

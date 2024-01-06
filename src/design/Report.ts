@@ -1379,9 +1379,6 @@ export class Designer extends Ractive {
     }
     if (document?.body?.parentElement?.style) document.body.parentElement.style.fontSize = `${scale}%`;
 
-    const langref: any = document.getElementById('langref');
-    if (langref) langref.contentWindow.postMessage({ action: 'theme', theme: dark ? 'dark' : 'light' }, '*');
-
     if (settings.outTheme === 'dark') Ractive.styleSet('out', darkTheme);
     else if (settings.outTheme === 'light') Ractive.styleSet('out', lightTheme);
     else Ractive.styleSet('out', dark ? darkTheme : lightTheme);
