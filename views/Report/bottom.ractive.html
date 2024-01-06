@@ -11,14 +11,14 @@
     {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<span class-which on-click="@.checkLink('param')" title="Close parameter editor for {{~/param.name}}"><button class-ico>{{>times}}</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}</span>{{/if}}
     {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<span class-which on-click="@.checkLink('source')" title="Close source editor for {{~/temp.bottom.source}}"><button class-ico>{{>times}}</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}</span>{{/if}}
     <div style="flex-grow: 1;" />
-    {{#if ~/show.bottom}}<button title="{{#if ~/max.bottom}}Shrink{{else}}Embiggen{{/if}} the bottom pane" on-click="@.toggle('max.bottom')" class-ico class="{{#if !~/max.bottom}}off{{/if}}">{{>max}}</button>{{/if}}
+    <button title="{{#if ~/max.bottom}}Shrink{{else}}Embiggen{{/if}} the bottom pane" on-click="@.toggle('max.bottom')" class-ico class="{{#if !~/max.bottom}}off{{/if}}">{{>max}}</button>
     <button title="{{#if ~/show.bottom}}Hide{{else}}Show{{/if}} the bottom pane" on-click="@.toggle('show.bottom')" class-ico class="{{#if ~/show.bottom}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>
   </div>
 </div>
 <div class-bottom-pane class-active="~/show.bottom" class-max="~/max.bottom" class-shrinkleft="~/show.shrinkleft">
   <div class-bottom>
     <div class-tab class-active-tab="~/temp.bottom.tab === 'langref'">
-      <iframe srcdoc="{{langref}}" id=langref />
+      <iframe srcdoc="{{@.langref(~/settings.scale)}}" id=langref />
     </div>
     <div class-tab class-active-tab="~/temp.bottom.tab === 'opref'">
       <div style="width: 10em; position: absolute; right: 0; top: 0; background-color: {{@style.bg}}; padding: 0.5rem; border: 1px solid; border-radius: 0 0 0 0.5em; border-width: 0 0 1px 1px;">
@@ -26,7 +26,7 @@
         <input lazy=500 placeholder="Operator..." value="{{opDoc}}" style="width: 10em; margin: 0.5em;" title="Find any operators with a name containing the string entered here." />
       </div>
       <div style="padding: 0.5rem; height: 100%; width: 100%; overflow: auto;">
-        <div style="max-width: 80em; margin: auto;">
+        <div style="max-width: 60em; margin: auto;">
           <h2 style="text-align: center;">Raport Operators</h2>
           <dl>
             {{#each ~/operators as op}}{{#if (!~/opDoc || op.0.includes(~/opDoc)) && (!~/opDocSearch || JSON.stringify(op.1).toLowerCase().includes(~/opDocSearch.toLowerCase()))}}

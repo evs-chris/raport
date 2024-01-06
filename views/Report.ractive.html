@@ -1,4 +1,4 @@
-<div as-trackfocus class=raport-wrapper>
+<div as-trackfocus class=raport-wrapper class-proppop="~/show.proppop">
   {{>left}}
   <div class="top-bar" class-shrinkleft="~/show.shrinkleft">
     <div class="design actions">
@@ -155,19 +155,17 @@
     color: {{@style.fg}};
   }
 
-  @media screen and (min-width: 60rem) {
-    .top-bar.shrinkleft {
-      left: {{(@style.leftwidth || 28) + 2}}rem;
-    }
-    .bottom-bar.shrinkleft {
-      left: {{(@style.leftwidth || 28) + 2}}rem;
-    }
-    .center-pane.shrinkleft {
-      left: {{(@style.leftwidth || 28) + 2}}rem;
-    }
-    .bottom-pane.shrinkleft {
-      left: {{(@style.leftwidth || 28) + 2}}rem;
-    }
+  .proppop .top-bar.shrinkleft {
+    left: {{(@style.leftwidth || 28) + 2}}rem;
+  }
+  .proppop .bottom-bar.shrinkleft {
+    left: {{(@style.leftwidth || 28) + 2}}rem;
+  }
+  .proppop .center-pane.shrinkleft {
+    left: {{(@style.leftwidth || 28) + 2}}rem;
+  }
+  .proppop .bottom-pane.shrinkleft {
+    left: {{(@style.leftwidth || 28) + 2}}rem;
   }
 
   @media screen and (max-width: 60rem) {
@@ -200,7 +198,7 @@
   }
 
   .center-pane.shrinkbottom {
-    bottom: calc(33vh + 2rem);
+    bottom: calc({{@style.bottomheight || 33}}vh + 2rem);
   }
 
   button.plain {
@@ -210,21 +208,21 @@
     cursor: pointer;
     user-select: none;
     border: none;
-    border-radius: 0.2em;
+    border-radius: 0.2rem;
     padding: 0 1.25rem;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
       0 1px 5px 0 rgba(0, 0, 0, 0.12),
       0 3px 1px -2px rgba(0, 0, 0, 0.2);
     transition: 0.2s ease-in-out;
     transition-property: box-shadow, opacity, background-color;
-    font-size: 0.7em;
-    line-height: 1.5em;
+    font-size: 0.7rem;
+    line-height: 1.5rem;
     background-color: {{@style.active}};
     color: {{@style.btntxt}};
     vertical-align: middle;
-    min-height: 2.25em;
+    min-height: 2.25rem;
     outline: 0;
-    margin: 0.25em;
+    margin: 0.25rem;
     position: relative;
     overflow: hidden;
     -webkit-tap-highlight-color: transparent;
@@ -243,6 +241,7 @@
     outline: none;
     width: 1.2rem;
     height: 1.2rem;
+    font-size: 0.8rem;
     margin-left: 0.1rem;
     box-sizing: content-box;
     color: {{@style.fg}};
@@ -490,7 +489,7 @@
     left: 2rem;
     right: 0;
     bottom: 2rem;
-    height: 33vh;
+    height: {{@style.bottomheight || 33}}vh;
     overflow: hidden;
     flex-shrink: 0;
     display: flex;

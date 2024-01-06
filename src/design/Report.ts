@@ -138,6 +138,8 @@ export class Designer extends Ractive {
   _inited = false;
   _isplay = false;
 
+  checkResize: () => void;
+
   addWidget(type: string) {
     const widget: any = { type };
     const path = this.get('temp.widget');
@@ -1402,6 +1404,8 @@ export class Designer extends Ractive {
   getNestLevel(path: string): string {
     return `level${Math.floor(path.split('.').length / 2)}`;
   }
+
+  langref = langref;
 }
 
 const designerOpts: ExtendOpts<Designer> = {
@@ -1436,7 +1440,6 @@ const designerOpts: ExtendOpts<Designer> = {
         provideSource: () => this.push('sources', {}),
         editProvidedSource: (ctx: ContextHelper) => this.editProvidedData(ctx),
       },
-      langref,
     };
   },
   components: { Editor, Viewer },
@@ -1639,14 +1642,38 @@ const designerOpts: ExtendOpts<Designer> = {
     'settings.leftwidth'(v) {
       Ractive.styleSet('leftwidth', v);
     },
+    'settings.bottomheight'(v) {
+      Ractive.styleSet('bottomheight', v);
+    },
+    'settings.scale'() {
+      if (this.checkResize) setTimeout(() => this.checkResize());
+    },
     'settings.leftwidth windowWidthInRem'(v) {
       const left = this.get('settings.leftwidth');
       const wnd = this.get('windowWidthInRem');
-      this.set('show.props', v && left && v > 2.5 * (left + 2));
+      const bigEnough = v && left && wnd > 2.5 * (left + 2);
+      this.set('show.props', bigEnough);
+      this.set('show.proppop', bigEnough);
     },
   },
   on: {
     init() {
+      const getSize = () => {
+        if (!this.rendered) return 0;
+        const el = document.createElement('div');
+        el.style.position = 'absolute';
+        el.style.width = '1rem';
+        document.body.appendChild(el);
+        const rem = el.clientWidth;
+        el.remove();
+        const wrapper = this.find('.raport-wrapper');
+        if (wrapper) return wrapper.clientWidth / rem;
+        return 0;
+      }
+      const resize = () => {
+        this.set('windowWidthInRem', getSize());
+      };
+      this.checkResize = resize;
       this.resetUndo();
       this.command('styleWithCSS', false, 'true');
       this._undoWatch = this.observe('report', debounce(this._onChange, 2000), { defer: true, init: true });
@@ -1730,24 +1757,10 @@ const designerOpts: ExtendOpts<Designer> = {
       setTimeout(() => {
         this._onChange(this.get('report'));
         this.applySettings();
-        const getSize = () => {
-          const el = document.createElement('div');
-          el.style.position = 'absolute';
-          el.style.width = '1rem';
-          document.body.appendChild(el);
-          const rem = el.clientWidth;
-          el.remove();
-          const wrapper = this.find('.raport-wrapper');
-          if (wrapper) return wrapper.clientWidth / rem;
-          return 0;
-        }
-        this.set('windowWidthInRem', getSize());
-        const resize = () => {
-          this.set('windowWidthInRem', getSize());
-        };
-        window.addEventListener('resize', resize);
+        this.checkResize();
+        window.addEventListener('resize', this.checkResize);
         this.once('unrender', () => {
-          window.removeEventListener('resize', resize);
+          window.removeEventListener('resize', this.checkResize);
         });
       }, 100);
     }
