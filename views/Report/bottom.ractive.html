@@ -160,7 +160,7 @@
         </div>
       </div>
       <div class-context style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
-        <div class-header title="The approximate data that should be available in this expression's context"><span>Context</span><span><input placeholder="Filter..." value="{{~/ctxsearch}}" lazy=500 /></span></div>
+        <div class-header title="The approximate data that should be available in this expression's context"><div style="margin-right: 0.5em;">Context</div><div><input placeholder="Filter..." value="{{~/ctxsearch}}" lazy=500 /></div></div>
         <div class-panel class-scrolled-wrapper><div as-scrolled>
           {{#if ~/temp.expr.ctx}}
             {{>expr-context ~/temp.expr.ctx}}
@@ -168,7 +168,7 @@
         </div></div>
       </div>
       <div class-ops style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
-        <div class-header title="All of the builtin operators. Click an operator to insert it into an active text field. Hover over an operator for a tooltip with its documentation. Hold the shift key and click an operator for popup with its documentation."><span>Operators</span><span><input placeholder="Search..." value="{{~/opsearch}}" lazy=500 /></span></div>
+        <div class-header title="All of the builtin operators. Click an operator to insert it into an active text field. Hover over an operator for a tooltip with its documentation. Hold the shift key and click an operator for popup with its documentation."><div style="margin-right: 0.5em;">Operators</div><div><input placeholder="Search..." value="{{~/opsearch}}" lazy=500 /></div></div>
         <div class-panel class-scrolled-wrapper><div as-scrolled>
           {{~/temp.expr.tab === 'ast' && @context.decorators.scrolled && @context.decorators.scrolled.invalidate() || '' && ''}}
           {{#each ~/operators}}
@@ -399,7 +399,7 @@
   }
 
   .bottom-pane .context .header, .bottom-pane .ops .header {
-    height: 2.55em;
+    flex-wrap: wrap;
     font-weight: bold;
     display: flex;
     justify-content: space-evenly;
