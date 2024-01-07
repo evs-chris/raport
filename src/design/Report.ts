@@ -1646,7 +1646,7 @@ const designerOpts: ExtendOpts<Designer> = {
       if (this.checkResize) setTimeout(() => this.checkResize());
     },
     'settings.leftwidth windowWidthInRem'(v) {
-      const left = this.get('settings.leftwidth');
+      const left = this.get('settings.leftwidth') || 28;
       const wnd = this.get('windowWidthInRem');
       const bigEnough = v && left && wnd > 2.5 * (left + 2);
       this.set('show.props', bigEnough);

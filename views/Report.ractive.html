@@ -17,7 +17,7 @@
       {{/if}}
       {{#if tab === 'result'}}<button class="ico text" on-click="@.download((~/report.name || 'report') + (~/report.type === 'delimited' ? '.csv' : '.html'), ~/result, ~/report.type === 'delimited' ? 'text/csv' : 'text/html')" title="Save output to a file">Save Output</button>{{/if}}
       <div class="center">
-        <a href="https://github.com/evs-chris/raport" target="_blank">Raport vRAPORT_VERSION</a>
+        <a style="margin-left: 1rem;" href="https://github.com/evs-chris/raport" target="_blank">Raport vRAPORT_VERSION</a>
       </div>
       <div class=right>
         {{#if ~/showProjects && ~/project.name}}<span style="display: inline-block; margin: 0 1em; font-size: 0.8em; height: 1rem; vertical-align: middle;">{{~/project.name}}</span>{{/if}}
@@ -304,14 +304,17 @@
 
   span.which {
     flex-grow: 0;
-    line-height: 2em;
+    flex-shrink: 1;
+    white-space: nowrap;
+    line-height: 1.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
     display: flex;
     align-items: center;
     cursor: pointer;
   }
-  .bottom-pane span.which {
-    line-height: 2.7em;
-    margin-right: auto;
+  span.which button {
+    flex-shrink: 0;
   }
 
   .raport-report {
