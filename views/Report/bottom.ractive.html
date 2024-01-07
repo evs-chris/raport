@@ -11,7 +11,7 @@
     {{#if ~/temp.bottom.param && ~/temp.bottom.tab === 'param'}}<span class-which on-click="@.checkLink('param')" title="Close parameter editor for {{~/param.name}}"><button class-ico>{{>times}}</button> Parameter {{+@.lastKey(~/temp.bottom.param) + 1}}</span>{{/if}}
     {{#if ~/temp.bottom.source && ~/temp.bottom.tab === 'source'}}<span class-which on-click="@.checkLink('source')" title="Close source editor for {{~/temp.bottom.source}}"><button class-ico>{{>times}}</button> Source {{+@.lastKey(~/temp.bottom.source) + 1}}</span>{{/if}}
     <div style="flex-grow: 1;" />
-    <button title="{{#if ~/max.bottom}}Shrink{{else}}Embiggen{{/if}} the bottom pane" on-click="@.toggle('max.bottom')" class-ico class="{{#if !~/max.bottom}}off{{/if}}">{{>max}}</button>
+    <button title="{{#if ~/max.bottom}}Shrink{{else}}Embiggen{{/if}} the bottom pane" on-click="@.toggle('max.bottom')" class-ico class="{{#if !~/max.bottom}}off{{/if}}" style="margin-left: 1rem;">{{>max}}</button>
     <button title="{{#if ~/show.bottom}}Hide{{else}}Show{{/if}} the bottom pane" on-click="@.toggle('show.bottom')" class-ico class="{{#if ~/show.bottom}}down{{else}}up{{/if}}-arrow">{{>arrow}}</button>
   </div>
 </div>
@@ -197,7 +197,7 @@
         </div>
       </div>
       <div class-context style-display="{{~/temp.expr.tab === 'ast' || ~/temp.expr.tab === 'text' || ~/temp.expr.tab === 'html' ? '' : 'none'}}">
-        <div class-header title="The approximate data that should be available in this expression's context"><div style="margin-right: 0.5em;">Context</div><div><input placeholder="Filter..." value="{{~/ctxsearch}}" lazy=500 /></div></div>
+        <div class-header title="The approximate data that should be available in this expression's context"><div style="margin-right: 0.5em;">Context</div><div><input placeholder="Filter..." value="{{~/ctxsearch}}" lazy=500 style="width: 100%;" /></div></div>
         <div class-panel class-scrolled-wrapper><div as-scrolled>
           {{#if ~/temp.expr.ctx}}
             {{>expr-context ~/temp.expr.ctx}}
@@ -408,6 +408,7 @@
     flex-grow: 1;
     flex-shrink: 1;
     overflow: hidden;
+    height: 100%;
   }
 
   .bottom-pane .bottom > .tab {
@@ -415,6 +416,7 @@
     flex-grow: 0;
     border: none;
     display: none;
+    overflow: auto;
   }
   .bottom-pane .bottom > .active-tab {
     flex-grow: 1;
