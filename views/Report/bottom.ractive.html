@@ -21,7 +21,7 @@
       <iframe srcdoc="{{@.langref(~/settings.scale, @style.theme)}}" id=langref />
     </div>
     <div class-tab class-active-tab="~/temp.bottom.tab === 'opref'">
-      <div style="width: 10em; position: absolute; right: 0; top: 0; background-color: {{@style.bg}}; padding: 0.5rem; border: 1px solid; border-radius: 0 0 0 0.5em; border-width: 0 0 1px 1px;">
+      <div class="ops-search">
         <input lazy=500 placeholder="Search..." value="{{opDocSearch}}" style="width: 10em; margin: 0.5em;" title="Find any operators with docs containing the string entered here." />
         <input lazy=500 placeholder="Operator..." value="{{opDoc}}" style="width: 10em; margin: 0.5em;" title="Find any operators with a name containing the string entered here." />
       </div>
@@ -719,5 +719,22 @@
   }
   .bottom-pane dd {
     margin: 0.5em 0 1em 2em;
+  }
+
+  .bottom-pane .ops-search {
+    width: 10em;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background-color: {{@style.bg}};
+    padding: 0.5rem;
+    border: 1px solid;
+    border-radius: 0 0 0 0.5em;
+    border-width: 0 0 1px 1px;
+    opacity: 0.4;
+    transition: opacity 0.2s ease-in-out;
+  }
+  .bottom-pane .ops-search:hover {
+    opacity: 1;
   }
 </style>
