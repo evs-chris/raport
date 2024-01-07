@@ -1973,12 +1973,28 @@ function nameForWidget(type: string, path: string): string {
 }
 
 function tryParseData(str: string, header?: boolean): any {
+  if (!str) return;
+
   try {
     return JSON.parse(str);
   } catch {
     if (str.trim()[0] === '<') {
       const data = parseXML(str);
       if (data) return data;
+    }
+
+    const brace = /[\{\[]/.exec(str);
+    if (brace && brace.index >=0 && brace.index <= 20) {
+      const res = evaluate(str);
+      if (typeof res === 'string') {
+        try {
+          return JSON.parse(res);
+        } catch {
+          const csv = evaluate({ res, header }, `parse(str, { csv:1 detect:1 header:header })`);
+          if (csv.length) return csv;
+          else return str;
+        }
+      } else if (res) return res;
     }
 
     const csv = evaluate({ str, header }, `parse(str, { csv:1 detect:1 header:header })`);
@@ -1992,7 +2008,7 @@ function tryParseData(str: string, header?: boolean): any {
           if (csv.length) return csv;
           else return str;
         }
-      }
+      } else if (res) return res;
     } else return csv;
   }
 }
