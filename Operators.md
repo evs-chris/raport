@@ -773,6 +773,29 @@
 
 <dl><dt>
 
+### `flatten`
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>any[] => any[]</code> (aggregate)</dt>
+<dd>Flattens nested arrays into a single non-nested array.</dd>
+<dt><code>(any[], number) => any[]</code> (aggregate)</dt>
+<dd>Flattens nested arrays into a single non-nested array, up to as many levels as specified by the second argument.</dd>
+</dl>
+
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>flat</code></dt><dd>The number of levels of nested arrays to flatten. If this is not supplied or not a number, it defaults to 1.</dd>
+</dl>
+</dl>
+<br/>
+
+<dl><dt>
+
 ### `floor`
 ---
 
@@ -1321,7 +1344,7 @@
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>array</code></dt><dd>When truthy for an object map call, this will cause the result to be the array of application results rather than an object. The application in this case should only return result values.</dd><dt><code>entries</code></dt><dd>When truthy for an object map call, this will cause the result to be the array of resulting application entries rather than an object. The same handling for object entries still applies to this option as the operation without it.</dd>
+<dt><code>array</code></dt><dd>When truthy for an object map call, this will cause the result to be the array of application results rather than an object. The application in this case should only return result values.</dd><dt><code>entries</code></dt><dd>When truthy for an object map call, this will cause the result to be the array of resulting application entries rather than an object. The same handling for object entries still applies to this option as the operation without it.</dd><dt><code>flat</code></dt><dd>When applied to an array or an object call that results in an array, this will cause the array to be flattened up to the level specified by the value of the option. If the value is not a number but still truthy, the number defaults to 1.</dd>
 </dl>
 </dl>
 <br/>
@@ -1661,7 +1684,7 @@
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd>
+<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.</dd><dt><code>strict</code></dt><dd>For the XML parser, be less forgiving about malformed content. Defaults to false.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd>
 </dl>
 </dl>
 <br/>

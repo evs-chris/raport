@@ -1,3 +1,22 @@
+## 0.23.2
+
+2024-01-06
+
+### Data
+
+* The xml parser can now be more strict if requested.
+* The xml stringifier will now properly indent a closing array tag.
+* There is now a `flatten` operator and the `map` operator includes a `flat` option to allow flattening nested arrays.
+
+### Designer
+
+* Data sources that are xml-ish will attempt to parse the text as xml.
+* The project name is now visible in the top tab bar.
+* The designer UI has been slightly redesigned to allow more control over the size and contents of the side and bottom panes.
+* Holding the shift key while mousing around the designer canvas will ignore container widget top bars, making it easier to select widgets just above containers.
+* The operator docs are now a separate tab on the bottom bar with a search by docs and by operator name.
+
+
 ## 0.23.1
 
 2023-12-31
