@@ -123,9 +123,9 @@
                   </div>
                 </div>
               {{else}}
-                <div>
+                <!-- <div>
                   <button title="Convert a single expression label text into a multipart label text that can have individual properties set per part" class-plain on-click="@context.set('.str', [.str])">Convert to Parts</button>
-                </div>
+                </div> -->
                 <div class-scrolled-wrapper style-flex-grow=1>
                   <div as-scrolled>
                     <Editor src="{{.str}}" template="{{.html || .template}}" on-run="~/temp.expr.tab === 'result' ? @.set('temp.expr.tab', 'text') : @.eval()" primary />
