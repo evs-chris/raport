@@ -172,6 +172,11 @@ export const operators = `[
   { op:['format' 'fmt'] sig:[
     { proto:'(any, string, ...args) => string' desc:'Applies the named formatted indicated by the second argument string to the given value, passing along any additional arguments to the formatter.' }
   ]}
+  { op:'generate' sig:[
+    { proto:'(application) => any[]' desc:'Calls the given application, aggregating values until the application returns undefined. If the result is an array, the elements of the array are added to the result. If the result is an object matching { value?: any, state?: any }, then the value will be added to the result and the state, if supplied, will replace the state of the generator. Any other value will be added to the result. Each application is passed the state, last value, and index of the call. Each of the arguments is also available a special reference, @state, @last, and @index, respectively. The global defaults for generate have a max property, defaulting to 10000, that limits the number of iterations that can be run to avoid non-terminating generators.' }
+  ], opts: [
+    { name:'[state]' type:'any' desc:'Any options passed to the operator are sent into the initial application as the state.' }
+  ]}
   { op:'get' sig:[
     { proto:'(any, string) => any' desc:'Safely retrieves the value at the given path string from the value passed as the first argument.' }
   ]}
@@ -390,6 +395,7 @@ export const operators = `[
   { op:'set-defaults' sig:[
     { proto:"('format', string) => any" desc:'Sets the defaults for the given named formatter. Defaults should be passed in as named options that depend on the decorator.' }
     { proto:"('round') => any" desc:'Sets the defaults for rounding operations. Defaults should be passed in as named options, which can be places, all-numeric, and method.' }
+    { proto:"('generate') => any" desc:'Sets the defaults for generate operations. Defaults should be passed in as named options, which can be max. The default max is 10000.' }
   ]}
   { op:'similar' sig:[
     { proto:'(string, string, number = 0.5, number = 2) => [string, string, number]' desc:'Finds the first similar substrings within the two given strings based on a threshhold (3rd argument, defaults to 50%) and fudge factor (4th argument, defaults to 2). The two similar substrings are returned in a tuple with the similarity percentage.' }

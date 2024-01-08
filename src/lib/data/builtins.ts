@@ -24,6 +24,10 @@ const spanMap = {
   d: [2, 24],
 };
 
+const generateDefaults = {
+  max: 10000,
+};
+
 const roundDefaults = {
   places: 2,
   'all-numeric': false,
@@ -347,6 +351,29 @@ registerOperator(
     if (isKeypath(r)) return safeGet(c, r);
     else if (typeof r === 'number') return safeGet(c, '' + r);
     else return evaluate(c, r);
+  }),
+  simple(['generate'], (_name: string, [apply], opts, ctx) => {
+    if (apply && isApplication(apply)) {
+      const res = [];
+      let state = opts;
+      let it: any;
+      for (let i = 0; i < generateDefaults.max; i++) {
+        it = evalApply(ctx, apply, [state, it, i], { index: i, last: it, state });
+        if (Array.isArray(it)) it.forEach(v => res.push(v));
+        else if (it && typeof it === 'object') {
+          const keys = Object.keys(it);
+          if (keys.find(k => k !== 'value' && k !== 'state')) res.push(it);
+          else {
+            res.push(it.value);
+            state = it.state || state;
+            it = it.value;
+          }
+        } else if (it === undefined) break;
+        else res.push(it);
+      }
+      return res;
+    }
+    return [];
   }),
   simple(['array'], (_name: string, values: any[]) => {
     return values;
@@ -944,6 +971,8 @@ registerOperator(
       if (vfmt) return Object.assign(vfmt.defaults, opts);
     } else if (type === 'round') {
       Object.assign(roundDefaults, opts);
+    } else if (type === 'generate') {
+      Object.assign(generateDefaults, opts);
     }
   }),
   simple(['parse'], (_name: string, args: any[], opts: any): any => {
