@@ -392,6 +392,7 @@ export function expandMacro(macro: string, w: Widget, ctx: RenderContext, placem
   const orig = w;
   if (res && !Array.isArray(res) && typeof res === 'object') {
     if ('content' in res || 'props' in res || 'properties' in res) w = Object.assign({}, w, res.props, res.properties, { widgets: Array.isArray(res.content) ? res.content : res.content ? [res.content] : w.widgets, macro: undefined });
+    else if ('replace' in res && res.replace && typeof res.replace === 'object' && 'type' in res.replace) return res.replace;
     else w = Object.assign({}, w, { widgets: [res], macro: undefined });
   } else if (Array.isArray(res)) w = Object.assign({}, w, { widgets: res, macro: undefined });
   return w;
