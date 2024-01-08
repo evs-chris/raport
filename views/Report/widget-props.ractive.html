@@ -338,7 +338,7 @@
       <span class-toggle class-active="typeof .source === 'string'" {{#if typeof .source !== 'string'}}on-click="@context.set('.source', '')"{{/if}}>Expression</span>
       <span class-toggle class-active="typeof .source !== 'string'" {{#if typeof .source === 'string'}}on-click="@context.set('.source', { source: '' })"{{/if}}>Source</span>
     </div>
-    {{#if typeof .source === 'string'}}<input value="{{.source}}" />{{/if}}
+    {{#if typeof .source === 'string'}}<div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.source}} tabout /></div>{{/if}}
     {{#if typeof .source !== 'string'}}<select value="{{.source.source}}"><option value="">(None)</option>{{#each ~/report.sources}}<option value="{{.name || .source}}">{{.label || .name || .source}}</option>{{/each}}</select>{{/if}}
   </span></label>
   {{#with ~/[@.split(~/temp.widget)] as repeater}}
