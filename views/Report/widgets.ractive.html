@@ -191,7 +191,7 @@
   {{elseif .type === 'image'}}
     <span class="widget-info">{{.url}}</span>
   {{elseif .type === 'repeater'}}
-    <span class="widget-info">{{.source && typeof .source === 'object' && 'x' in .source ? .source.x : (.source.name || .source.source || '(None)')}}</span>
+    <span class="widget-info">{{.source && typeof .source === 'object' && 'x' in .source ? .source.x : typeof .source === 'string' ? .source : (.source.name || .source.source || '(None)')}}</span>
   {{elseif .macro}}
     <span class="widget-info">macro: {{.macro}}</span>
   {{elseif .widgets.length}}
