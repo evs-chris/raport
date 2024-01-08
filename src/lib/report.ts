@@ -1,6 +1,6 @@
 import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, Root, Context, RootContext, extend, evaluate, filter, toDataSet } from './data/index';
 
-import { renderWidget, RenderContext, RenderResult, RenderState, expandMargin } from './render/index';
+import { renderWidget, RenderContext, RenderResult, RenderState, expandMargin, expandMacro } from './render/index';
 import { styleClass, styleFont } from './render/style';
 
 import { parse as parseTemplate } from './data/parse/template';
@@ -415,7 +415,8 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
     }
   }
 
-  for (const w of report.widgets) {
+  for (let w of report.widgets) {
+    if (w.macro) w = expandMacro(w.macro, w, ctx, { x: 0, y: 0, availableX, availableY, maxX: availableX, maxY }, state);
     let r: RenderResult;
     do {
       r = renderWidget(w, ctx, { x: 0, y, availableX, availableY, maxX: availableX, maxY }, state);
