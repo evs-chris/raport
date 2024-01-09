@@ -346,6 +346,8 @@ export class Designer extends Ractive {
     if (w.type === 'html') this.editExpr(`${path}.html`, { html: true });
     else if (w.type === 'label' || w.type === 'measured') this.editExpr(`${path}.text`, { label: true });
     else if (w.type === 'image') this.editExpr(`${path}.url`);
+    else if (w.type === 'container' && w.macro) this.editExpr(`${path}.macro`);
+    else if (w.type === 'repeater' && typeof w.source === 'string') this.editExpr(`${path}.source`);
     this.treeScrollToActive();
   }
 
@@ -565,9 +567,9 @@ export class Designer extends Ractive {
   clickWidget(target: ContextHelper) {
     const keypath = target.get('@keypath');
     const type = target.get('.type');
-    if (!this.event?.event?.ctrlKey && this.get('reparent') && type === 'container' && keypath.indexOf(this.get('reparent').resolve()) === -1) this.reparent(target);
+    if (!this.event?.event?.shiftKey && this.get('reparent') && type === 'container' && keypath.indexOf(this.get('reparent').resolve()) === -1) this.reparent(target);
     else if (this.get('reparent')) this.move(target);
-    else if (!this.event?.event?.ctrlKey && this.get('~/copy') && type === 'container') this.paste(target);
+    else if (!this.event?.event?.shiftKey && this.get('~/copy') && type === 'container') this.paste(target);
     else if (this.get('~/copy')) this.pasteBefore(target);
     else this.selectWidget(keypath);
     return false;
@@ -1881,7 +1883,7 @@ const designerOpts: ExtendOpts<Designer> = {
       function move(ev: MouseEvent) {
         cx = ev.clientX - x;
         cy = ev.clientY - y;
-        if (!ev.ctrlKey) {
+        if (!ev.ctrlKey && !ev.shiftKey) {
           ctx.set({ [`^^/layout.${idx}.0`]: Math.round(sx + (cx / sz)), [`^^/layout.${idx}.1`]: Math.round(sy + (cy / sz)) });
         } else {
           ctx.set({ [`^^/layout.${idx}.0`]: sx + (cx / sz), [`^^/layout.${idx}.1`]: sy + (cy / sz) });

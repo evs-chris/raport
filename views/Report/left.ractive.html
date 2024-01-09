@@ -25,7 +25,7 @@
     <div class="scrolled-wrapper widget-tree">
       <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
         {{#with report}}
-        <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : ~/copy ? @.paste(@context) : @.selectWidget('report')">
+        <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : ~/copy ? @.paste(@context) : @.selectWidget('report')" title="{{#if ~/reparent}}Click to move the widget to this container - {{elseif ~/copy}}Click to add a copy of the widget to this container - {{/if}} Path: {{@keypath}}">
           <span class-line on-mouseover="@.set('temp.hover', 'report'), false">
             Report
             <span class=actions>
