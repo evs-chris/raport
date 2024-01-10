@@ -844,6 +844,27 @@
 
 <dl><dt>
 
+### `generate`
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>(application) => any[]</code></dt>
+<dd>Calls the given application, aggregating values until the application returns undefined. If the result is an array, the elements of the array are added to the result. If the result is an object matching { value?: any, state?: any }, then the value will be added to the result and the state, if supplied, will replace the state of the generator. Any other value will be added to the result. Each application is passed the state, last value, and index of the call. Each of the arguments is also available a special reference, @state, @last, and @index, respectively. The global defaults for generate have a max property, defaulting to 10000, that limits the number of iterations that can be run to avoid non-terminating generators.</dd>
+</dl>
+
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>[state]</code></dt><dd>Any options passed to the operator are sent into the initial application as the state.</dd>
+</dl>
+</dl>
+<br/>
+
+<dl><dt>
+
 ### `get`
 ---
 
@@ -1891,6 +1912,8 @@ __NOTE:__ By default, the single-number signature will round to an integer, but 
 <dd>Sets the defaults for the given named formatter. Defaults should be passed in as named options that depend on the decorator.</dd>
 <dt><code>('round') => any</code></dt>
 <dd>Sets the defaults for rounding operations. Defaults should be passed in as named options, which can be places, all-numeric, and method.</dd>
+<dt><code>('generate') => any</code></dt>
+<dd>Sets the defaults for generate operations. Defaults should be passed in as named options, which can be max. The default max is 10000.</dd>
 </dl>
 
 </dl>

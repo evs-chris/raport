@@ -1,3 +1,30 @@
+## 0.23.3
+
+2024-01-10
+
+### Render
+
+* __BUG:__ Labels using the old array-for-substyling method will no longer render escaped HTML.
+* __BUG:__ Top-level macro widgets will now be processed fully.
+* Macros can now be completely replaced with a new widget by returning a result in the form `{ replace: Widget }`
+
+### Data
+
+* There is a new `generate` operator that can be used to iteratively create arrays in a was similar to generators from other languages.
+
+### Designer
+
+* Labels will no longer offer to split their text into parts, though they can still be modified if they are already split. Styled labels are the preferred and superior replacement.
+* The widget tree scroll-to-active function now targets center to better accomodate sticky nodes.
+* Labeled fields in the UI with buttons next to the label will now align more pleasantly.
+* Selecting a macro container or expression repeater will link the relevant property to the evaluation pane like label text.
+* There are now tooltips for pasting and moving elements and more consistent behavior when pasting.
+* Repeater source expressions will now use an Editor rather than a plain text field.
+* Expression repeaters will now show their source in the widget tree.
+* Provided data sources that don't parse as JSON but are still valid expressions will be processed correctly.
+* A number of UI adjustments have been made to make navigating the designer more pleasant - like additional space between settings inputs and clipped widget link paths on the bottom bar.
+
+
 ## 0.23.2
 
 2024-01-06
