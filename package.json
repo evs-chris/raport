@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/evs-chris/raport.git"
+    "url": "git+https://github.com/evs-chris/raport.git"
   },
   "keywords": [
     "report",
