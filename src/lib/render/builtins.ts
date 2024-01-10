@@ -13,6 +13,7 @@ registerRenderer<Label>('label', (w, ctx, placement) => {
   let sval: any;
   let val = (Array.isArray(w.text) ? w.text : [w.text]).map(v => {
     let val = evaluate(ctx, typeof v === 'object' && 'text' in v ? v.text : v);
+    if (typeof val === 'string') val = escapeHTML(val);
     if (typeof v === 'object' && 'id' in v) {
       let c = ctx.context;
       while (c) {
@@ -22,9 +23,16 @@ registerRenderer<Label>('label', (w, ctx, placement) => {
     }
     str += val;
     sval = val;
-    if (typeof v === 'object' && 'text' in v) return `<span${styleClass(ctx, [], [styleFont(v.font, ctx) + styleExtra(v, ctx), ''])}>${escapeHTML(val)}</span>`;
-    else return val;
+
+    if (w.styled) val = styleText(val);
+
+    if (typeof v === 'object' && 'text' in v) {
+      return `<span${styleClass(ctx, [], [styleFont(v.font, ctx) + styleExtra(v, ctx), ''])}>${val}</span>`;
+    } else {
+      return val
+    };
   }).join('');
+
   if (w.id) {
     let c = ctx.context;
     while (c) {
@@ -32,12 +40,13 @@ registerRenderer<Label>('label', (w, ctx, placement) => {
       c = c.parent;
     }
   }
+
   if (w.format && w.format.name) {
     const args: ValueOrExpr[] = [{ v: !Array.isArray(w.text) || w.text.length === 1 ? sval : val }, { v: w.format.name }];
     val = evaluate(ctx, { op: 'format', args: args.concat(w.format.args || []) });
   }
-  if (typeof val === 'string' && w.styled) return `<span${styleClass(ctx, ['label'], style(w, placement, ctx, { lineSize: true }))}>${styleText(escapeHTML(val))}</span>`
-  else return `<span${styleClass(ctx, ['label'], style(w, placement, ctx, { lineSize: true }))}>${escapeHTML(val)}</span>`
+
+  return `<span${styleClass(ctx, ['label'], style(w, placement, ctx, { lineSize: true }))}>${val}</span>`
 });
 
 registerRenderer<Container>('container', (w, ctx, placement, state) => {
