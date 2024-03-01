@@ -1,3 +1,12 @@
+## 0.23.4
+
+2024-03-01
+
+### Data
+
+* __BUG:__ Extracting days from a time-span will now consider adding a month to the last day of a month with less than 31 days to go to the last day of the next month.
+
+
 ## 0.23.3
 
 2024-01-10
