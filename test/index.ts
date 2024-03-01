@@ -5,6 +5,7 @@ import './data/parse';
 import './data/ops/checked';
 import './data/ops/value';
 import './data/ops/builtin';
+import './data/ops/date';
 
 const q = QUnit;
 

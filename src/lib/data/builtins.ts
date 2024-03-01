@@ -465,8 +465,20 @@ registerOperator(
             to.setDate(1);
             to.setFullYear(to.getFullYear() + span.d[0]);
             to.setMonth(from.getMonth() + span.d[1]);
+
             const m = to.getMonth();
             to.setDate(from.getDate());
+
+            // watch out for last day of month next to longer month
+            const end = new Date(+from);
+            const endM = end.getMonth();
+            end.setDate(end.getDate() + 1);
+            if (endM !== end.getMonth()) {
+              // make sure target date is last day of month
+              to.setMonth(to.getMonth() + 1);
+              to.setDate(0);
+            }
+
             if (to.getMonth() !== m) to.setDate(0);
             to.setDate(to.getDate() + span.d[2]);
             const dist = +to - +from;
