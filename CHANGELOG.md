@@ -1,3 +1,12 @@
+## 0.23.5
+
+2024-03-05
+
+### Render
+
+* __BUG:__ The delimited report runner will now clear the expression cache after running headers so that template expressions from the headers that happen to match field expressions won't cause the fields to just render the header string again.
+
+
 ## 0.23.4
 
 2024-03-01
