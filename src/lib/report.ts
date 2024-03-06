@@ -362,6 +362,8 @@ function runDelimited(report: Delimited, context: Context): string {
     const ctx = extend(context, { parser: parseTemplate });
     res += headers.map(h => `${report.quote || ''}${evaluate(ctx, h)}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
   }
+  // clear out expression cache to avoid template/non-template cache overlap
+  context.root.exprs = {};
   const unquote: RegExp = report.quote ? new RegExp(report.quote, 'g') : undefined;
   for (const value of values) {
     const c = extend(context, { value });
