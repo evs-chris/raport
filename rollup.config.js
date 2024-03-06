@@ -135,31 +135,33 @@ if (process.env.ENV === 'dev') {
   // build lib es and umd with min
   configs.push({
     input: 'src/lib/index.ts',
-    output: [{
-      dir: 'lib',
-      format: 'umd',
-      entryFileNames: 'raport.umd.js',
-      name: 'Raport',
-      sourcemap: true,
-    }, {
-      dir: 'lib',
-      format: 'umd',
-      entryFileNames: 'raport.umd.min.js',
-      name: 'Raport',
-      sourcemap: true,
-      plugins: [terser()],
-    }, {
-      dir: 'lib',
-      format: 'module',
-      entryFileNames: 'index.js',
-      sourcemap: true,
-    }, {
-      dir: 'lib',
-      entryFileNames: 'index.min.js',
-      format: 'module',
-      sourcemap: true,
-      plugins: [terser()]
-    }],
+    output: [
+      {
+        dir: 'lib',
+        format: 'umd',
+        entryFileNames: 'raport.umd.js',
+        name: 'Raport',
+        sourcemap: true,
+      }, {
+        dir: 'lib',
+        format: 'umd',
+        entryFileNames: 'raport.umd.min.js',
+        name: 'Raport',
+        sourcemap: true,
+        plugins: [terser()],
+      }, {
+        dir: 'lib',
+        format: 'module',
+        entryFileNames: 'index.js',
+        sourcemap: true,
+      }, {
+        dir: 'lib',
+        entryFileNames: 'index.min.js',
+        format: 'module',
+        sourcemap: true,
+        plugins: [terser()]
+      }
+    ],
     plugins: [
       typescript({
         include: ['src/lib/**/*.ts'],
@@ -174,41 +176,43 @@ if (process.env.ENV === 'dev') {
   configs.push({
     input: 'src/design/index.ts',
     external: ['ractive', /^raport/],
-    output: [{
-      dir: 'design',
-      format: 'umd',
-      name: 'Raport.Design',
-      entryFileNames: 'raport.design.umd.js',
-      sourcemap: true,
-      globals: {
-        'raport': 'Raport',
-        'ractive': 'Ractive',
-        'raport/index': 'Raport',
+    output: [
+      {
+        dir: 'design',
+        format: 'umd',
+        name: 'Raport.Design',
+        entryFileNames: 'raport.design.umd.js',
+        sourcemap: true,
+        globals: {
+          'raport': 'Raport',
+          'ractive': 'Ractive',
+          'raport/index': 'Raport',
+        }
+      }, {
+        dir: 'design',
+        format: 'umd',
+        name: 'Raport.Design',
+        entryFileNames: 'raport.design.umd.min.js',
+        sourcemap: true,
+        globals: {
+          'raport': 'Raport',
+          'ractive': 'Ractive',
+          'raport/index': 'Raport',
+        },
+        plugins: [terser()]
+      }, {
+        dir: 'design',
+        entryFileNames: 'index.js',
+        format: 'module',
+        sourcemap: true,
+      }, {
+        dir: 'design',
+        entryFileNames: 'index.min.js',
+        format: 'module',
+        sourcemap: true,
+        plugins: [terser()]
       }
-    }, {
-      dir: 'design',
-      format: 'umd',
-      name: 'Raport.Design',
-      entryFileNames: 'raport.design.umd.min.js',
-      sourcemap: true,
-      globals: {
-        'raport': 'Raport',
-        'ractive': 'Ractive',
-        'raport/index': 'Raport',
-      },
-      plugins: [terser()]
-    }, {
-      dir: 'design',
-      entryFileNames: 'index.js',
-      format: 'module',
-      sourcemap: true,
-    }, {
-      dir: 'design',
-      entryFileNames: 'index.min.js',
-      format: 'module',
-      sourcemap: true,
-      plugins: [terser()]
-    }],
+    ],
     plugins: [
       ractive({
         root: 'views',
@@ -232,21 +236,70 @@ if (process.env.ENV === 'dev') {
     ],
   });
 
+  // build playground
   configs.push({
     input: 'src/play/index.ts',
-    output: {
-      file: 'play/index.min.js',
-      format: 'iife',
-      name: 'play',
-      sourcemap: true,
-    },
+    output: [
+      {
+        file: 'play/index.js',
+        format: 'iife',
+        name: 'play',
+        sourcemap: true,
+      },
+      {
+        file: 'play/index.min.js',
+        format: 'iife',
+        name: 'play',
+        sourcemap: true,
+        plugins: [terser()],
+      }
+    ],
     plugins: [
       typescript({
         include: ['src/**/*.ts'],
       }),
       sourcemaps(),
       node(),
-      terser(),
+      replace(replaceOpts),
+    ],
+  });
+
+  // build differ
+  configs.push({
+    input: 'src/play/diff.ts',
+    external: ['ractive', /^raport/, /^design/],
+    output: [
+      {
+        file: 'play/diff.min.js',
+        format: 'iife',
+        name: 'diff',
+        sourcemap: true,
+        globals: {
+          'ractive': 'Ractive',
+          'raport': 'Raport',
+          'raport/index': 'Raport',
+        },
+        plugins: [terser()],
+      },
+      {
+        file: 'play/diff.js',
+        format: 'iife',
+        name: 'diff',
+        sourcemap: true,
+        globals: {
+          'ractive': 'Ractive',
+          'raport': 'Raport',
+          'raport/index': 'Raport',
+        },
+      }
+    ],
+    plugins: [
+      typescript({
+        include: ['src/**/*.ts'],
+        sourceMap: true,
+      }),
+      sourcemaps(),
+      node(),
       replace(replaceOpts),
     ],
   });
