@@ -1,3 +1,14 @@
+## 0.23.6
+
+2024-03-26
+
+### Designer
+
+* __BUG:__ The designer for delimited reports will now correctly reload quotes and field and record delimiters from a report definition.
+* The operators pane no longer has nested scrollbars.
+* The parameters pane will now show placeholders for object- and array-typed parameters.
+
+
 ## 0.23.5
 
 2024-03-05
