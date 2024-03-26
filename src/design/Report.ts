@@ -1493,9 +1493,20 @@ const designerOpts: ExtendOpts<Designer> = {
       }
     },
     'temp.quote temp.record temp.field'(v: string, _o, k: string) {
+      if (this.evalLock) return;
+      this.evalLock = true;
       try {
         this.set(k.replace('temp', 'report'), (parse(`'${v.replace(/'/g, '\\\'')}'`) as Literal).v);
       } catch {}
+      this.evalLock = false;
+    },
+    'report.quote report.record report.field'(v: string, _o, k: string) {
+      if (this.evalLock) return;
+      this.evalLock = true;
+      try {
+        this.set(k.replace('report', 'temp'), JSON.stringify(v).slice(1, -1));
+      } catch {}
+      this.evalLock = false;
     },
     'temp.expr.str'(v) {
       if (!v) {
