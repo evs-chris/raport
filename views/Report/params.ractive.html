@@ -29,6 +29,10 @@
             <input value="{{~/params[.name]}}" />
           </label>
         {{/if}}
+      {{elseif .type === 'object' || .type === 'array' || .type.slice(-2) === '[]'}}
+        <label class-string>{{.label || .name}}
+          <div style="height: 1em; border: 1px solid #ccc; padding: 0.25em; text-align: center;">{{.type}} Parameter</div>
+        </label>
       {{else}}
         <label class-string>{{.label || .name}}
           {{#if .type === 'number'}}<input type=number value="{{~/params[.name]}}" />
