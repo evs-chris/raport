@@ -1,3 +1,12 @@
+## 0.23.7
+
+2024-04-11
+
+### Data
+
+* The `deep-is`, `deep-is-not`, and `diff` operators can now take an `equal` named argument in place of the third positional argument, and it can be specified as `'sql'`, which has some additional loose handling around booleans, numbers, and dates as strings.
+
+
 ## 0.23.6
 
 2024-03-26

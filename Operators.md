@@ -32,10 +32,15 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Do a deep inequality check on the first two arguments using loose equality for primitives.</dd>
-<dt><code>(any, any, 'strict'|'loose'|application) => boolean</code></dt>
+<dt><code>(any, any, 'strict'|'loose'|'sql'|application) => boolean</code></dt>
 <dd>Do a deep inequality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
+</dl>
 </dl>
 <br/>
 
@@ -235,10 +240,15 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Do a deep equality check on the first two arguments using loose equality for primitives.</dd>
-<dt><code>(any, any, 'strict'|'loose'|application) => boolean</code></dt>
+<dt><code>(any, any, 'strict'|'loose'|'sql'|application) => boolean</code></dt>
 <dd>Do a deep equality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
+</dl>
 </dl>
 <br/>
 
@@ -560,10 +570,15 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Do a deep equality check on the first two arguments using loose equality for primitives.</dd>
-<dt><code>(any, any, 'strict'|'loose'|application) => boolean</code></dt>
+<dt><code>(any, any, 'strict'|'loose'|'sql'|application) => boolean</code></dt>
 <dd>Do a deep equality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
+</dl>
 </dl>
 <br/>
 
@@ -578,10 +593,15 @@
 <dl>
 <dt><code>(any, any) => boolean</code> (binary)</dt>
 <dd>Do a deep inequality check on the first two arguments using loose equality for primitives.</dd>
-<dt><code>(any, any, 'strict'|'loose'|application) => boolean</code></dt>
+<dt><code>(any, any, 'strict'|'loose'|'sql'|application) => boolean</code></dt>
 <dd>Do a deep inequality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
+</dl>
 </dl>
 <br/>
 
@@ -614,8 +634,15 @@
 <dl>
 <dt><code>(any, any) => Diff</code></dt>
 <dd>Does a deep comparison of the two arguments returning a map of deep keypath to a tuple of the left value and right value for differing paths.</dd>
+<dt><code>(any, any, equal) => Diff</code></dt>
+<dd>Does a deep comparison of the two arguments returning a map of deep keypath to a tuple of the left value and right value for differing paths. The third argument is used as the equality check for comparisons (see equal named argument).</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
+</dl>
 </dl>
 <br/>
 
