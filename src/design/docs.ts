@@ -39,11 +39,15 @@ export const operators = `[
   ]}
   { op:['===' 'deep-is'] sig:[
     { bin:1 proto: '(any, any) => boolean' desc:'Do a deep equality check on the first two arguments using loose equality for primitives.' }
-    { proto: "(any, any, 'strict'|'loose'|application) => boolean" desc:'Do a deep equality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.' }
+    { proto: "(any, any, 'strict'|'loose'|'sql'|application) => boolean" desc:'Do a deep equality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.' }
+  ] opts:[
+    { name::equal type:"'strict'|'loose'|'sql'|(any, any) => boolaen" desc:'What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.' }
   ]}
   { op:['!==' 'deep-is-not'] sig:[
     { bin:1 proto: '(any, any) => boolean' desc:'Do a deep inequality check on the first two arguments using loose equality for primitives.' }
-    { proto: "(any, any, 'strict'|'loose'|application) => boolean" desc:'Do a deep inequality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.' }
+    { proto: "(any, any, 'strict'|'loose'|'sql'|application) => boolean" desc:'Do a deep inequality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.' }
+  ] opts:[
+    { name::equal type:"'strict'|'loose'|'sql'|(any, any) => boolaen" desc:'What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.' }
   ]}
   { op:['>' 'gt'] sig:[
     { bin:1 proto: '(any, any) => boolean' desc:'Returns true if the first value is greater than the second value.' }
@@ -121,6 +125,9 @@ export const operators = `[
   ]}
   { op:'diff' sig:[
     { proto:'(any, any) => Diff' desc:'Does a deep comparison of the two arguments returning a map of deep keypath to a tuple of the left value and right value for differing paths.' }
+    { proto:'(any, any, equal) => Diff' desc:'Does a deep comparison of the two arguments returning a map of deep keypath to a tuple of the left value and right value for differing paths. The third argument is used as the equality check for comparisons (see equal named argument).' }
+  ] opts:[
+    { name::equal type:"'strict'|'loose'|'sql'|(any, any) => boolaen" desc:'What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.' }
   ]}
   { op:'does-not-contain' sig:[
     { bin:1 proto:'(any[], any) => boolean' desc:'Returns false if the second argument is found in the first argument array using indexOf.' }

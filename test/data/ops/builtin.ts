@@ -222,6 +222,30 @@ q.test('date', t => {
 });
 
 // TODO: detect-delimiters
+
+q.test('deep-is', t => {
+  t.ok(evaluate(`deep-is('2022-12-22' date('2022-12-22') :sql)`));
+  t.notOk(evaluate(`deep-is('2022-12-22' date('2022-12-22T00:00:00.001') :sql)`));
+  t.ok(evaluate(`deep-is(10 '10.00' :sql)`));
+  t.ok(evaluate(`deep-is('10' '10.00' equal::sql)`));
+  t.notOk(evaluate(`deep-is('10.01' '10.00' :sql)`));
+  t.notOk(evaluate(`deep-is(10.01 '10.00' equal::sql)`));
+  t.ok(evaluate(`deep-is(:on true equal::sql)`));
+  t.notOk(evaluate(`deep-is(:anything true equal::sql)`));
+  t.notOk(evaluate(`deep-is(:off true equal::sql)`));
+  t.ok(evaluate(`deep-is(:ON true equal::sql)`));
+  t.ok(evaluate(`deep-is(:Yes true equal::sql)`));
+  t.ok(evaluate(`deep-is(:True true equal::sql)`));
+  t.ok(evaluate(`deep-is(:true true equal::sql)`));
+  t.ok(evaluate(`deep-is(:off false equal::sql)`));
+  t.notOk(evaluate(`deep-is(:anything false equal::sql)`));
+  t.notOk(evaluate(`deep-is(:on false equal::sql)`));
+  t.ok(evaluate(`deep-is(:OFF false equal::sql)`));
+  t.ok(evaluate(`deep-is(:No false equal::sql)`));
+  t.ok(evaluate(`deep-is(:False false equal::sql)`));
+  t.ok(evaluate(`deep-is(:false false equal::sql)`));
+});
+
 // TODO: diff
 
 q.test('does-not-contain', t => {

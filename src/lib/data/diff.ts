@@ -1,3 +1,6 @@
+import { parseDate } from './parse';
+import { dateRelToDate } from './index';
+
 export function join(...strs: string[]): string {
   return strs.filter(s => s).join('.');
 }
@@ -8,13 +11,32 @@ export interface Diff {
 
 const looseEqual = (v1: any, v2: any) => v1 == v2;
 const strictEqual = (v1: any, v2: any) => v1 === v2;
+const isNum = /^[\d.]+$/;
+const trueStrings = /^(true|on|yes)$/i;
+const falseStrings = /^(false|off|no)$/i;
+const sqlEqual = (v1: any, v2: any) => {
+  let tmp1: any, tmp2: any;
+  if ((typeof v1 === 'number' || typeof v1 === 'string' && isNum.test(v1)) && (typeof v2 === 'number' || typeof v2 === 'string' && isNum.test(v2))) {
+    return +v1 === +v2;
+  } else if ((typeof v1 === 'boolean' || typeof v2 === 'boolean') && (typeof v1 === 'string' || typeof v2 === 'string')) {
+    return trueStrings.test(v1) && trueStrings.test(v2) || falseStrings.test(v1) && falseStrings.test(v2);
+  } else if ((v1 instanceof Date || Array.isArray((tmp1 = parseDate(v1) as any)?.f)) && (v2 instanceof Date || Array.isArray((tmp2 = parseDate(v2) as any)?.f))) {
+    if (tmp1) tmp1 = dateRelToDate(tmp1);
+    else tmp1 = v1;
+    if (tmp2) tmp2 = dateRelToDate(tmp2);
+    else tmp2 = v2;
+    return +tmp1 === +tmp2;
+  }
+
+  else return v1 == v2;
+};
 
 type Identifier = true|string|((v: any) => any);
 export interface IdentityMap {
   [path: string]: Identifier;
 }
 
-type EqualizerValue = 'strict'|'loose'|((v1: any, v2: any) => boolean);
+type EqualizerValue = 'strict'|'loose'|'sql'|((v1: any, v2: any) => boolean);
 interface EqualizerOptions {
   type?: EqualizerValue;
   /** A map of identity methods to use when comparing elements within an array, making arrays act as a set */
@@ -30,7 +52,7 @@ function checkIdentity(map: IdentityMap, path: string) {
 
 export function diff(v1: any, v2: any, equal?: Equalizer): Diff {
   const type = equal && typeof equal === 'object' ? equal.type : equal;
-  const eq = typeof type === 'function' ? type : type === 'strict' ? strictEqual : looseEqual;
+  const eq = typeof type === 'function' ? type : type === 'strict' ? strictEqual : type === 'sql' ? sqlEqual : looseEqual;
   return _diff(v1, v2, '', {}, eq, typeof equal === 'object' ? equal.identity : undefined);
 }
 
@@ -82,7 +104,7 @@ function _diff(v1: any, v2: any, path: string, diff: Diff, equal: (v1: any, v2: 
 }
 
 export function deepEqual(v1: any, v2: any, equal?: EqualizerValue): boolean {
-  const eq = typeof equal === 'function' ? equal : equal === 'strict' ? strictEqual : looseEqual;
+  const eq = typeof equal === 'function' ? equal : equal === 'strict' ? strictEqual : equal === 'sql' ? sqlEqual : looseEqual;
   return _deepEqual(v1, v2, eq);
 }
 

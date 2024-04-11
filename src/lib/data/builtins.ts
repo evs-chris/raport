@@ -234,8 +234,8 @@ registerOperator(
     if (!res && isSchema(r)) res = validate(l, r, 'strict') === true;
     return name === 'strict-is' ? res : !res;
   }),
-  simple(['deep-is', 'deep-is-not', '===', '!=='], (name: string, values: any[], _opts, ctx: Context): boolean => {
-    let [l, r, equal] = values;
+  simple(['deep-is', 'deep-is-not', '===', '!=='], (name: string, [l, r, equal]: any[], opts, ctx: Context): boolean => {
+    equal = equal || opts?.equal;
     if (equal && isApplication(equal)) {
       const eq = equal;
       equal = (l: any, r: any) => evalApply(ctx, eq, [l, r]);
@@ -654,7 +654,8 @@ registerOperator(
     if ((mode || opts?.mode) === 'schema') return unparseSchema(inspect(v, opts?.flat));
     else return inspect(v);
   }),
-  simple(['diff'], (_, [left, right, equal], _opts, ctx: Context) => {
+  simple(['diff'], (_, [left, right, equal], opts, ctx: Context) => {
+    equal = equal || opts?.equal;
     if (equal && isApplication(equal)) {
       const eq = equal;
       equal = (l: any, r: any) => evalApply(ctx, eq, [l, r]);
