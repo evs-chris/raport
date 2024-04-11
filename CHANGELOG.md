@@ -1,3 +1,12 @@
+## 0.23.8
+
+2024-04-11
+
+### Data
+
+* __BUG:__ Passing a date and a non-string to an operator that accepts `equal::sql` will no longer throw.
+
+
 ## 0.23.7
 
 2024-04-11
