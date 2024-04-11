@@ -20,7 +20,7 @@ const sqlEqual = (v1: any, v2: any) => {
     return +v1 === +v2;
   } else if ((typeof v1 === 'boolean' || typeof v2 === 'boolean') && (typeof v1 === 'string' || typeof v2 === 'string')) {
     return trueStrings.test(v1) && trueStrings.test(v2) || falseStrings.test(v1) && falseStrings.test(v2);
-  } else if ((v1 instanceof Date || Array.isArray((tmp1 = parseDate(v1) as any)?.f)) && (v2 instanceof Date || Array.isArray((tmp2 = parseDate(v2) as any)?.f))) {
+  } else if ((v1 instanceof Date || typeof v1 === 'string' && Array.isArray((tmp1 = parseDate(v1) as any)?.f)) && (v2 instanceof Date || typeof v2 === 'string' && Array.isArray((tmp2 = parseDate(v2) as any)?.f))) {
     if (tmp1) tmp1 = dateRelToDate(tmp1);
     else tmp1 = v1;
     if (tmp2) tmp2 = dateRelToDate(tmp2);
