@@ -457,7 +457,7 @@ export function filter(ds: DataSet|any[], filter?: ValueOrExpr, sorts?: Sort[]|V
     });
   }
 
-  if (sorts) sort(_context, values, sorts);
+  if (sorts) sort(_context, !filter ? values.slice() : values, sorts);
 
   if (groups && !Array.isArray(groups)) groups = [groups];
 

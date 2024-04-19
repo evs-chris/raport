@@ -427,7 +427,7 @@ registerOperator(
       else return {};
     }
     if (!sorts) sorts = [{ a: { r: { k: ['_'] } } }];
-    return sort(ctx, arr, sorts);
+    return sort(ctx, arr.slice(), sorts);
   }),
   simple(['time-span', 'time-span-ms'], (_name: string, args: any[], opts: any): any => {
     const namedArgs = opts || {};

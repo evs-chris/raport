@@ -686,6 +686,7 @@ q.test('sort', t => {
   t.equal(JSON.stringify(evaluate('sort({ b::a c::a a::a } =>@key)')), JSON.stringify({ a: 'a', b: 'a', c: 'a' }));
   t.equal(JSON.stringify(evaluate('sort({ b::a c::a a::a } `-@key`)')), JSON.stringify({ c: 'a', b: 'a', a: 'a' }));
   t.equal(JSON.stringify(evaluate('sort({ b::b c::a a::c } =>_)')), JSON.stringify({ c: 'a', b: 'b', a: 'c' }));
+  t.deepEqual(evaluate('set ~foo = [1 2 3 4]; sort(~foo =>0 - _); ~foo'), [1, 2, 3, 4]);
 });
 
 q.test('source', t => {
