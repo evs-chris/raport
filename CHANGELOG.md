@@ -1,3 +1,12 @@
+## 0.23.9
+
+2024-04-19
+
+### Data
+
+* __BUG:__ The `sort` operator and internal filtering with no sort will no longer modify any input array.
+
+
 ## 0.23.8
 
 2024-04-11
