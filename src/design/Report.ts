@@ -421,7 +421,7 @@ export class Designer extends Ractive {
       val.forEach((v, i) => {
         if (typeof v === 'object' && !('text' in v)) val[i] = stringify(v);
       });
-    } else if (typeof val !== 'string') val = stringify(val);
+    } else if (typeof val !== 'string') val = val === undefined ? '' : stringify(val);
 
     this.set('temp.expr.path', path);
 
@@ -1559,7 +1559,7 @@ const designerOpts: ExtendOpts<Designer> = {
         this.evalLock = true;
         if (o === undefined && v) this.set('temp.expr.error', undefined);
         try {
-          const str = stringify(v, { template: this.get('temp.expr.html') });
+          const str = v === undefined ? '' : stringify(v, { template: this.get('temp.expr.html') });
 
           this.set('temp.expr.str', str);
 
