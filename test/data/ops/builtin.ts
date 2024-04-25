@@ -279,6 +279,10 @@ q.test('filter', t => {
   t.deepEqual(evaluate(`filter({ a::b c::d } =>_ == :d)`), { c: 'd' });
   t.deepEqual(evaluate(`filter({ a::b c::d } =>@key == :c)`), { c: 'd' });
   t.deepEqual(evaluate(`filter({ a::b c::d } =>@index == 0)`), { a: 'b' });
+  t.deepEqual(evaluate(`filter([3 2 1] =>true '_')`), [1, 2, 3]);
+  t.deepEqual(evaluate(`filter([3 2 1] '' '_')`), [1, 2, 3]);
+  t.deepEqual(evaluate(`set ~foo = [3 2 1]; filter(~foo =>true '_'); ~foo`), [3, 2, 1]);
+  t.deepEqual(evaluate(`set ~foo = [3 2 1]; filter(~foo '' '_'); ~foo`), [3, 2, 1]);
 });
 
 q.test('find', t => {
