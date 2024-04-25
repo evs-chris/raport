@@ -1,3 +1,13 @@
+## 0.24.1
+
+2024-04-25
+
+### Data
+
+* __BUG:__ `filter` with a sort expression and no filter expression will no longer discard the result of the sort.
+* Parsed expressions are now cached in namespaces associated with their parsers so that template expressions and plain expressions don't interfere with each other.
+
+
 ## 0.24.0
 
 2024-04-25
