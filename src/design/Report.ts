@@ -1406,6 +1406,16 @@ export class Designer extends Ractive {
     return `level${Math.floor(path.split('.').length / 2)}`;
   }
 
+  fillBlankDelimitedHeaders() {
+    const sets: { [path: string]: string } = {};
+    const headers: string[] = this.get('report.headers') || [];
+    const fields: string[] = this.get('report.fields') || [];
+    for (let i = 0; i < headers.length; i++) {
+      if (!headers[i]) sets[`report.headers.${i}`] = fields[i];
+    }
+    this.set(sets);
+  }
+
   langref = langref;
 }
 
@@ -1484,6 +1494,10 @@ const designerOpts: ExtendOpts<Designer> = {
     sourceNames() {
       const sources: ReportSource[] = this.get('report.sources') || [];
       return sources.map(s => ({ label: s.label || s.name || s.source, value: s.name || s.source }));
+    },
+    blankDelimitedHeaders() {
+      const headers = this.get('report.headers') || [];
+      return ~headers.findIndex(h => !h);
     },
   },
   observe: {

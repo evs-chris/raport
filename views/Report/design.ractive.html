@@ -16,6 +16,9 @@
               <div class-bar>
                 <span class-name>Header</span>
                 <button on-click="@.push('report.headers', ''), @.push('report.fields', '')">Add Field</button>
+                {{#if ~/blankDelimitedHeaders}}
+                  <button on-click="@.fillBlankDelimitedHeaders()" title="Fill any blank headers with the corresponding field expression">Fill Blanks</button>
+                {{/if}}
               </div>
               <div class-children class-fields>
                 {{#each report.headers}}
