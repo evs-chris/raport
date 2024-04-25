@@ -1,3 +1,20 @@
+## 0.24.0
+
+2024-04-25
+
+### Render
+
+* Delimited fields that produce `undefined` as a value will no longer output the string 'undefined'. If you need undefined to be the result, you can use a coalescing operator to return the string literally.
+* The delimited runner can now render an HTML table rather than delimited data. This is intended for use in the designer but could be useful elsewhere.
+
+### Designer
+
+* __BUG__: The delimited output no longer overflows its container.
+* __BUG__: The expression evaluation pane will no longer show undefined when the expression is cleared out.
+* There is now helper for delimited headers that places the expression from the corresponding field in any blank headers.
+* There is now an option to view delimited data as a table rather than as delimited text.
+
+
 ## 0.23.9
 
 2024-04-19
