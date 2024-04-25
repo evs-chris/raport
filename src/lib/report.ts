@@ -345,6 +345,9 @@ export function applySource(context: RootContext, source: ReportSource, sources:
 }
 
 function runDelimited(report: Delimited, context: Context, options?: { table?: boolean }): string {
+  // clear out expression cache to avoid template/non-template cache overlap
+  context.root.exprs = {};
+
   const source = context.root.sources[report.source ? report.source : (report.sources[0].name || report.sources[0].source)];
   const values = Array.isArray(source.value) ?
     source.value :
