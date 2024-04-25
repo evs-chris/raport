@@ -15,7 +15,10 @@
       {{#if data && tab === 'import'}}
         <span class-which on-click="@.checkLink('import')"><button class="ico">{{>times}}</button> Close {{data.name}} Source Data</span>
       {{/if}}
-      {{#if tab === 'result'}}<button class="ico text" on-click="@.download((~/report.name || 'report') + (~/report.type === 'delimited' ? '.csv' : '.html'), ~/result, ~/report.type === 'delimited' ? 'text/csv' : 'text/html')" title="Save output to a file">Save Output</button>{{/if}}
+      {{#if ~/report.type === 'delimited'}}
+        <label title="Display report output in a table rather than as plain delimited text."><input type="checkbox" checked="{{~/settings.delimitedTable}}" on-change="@.run()" /> Table view?</label>
+      {{/if}}
+      {{#if tab === 'result' && (~/report.type !== 'delimited' || !~/settings.delimitedTable)}}<button class="ico text" on-click="@.download((~/report.name || 'report') + (~/report.type === 'delimited' ? '.csv' : '.html'), ~/result, ~/report.type === 'delimited' ? 'text/csv' : 'text/html')" title="Save output to a file">Save Output</button>{{/if}}
       <div class="center">
         <a style="margin-left: 1rem;" href="https://github.com/evs-chris/raport" target="_blank">Raport vRAPORT_VERSION</a>
       </div>

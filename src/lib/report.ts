@@ -283,6 +283,8 @@ interface ReportExtras {
   head?: string;
   /** Extra content to be rendered at the bottom of the <body> */
   foot?: string;
+  /** Run a delimited report to a table instead of using the defined delimiters */
+  table?: boolean;
 }
 
 /** Initialize a parameter map based on the parameters defined by the given report. */
@@ -316,7 +318,7 @@ export function run(report: Report, sources: SourceMap, parameters?: ParameterMa
     if (res && typeof res === 'object') ctx.value = Object.assign(ctx.value, res);
   }
 
-  if (report.type === 'delimited') return runDelimited(report, ctx);
+  if (report.type === 'delimited') return runDelimited(report, ctx, { table: extra?.table });
   else if (report.type === 'flow') return runFlow(report, ctx, extra);
   else return runPage(report, ctx, extra);
 }
@@ -342,7 +344,7 @@ export function applySource(context: RootContext, source: ReportSource, sources:
   else context.sources[source.name || source.source] = toDataSet(base);
 }
 
-function runDelimited(report: Delimited, context: Context): string {
+function runDelimited(report: Delimited, context: Context, options?: { table?: boolean }): string {
   const source = context.root.sources[report.source ? report.source : (report.sources[0].name || report.sources[0].source)];
   const values = Array.isArray(source.value) ?
     source.value :
@@ -360,21 +362,37 @@ function runDelimited(report: Delimited, context: Context): string {
   let res = '';
   if (headers) {
     const ctx = extend(context, { parser: parseTemplate });
-    res += headers.map(h => `${report.quote || ''}${evaluate(ctx, h)}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
+    if (options?.table) res += `<tr>${headers.map(h => `<th>${evaluate(ctx, h)}</th>`).join('')}</tr>`;
+    else res += headers.map(h => `${report.quote || ''}${evaluate(ctx, h)}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
   }
   // clear out expression cache to avoid template/non-template cache overlap
   context.root.exprs = {};
-  const unquote: RegExp = report.quote ? new RegExp(report.quote, 'g') : undefined;
-  for (const value of values) {
-    const c = extend(context, { value });
-    res += fields.map(f => {
-      let val = f ? evaluate(c, f) : '';
-      if (val === undefined) val = '';
-      if (typeof val !== 'string') val = `${val}`;
-      if (unquote) val = val.replace(unquote, report.quote + report.quote);
-      return `${report.quote || ''}${val}${report.quote || ''}`;
-    }).join(report.field || ',') + (report.record || '\n');
+
+  if (options?.table) {
+    for (const value of values) {
+      const c = extend(context, { value });
+      res += `<tr>${fields.map(f => {
+        let val = f ? evaluate(c, f) : '';
+        if (val === undefined) val = '';
+        if (typeof val !== 'string') val = `${val}`;
+        return `<td>${val}</td>`;
+      }).join('')}</tr>`;
+    }
+    res = `<table>${res}</table>`;
+  } else {
+    const unquote: RegExp = report.quote ? new RegExp(report.quote, 'g') : undefined;
+    for (const value of values) {
+      const c = extend(context, { value });
+      res += fields.map(f => {
+        let val = f ? evaluate(c, f) : '';
+        if (val === undefined) val = '';
+        if (typeof val !== 'string') val = `${val}`;
+        if (unquote) val = val.replace(unquote, report.quote + report.quote);
+        return `${report.quote || ''}${val}${report.quote || ''}`;
+      }).join(report.field || ',') + (report.record || '\n');
+    }
   }
+
   return res;
 }
 

@@ -164,7 +164,8 @@ export class Designer extends Ractive {
     this.fire('running');
     try {
       text = run(report, srcs, ctx, {
-        foot: this.frameExtra()
+        foot: this.frameExtra(),
+        table: this.get('settings.delimitedTable'),
       });
     } catch (e) {
       console.error(e);
@@ -180,6 +181,10 @@ export class Designer extends Ractive {
     return `
       <style>
         @media screen {
+          :root {
+            --fg: ${this.get('@style.out.fg') || this.get('@style.fg')};
+            --bg: ${this.get('@style.out.bg') || this.get('@style.bg')};
+          }
           html:before, html:after { content: ' '; position: fixed; display: block; z-index: 2; box-shadow: 0 0 10px #000; transition: opacity 0.4s ease-in-out; opacity: 1; width: 100%; height: 5px; }
           html:before { top: -5px; }
           html:after { bottom: -5px; }
@@ -189,12 +194,18 @@ export class Designer extends Ractive {
           html { font-size: ${this.get('settings.scale')}% !important;
           body {
             background-color: ${this.get('@style.out.dark') || this.get('@style.dark')};
-            padding: 2em;${typ === 'delimited' ? `
-            display: inline-block;` : ''}
+            padding: 2em;
+          }${typ === 'delimited' ? `
+          body {
+            display: inline-block;
           }
+          table{ border-collapse: collapse; }
+          th, td { padding: 0.15em 0.4em; border: 1px solid rgba(128, 128, 128, 0.5); }
+          th { position: sticky; top: 0; border-bottom: 2px solid; background: var(--bg); }
+          tr:hover td { background: rgba(128, 128, 128, 0.2); }` : ''}
           .page-back {
-            color: ${this.get('@style.out.fg') || this.get('@style.fg')};
-            background-color: ${this.get('@style.out.bg') || this.get('@style.bg')};
+            color: var(--fg);
+            background-color: var(--bg);
           }
         }
       </style>
