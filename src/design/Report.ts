@@ -176,6 +176,7 @@ export class Designer extends Ractive {
   }
 
   frameExtra() {
+    const typ = this.get('report.type');
     return `
       <style>
         @media screen {
@@ -188,7 +189,8 @@ export class Designer extends Ractive {
           html { font-size: ${this.get('settings.scale')}% !important;
           body {
             background-color: ${this.get('@style.out.dark') || this.get('@style.dark')};
-            padding: 2em;
+            padding: 2em;${typ === 'delimited' ? `
+            display: inline-block;` : ''}
           }
           .page-back {
             color: ${this.get('@style.out.fg') || this.get('@style.fg')};
