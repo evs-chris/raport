@@ -1,4 +1,4 @@
-import { Root, evaluate, extend } from '../../src/lib/index';
+import { Root, evaluate, extend, parse, parseTemplate } from '../../src/lib/index';
 import { isContext } from '../../src/lib/data/index';
 
 const q = QUnit;
@@ -67,4 +67,36 @@ q.test('nested simple operations', t => {
 q.test('simple applicative operations', t => {
   const data = new Root({ foo: [1, 2, 3] });
   t.deepEqual(evaluate(data, '(map foo =>(+ @value 2))'), [3, 4, 5]);
+});
+
+q.only('parser namespaces cache politely', t => {
+  const ctx = new Root();
+  let exprCount = 0, tplCount = 0;
+  const parseWrapper = function(...args: any[]) {
+    exprCount++;
+    return parse.apply(null, args);
+  };
+  (parseWrapper as any).namespace = 'expr';
+  const parseTplWrapper = function(...args: any[]) {
+    tplCount++;
+    return parseTemplate.apply(null, args);
+  };
+  (parseTplWrapper as any).namespace = 'tpl';
+
+  t.equal(evaluate(ctx, '10 + 10'), 20);
+  t.ok(ctx.exprs.default?.['10 + 10']);
+  t.equal(exprCount, 0);
+  t.equal(tplCount, 0);
+
+  ctx.parser = parseWrapper as any;
+  t.equal(evaluate(ctx, '10 + 10'), 20);
+  t.ok(ctx.exprs.expr?.['10 + 10']);
+  t.equal(exprCount, 1);
+  t.equal(tplCount, 0);
+
+  ctx.parser = parseTplWrapper as any;
+  t.equal(evaluate(ctx, '10 + 10'), '10 + 10');
+  t.ok(ctx.exprs.tpl?.['10 + 10']);
+  t.equal(exprCount, 1);
+  t.equal(tplCount, 1);
 });

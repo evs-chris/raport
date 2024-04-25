@@ -89,4 +89,6 @@ function concat(values: Value[]): Value {
   return { op: '+', args: values };
 }
 
-export const parse = makeParser(alt<Value>(map(rep1(content), args => concat(args)), map(ws, () => ({ v: '' }))), { trim: true });
+const _parse = makeParser(alt<Value>(map(rep1(content), args => concat(args)), map(ws, () => ({ v: '' }))), { trim: true });
+(_parse as any).namespace = 'template';
+export const parse: typeof _parse & { namespace: string } = _parse as any;

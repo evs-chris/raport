@@ -335,7 +335,12 @@ export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[], speci
 }
 
 export function evalParse(ctx: Context, expr: ValueOrExpr): any {
-  if (typeof expr === 'string') expr = ctx.root.exprs[expr] || (ctx.root.exprs[expr] = (ctx.parser || parse)(expr));
+  if (typeof expr === 'string') {
+    const p = ctx.parser || parse;
+    const ns = p.namespace || 'unknown';
+    const cache = ctx.root.exprs[ns] || (ctx.root.exprs[ns] = {});
+    expr = cache[expr] || (cache[expr] = p(expr));
+  }
   if (typeof expr !== 'object') expr = { v: expr };
   return evalValue(ctx, expr);
 }
@@ -717,14 +722,14 @@ export interface Context {
   special?: ParameterMap;
   locals?: ParameterMap;
   value: any;
-  parser?: (txt: string) => Value;
+  parser?: ((txt: string) => Value) & { namespace: string };
 }
 
 export interface RootContext extends Context {
   parameters: ParameterMap;
   sources: SourceMap;
   parent: undefined;
-  exprs: { [key: string]: Value };
+  exprs: { [ns: string]: { [key: string]: Value } };
 }
 
 export class Root implements RootContext {
@@ -734,8 +739,8 @@ export class Root implements RootContext {
   sources: SourceMap = {};
   special: ParameterMap = {};
   parent: undefined;
-  exprs = {};
-  parser?: (txt: string) => Value;
+  exprs = {} as { [ns: string]: { [key: string]: Value } };
+  parser?: ((txt: string) => Value) & { namespace: string };
   path: '' = '';
 
   constructor(root: any = {}, opts?: ExtendOptions & { parameters?: ParameterMap }) {
@@ -761,7 +766,7 @@ export interface ExtendOptions {
   value?: any;
   special?: any;
   locals?: ParameterMap,
-  parser?: (txt: string) => Value;
+  parser?: ((txt: string) => Value) & { namespace: string };
   path?: string;
   fork?: boolean;
 }

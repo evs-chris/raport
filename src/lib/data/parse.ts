@@ -471,7 +471,8 @@ values.parser = alt('expression', array, object, literal, typelit, string, appli
 
 export const parseBlock = makeParser<Value>(map(rep1sep(value, read1(space + ';'), 'allow'), args => args.length === 1 ? args[0] : { op: 'block', args, opts: { v: { implicit: 1 } } }, 'expression-sequence'), { trim: true });
 export const parseExpr = makeParser(value, { trim: true });
-export const parse = parseBlock;
+(parseBlock as any).namespace = 'default';
+export const parse: typeof parseBlock & { namespace: string } = parseBlock as any;
 export default parse;
 
 export function schema() {

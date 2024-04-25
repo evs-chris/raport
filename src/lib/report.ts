@@ -345,9 +345,6 @@ export function applySource(context: RootContext, source: ReportSource, sources:
 }
 
 function runDelimited(report: Delimited, context: Context, options?: { table?: boolean }): string {
-  // clear out expression cache to avoid template/non-template cache overlap
-  context.root.exprs = {};
-
   const source = context.root.sources[report.source ? report.source : (report.sources[0].name || report.sources[0].source)];
   const values = Array.isArray(source.value) ?
     source.value :
@@ -368,8 +365,6 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
     if (options?.table) res += `<tr>${headers.map(h => `<th>${evaluate(ctx, h)}</th>`).join('')}</tr>`;
     else res += headers.map(h => `${report.quote || ''}${evaluate(ctx, h)}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
   }
-  // clear out expression cache to avoid template/non-template cache overlap
-  context.root.exprs = {};
 
   if (options?.table) {
     for (const value of values) {
