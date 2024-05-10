@@ -36,6 +36,7 @@
                 {{#if !.overlay}}<button class=ico title="Add page overlay" on-click="@context.set('.overlay', { type: 'container' }), false">+O</button>{{/if}}
               {{else}}
                 {{#if !.headers}}<button class=ico title="Add headers" on-click="@.addHeader(), false">+H</button>{{/if}}
+                <button class=ico title="Add field" on-click="@.push('report.fields', ''), .headers && @.push('report.headers', ''), false">+F</button>
               {{/if}}
             </span>
           </span>
