@@ -170,7 +170,7 @@ Ractive.extendWith(Editor, {
     },
   },
   decorators: { autosize },
-  attributes: ['src', 'template', 'tabout', 'primary'],
+  attributes: ['src', 'template', 'tabout', 'primary', 'no-fill'],
 });
 
 export class Viewer extends Ractive {
@@ -198,7 +198,7 @@ Ractive.extendWith(Viewer, {
       pre { margin: 0; white-space: pre-wrap; font-size: 0.875rem; }
       .syntax-editor code { padding: 0; flex-grow: 1; }
       .syntax-editor { max-height: 100%; overflow: auto; }
-      .syntax-editor code { font-size: inherit; line-height: 0.875rem; }
+      .syntax-editor code { font-size: inherit; line-height: 1rem; }
       `,
   },
   partials: {
@@ -208,7 +208,7 @@ Ractive.extendWith(Viewer, {
     init() {
       this.observe('src template', debounce(function() {
         this.highlightSyntax();
-      }, 150));
+      }, 350));
     },
   },
   attributes: ['src', 'template'],

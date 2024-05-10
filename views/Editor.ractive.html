@@ -1,4 +1,4 @@
-<div class="syntax-editor" {{>extra-attributes}}>
+<div class="syntax-editor" {{>extra-attributes}} class-shrinky="~/['no-fill']">
   {{#if ~/lines.length > 4}}<div class="line-nos">{{#each ~/lines}}{{.}}<br />{{/each}}</div>{{/if}}
   <div class="editor-pane">
     <code class="ast-nodes">
@@ -23,9 +23,12 @@
 <style rel=ractive>
   .syntax-editor {
     position: relative;
-    min-height: 99%;
     color: {{@style.code.c1}};
     display: flex;
+  }
+
+  .syntax-editor:not(.shrinky) {
+    min-height: 99% !important;
   }
 
   .syntax-editor > .line-nos {
@@ -34,12 +37,13 @@
     flex-shrink: 0;
     font-family: monospace;
     font-size: 0.875rem !important;
-    line-height: 0.875rem !important;
-    padding: 0.875rem !important;
+    line-height: 1rem !important;
+    padding: 0.5rem !important;
     color: {{@style.fg}};
     background-color: {{@style.border}};
     border-right: 1px solid {{@style.dark}};
     text-align: right;
+    border: none !important;
   }
 
   .syntax-editor > .editor-pane {
@@ -60,30 +64,32 @@
     position: absolute;
     top: 0;
     font-family: monospace;
-    color: transparent;
-    background: transparent;
+    color: transparent !important;
+    background: transparent !important;
     caret-color: {{@style.fg}};
-    min-height: 99%;
+    min-height: 99% !important;
     overflow: hidden;
     resize: none;
     margin: 0 !important;
-    padding: 0.875rem !important;
-    line-height: 0.875rem !important;
+    padding: 0.5rem !important;
+    line-height: 1rem !important;
     font-size: 0.875rem !important;
     white-space: pre-wrap;
     word-break: break-all;
+    border: none !important;
   }
 
   .syntax-editor code {
-    padding: 0.875rem;
+    padding: 0.5rem !important;
     font-family: monospace;
     display: block;
     box-sizing: border-box;
-    min-height: 99%;
+    min-height: 99% !important;
     overflow: hidden;
-    line-height: 0.875rem;
-    font-size: 0.875rem;
-    min-height: 1.75rem;
+    line-height: 1rem !important;
+    font-size: 0.875rem !important;
+    min-height: 1.75rem !important;
+    border: none !important;
   }
 
   .syntax-editor > .editor-pane > code > pre {

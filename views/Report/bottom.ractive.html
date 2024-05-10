@@ -232,7 +232,7 @@
           <label title="Add an Initialization expression to provide a default for the parameter"><input type=checkbox twoway=false on-change="@context.set('.init', '')" /> Initialization expression?</label>
         {{else}}
           <label title="Add an Initialization expression to provide a default for the parameter"><input type=checkbox twoway=false checked on-change="@context.set('.init', undefined)" /> Initialization expression?</label>
-          <div style="height: 5em; border: 1px solid #ccc; overflow: auto; margin-right: 1em;"><Editor src="{{.init}}" /></div>
+          <div style="height: 5em; border: 1px solid {{@style.border}}; overflow: auto; margin: 0 0.5em;"><Editor src="{{.init}}" tabout /></div>
         {{/if}}
         <label title="Set up options to render the parameter as a select"><input type=checkbox twoway=false checked="{{Array.isArray(.options)}}" on-change="@context.set('.options', Array.isArray(.options) ? undefined : [])" /> Options?</label>
         {{#if Array.isArray(.options)}}
@@ -271,9 +271,9 @@
         {{else}}
           <label title="The upstream source that this source should be based on."><span>Source</span><select value="{{.source}}">{{#each ~/sources}}<option>{{.name}}</option>{{/each}}</select></label>
         {{/if}}
-        <label title="An expression providing the base data for this source. This will override the upstream source."><span>Base <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.base')">{{>pencil}}</button></span><textarea rows=1>{{.base}}</textarea></label>
-        <label title="A filter expression to apply to the source before it is used."><span>Filter <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.filter')">{{>pencil}}</button></span><textarea rows=1>{{.filter}}</textarea></label>
-        <label title="A sort expression to apply to the source before it is used. This should be an array of applications or config objects with by keys having application values."><span>Sort <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.sort')">{{>pencil}}</button></span><textarea rows=1>{{.sort}}</textarea></label>
+        <label title="An expression providing the base data for this source. This will override the upstream source, which is available in this expression as @source."><span>Base <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.base')" tabindex=-1>{{>pencil}}</button></span><div style="height: 5em; border: 1px solid {{@style.border}}; overflow: auto; margin: 0;"><Editor src="{{.base}}" tabout /></div></label>
+        <label title="A filter expression to apply to the source before it is used."><span>Filter <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.filter')" tabindex=-1>{{>pencil}}</button></span><div style="height: 5em; border: 1px solid {{@style.border}}; overflow: auto; margin: 0;"><Editor src="{{.filter}}" tabout /></div></label>
+        <label title="A sort expression to apply to the source before it is used. This should be an array of applications or config objects with by keys having application values."><span>Sort <button class-ico on-click="@.editExpr(~/temp.bottom.source + '.sort')" tabindex=-1>{{>pencil}}</button></span><div style="height: 5em; border: 1px solid {{@style.border}}; overflow: auto; margin: 0;"><Editor src="{{.sort}}" tabout /></div></label>
         {{#if Array.isArray(.group)}}
           <div class-options style="height: 100%; width: 20rem;">
             <h3>
@@ -284,9 +284,9 @@
               {{#each .group}}
                 <div class-group-edit>
                   <span>{{@index + 1}}</span>
-                  <textarea rows=1>{{.}}</textarea>
-                  <button title="Edit group expression" class-ico on-click="@.editExpr('~/' + @keypath)">{{>pencil}}</button>
-                  <button title="Remove group expression" class-ico on-click="@context.splice('../', @index, 1)">{{>times}}</button>
+                  <div style="height: 5em; border: 1px solid {{@style.border}}; overflow: auto; margin: 0.5em; flex-grow: 1;"><Editor src="{{.}}" tabout /></div>
+                  <button title="Edit group expression" class-ico on-click="@.editExpr('~/' + @keypath)" tabindex=-1>{{>pencil}}</button>
+                  <button title="Remove group expression" class-ico on-click="@context.splice('../', @index, 1)" tabindex=-1>{{>times}}</button>
                 </div>
               {{/each}}
             </div></div>
