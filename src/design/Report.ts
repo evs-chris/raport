@@ -647,12 +647,12 @@ export class Designer extends Ractive {
     this.toggle('exprExpand.' + Ractive.escapeKey(path));
   }
 
-  async buildRoot(): Promise<Root> {
+  async buildRoot(skipSources?: boolean): Promise<Root> {
     const report: Report = this.get('report');
     const res = new Root(cloneDeep(report.context), { parameters: this.get('params') });
     if (report.extraContext) evaluate(res, report.extraContext);
     const srcs = await this.buildSources();
-    applySources(res, report.sources || [], srcs);
+    if (!skipSources) applySources(res, report.sources || [], srcs);
     return res;
   }
 
@@ -701,7 +701,7 @@ export class Designer extends Ractive {
   }
 
   async buildLocalContext(path?: string): Promise<Context> {
-    const root = await this.buildRoot();
+    const root = await this.buildRoot(path && path.slice(0, 'report.sources.'.length) === 'report.sources.');
     root.special.date = new Date();
     root.special.local = {};
     root.special.locals = {};
@@ -714,14 +714,40 @@ export class Designer extends Ractive {
       const parts = Ractive.splitKeypath(path);
       if (parts[0] === 'report') parts.shift();
       if (parts[0] === 'fields') {
-        const src = evaluate(ctx, `*${this.get('report.sources.0.source')}`);
-        if (src) {
-          if (src.all) ctx = extend(ctx, { value: src.all[0] });
-          else ctx = extend(ctx, { value: src[0] });
+        let src = evaluate(ctx, `*${this.get('report.source')}`);
+        if (src && !Array.isArray(src) && typeof src === 'object' && Array.isArray(src.all)) src = src.all;
+        if (src && typeof src === 'object' && Array.isArray(src.value)) src = src.value;
+        if (src && Array.isArray(src)) src = src[0];
+        let context = extend(ctx, { value: src });
+        const row = this.get('report.rowContext');
+        if (row) {
+          if (!context.locals) context.locals = {};
+          const v = evaluate(context, row);
+          if (v) context.value = v;
         }
+        ctx = context;
+      } else if (parts[0] === 'rowContext') {
+        let src = evaluate(ctx, `*${this.get('report.source')}`);
+        if (src && !Array.isArray(src) && typeof src === 'object' && Array.isArray(src.all)) src = src.all;
+        if (src && typeof src === 'object' && Array.isArray(src.value)) src = src.value;
+        if (src && Array.isArray(src)) src = src[0];
+        ctx = extend(ctx, { value: src });
       } else if (parts[0] === 'sources') {
-        if (parts[parts.length - 1] === 'base') ctx = extend(ctx, { value: evaluate(ctx, `*${this.get(`report.sources.${parts[1]}.source`)}.value`) });
-        else ctx = extend(ctx, { value: evaluate(ctx, `*${this.get(`report.sources.${parts[1]}.source`)}.0`) });
+        if (parts[parts.length - 1] === 'base') {
+          const name = this.get(`report.sources.${parts[1]}.source`);
+          const provided = (this.get('sources') || []).find(s => s.name === name);
+          let src = await this.loadSourceData(provided);
+          ctx = extend(ctx, { value: ctx.value, special: { source: src } });
+        } else {
+          const name = this.get(`report.sources.${parts[1]}.name`) || this.get(`report.sources.${parts[1]}.source`);
+          const srcs = await this.buildSources();
+          applySources(root, loc.sources || [], srcs);
+          let src = evaluate(ctx, `*${name}`);
+          if (src && !Array.isArray(src) && typeof src === 'object' && Array.isArray(src.all)) src = src.all;
+          if (src && typeof src === 'object' && Array.isArray(src.value)) src = src.value;
+          if (src && Array.isArray(src)) src = src[0];
+          ctx = extend(ctx, { value: src });
+        }
       } else {
         while (loc && parts.length) {
           const part = parts.shift();
@@ -814,6 +840,10 @@ export class Designer extends Ractive {
 
     let t = inspect(ctx.root.special);
     t.fields.forEach(f => (f.name = `@${f.name}`, pl.fields.push(f)));
+    if (ctx.special) {
+      t = inspect(ctx.special)
+      t.fields.forEach(f => (f.name = `@${f.name}`, pl.fields.push(f)));
+    }
 
     (this.get('report.parameters') || []).forEach((p: Parameter) => pl.fields.push({ name: `!${p.name}`, type: p.type }));
 
@@ -823,7 +853,7 @@ export class Designer extends Ractive {
         c = c.parent;
         if (c === c.root) prefix = '~';
         else prefix += '^';
-        if (last === c.value) continue;
+        if (last === c.value && c.parent) continue;
         stack.push(c);
 
         t = inspect(c.value, c !== c.root);
