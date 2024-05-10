@@ -417,6 +417,8 @@ export class Designer extends Ractive {
     if (typeof val === 'string') this._importText.value = val;
     else this._importText.value = JSON.stringify(val, null, 2);
 
+    if (!this.get('show.proppop')) this.set('show.props', false);
+
     this.set('tab', 'import');
   }
 
@@ -448,6 +450,7 @@ export class Designer extends Ractive {
     this.link(path, 'expr');
     this.set('temp.expr.str', val);
     this.set('show.bottom', true);
+    if (!this.get('show.proppop')) this.set('show.props', false);
 
     const el = document.getElementById(`expr-${html ? 'html' : 'text'}`);
     if (el) setTimeout(() => el.focus(), 500);
@@ -466,6 +469,7 @@ export class Designer extends Ractive {
     this.set('temp.bottom.param', path);
     this.set('temp.bottom.tab', 'param');
     this.link(path, 'param');
+    if (!this.get('show.proppop')) this.set('show.props', false);
   }
 
   editReportSrc(ctx: ContextHelper, key?: string) {
@@ -474,6 +478,7 @@ export class Designer extends Ractive {
     this.set('temp.bottom.source', path);
     this.set('temp.bottom.tab', 'source');
     this.link(path, 'source');
+    if (!this.get('show.proppop')) this.set('show.props', false);
   }
 
   moveUp(ctx: ContextHelper, path?: string|string[], index?: number, end?: boolean) {

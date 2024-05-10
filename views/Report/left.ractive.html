@@ -1,7 +1,7 @@
 <div class="left-bar">
   <button class="large ico {{~/show.props ? 'left' : 'right'}}-arrow" on-click="@.toggle('show.props')" title="{{#if ~/show.props}}Hide{{else}}Show{{/if}} the left pane">{{>arrow}}</button>
-  <button class="large ico {{~/show.hidetree ? 'off' : ''}}" on-click="@.set('show.props', true), @.toggle('show.hidetree'), !~/show.hidetree && ~/show.hideprops ? @.set('show.hideprops', false) : ''" title="{{#if ~/show.hidetree}}Show{{else}}Hide{{/if}} widget tree">{{>tree}}</button>
-  <button class="large ico {{~/show.hideprops ? 'off' : ''}}" on-click="@.set('show.props', true), @.toggle('show.hideprops'), !~/show.hideprops && ~/show.hidetree ? @.set('show.hidetree', false) : ''" title="{{#if ~/show.hideprops}}Show{{else}}Hide{{/if}} widget properties">{{>cog}}</button>
+  <button class="large ico {{~/show.hidetree ? 'off' : ''}}" {{#if ~/show.props}}on-click="@.toggle('show.hidetree'), !~/show.hidetree && ~/show.hideprops ? @.set('show.hideprops', false) : ''" title="{{#if ~/show.hidetree}}Show{{else}}Hide{{/if}} widget tree"{{else}}on-click="@.toggle('show.props'), @.set('show.hidetree', false), @.set('show.hideprops', true)" title="Show the left pane with only the widget tree"{{/if}}>{{>tree}}</button>
+  <button class="large ico {{~/show.hideprops ? 'off' : ''}}" {{#if ~/show.props}}on-click="@.toggle('show.hideprops'), !~/show.hideprops && ~/show.hidetree ? @.set('show.hidetree', false) : ''" title="{{#if ~/show.hideprops}}Show{{else}}Hide{{/if}} widget properties"{{else}}on-click="@.toggle('show.props'), @.set('show.hidetree', true), @.set('show.hideprops', false)" title="Show the left pane with only widget properties"{{/if}}>{{>cog}}</button>
 </div>
 <div class="left properties left-pop" class-popped="~/show.props">
   {{#if !~/show.hidetree}}
@@ -57,7 +57,7 @@
     {{#if ~/temp.widget === 'report'}}
       <div class="growy">
         <div class=sheet>
-          <label><span title="The name of this report, which is used for naming files. This is a template, so it must use mustache interpolators for variables.">Name <button class-ico on-click="@.editExpr('report.name', { template: true }), false">{{>pencil}}</button></span><span>
+          <label><span title="The name of this report, which is used for naming files. This is a template, so it must use mustache interpolators for variables.">Name <button class-ico on-click="@.editExpr('report.name', { template: true }), false" tabindex=-1>{{>pencil}}</button></span><span>
             <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src="{{report.name}}" tabout template /></div>
           </span></label>
           <label><span title="Paged reports are rendered in consectutive, fixed-size pages. Flowed reports are rendered in a continuous container, which does not allow height fit on immediate child widgets or negative offsets. Delimited reports render delimited text only e.g. CSV.">Type</span><span><select value="{{report.type}}">
@@ -137,9 +137,9 @@
             <div class-src>
               <div class-src-name><input value="{{.name}}" disabled="{{~/showProjects === false}}" /></div>
               <div class-src-btn>
-                <button class-ico class-large title="Import data..." on-click="~/actions.editProvidedSource(@context)">{{>pencil}}</button>
-                <button class-ico class-large title="Log data to console..." on-click="@.logData(.)">{{>'console'}}</button>
-                <button class-ico class-large on-click="@.checkLink('import', @keypath), @context.splice('../', @index, 1)">{{>times}}</button>
+                <button class-ico class-large title="Import data..." on-click="~/actions.editProvidedSource(@context)" tabindex=-1>{{>pencil}}</button>
+                <button class-ico class-large title="Log data to console..." on-click="@.logData(.)" tabindex=-1>{{>'console'}}</button>
+                <button class-ico class-large on-click="@.checkLink('import', @keypath), @context.splice('../', @index, 1)" tabindex=-1>{{>times}}</button>
               </div>
             </div>
           {{/each}}
@@ -164,7 +164,7 @@
             <div class-rsrc-name><input value="{{.name}}" /></div>
             <div class-rsrc-src><select value="{{.source}}">{{#each ~/sources}}<option>{{.name}}</option>{{/each}}</select></div>
             <div class-rsrc-btn>
-              <button class-ico on-click="@.checkLink('source', @keypath), @context.splice('../', @index, 1)">{{>times}}</button>
+              <button class-ico on-click="@.checkLink('source', @keypath), @context.splice('../', @index, 1)" tabindex=-1>{{>times}}</button>
             </div>
           </div>
         {{/each}}
