@@ -93,6 +93,9 @@
             <label><span title="The string to render between records, defaulting to '\n'.">Record Delimiter</span><span><input value="{{temp.record}}" /></span></label>
             <label><span title="The string to render between fields, defaulting to ','.">Field Delimiter</span><span><input value="{{temp.field}}" /></span></label>
             <label><span title="The quote character to render around field values, defaulting to none.">Quote</span><span><input value="{{temp.quote}}" /></span></label>
+            <label><span title="If supplied, this expression is evaluated and the result replaces the value in the context in which the fields in the record are evaluated. If the initial value should be used while side-effecting expressions are evaluated, the last expression in the context source should be, _, @value, or a false-y value .">Row Context <button title="Edit in Expression Editor" class-ico on-click="@.editExpr('report.rowContext')" tabindex=-1>{{>pencil}}</button></span><span>
+              <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{report.rowContext}} tabout /></div>
+            </span></label>
           {{/if}}
         </div>
       </div>

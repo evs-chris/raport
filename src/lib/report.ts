@@ -52,6 +52,7 @@ export interface Delimited<T = {}> extends BaseReport<T> {
   record?: string;
   field?: string;
   quote?: string;
+  rowContext?: ValueOrExpr;
 }
 
 export interface Displayed<T = {}> extends BaseReport<T> {
@@ -362,25 +363,37 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
   let res = '';
   if (headers) {
     const ctx = extend(context, { parser: parseTemplate });
-    if (options?.table) res += `<tr>${headers.map(h => `<th>${evaluate(ctx, h)}</th>`).join('')}</tr>`;
+    if (options?.table) res += `<tr class=header><th style="border-right: 2px solid;"></th>${headers.map(h => `<th>${evaluate(ctx, h)}</th>`).join('')}</tr>`;
     else res += headers.map(h => `${report.quote || ''}${evaluate(ctx, h)}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
   }
 
   if (options?.table) {
+    let idx = 1;
     for (const value of values) {
       const c = extend(context, { value });
-      res += `<tr>${fields.map(f => {
+      if (report.rowContext) {
+        if (!c.locals) c.locals = {};
+        const v = evaluate(c, report.rowContext);
+        if (v) c.value = v;
+      }
+      res += `<tr class=row><th>${idx}</th>${fields.map(f => {
         let val = f ? evaluate(c, f) : '';
         if (val === undefined) val = '';
         if (typeof val !== 'string') val = `${val}`;
         return `<td>${val}</td>`;
       }).join('')}</tr>`;
+      idx++;
     }
     res = `<table>${res}</table>`;
   } else {
     const unquote: RegExp = report.quote ? new RegExp(report.quote, 'g') : undefined;
     for (const value of values) {
       const c = extend(context, { value });
+      if (report.rowContext) {
+        if (!c.locals) c.locals = {};
+        const v = evaluate(c, report.rowContext);
+        if (v) c.value = v;
+      }
       res += fields.map(f => {
         let val = f ? evaluate(c, f) : '';
         if (val === undefined) val = '';

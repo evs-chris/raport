@@ -199,10 +199,11 @@ export class Designer extends Ractive {
           body {
             display: inline-block;
           }
-          table{ border-collapse: collapse; }
+          table { border-collapse: collapse; }
           th, td { padding: 0.15em 0.4em; border: 1px solid rgba(128, 128, 128, 0.5); }
-          th { position: sticky; top: 0; border-bottom: 2px solid; background: var(--bg); }
-          tr:hover td { background: rgba(128, 128, 128, 0.2); }` : ''}
+          tr.header th { position: sticky; top: 0; border-bottom: 2px solid; background: var(--bg); z-index: 10; }
+          tr.row th { position: sticky; left: 0; padding: 0.15em 0.5em; text-align: right; border-right: 2px solid; background: var(--bg); z-index: 9; }
+          tr:hover td, tr.row:hover th { background: rgba(128, 128, 128, 0.2); }` : ''}
           .page-back {
             color: var(--fg);
             background-color: var(--bg);
