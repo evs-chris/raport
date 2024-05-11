@@ -22,6 +22,7 @@ Ractive.extendWith(App, {
   data() {
     return {
       sources: [{ name: 'sample', values() { return Promise.resolve(sample()); } }],
+      sample,
     }
   },
   components: {

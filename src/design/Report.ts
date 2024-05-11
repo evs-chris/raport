@@ -1354,6 +1354,13 @@ export class Designer extends Ractive {
     this.link('project.sources', 'sources');
     this.set('projectSaved', this.stringifyProject(this.get(path)));
     this.resetUndo();
+
+    // check for sample data refs
+    const sources = this.get('sources') || [];
+    for (let i = 0; i < sources.length; i++) {
+      const s = sources[i];
+      if (s && s.name === 'sample' && !s.value) this.set(`sources.${i}.values`, this.get('sample'));
+    }
   }
 
   unlinkProject() {
