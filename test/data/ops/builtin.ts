@@ -583,7 +583,12 @@ q.test('pipe', t => {
 // TODO: reduce
 // TODO: replace-all
 // TODO: replace
-// TODO: reverse
+
+q.test('reverse', t => {
+  t.deepEqual(evaluate('reverse([1 2 3])'), [3, 2, 1]);
+  t.deepEqual(evaluate('let a = [1 2 3]; reverse(a); a'), [1, 2, 3]);
+  t.equal(evaluate('reverse(:testing)'), 'gnitset');
+});
 
 q.test('round', t => {
   t.equal(evaluate('round(10.4)'), 10);

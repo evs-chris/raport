@@ -849,7 +849,7 @@ registerOperator(
       for (let i = 0; i < src.length; i++) r = src[i] + r;
       return r;
     } else if (Array.isArray(src)) {
-      return src.reverse();
+      return src.slice().reverse();
     }
   }),
   simple(['wrap-count'], (_name: string, [str, width, font], opts, ctx): number => {
