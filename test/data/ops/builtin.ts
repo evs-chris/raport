@@ -673,6 +673,10 @@ q.test('round', t => {
 // TODO: similar
 // TODO: similarity
 // TODO: slice, substr
+q.test('set-defaults', t => {
+  // TODO: moar set-defaults tests
+  t.deepEqual(evaluate('[0.1 + 0.2 { set-defaults(:round context:1 places:2) 0.1 + 0.2 }, 0.1 + 0.2]'), [0.30000000000000004, 0.3, 0.30000000000000004]);
+});
 
 q.test('sort', t => {
   t.deepEqual(evaluate('sort([3 2 1])'), [1, 2, 3]);

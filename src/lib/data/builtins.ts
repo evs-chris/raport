@@ -28,12 +28,15 @@ const generateDefaults = {
   max: 10000,
 };
 
+type RoundingMethod = 'half-up'|'half-down'|'half-even'|'half-odd'|'to-0'|'from-0';
 const roundDefaults = {
   places: 2,
   'all-numeric': false,
-  method: 'half-even' as 'half-up'|'half-down'|'half-even'|'half-odd'|'to-0'|'from-0',
+  method: 'half-even' as RoundingMethod,
 };
-export function round(amt: string|number, place = roundDefaults.places, type = roundDefaults.method): string {
+export function round(amt: string|number, settings?: { places: number; method: RoundingMethod }): string {
+  const place = settings?.places ?? roundDefaults.places;
+  const type = settings?.method ?? roundDefaults.method;
   if (place > 0) {
     let str = (+amt || 0).toString();
     const point = str.indexOf('.');
@@ -695,7 +698,7 @@ registerOperator(
 
 // math
 registerOperator(
-  simple(['+', 'add'], (_name: string, values: any[]): any => {
+  simple(['+', 'add'], (_name, values: any[], _opts, ctx): any => {
     if (values.length === 1) {
       if (isDateRel(values[0])) return +dateRelToDate(values[0]);
       else if (!values[0]) return 0;
@@ -707,7 +710,8 @@ registerOperator(
     else if (values.reduce((a, c) => a && typeof c === 'object' && !isDateRel(c), true)) return Object.assign.apply(Object, [{}].concat(values));
     const num = values.reduce((a, c) => a && isNum(c), true);
     if (num) {
-      return values.reduce((a, c) => a + +c, 0);
+      if (ctx.special?.round) return +values.reduce((a, c) => +round(a + +c, ctx.special.round), 0);
+      else return values.reduce((a, c) => a + +c, 0);
     } else {
       return values.reduce((a, c) => a + (c === undefined || c === null ? '' : c), '');
     }
@@ -717,16 +721,17 @@ registerOperator(
     if (match = hasNum.exec(v)) return +match[1];
     return parseInt(v);
   }),
-  simple(['-', 'subtract'], (_name: string, values: any[]): number => {
+  simple(['-', 'subtract'], (_name, values: any[], _opts, ctx): number => {
     const first = values.shift();
     if (!values.length) return -first;
     if (isDateRel(first)) {
       if (values.reduce((a, c) => a && isDateRel(c), true)) return values.reduce((a, c) => a - +dateRelToDate(c), +dateRelToDate(first));
       if (values.reduce((a, c) => a && isTimespan(c), true)) return values.reduce((a, c) => dateAndTimespan(a, c, -1), dateRelToDate(first));
     }
-    return values.reduce((a, c) => a - (!isNum(c) ? 0 : +c), !isNum(first) ? 0 : +first);
+    if (ctx.special?.round) return values.reduce((a, c) => +round(a - (!isNum(c) ? 0 : +c), ctx.special.round), !isNum(first) ? 0 : +first);
+    else return values.reduce((a, c) => a - (!isNum(c) ? 0 : +c), !isNum(first) ? 0 : +first);
   }),
-  simple(['*', 'multiply'], (_name: string, values: any[]): number|string => {
+  simple(['*', 'multiply'], (_name, values: any[], _opts, ctx): number|string|any[] => {
     const first = values.shift();
     if (!isNum(first)) {
       if (typeof first === 'string' && values.length === 1 && isNum(values[0]) && +values[0] > 0) {
@@ -736,29 +741,32 @@ registerOperator(
       }
       return 0;
     }
-    return values.reduce((a, c) => a * (!isNum(c) ? 0 : +c), +first);
+    if (ctx.special.round) return values.reduce((a, c) => +round(a * (!isNum(c) ? 0 : +c), ctx.special.round), +first);
+    else return values.reduce((a, c) => a * (!isNum(c) ? 0 : +c), +first);
   }),
-  simple(['/', '/%', 'divide', 'intdiv'], (name: string, values: any[]): number => {
+  simple(['/', '/%', 'divide', 'intdiv'], (name: string, values: any[], _opts, ctx): number => {
     const first = values.shift();
     if (isNaN(first)) return 0;
     if (name.length > 1 || name === 'intdiv') return values.reduce((a, c) => Math.floor(a / (isNaN(c) ? 1 : +c)), +first);
+    if (ctx.special?.round) return values.reduce((a, c) => +round(a / (isNaN(c) ? 1 : +c), ctx.special.round), +first);
     else return values.reduce((a, c) => a / (isNaN(c) ? 1 : +c), +first);
   }),
   simple(['%', 'modulus'], (_name: string, values: any[]): number => {
     const first = values.shift();
     return values.reduce((a, c) => a % (isNaN(c) ? 1 : +c), isNaN(first) ? 0 : +first);
   }),
-  simple(['pow', '**'], (_name: string, values: any[]): number => {
+  simple(['pow', '**'], (_name, values: any[], _opts, ctx): number => {
     const pow = values.pop();
     const first = Math.pow(values.pop(), pow);
-    return values.reverse().reduce((a, c) => Math.pow(c, a), first);
+    if (ctx.special?.round) return values.reverse().reduce((a, c) => +round(Math.pow(c, a), ctx.special.round), first);
+    else return values.reverse().reduce((a, c) => Math.pow(c, a), first);
   }),
   simple(['abs'], (_name: string, values: any[]) => {
     if (typeof values[0] !== 'number') return values[0];
     return Math.abs(values[0]);
   }),
   simple(['round'], (_name: string, [num, precision, method]: [number, number, string]): number => {
-    if (precision !== undefined || roundDefaults['all-numeric']) return +round(num, precision, method as any);
+    if (precision !== undefined || roundDefaults['all-numeric']) return +round(num, { places: precision, method: method as any });
     else return Math.round(num);
   }),
   simple(['floor'], (_name: string, values: [number]): number => {
@@ -1003,14 +1011,18 @@ registerOperator(
       } else return `${v}`;
     } else return op.apply(v, s, (opts || op.defaults) as any);
   }),
-  simple(['set-defaults'], (_name: string, [type, name]: any[], opts) => {
+  simple(['set-defaults'], (_name: string, [type, name]: any[], opts, ctx) => {
     if (type === 'format' && typeof name === 'string') {
       const fmt = formats[name];
       if (fmt) return Object.assign(fmt.defaults, opts);
       const vfmt = virtualFormats[name];
       if (vfmt) return Object.assign(vfmt.defaults, opts);
     } else if (type === 'round') {
-      Object.assign(roundDefaults, opts);
+      if (opts?.context) {
+        if (opts?.unset) {
+          if (ctx.special) delete ctx.special.round;
+        } else (ctx.special || (ctx.special = {})).round = Object.assign({}, opts, { context: undefined });
+      } else Object.assign(roundDefaults, opts);
     } else if (type === 'generate') {
       Object.assign(generateDefaults, opts);
     }
@@ -1151,13 +1163,15 @@ registerOperator({
   type: 'aggregate',
   names: ['avg'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
-    return arr.reduce((a, c) => a + num(args[0] ? evalApply(ctx, args[0], [c]) : c), 0) / arr.length;
+    if (ctx.special?.round) return +round(arr.reduce((a, c) => +round(a + num(args[0] ? evalApply(ctx, args[0], [c]) : c)), 0) / arr.length)
+    else return arr.reduce((a, c) => a + num(args[0] ? evalApply(ctx, args[0], [c]) : c), 0) / arr.length;
   },
 }, {
   type: 'aggregate',
   names: ['sum'],
   apply(_name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
-    return arr.reduce((a, c) => a + num(args[0] ? evalApply(ctx, args[0], [c]) : c), 0);
+    if (ctx.special?.round) return arr.reduce((a, c) => +round(a + num(args[0] ? evalApply(ctx, args[0], [c]) : c)), 0);
+    else return arr.reduce((a, c) => a + num(args[0] ? evalApply(ctx, args[0], [c]) : c), 0);
   }
 }, {
   type: 'aggregate',
