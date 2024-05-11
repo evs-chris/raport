@@ -220,6 +220,19 @@ export function similar(a: string, b: string, threshhold: number = 0.5, fudges: 
   }
 }
 
+export function inRange(v: number, range: Array<number|[number, number]|{ not: number|[number, number] }>): boolean {
+  let found = false;
+  let excluded = false;
+  for (const r of range) {
+    if (Array.isArray(r) && v >= r[0] && v <= r[1]) found = true;
+    else if (typeof r === 'object' && 'not' in r) {
+      if (Array.isArray(r.not) && v >= r.not[0] && v <= r.not[1]) excluded = true;
+      else if (v == r.not) excluded = true;
+    } else if (v == r) found = true;
+  }
+  return found && !excluded;
+}
+
 // basic ops
 registerOperator(
   simple(['is', 'is-not', '==', '!='], (name: string, values: any[]): boolean => {
@@ -305,7 +318,7 @@ registerOperator(
       const found = l.reduce((a, c) => a && ~keys.indexOf(c), true);
       return name === 'in' ? found : !found;
     } else if (typeof r === 'string' && isNum(l) && (range = _parseRange(ctx, r), Array.isArray(range))) {
-      const found = range.reduce((a, c) => a || (Array.isArray(c) ? l >= c[0] && l <= c[1] : l == c), false);
+      const found = inRange(+l, range);
       return name === 'in' ? found : !found;
     } else if (isApplication(l)) {
       let found: any = false;
@@ -375,7 +388,20 @@ registerOperator(
     }
     return [];
   }),
-  simple(['array'], (_name: string, values: any[]) => {
+  simple(['array'], (_name: string, values: any[], opts) => {
+    if (values.length === 1 && opts?.range) {
+      let range = values[0];
+      if (typeof range === 'string') range = parseRange(range);
+      if (Array.isArray(range)) {
+        const bounds = Array.isArray(opts.bounds) && opts.bounds.length === 2 && opts.bounds.filter(b => typeof b === 'number').length === 2 ? opts.bounds : [-100, 200];
+        bounds.slice().sort((l, r) => l < r ? -1 : l > r ? 1 : 0);
+        let [lower, upper] = bounds;
+        if (upper - lower > 10000) lower = upper - 10000;
+        const res = [];
+        for (let i = lower; i <= upper; i++) if (inRange(i, range)) res.push(i);
+        return res;
+      } else return [];
+    }
     return values;
   }),
   simple(['object'], (_name: string, values: any[]) => {

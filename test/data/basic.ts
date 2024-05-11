@@ -69,7 +69,7 @@ q.test('simple applicative operations', t => {
   t.deepEqual(evaluate(data, '(map foo =>(+ @value 2))'), [3, 4, 5]);
 });
 
-q.only('parser namespaces cache politely', t => {
+q.test('parser namespaces cache politely', t => {
   const ctx = new Root();
   let exprCount = 0, tplCount = 0;
   const parseWrapper = function(...args: any[]) {

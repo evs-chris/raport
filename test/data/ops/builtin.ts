@@ -130,6 +130,8 @@ q.test('and', t => {
 
 q.test('array', t => {
   t.deepEqual(evaluate('(array 1 2 3)'), [1, 2, 3]);
+  t.deepEqual(evaluate('array(1)'), [1]);
+  t.deepEqual(evaluate('array(`-2-2 !0` range:1)'), [-2, -1, 1, 2]);
 });
 
 q.test('avg', t => {
@@ -356,6 +358,7 @@ q.test('in', t => {
   t.ok(evaluate(`99 in '1,2,3,4-100,1000'`));
   t.ok(evaluate(`99 in '>10'`));
   t.notOk(evaluate(`99 in '<10'`));
+  t.ok(evaluate(`50 not-in '0-100 !50'`));
   t.ok(evaluate(`(=>_ == :d) in { a::b c::d }`));
   t.notOk(evaluate(`(=>_ == :d) in { a::b c::e }`));
   t.ok(evaluate(`(=>@key == :c) in { a::b c::d }`));
