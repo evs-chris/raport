@@ -30,6 +30,7 @@ q.test('-', t => {
   t.equal(evaluate('(- 10 8)'), 2);
   t.equal(evaluate('10 - 8'), 2);
   t.equal(evaluate('(- 10 8 10)'), -8);
+  t.equal(evaluate('let a = 10; -a'), -10);
 });
 
 q.test('/', t => {

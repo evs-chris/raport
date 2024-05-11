@@ -719,6 +719,7 @@ registerOperator(
   }),
   simple(['-', 'subtract'], (_name: string, values: any[]): number => {
     const first = values.shift();
+    if (!values.length) return -first;
     if (isDateRel(first)) {
       if (values.reduce((a, c) => a && isDateRel(c), true)) return values.reduce((a, c) => a - +dateRelToDate(c), +dateRelToDate(first));
       if (values.reduce((a, c) => a && isTimespan(c), true)) return values.reduce((a, c) => dateAndTimespan(a, c, -1), dateRelToDate(first));
