@@ -15,6 +15,7 @@ q.test('*', t => {
   t.equal(evaluate('(* 2 4)'), 8);
   t.equal(evaluate('2 * 4'), 8);
   t.equal(evaluate('(* 2 4 2)'), 16);
+  t.deepEqual(evaluate('[1 2] * 3'), [1, 2, 1, 2, 1, 2]);
 });
 
 // TODO: **
