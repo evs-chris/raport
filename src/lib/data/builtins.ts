@@ -1429,7 +1429,7 @@ registerFormat('hex', val => {
 
 registerFormat('base', (val, [n]) => {
   try {
-    val.toString(n);
+    return val.toString(n);
   } catch {
     return val;
   }
