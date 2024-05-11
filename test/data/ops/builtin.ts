@@ -18,13 +18,17 @@ q.test('*', t => {
   t.deepEqual(evaluate('[1 2] * 3'), [1, 2, 1, 2, 1, 2]);
 });
 
-// TODO: **
+q.test('**', t => {
+  t.equal(evaluate('2 ** 2'), 4);
+  t.equal(evaluate('2 ** 3 ** 2'), 512);
+});
 
 q.test('+', t => {
   t.equal(evaluate('(+ 2 4)'), 6);
   t.equal(evaluate('2 + 4'), 6);
   t.equal(evaluate('(+ 2 4 2)'), 8);
   t.equal(evaluate('(+ :joe :y)'), 'joey');
+  t.deepEqual(evaluate('{ a::b c:1 } + { c::d }'), { a: 'b', c: 'd' });
 });
 
 q.test('-', t => {
@@ -162,8 +166,8 @@ q.test('call', t => {
   t.equal(evaluate('(call 10 :toString 16)'), 'a');
 });
 
-// TODO: case
-// TODO: ceil
+q.todo('case', () => {});
+q.todo('ceil', () => {});
 
 q.test('clamp', t => {
   t.equal(evaluate('(clamp 10 20 30)'), 20);
@@ -225,7 +229,7 @@ q.test('date', t => {
   t.equal(evaluate('(call (date :2019-01-01) :toISOString)').substr(0, 10), '2019-01-01');
 });
 
-// TODO: detect-delimiters
+q.todo('detect-delimiters', () => {});
 
 q.test('deep-is', t => {
   t.ok(evaluate(`deep-is('2022-12-22' date('2022-12-22') :sql)`));
@@ -250,7 +254,7 @@ q.test('deep-is', t => {
   t.ok(evaluate(`deep-is(:false false equal::sql)`));
 });
 
-// TODO: diff
+q.todo('diff', () => {});
 
 q.test('does-not-contain', t => {
   t.equal(evaluate('(does-not-contain :test :ee)'), true);
@@ -272,8 +276,8 @@ q.test('does-not-contain', t => {
   t.ok(evaluate(`[:a :b :c :e] does-not-contain =>@index == 9`));
 });
 
-// TODO: each
-// TODO: eval
+q.todo('each', () => {});
+q.todo('eval', () => {});
 
 q.test('filter', t => {
   // TODO: there's a lot more available here
@@ -298,15 +302,14 @@ q.test('find', t => {
   t.equal(evaluate(`find({ a::b c::d } =>@index == 0)`), 'b');
 });
 
-// TODO: first
-
+q.todo('first', () => {});
 
 q.test('flatten', t => {
   t.deepEqual(evaluate('flatten([:a :b [:c :d :e] :f :g])'), 'abcdefg'.split(''));
   t.deepEqual(evaluate('flatten([:a :b [:c [:d] :e] :f :g] 2)'), 'abcdefg'.split(''));
 });
 
-// TODO: floor
+q.todo('floor', () => {});
 
 q.test('format', t => {
   // TODO: test all of the builtins
@@ -318,7 +321,7 @@ q.test('get', t => {
   t.equal(evaluate('(get (object :foo (object :bar 42)) "foo.bar")'), 42);
 });
 
-// TODO: group
+q.todo('group', () => {});
 
 q.test('if', t => {
   const op: Operator = { type: 'value', names: ['nope'], apply() { t.notOk('nope'); } };
@@ -387,7 +390,7 @@ q.test('index', t => {
   t.deepEqual(evaluate({ list }, 'index(list + { id:2 name::frank }, =>[id name] many:1)'), { 1: ['joe'], 2: ['sue', 'frank'], 3: ['larry'] });
 });
 
-// TODO: inspect
+q.todo('inspect', () => {});
 
 q.test('intersect', t => {
   const arr = evaluate('intersect([1 1 2 3 4 5 5] [1 2 2 3 6 6])');
@@ -397,7 +400,7 @@ q.test('intersect', t => {
   t.equal(arr[2], 3);
 });
 
-// TODO: interval
+q.todo('interval', () => {});
 
 q.test(`is`, t => {
   t.ok(evaluate(`(is :joe 'joe')`));
@@ -439,11 +442,11 @@ q.test('join', t => {
   t.equal(evaluate(ctx, `join(=>upper(_) ', ' ', and ' ' and ')`), 'A and B');
 });
 
-// TODO: keys
-// TODO: label-diff
-// TODO: last
-// TODO: let
-// TODO: len, length
+q.todo('keys', () => {});
+q.todo('label-diff', () => {});
+q.todo('last', () => {});
+q.todo('let', () => {});
+q.todo('len, length', () => {});
 
 q.test(`like`, t => {
   t.equal(evaluate('(like :SomeThing :*et*)'), false);
@@ -458,7 +461,7 @@ q.test(`like`, t => {
   t.equal(evaluate('[:A :B] like [:D :C]'), false);
 });
 
-// TODO: lower
+q.todo('lower', () => {});
 
 q.test('map', t => {
   // TODO: test options
@@ -497,7 +500,7 @@ q.test('min', t => {
   t.equal(evaluate('min()'), 0);
 });
 
-// TODO: not
+q.todo('not', () => {});
 
 q.test(`not-ilike`, t => {
   t.equal(evaluate('(not-ilike :SomeThing :*et*)'), false);
@@ -554,8 +557,8 @@ q.test('nth', t => {
   t.equal(evaluate(ctx, 'nth(-2)'), 3);
 });
 
-// TODO: num
-// TODO: object
+q.todo('num', () => {});
+q.todo('object', () => {});
 
 q.test('or', t => {
   const op: Operator = { type: 'value', names: ['nope'], apply() { t.notOk('nope'); } };
@@ -570,20 +573,20 @@ q.test('or', t => {
   unregisterOperator(op);
 });
 
-// TODO: overlap
-// TODO: pad
-// TODO: padl
-// TODO: padr
-// TODO: parse
+q.todo('overlap', () => {});
+q.todo('pad', () => {});
+q.todo('padl', () => {});
+q.todo('padr', () => {});
+q.todo('parse', () => {});
 
 q.test('pipe', t => {
   t.deepEqual(evaluate(`pipe([1 2 3] filter(=>_ != 1) map(=>_ * 2))`), [4, 6]);
 });
 
-// TODO: rand, random
-// TODO: reduce
-// TODO: replace-all
-// TODO: replace
+q.todo('rand, random', () => {});
+q.todo('reduce', () => {});
+q.todo('replace-all', () => {});
+q.todo('replace', () => {});
 
 q.test('reverse', t => {
   t.deepEqual(evaluate('reverse([1 2 3])'), [3, 2, 1]);
@@ -674,15 +677,16 @@ q.test('round', t => {
   evaluate('set-defaults(:round places:2 all-numeric:0 method::half-even)');
 });
 
-// TODO: set
-// TODO: set-defaults
-// TODO: similar
-// TODO: similarity
-// TODO: slice, substr
+q.todo('set', () => {});
+
 q.test('set-defaults', t => {
   // TODO: moar set-defaults tests
   t.deepEqual(evaluate('[0.1 + 0.2 { set-defaults(:round context:1 places:2) 0.1 + 0.2 }, 0.1 + 0.2]'), [0.30000000000000004, 0.3, 0.30000000000000004]);
 });
+
+q.todo('similar', () => {});
+q.todo('similarity', () => {});
+q.todo('slice, substr', () => {});
 
 q.test('sort', t => {
   t.deepEqual(evaluate('sort([3 2 1])'), [1, 2, 3]);
@@ -714,9 +718,9 @@ q.test('source', t => {
   t.deepEqual(evaluate('source({ value:9 max:10 })'), { value: { value: 9, max: 10 } });
 });
 
-// TODO: split
-// TODO: strict-is
-// TODO: strict-is-not
+q.todo('split', () => {});
+q.todo('strict-is', () => {});
+q.todo('strict-is-not', () => {});
 
 q.test('string', t => {
   t.equal(evaluate('string(null)'), '');
@@ -729,7 +733,7 @@ q.test('string', t => {
   t.equal(evaluate('string("|b|hello" styled:1)'), '<span style="font-weight:bold;">hello</span>');
 });
 
-// TODO: sum
+q.todo('sum', () => {});
 
 q.test('time-span', t => {
   t.equal(evaluate('time-span(#2021-10-31# #2021-11-10# unit::d)'), 10, 'fall dst is accurate');
@@ -744,20 +748,20 @@ q.test('time-span', t => {
   t.equal(evaluate('time-span(#2020-2-28# #2020-3-1# unit::d)'), 2, 'leap year is covered');
 });
 
-// TODO: trim
-// TODO: triml
-// TODO: trimr
+q.todo('trim', () => {});
+q.todo('triml', () => {});
+q.todo('trimr', () => {});
 
 q.test('unique', t => {
   const vals = [{ a: 10, b: 'a' }, { a: 12, b: 'b' }, { a: 10, b: 'c' }];
   t.deepEqual(evaluate({ vals }, '(map (unique vals =>a) =>b)'), ['a', 'b']);
 });
 
-// TODO: unique-map
-// TODO: unless
-// TODO: unparse
-// TODO: upper
-// TODO: valid
-// TODO: validate
-// TODO: values
-// TODO: with
+q.todo('unique-map', () => {});
+q.todo('unless', () => {});
+q.todo('unparse', () => {});
+q.todo('upper', () => {});
+q.todo('valid', () => {});
+q.todo('validate', () => {});
+q.todo('values', () => {});
+q.todo('with', () => {});

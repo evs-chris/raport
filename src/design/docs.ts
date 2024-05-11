@@ -3,22 +3,40 @@ export const operators = `[
     { bin:1 proto:'...any => number' desc:'Returns the modulus of the given values starting with the first.' }
   ]}
   { op:['*' 'multiply'] sig:[
-    { bin:1 proto:'...number => number' desc:'Multiplies the given values starting with the first.' }
-    { bin:1 proto:'(string, number) => string' desc:'Returns the given string copied number times.'}
+    { bin:1 proto:'...number => number' desc:'Multiplies the given values starting with the first.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).' }
+    { bin:1 proto:'(string, number) => string' desc:'Returns the given string copied number times if the number is positive.'}
+    { bin:1 proto:'(any[], number) => any[]' desc:'Returns the given array concatenated number times if the array has fewer than 1,000 elements and the number is positive and less than 10,000.'}
   ]}
   { op:['**' 'pow'] sig:[
-    { bin:1 proto:'...number => number' desc:'Applies exponentiation to the given arguments with right associativity.' eg:'(** 1 2 3) is 1^(2^3)'}
+    { bin:1 proto:'...number => number' desc:'Applies exponentiation to the given arguments with right associativity.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).' eg:'(** 1 2 3) is 1^(2^3)'}
   ]}
   { op:['+' 'add'] sig:[
-    { bin:1 proto:'...number => number' desc:'Adds the given numbers together.' }
+    { bin:1 proto:'...number => number' desc:'Adds the given numbers together.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).' }
     { bin:1 proto:'...any => string' desc:'Concatenates the given arguments as strings.' }
+    { bin:1 proto:'...object => object' desc:'Creates a shallow copy comprised of each given object where overlapping keys in later arguments override keys in earlier arguments.' }
+    { bin:1 proto:'...any[] => object' desc:'Creates a shallow copy comprised of each given array concatenated.' }
+    { bin:1 proto:'(date, timespan) => date' desc:'Adds the given timespan to the given date.' }
+    { bin:1 proto:'...timespan => timespan' desc:'Adds the given timespans together.' }
     { un:1 proto:'any => number' desc:'The unary + operator converts the given value to a number.' }
   ]}
   { op:['-' 'subtract'] sig:[
-    { bin:1 proto:'...any => number' desc:'Subtracts the given values as numbers starting with the first.' }
+    { bin:1 proto:'...any => number' desc:'Subtracts the given values as numbers starting with the first.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).' }
+    { bin:1 proto:'(date, date) => timespan' desc:'Subtracts the second date from the first, resulting in the timespan between the two dates.' }
+    { bin:1 proto:'(date, timespan) => date' desc:'Subtracts the second date from the first, resulting in the timespan between the two dates.' }
+    { un:1 proto:'any => number' desc:'The unary - operator converts the given value to a number and negates it.' }
   ]}
   { op:['/' 'divide'] sig:[
-    { bin:1 proto:'...any => number' desc:'Divides the given values starting with the first.' }
+    { bin:1 proto:'...any => number' desc:'Divides the given values starting with the first.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).' }
   ]}
   { op:['/%' 'intdiv'] sig:[
     { bin:1 proto:'...any => number' desc:'Divides the given values with integer division starting with the first.'}
@@ -41,13 +59,17 @@ export const operators = `[
     { bin:1 proto: '(any, any) => boolean' desc:'Do a deep equality check on the first two arguments using loose equality for primitives.' }
     { proto: "(any, any, 'strict'|'loose'|'sql'|application) => boolean" desc:'Do a deep equality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.' }
   ] opts:[
-    { name::equal type:"'strict'|'loose'|'sql'|(any, any) => boolaen" desc:'What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.' }
+    { name::equal type:"'strict'|'loose'|'sql'|(any, any) => boolaen" desc:'What type of equality check should be used to determine whether two values are different.
+
+The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.' }
   ]}
   { op:['!==' 'deep-is-not'] sig:[
     { bin:1 proto: '(any, any) => boolean' desc:'Do a deep inequality check on the first two arguments using loose equality for primitives.' }
     { proto: "(any, any, 'strict'|'loose'|'sql'|application) => boolean" desc:'Do a deep inequality check on the first two arguments using the comparison method specified by the third argument. If an application is given, it will be called with each item being checked at each step in the recursive check to determine equality.' }
   ] opts:[
-    { name::equal type:"'strict'|'loose'|'sql'|(any, any) => boolaen" desc:'What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.' }
+    { name::equal type:"'strict'|'loose'|'sql'|(any, any) => boolaen" desc:'What type of equality check should be used to determine whether two values are different.
+
+The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.' }
   ]}
   { op:['>' 'gt'] sig:[
     { bin:1 proto: '(any, any) => boolean' desc:'Returns true if the first value is greater than the second value.' }
@@ -69,6 +91,10 @@ export const operators = `[
   ]}
   { op:'array' sig:[
     { proto:'...any => any[]' desc:'Returns all of its arguments in an array.'}
+    { proto: 'range => number[]' desc:'Convert a range to an array of numbers covered by the range. The maximum number of elements in the resulting array is 10,000, and the default bounds are -100 to 200.'}
+  ] opts:[
+    { name::range type::boolean desc:'Use the range prototype of the operator. Without this, even a parsed range will result in an array with the range as the only element.' }
+    { name::bounds type:'[number, number]' desc:'Sets the lower and upper bounds, respectively, of the resulting array. If the bounds are more than 10,000 apart, the lower bound will be set to 10,000 less than the upper bound.' }
   ]}
   { op:'avg' sig:[
     { agg:1 proto: '() => number' desc:'Computes the average of the current source.' }
@@ -80,7 +106,11 @@ export const operators = `[
     { proto:'...any => any' desc:'Evaluates each of its arguments and returns the value of the final argument.' }
   ]}
   { op:['case' 'switch'] sig:[
-    { proto:'(any, ...(any|application, any)) => any' desc:'Evaluates its first argument and uses it as a basis for comparison for each subsequent pair of arguments, called matchers. The first value in a matcher is used for the comparison, and the second value is returned if the comparison holds. If the matcher first value is an application, the matcher matches if the application returns a truthy value when given the basis value. If the matcher first value is a value, the matcher matches if the first value and the basis value are loosely equal. The basis value is available as @case or the shorthand _ in each matcher.' eg:['case 1+1 when 1 then :nope when =>4 - _ == _ then :yep else :other end' 'case(1+1 1 :nope =>4 - _ == _ :yep :other)'] }
+    { proto:'(any, ...(any|application, any)) => any' desc:'Evaluates its first argument and uses it as a basis for comparison for each subsequent pair of arguments, called matchers.
+
+The first value in a matcher is used for the comparison, and the second value is returned if the comparison holds. If the matcher first value is an application, the matcher matches if the application returns a truthy value when given the basis value. If the matcher first value is a value, the matcher matches if the first value and the basis value are loosely equal.
+
+The basis value is available as @case or the shorthand _ in each matcher.' eg:['case 1+1 when 1 then :nope when =>4 - _ == _ then :yep else :other end' 'case(1+1 1 :nope =>4 - _ == _ :yep :other)'] }
   ]}
   { op:'ceil' sig:[
     { proto:'number => number' desc:'Returns the given number rounded up to the nearest integer.' }
@@ -180,7 +210,15 @@ export const operators = `[
     { proto:'(any, string, ...args) => string' desc:'Applies the named formatted indicated by the second argument string to the given value, passing along any additional arguments to the formatter.' }
   ]}
   { op:'generate' sig:[
-    { proto:'(application) => any[]' desc:'Calls the given application, aggregating values until the application returns undefined. If the result is an array, the elements of the array are added to the result. If the result is an object matching { value?: any, state?: any }, then the value will be added to the result and the state, if supplied, will replace the state of the generator. Any other value will be added to the result. Each application is passed the state, last value, and index of the call. Each of the arguments is also available a special reference, @state, @last, and @index, respectively. The global defaults for generate have a max property, defaulting to 10000, that limits the number of iterations that can be run to avoid non-terminating generators.' }
+    { proto:'(application) => any[]' desc:'Calls the given application, aggregating values until the application returns undefined.
+
+If the result is an array, the elements of the array are added to the result.
+If the result is an object matching { value?: any, state?: any }, then the value will be added to the result and the state, if supplied, will replace the state of the generator.
+Any other value will be added to the result.
+
+Each application is passed the state, last value, and index of the call. Each of the arguments is also available a special reference, @state, @last, and @index, respectively.
+
+The global defaults for generate have a max property, defaulting to 10000, that limits the number of iterations that can be run to avoid non-terminating generators.' }
   ], opts: [
     { name:'[state]' type:'any' desc:'Any options passed to the operator are sent into the initial application as the state.' }
   ]}
@@ -208,11 +246,16 @@ export const operators = `[
     { bin:1 proto:'(application, object) => boolean' desc:'Returns true if the first argument application returns true for one of the [value, index, key] tuples in the second argument array.' }
     { bin:1 proto:'(string, string) => boolean' desc:'Returns true if the first argument is a substring of the second argument.' }
     { bin:1 proto:'(string|string[], object) => boolean' desc:'Returns true if the strings in the first argument are all keys in the given object.' }
-    { bin:1 proto:'(date, daterange) => boolean' desc:'Returns true if the first argument is a falls within the second argument range.' }
-    { bin:1 proto:'(number, range) => boolean' desc:'Returns true if the first argument is a falls within the second argument range.' }
+    { bin:1 proto:'(date, daterange) => boolean' desc:'Returns true if the first argument falls within the second argument range.' }
+    { bin:1 proto:'(number, range) => boolean' desc:'Returns true if the first argument falls within the second argument range.' }
   ]}
   { op:'index' sig:[
-    { agg:1 proto:'(array, application) => object' desc:'Returns a map of the given array keyed on the result of the application. If the application returns a tuple, the values in the map will be the second value in the tuple and the keys will be the first. If the key portion of the tuple is an array, the value will be set for each key in the keys array. If the application returns an empty tuple, the value in the array will be omitted from the result. The value may also be an object with a "key" or "keys" key and, optionally, a "value" key. The value may also be an object with a "many" key with an array value of multiple entries of any of the previous types to be added to the map.' }
+    { agg:1 proto:'(array, application) => object' desc:'Returns a map of the given array keyed on the result of the application.
+
+If the application returns a tuple, the values in the map will be the second value in the tuple and the keys will be the first. If the key portion of the tuple is an array, the value will be set for each key in the keys array.
+If the application returns an empty tuple, the value in the array will be omitted from the result.
+The value may also be an object with a "key" or "keys" key and, optionally, a "value" key.
+The value may also be an object with a "many" key with an array value of multiple entries of any of the previous types to be added to the map.' }
   ] opts: [
     { name:'many' type::boolean desc:'If enabled, the values in the map will be arrays aggregating all of the values with the same key. Otherwise, the last entry for a key will be the value for that key in the map.' }
   ]}
@@ -247,7 +290,9 @@ export const operators = `[
     { proto:'(object, true) => string[]' desc:'Returns an array of all of the keys in the given object, including any from the prototype chain.' }
   ]}
   { op:'label-diff' sig:[
-    { proto:'(Diff, LabelMap) => Diff' desc:'Takes the given diff and label map and swaps out paths in the diff for labels in the map. The label map is a nested object with the keys being single key paths in the diff and the values being a label or tuple of a label and label map for nested sub structures.' eg:'label-diff(d { foo:[:Company { bar::Address }] }) where d = { :foo.bar: [:street :avenue] } will result in { "Company Address": [:street :avenue] }' }
+    { proto:'(Diff, LabelMap) => Diff' desc:'Takes the given diff and label map and swaps out paths in the diff for labels in the map.
+
+The label map is a nested object with the keys being single key paths in the diff and the values being a label or tuple of a label and label map for nested sub structures.' eg:'label-diff(d { foo:[:Company { bar::Address }] }) where d = { :foo.bar: [:street :avenue] } will result in { "Company Address": [:street :avenue] }' }
   ] opts:[
     { name:'omit' type:'boolean' desc:'Remove any unlabelled diff entries from the output.' }
   ]}
@@ -313,8 +358,8 @@ export const operators = `[
     { bin:1 proto:'(application, object) => boolean' desc:'Returns false if the first argument application returns true for one of the [value, index, key] tuples in the second argument array.' }
     { bin:1 proto:'(string, string) => boolean' desc:'Returns false if the first argument is a substring of the second argument.' }
     { bin:1 proto:'(string|string[], object) => boolean' desc:'Returns false if the strings in the first argument are all keys in the given object.' }
-    { bin:1 proto:'(date, daterange) => boolean' desc:'Returns false if the first argument is a falls within the second argument range.' }
-    { bin:1 proto:'(number, range) => boolean' desc:'Returns false if the first argument is a falls within the second argument range.' }
+    { bin:1 proto:'(date, daterange) => boolean' desc:'Returns false if the first argument falls within the second argument range.' }
+    { bin:1 proto:'(number, range) => boolean' desc:'Returns false if the first argument falls within the second argument range.' }
   ]}
   { op:'not-like' sig:[
     { bin:1 proto:'(string, string) => any' desc:'Checks to see if the first string does not match the second string used as a pattern case sensitively.' }
@@ -401,7 +446,11 @@ export const operators = `[
   ]}
   { op:'set-defaults' sig:[
     { proto:"('format', string) => any" desc:'Sets the defaults for the given named formatter. Defaults should be passed in as named options that depend on the decorator.' }
-    { proto:"('round') => any" desc:'Sets the defaults for rounding operations. Defaults should be passed in as named options, which can be places, all-numeric, and method.' }
+    { proto:"('round') => any" desc:'Sets the defaults for rounding operations. Defaults should be passed in as named options, which can be places, all-numeric, and method. 
+
+If a truthy option named context is supplied, the defaults will only be set in the current context and any derived from it in the future. With a context-local round default set, math operations performed in the context or its children will apply rounding as they are performed.
+
+To clear a context-local round default, call this with truthy context and unset named options.' }
     { proto:"('generate') => any" desc:'Sets the defaults for generate operations. Defaults should be passed in as named options, which can be max. The default max is 10000.' }
   ]}
   { op:'similar' sig:[
@@ -418,8 +467,18 @@ export const operators = `[
     { proto:'(string, number, number) => any[]' desc:'Returns a substring of the given string starting from the character at the given index and ending immediately before the final given index. If the final index is negative, it is an offset from the end of the string.' }
   ]}
   { op:'sort' sig:[
-    { proto:'(any[], sort[]) => any[]' desc:'Sorts the given array using the given sort array. Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application. Any array elements that are applications are applied directly to get a comparison value. Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags. If no sorts are provided, an identity sort will be applied.' }
-    { proto:'(object, sort[]) => object' desc:'Sorts the given object keys using the given sort array. Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application. Any array elements that are applications are applied directly to get a comparison value. Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags. If no sorts are provided, an identity sort will be applied to the keys.' }
+    { proto:'(any[], sort[]) => any[]' desc:'Sorts the given array using the given sort array.
+
+Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application.
+Any array elements that are applications are applied directly to get a comparison value.
+Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags.
+If no sorts are provided, an identity sort will be applied.' }
+    { proto:'(object, sort[]) => object' desc:'Sorts the given object keys using the given sort array.
+
+Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application.
+Any array elements that are applications are applied directly to get a comparison value.
+Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags.
+If no sorts are provided, an identity sort will be applied to the keys.' }
   ]}
   { op:'source' sig:[
     { proto:'any => DataSet' desc:'Creates a DataSet from the given value, or returns the value if it is already a DataSet.' }
@@ -854,9 +913,10 @@ export function languageReference(zoom = 100, theme = 'dark') {
 <li>Two integers with nothing but a <code>-</code> between them, indicating any number that falls within the inclusive range of the left and right integer</li>
 <li>a <code>&lt;</code> followed by an integer with optional preceding whitespace, indicating any number less than the integer</li>
 <li>a <code>&gt;</code> followed by an integer with optional preceding whitespace, indicating any number greater than the integer</li>
+<li>a <code>!</code> followed by any of the preceding range types, indicating that the range type should be excluded from the range</li>
 <li>a <code>*</code>, indicating any number</li>
 </ul>
-<p>Exmaple: <code><span class="ast-nodes"><span class="string">'1, 3, 5, 7, &gt;10'</span></span></code>, <code><span class="ast-nodes"><span class="string">'22-33 44 55-66'</span></span></code></p>
+<p>Exmaple: <code><span class="ast-nodes"><span class="string">'1, 3, 5, 7, &gt;10'</span></span></code>, <code><span class="ast-nodes"><span class="string">'22-33 44 55-66'</span></span></code>, <code><span class="ast-nodes"><span class="string">'1-100 !23 !34 !88'</span></span></code></p>
 </div>
 
 <h2 id="references">References</h2>
@@ -895,7 +955,7 @@ export function languageReference(zoom = 100, theme = 'dark') {
 <li><code><span class="ast-nodes"><span class="conditional"><span class="ast-extra">if </span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &gt; </span><span class="number">10</span></span><span class="ast-extra"> then </span><span class="string">:large</span><span class="ast-extra"> elif </span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &lt; </span><span class="number">5</span></span><span class="ast-extra"> then </span><span class="string">:small</span><span class="ast-extra"> else </span><span class="string">:medium</span></span></span></code></li>
 <li><code><span class="ast-nodes"><span class="conditional"><span class="ast-extra">if </span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &gt; </span><span class="number">10</span></span><span class="ast-extra"> </span><span class="block"><span class="ast-extra">{ </span><span class="string">:large</span><span class="ast-extra"> }</span></span><span class="ast-extra"> elif </span><span class="binary-op"><span class="reference">foo</span><span class="ast-extra"> &lt; </span><span class="number">5</span></span><span class="ast-extra"> </span><span class="block"><span class="ast-extra">{ </span><span class="string">:small</span><span class="ast-extra"> }</span></span><span class="ast-extra"> else </span><span class="block"><span class="ast-extra">{ </span><span class="string">:medium</span><span class="ast-extra"> }</span></span></span></span></code></li>
 </ul>
-<p>Most operators are limited to LISP and call syntax because that&#39;s how they&#39;re most reasonably used. <code>+</code> and <code>not</code> are available as unary operators. Supported binary operators in order of precedence are exponentiation (<code>**</code>), mutiplication/division/modulus/int division (<code>*</code>, <code>/</code>, <code>%</code>, <code>/%</code>), addition/subtraction (<code>+</code>, <code>-</code>), comparison (<code>&gt;=</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&lt;</code>, <code>ilike</code>, <code>in</code>, <code>like</code>, <code>not-ilike</code>, <code>not-like</code>, <code>not-in</code>, <code>contains</code>, <code>does-not-contain</code>, <code>gt</code>, <code>gte</code>, <code>lt</code>, <code>lte</code>), equality (<code>is</code>, <code>is-not</code>, <code>==</code>, <code>!=</code>, <code>deep-is</code>, <code>deep-is-not</code>, <code>strict-is</code>, <code>strict-is-not</code>, <code>===</code>, <code>!==</code>), boolean and (<code>and</code>, <code>&amp;&amp;</code>), boolean or (<code>or</code>, <code>\|\|</code>) and nullish coalescing (<code>??</code>). At least one space is required on either side of a binary operator.</p>
+<p>Most operators are limited to LISP and call syntax because that&#39;s how they&#39;re most reasonably used. <code>+</code>, <code>-</code>, and <code>not</code> are available as unary operators. Supported binary operators in order of precedence are exponentiation (<code>**</code>), mutiplication/division/modulus/int division (<code>*</code>, <code>/</code>, <code>%</code>, <code>/%</code>), addition/subtraction (<code>+</code>, <code>-</code>), comparison (<code>&gt;=</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&lt;</code>, <code>ilike</code>, <code>in</code>, <code>like</code>, <code>not-ilike</code>, <code>not-like</code>, <code>not-in</code>, <code>contains</code>, <code>does-not-contain</code>, <code>gt</code>, <code>gte</code>, <code>lt</code>, <code>lte</code>), equality (<code>is</code>, <code>is-not</code>, <code>==</code>, <code>!=</code>, <code>deep-is</code>, <code>deep-is-not</code>, <code>strict-is</code>, <code>strict-is-not</code>, <code>===</code>, <code>!==</code>), boolean and (<code>and</code>, <code>&amp;&amp;</code>), boolean or (<code>or</code>, <code>\|\|</code>) and nullish coalescing (<code>??</code>). At least one space is required on either side of a binary operator.</p>
 <p>Most operators take a number of arguments, which are passed within their <code>()</code>s. Some operators will evaluate their arguments lazily, like <code>and</code> and <code>or</code>, and others will evaluate all of their arguments before processing them. Some operators will implicitly operate on their nearest data source, and these are internally configured as aggregate operators, including <code>sum</code> and <code>avg</code>.</p>
 <p>Call operations may be attached to a reference such that the reference further refines the result of the call operation.</p>
 <p>Example: <code><span class="ast-nodes"><span class="binary-op"><span class="call"><span class="ast-extra">find(</span><span class="reference">list</span><span class="ast-extra"> </span><span class="application"><span class="ast-extra">=&gt;</span><span class="binary-op"><span class="call"><span class="ast-extra">len(</span><span class="reference">parts</span><span class="ast-extra">)</span></span><span class="ast-extra"> &gt; </span><span class="number">10</span></span></span><span class="ast-extra">)</span></span><span class="ast-extra">.name</span></span></span></code></p>

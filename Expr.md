@@ -94,9 +94,10 @@ Ranges don't have any special syntax built directly into REL, but there is a bui
 * Two integers with nothing but a `-` between them, indicating any number that falls within the inclusive range of the left and right integer
 * a `<` followed by an integer with optional preceding whitespace, indicating any number less than the integer
 * a `>` followed by an integer with optional preceding whitespace, indicating any number greater than the integer
+* a `!` followed by any of the preceding range types, indicating that the range type should be excluded from the range
 * a `*`, indicating any number
 
-Exmaple: `'1, 3, 5, 7, >10'`, `'22-33 44 55-66'`
+Exmaple: `'1, 3, 5, 7, >10'`, `'22-33 44 55-66'`, `'1-100 !23 !34 !88'`
 
 ## References
 
@@ -144,7 +145,7 @@ Operators are the foundational component of REL, as everything within REL other 
 * `if foo > 10 then :large elif foo < 5 then :small else :medium`
 * `if foo > 10 { :large } elif foo < 5 { :small } else { :medium }`
 
-Most operators are limited to LISP and call syntax because that's how they're most reasonably used. `+` and `not` are available as unary operators. Supported binary operators in order of precedence are exponentiation (`**`), mutiplication/division/modulus/int division (`*`, `/`, `%`, `/%`), addition/subtraction (`+`, `-`), comparison (`>=`, `>`, `<=`, `<`, `ilike`, `in`, `like`, `not-ilike`, `not-like`, `not-in`, `contains`, `does-not-contain`, `gt`, `gte`, `lt`, `lte`), equality (`is`, `is-not`, `==`, `!=`, `deep-is`, `deep-is-not`, `strict-is`, `strict-is-not`, `===`, `!==`), boolean and (`and`, `&&`), boolean or (`or`, `\|\|`) and nullish coalescing (`??`). At least one space is required on either side of a binary operator.
+Most operators are limited to LISP and call syntax because that's how they're most reasonably used. `+`, `-`, and `not` are available as unary operators. Supported binary operators in order of precedence are exponentiation (`**`), mutiplication/division/modulus/int division (`*`, `/`, `%`, `/%`), addition/subtraction (`+`, `-`), comparison (`>=`, `>`, `<=`, `<`, `ilike`, `in`, `like`, `not-ilike`, `not-like`, `not-in`, `contains`, `does-not-contain`, `gt`, `gte`, `lt`, `lte`), equality (`is`, `is-not`, `==`, `!=`, `deep-is`, `deep-is-not`, `strict-is`, `strict-is-not`, `===`, `!==`), boolean and (`and`, `&&`), boolean or (`or`, `\|\|`) and nullish coalescing (`??`). At least one space is required on either side of a binary operator.
 
 Most operators take a number of arguments, which are passed within their `()`s. Some operators will evaluate their arguments lazily, like `and` and `or`, and others will evaluate all of their arguments before processing them. Some operators will implicitly operate on their nearest data source, and these are internally configured as aggregate operators, including `sum` and `avg`.
 

@@ -1,3 +1,30 @@
+## 0.24.2
+
+2024-05-11
+
+### Data
+
+* __BUG:__ The `base` formatter will now actually return the converted value.
+* __BUG:__ The `reverse` operator for arrays will now return a reversed copy rather than reversing the source array and returning it.
+* `-` can now be used as a unary operator.
+* Ranges can now have exclusions in the form of any of the existing range parts immeddiately preceded by a `!` e.g. `1-20 !12 !15-16`.
+* Contexts can now have local rounding set, which will cause any math operators that execute in the context or any of its children to automatically apply the set local rounding to their results. Context-local rounding can be specified with `set-defaults`.
+
+### Render
+
+* Delimited reports now have support for row context, which allows for context to be set up for each value in the data source before fields are rendered in that context. If the row context expression returns a value, it will replace the value from the source before the fields are rendered.
+
+### Designer
+
+* While the designer is not really useful for much in mobile safari, it will now at least try to tell safari not to jump and zoom every time you happen to focus an input.
+* The left menu will now automatically hide when it transfers focus to the expression pane. The widget tree and widget props icons on the left bar will cause the left menu to open with their respective sections shown exclusively.
+* The expression editor is used in more places, like the source filter, sort, group, and context.
+* The context pane is now more helpful for source, context, and delimited field expressions.
+* The sample data included with the designer is now more complex. It is based on the northwinds schema and data that was available for SQLite. If a project is saved with a reference to sample data, it will now be injected into the project as it loads.
+* There is now a `+F` button on the report entry in the widget tree for delimited reports to add a field.
+* The editor should now get a little less out-of-sync between the actual text and the highlighted view, though there appears to be a bug in `word-break: break-all` in most browsers that causes some lines not have characters completely filling them. This causes line numbers to get misaligned for some very long lines.
+
+
 ## 0.24.1
 
 2024-04-25

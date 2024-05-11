@@ -39,7 +39,9 @@
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
+<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different.
+
+The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
 </dl>
 </dl>
 <br/>
@@ -86,9 +88,13 @@
 
 <dl>
 <dt><code>...number => number</code> (binary)</dt>
-<dd>Multiplies the given values starting with the first.</dd>
+<dd>Multiplies the given values starting with the first.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).</dd>
 <dt><code>(string, number) => string</code> (binary)</dt>
-<dd>Returns the given string copied number times.</dd>
+<dd>Returns the given string copied number times if the number is positive.</dd>
+<dt><code>(any[], number) => any[]</code> (binary)</dt>
+<dd>Returns the given array concatenated number times if the array has fewer than 1,000 elements and the number is positive and less than 10,000.</dd>
 </dl>
 
 </dl>
@@ -104,7 +110,9 @@
 
 <dl>
 <dt><code>...number => number</code> (binary)</dt>
-<dd>Applies exponentiation to the given arguments with right associativity.</dd>
+<dd>Applies exponentiation to the given arguments with right associativity.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).</dd>
 <dd>e.g. <code>(** 1 2 3) is 1^(2^3)</code></dd>
 </dl>
 
@@ -121,9 +129,19 @@
 
 <dl>
 <dt><code>...number => number</code> (binary)</dt>
-<dd>Adds the given numbers together.</dd>
+<dd>Adds the given numbers together.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).</dd>
 <dt><code>...any => string</code> (binary)</dt>
 <dd>Concatenates the given arguments as strings.</dd>
+<dt><code>...object => object</code> (binary)</dt>
+<dd>Creates a shallow copy comprised of each given object where overlapping keys in later arguments override keys in earlier arguments.</dd>
+<dt><code>...any[] => object</code> (binary)</dt>
+<dd>Creates a shallow copy comprised of each given array concatenated.</dd>
+<dt><code>(date, timespan) => date</code> (binary)</dt>
+<dd>Adds the given timespan to the given date.</dd>
+<dt><code>...timespan => timespan</code> (binary)</dt>
+<dd>Adds the given timespans together.</dd>
 <dt><code>any => number</code> (unary)</dt>
 <dd>The unary + operator converts the given value to a number.</dd>
 </dl>
@@ -141,7 +159,15 @@
 
 <dl>
 <dt><code>...any => number</code> (binary)</dt>
-<dd>Subtracts the given values as numbers starting with the first.</dd>
+<dd>Subtracts the given values as numbers starting with the first.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).</dd>
+<dt><code>(date, date) => timespan</code> (binary)</dt>
+<dd>Subtracts the second date from the first, resulting in the timespan between the two dates.</dd>
+<dt><code>(date, timespan) => date</code> (binary)</dt>
+<dd>Subtracts the second date from the first, resulting in the timespan between the two dates.</dd>
+<dt><code>any => number</code> (unary)</dt>
+<dd>The unary - operator converts the given value to a number and negates it.</dd>
 </dl>
 
 </dl>
@@ -157,7 +183,9 @@
 
 <dl>
 <dt><code>...any => number</code> (binary)</dt>
-<dd>Divides the given values starting with the first.</dd>
+<dd>Divides the given values starting with the first.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).</dd>
 </dl>
 
 </dl>
@@ -247,7 +275,9 @@
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
+<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different.
+
+The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
 </dl>
 </dl>
 <br/>
@@ -326,9 +356,19 @@
 
 <dl>
 <dt><code>...number => number</code> (binary)</dt>
-<dd>Adds the given numbers together.</dd>
+<dd>Adds the given numbers together.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).</dd>
 <dt><code>...any => string</code> (binary)</dt>
 <dd>Concatenates the given arguments as strings.</dd>
+<dt><code>...object => object</code> (binary)</dt>
+<dd>Creates a shallow copy comprised of each given object where overlapping keys in later arguments override keys in earlier arguments.</dd>
+<dt><code>...any[] => object</code> (binary)</dt>
+<dd>Creates a shallow copy comprised of each given array concatenated.</dd>
+<dt><code>(date, timespan) => date</code> (binary)</dt>
+<dd>Adds the given timespan to the given date.</dd>
+<dt><code>...timespan => timespan</code> (binary)</dt>
+<dd>Adds the given timespans together.</dd>
 <dt><code>any => number</code> (unary)</dt>
 <dd>The unary + operator converts the given value to a number.</dd>
 </dl>
@@ -363,8 +403,15 @@
 <dl>
 <dt><code>...any => any[]</code></dt>
 <dd>Returns all of its arguments in an array.</dd>
+<dt><code>range => number[]</code></dt>
+<dd>Convert a range to an array of numbers covered by the range. The maximum number of elements in the resulting array is 10,000, and the default bounds are -100 to 200.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>range</code></dt><dd>Use the range prototype of the operator. Without this, even a parsed range will result in an array with the range as the only element.</dd><dt><code>bounds</code></dt><dd>Sets the lower and upper bounds, respectively, of the resulting array. If the bounds are more than 10,000 apart, the lower bound will be set to 10,000 less than the upper bound.</dd>
+</dl>
 </dl>
 <br/>
 
@@ -416,7 +463,11 @@
 
 <dl>
 <dt><code>(any, ...(any|application, any)) => any</code></dt>
-<dd>Evaluates its first argument and uses it as a basis for comparison for each subsequent pair of arguments, called matchers. The first value in a matcher is used for the comparison, and the second value is returned if the comparison holds. If the matcher first value is an application, the matcher matches if the application returns a truthy value when given the basis value. If the matcher first value is a value, the matcher matches if the first value and the basis value are loosely equal. The basis value is available as @case or the shorthand _ in each matcher.</dd>
+<dd>Evaluates its first argument and uses it as a basis for comparison for each subsequent pair of arguments, called matchers.
+
+The first value in a matcher is used for the comparison, and the second value is returned if the comparison holds. If the matcher first value is an application, the matcher matches if the application returns a truthy value when given the basis value. If the matcher first value is a value, the matcher matches if the first value and the basis value are loosely equal.
+
+The basis value is available as @case or the shorthand _ in each matcher.</dd>
 <dd>e.g. <code>case 1+1 when 1 then :nope when =>4 - _ == _ then :yep else :other end</code></dd>
 <dd>e.g. <code>case(1+1 1 :nope =>4 - _ == _ :yep :other)</code></dd>
 </dl>
@@ -577,7 +628,9 @@
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
+<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different.
+
+The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
 </dl>
 </dl>
 <br/>
@@ -600,7 +653,9 @@
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
+<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different.
+
+The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
 </dl>
 </dl>
 <br/>
@@ -656,7 +711,9 @@
 
 <dl>
 <dt><code>...any => number</code> (binary)</dt>
-<dd>Divides the given values starting with the first.</dd>
+<dd>Divides the given values starting with the first.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).</dd>
 </dl>
 
 </dl>
@@ -879,7 +936,15 @@
 
 <dl>
 <dt><code>(application) => any[]</code></dt>
-<dd>Calls the given application, aggregating values until the application returns undefined. If the result is an array, the elements of the array are added to the result. If the result is an object matching { value?: any, state?: any }, then the value will be added to the result and the state, if supplied, will replace the state of the generator. Any other value will be added to the result. Each application is passed the state, last value, and index of the call. Each of the arguments is also available a special reference, @state, @last, and @index, respectively. The global defaults for generate have a max property, defaulting to 10000, that limits the number of iterations that can be run to avoid non-terminating generators.</dd>
+<dd>Calls the given application, aggregating values until the application returns undefined.
+
+If the result is an array, the elements of the array are added to the result.
+If the result is an object matching { value?: any, state?: any }, then the value will be added to the result and the state, if supplied, will replace the state of the generator.
+Any other value will be added to the result.
+
+Each application is passed the state, last value, and index of the call. Each of the arguments is also available a special reference, @state, @last, and @index, respectively.
+
+The global defaults for generate have a max property, defaulting to 10000, that limits the number of iterations that can be run to avoid non-terminating generators.</dd>
 </dl>
 
 #### <ins>Options</ins>
@@ -1019,9 +1084,9 @@
 <dt><code>(string|string[], object) => boolean</code> (binary)</dt>
 <dd>Returns true if the strings in the first argument are all keys in the given object.</dd>
 <dt><code>(date, daterange) => boolean</code> (binary)</dt>
-<dd>Returns true if the first argument is a falls within the second argument range.</dd>
+<dd>Returns true if the first argument falls within the second argument range.</dd>
 <dt><code>(number, range) => boolean</code> (binary)</dt>
-<dd>Returns true if the first argument is a falls within the second argument range.</dd>
+<dd>Returns true if the first argument falls within the second argument range.</dd>
 </dl>
 
 </dl>
@@ -1037,7 +1102,12 @@
 
 <dl>
 <dt><code>(array, application) => object</code> (aggregate)</dt>
-<dd>Returns a map of the given array keyed on the result of the application. If the application returns a tuple, the values in the map will be the second value in the tuple and the keys will be the first. If the key portion of the tuple is an array, the value will be set for each key in the keys array. If the application returns an empty tuple, the value in the array will be omitted from the result. The value may also be an object with a "key" or "keys" key and, optionally, a "value" key. The value may also be an object with a "many" key with an array value of multiple entries of any of the previous types to be added to the map.</dd>
+<dd>Returns a map of the given array keyed on the result of the application.
+
+If the application returns a tuple, the values in the map will be the second value in the tuple and the keys will be the first. If the key portion of the tuple is an array, the value will be set for each key in the keys array.
+If the application returns an empty tuple, the value in the array will be omitted from the result.
+The value may also be an object with a "key" or "keys" key and, optionally, a "value" key.
+The value may also be an object with a "many" key with an array value of multiple entries of any of the previous types to be added to the map.</dd>
 </dl>
 
 #### <ins>Options</ins>
@@ -1219,7 +1289,9 @@
 
 <dl>
 <dt><code>(Diff, LabelMap) => Diff</code></dt>
-<dd>Takes the given diff and label map and swaps out paths in the diff for labels in the map. The label map is a nested object with the keys being single key paths in the diff and the values being a label or tuple of a label and label map for nested sub structures.</dd>
+<dd>Takes the given diff and label map and swaps out paths in the diff for labels in the map.
+
+The label map is a nested object with the keys being single key paths in the diff and the values being a label or tuple of a label and label map for nested sub structures.</dd>
 <dd>e.g. <code>label-diff(d { foo:[:Company { bar::Address }] }) where d = { :foo.bar: [:street :avenue] } will result in { "Company Address": [:street :avenue] }</code></dd>
 </dl>
 
@@ -1471,9 +1543,13 @@
 
 <dl>
 <dt><code>...number => number</code> (binary)</dt>
-<dd>Multiplies the given values starting with the first.</dd>
+<dd>Multiplies the given values starting with the first.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).</dd>
 <dt><code>(string, number) => string</code> (binary)</dt>
-<dd>Returns the given string copied number times.</dd>
+<dd>Returns the given string copied number times if the number is positive.</dd>
+<dt><code>(any[], number) => any[]</code> (binary)</dt>
+<dd>Returns the given array concatenated number times if the array has fewer than 1,000 elements and the number is positive and less than 10,000.</dd>
 </dl>
 
 </dl>
@@ -1544,9 +1620,9 @@
 <dt><code>(string|string[], object) => boolean</code> (binary)</dt>
 <dd>Returns false if the strings in the first argument are all keys in the given object.</dd>
 <dt><code>(date, daterange) => boolean</code> (binary)</dt>
-<dd>Returns false if the first argument is a falls within the second argument range.</dd>
+<dd>Returns false if the first argument falls within the second argument range.</dd>
 <dt><code>(number, range) => boolean</code> (binary)</dt>
-<dd>Returns false if the first argument is a falls within the second argument range.</dd>
+<dd>Returns false if the first argument falls within the second argument range.</dd>
 </dl>
 
 </dl>
@@ -1763,7 +1839,9 @@
 
 <dl>
 <dt><code>...number => number</code> (binary)</dt>
-<dd>Applies exponentiation to the given arguments with right associativity.</dd>
+<dd>Applies exponentiation to the given arguments with right associativity.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).</dd>
 <dd>e.g. <code>(** 1 2 3) is 1^(2^3)</code></dd>
 </dl>
 
@@ -1938,7 +2016,11 @@ __NOTE:__ By default, the single-number signature will round to an integer, but 
 <dt><code>('format', string) => any</code></dt>
 <dd>Sets the defaults for the given named formatter. Defaults should be passed in as named options that depend on the decorator.</dd>
 <dt><code>('round') => any</code></dt>
-<dd>Sets the defaults for rounding operations. Defaults should be passed in as named options, which can be places, all-numeric, and method.</dd>
+<dd>Sets the defaults for rounding operations. Defaults should be passed in as named options, which can be places, all-numeric, and method. 
+
+If a truthy option named context is supplied, the defaults will only be set in the current context and any derived from it in the future. With a context-local round default set, math operations performed in the context or its children will apply rounding as they are performed.
+
+To clear a context-local round default, call this with truthy context and unset named options.</dd>
 <dt><code>('generate') => any</code></dt>
 <dd>Sets the defaults for generate operations. Defaults should be passed in as named options, which can be max. The default max is 10000.</dd>
 </dl>
@@ -2012,9 +2094,19 @@ __NOTE:__ By default, the single-number signature will round to an integer, but 
 
 <dl>
 <dt><code>(any[], sort[]) => any[]</code></dt>
-<dd>Sorts the given array using the given sort array. Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application. Any array elements that are applications are applied directly to get a comparison value. Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags. If no sorts are provided, an identity sort will be applied.</dd>
+<dd>Sorts the given array using the given sort array.
+
+Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application.
+Any array elements that are applications are applied directly to get a comparison value.
+Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags.
+If no sorts are provided, an identity sort will be applied.</dd>
 <dt><code>(object, sort[]) => object</code></dt>
-<dd>Sorts the given object keys using the given sort array. Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application. Any array elements that are applications are applied directly to get a comparison value. Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags. If no sorts are provided, an identity sort will be applied to the keys.</dd>
+<dd>Sorts the given object keys using the given sort array.
+
+Any array elements that are strings may indicate direction with a leading + or - for ascending and descending, respectively. The remainder of the string is parsed and used as an application.
+Any array elements that are applications are applied directly to get a comparison value.
+Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags.
+If no sorts are provided, an identity sort will be applied to the keys.</dd>
 </dl>
 
 </dl>
@@ -2147,7 +2239,15 @@ __NOTE:__ By default, the single-number signature will round to an integer, but 
 
 <dl>
 <dt><code>...any => number</code> (binary)</dt>
-<dd>Subtracts the given values as numbers starting with the first.</dd>
+<dd>Subtracts the given values as numbers starting with the first.
+
+If there is context-local rounding set, it will be applied to the result (see set-defaults).</dd>
+<dt><code>(date, date) => timespan</code> (binary)</dt>
+<dd>Subtracts the second date from the first, resulting in the timespan between the two dates.</dd>
+<dt><code>(date, timespan) => date</code> (binary)</dt>
+<dd>Subtracts the second date from the first, resulting in the timespan between the two dates.</dd>
+<dt><code>any => number</code> (unary)</dt>
+<dd>The unary - operator converts the given value to a number and negates it.</dd>
 </dl>
 
 </dl>
@@ -2185,7 +2285,11 @@ __NOTE:__ By default, the single-number signature will round to an integer, but 
 
 <dl>
 <dt><code>(any, ...(any|application, any)) => any</code></dt>
-<dd>Evaluates its first argument and uses it as a basis for comparison for each subsequent pair of arguments, called matchers. The first value in a matcher is used for the comparison, and the second value is returned if the comparison holds. If the matcher first value is an application, the matcher matches if the application returns a truthy value when given the basis value. If the matcher first value is a value, the matcher matches if the first value and the basis value are loosely equal. The basis value is available as @case or the shorthand _ in each matcher.</dd>
+<dd>Evaluates its first argument and uses it as a basis for comparison for each subsequent pair of arguments, called matchers.
+
+The first value in a matcher is used for the comparison, and the second value is returned if the comparison holds. If the matcher first value is an application, the matcher matches if the application returns a truthy value when given the basis value. If the matcher first value is a value, the matcher matches if the first value and the basis value are loosely equal.
+
+The basis value is available as @case or the shorthand _ in each matcher.</dd>
 <dd>e.g. <code>case 1+1 when 1 then :nope when =>4 - _ == _ then :yep else :other end</code></dd>
 <dd>e.g. <code>case(1+1 1 :nope =>4 - _ == _ :yep :other)</code></dd>
 </dl>
