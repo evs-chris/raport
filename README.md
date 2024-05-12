@@ -294,4 +294,10 @@ npm run package
 
 ## Designer
 
-There is a basic report designer, which is built as a [Ractive.js](https://ractive.js.org/) component, with an environment to design reports in paged, flowed, or delimited formats. It also has a expression evaluation engine that takes into account context in most cases and can `fmt` your expressions.
+There is a report designer, which is built as a [Ractive.js](https://ractive.js.org/) component, with an environment to design reports in paged, flowed, or delimited formats. It also has a expression evaluation engine that takes into account context in most cases and can `fmt` your expressions.
+
+## What's with the name? You know it's misspelled, right?
+
+Why yes, yes I do. The two hardest problems in software development are cache invalidation, naming things, and dealing with off-by-one errors. In this case, I was inspired by the 'No Ragrets' tattoo meme. Since raport sounds almost exactly like report in my fine mumbly accent and it wasn't likely to be taken anywhere else by a similar project, raport is what I landed on. The logo is also inspired by the meme and adds a bit of Comic Sans MS to the mix for the lulz. I'm not an artist and would like to apologize in advance for the image below.
+
+![raport logo](https://github.com/evs-chris/raport/blob/master/play/raport.png?raw=true)
