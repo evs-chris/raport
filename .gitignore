@@ -6,3 +6,4 @@ play/index*js*
 play/diff*js*
 src/play/
 .views
+.DS_Store
