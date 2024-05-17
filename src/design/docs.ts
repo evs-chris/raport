@@ -754,7 +754,7 @@ export function languageReference(zoom = 100, theme = 'dark') {
   .dark .ast-nodes .primitive,
   .dark .ast-nodes .number,
   .dark .ast-nodes .date,
-  .dark .ast-nides .timespan {
+  .dark .ast-nodes .timespan {
     color: #0ca;
   }
 
@@ -831,17 +831,35 @@ export function languageReference(zoom = 100, theme = 'dark') {
   }
 
   .ast-nodes .each-block > .ast-extra {
+    color: #167;
+  }
+  .dark .ast-nodes .each-block > .ast-extra {
     color: #4bc;
   }
 
   .ast-nodes .case-block > .ast-extra,
   .ast-nodes .unless-block > .ast-extra,
   .ast-nodes .if-block > .ast-extra {
+    color: #189;
+  }
+  .dark .ast-nodes .case-block > .ast-extra,
+  .dark .ast-nodes .unless-block > .ast-extra,
+  .dark .ast-nodes .if-block > .ast-extra {
     color: #1de;
   }
 
   .ast-nodes .with-block > .ast-extra {
+    color: #145;
+  }
+  .dark .ast-nodes .with-block > .ast-extra {
     color: #29c;
+  }
+
+  .ast-nodes .interpolator > .ast-extra {
+    color: #555;
+  }
+  .dark .ast-nodes .interpolator > .ast-extra {
+    color: #ccc;
   }
 </style>
 </head>
@@ -1002,7 +1020,7 @@ export function languageReference(zoom = 100, theme = 'dark') {
 </code></pre>
 </div>
 
-<h2>Styled Text</h2>
+<h2 id="styled-text">Styled Text</h2>
 <div class=indent>
 <p>Reports often benefit from styled text, and while most of the raport controls include properties that style their rendered text, it is usually only easily applied to the entire string at once. Labels can be split into an array of parts that are individually styled, but that makes interpolation within the label text difficult when flow control and styling interleave. To address this, raport also provides a light markup language that can be used to apply styling to plain text.</p>
 <p>The syntax consists of markup tags interspersed within the text, where each tag may include multiple properties that are inline or block and boolean or valued. Inline properties are typically boolean and can be enabled and disabled at any place within the text. Block properties are grouped with other block properties within their initial tag and are enabled and disabled together. Boolean properties are toggled with each tag, and valued properties form a stack.</p>
@@ -1040,6 +1058,26 @@ export function languageReference(zoom = 100, theme = 'dark') {
 <li><code>rotate</code> - rotates the block by the given number of turns. The direction may be specified as <code>left</code> or <code>right</code> and defaults to right. An addition set of coordinates may be supplied to set the point of rotation, and they may be numbers corresponding to <code>rem</code>, percentages, or relative values <code>top</code>, <code>left</code>, <code>bottom</code>, <code>right</code>, and <code>center</code>. The order of <code>move</code> and <code>rotate</code> tags will affect how they are applied.</li>
 <li><code>width</code>, <code>w</code> - sets the width of the block in <code>rem</code>, e.g., <code>|w=10|this is 10rem wide</code>. The width does not include any padding or margin, in contrast to the behavior of the width and margin properties of raport widgets. Width may also be set as a percentage of its container, making it easier to align text within a widget e.g., <code>|w=100%,align=center|this is centered in the container</code>.</li>
 </ul>
+</div>
+
+<h2 id="templates">Templates</h2>
+<div class=indent>
+<p>There are some contexts in which output is always a string, such as names and HTML output. In these cases it makes sense not to require wrapping the entire string in a set of quotes and using nested interpolators or concatenation. For this purpose, Raport has a template version of expressions that are similar to mustache or handlebars templates, where double curly braces delimit interpolation with special cases for iteration, branching, and context management, and everything else is plain text, including any special characters.</p>
+<h3>Blocks</h3>
+<p>There are five special interpolators that are treated as blocks with bodies and require a closing delimiter to indicate where their body ends. The opening delimiter includes the special name, and the closing delimiter includes a <code>/</code>, optionally followed by any text, typically the special name e.g. <code class="ast-nodes"><span><span class="if-block"><span class="ast-extra">{{if </span><span class="reference">user.logged-in</span><span class="ast-extra">}}</span><span class="content">Hello, </span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">user.name</span><span class="ast-extra">}}</span></span><span class="content">!</span><span class="ast-extra">{{/if}}</span></span></span></code>. Most of the block operators also accept sub-interpolators that split their body into multiple parts. This is used for different branches in an <code>if</code> and an alternative body for an <code>each</code> that has nothing to iterate over. Every sub-block will start with <code>else</code>, <code>else if</code>. <code>elseif</code>, <code>elsif</code>, <code>elif</code>, or <code>when</code>. The sub-blocks do not have their own closing delimiter.</p>
+<ul>
+<li><p>The <code>each</code> block accepts an expression that evaluates to a data source and renders its body once for each value in the source with the value set as the context of the body. The current index is available as <code>@index</code>, the last index is available as <code>@last</code>, the current key is available as <code>@key</code>, and the last key is available as <code>@last-key</code>. The body of an <code>each</code> may specify an alternative for use if there is nothing to iterate over using an <code>else</code> tag e.g. <pre><code class="ast-nodes"><span><span class="each-block"><span class="ast-extra">{{each </span><span class="reference">order.items</span><span class="ast-extra">}}</span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">name</span><span class="ast-extra">}}</span></span><span class="content"> - </span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">quantity</span><span class="ast-extra">}}</span></span><span class="content">
+</span><span class="ast-extra">{{else}}</span><span class="content">No items.</span><span class="ast-extra">{{/}}</span></span></span></code></pre></p></li>
+<li><p>The <code>if</code> block accepts an expression that evaluates to a boolean, and if the value is truthy, renders its body. The body of an <code>if</code> block can supply multiple alternate sub-blocks using <code>else if</code> interpolators, that each accept an expression, and a final <code>else</code> interpolator that does not accept an expression e.g. <code class="ast-nodes"><span><span class="interpolator"><span class="ast-extra">{{</span><span class="let"><span class="ast-extra">let </span><span class="reference">month</span><span class="ast-extra"> = </span><span class="binary-op"><span class="ast-extra">+(</span><span class="binary-op"><span class="reference">@date</span><span class="format-op"><span class="ast-extra">#date,</span><span class="string">:M</span></span></span><span class="ast-extra">)</span></span></span><span class="ast-extra">}}</span></span><span class="if-block"><span class="ast-extra">{{if </span><span class="binary-op"><span class="reference">month</span><span class="ast-extra"> in </span><span class="string">'11-12 1-3'</span></span><span class="ast-extra">}}</span><span class="content">Chilly outside, isn't it?</span><span class="ast-extra">{{else if </span><span class="binary-op"><span class="reference">month</span><span class="ast-extra"> == </span><span class="number">4</span></span><span class="ast-extra">}}</span><span class="content">Is it raining?</span><span class="ast-extra">{{else if </span><span class="binary-op"><span class="reference">month</span><span class="ast-extra"> in </span><span class="string">'7 8'</span></span><span class="ast-extra">}}</span><span class="content">Geez it's hot.</span><span class="ast-extra">{{else}}</span><span class="content">Nice out today, no?</span><span class="ast-extra">{{/if}}</span></span></span></code></p></li>
+<li><p>The <code>unless</code> block accepts an expression that evaluates to a boolan, and if the value is <strong>not</strong> truthy, renders its body e.g. <code class="ast-nodes"><span><span class="unless-block"><span class="ast-extra">{{unless </span><span class="reference">logged-in</span><span class="ast-extra">}}</span><span class="content">Please log in.</span><span class="ast-extra">{{/unless}}</span></span></span></code>. The <code>unless</code> block does not support any sub-blocks.</p></li>
+<li><p>The <code>case</code> block accepts an expression, the keyword <code>when</code>, and another expression. The first expression is evaluated, and the second expression is used with the first <code>when</code> block. The sub-blocks must be either <code>when</code> blocks, which accept an expression argument, or a final <code>else</code> block that is rendered if none of the <code>when</code> blocks match e.g. <pre><code class="ast-nodes"><span><span class="case-block"><span class="ast-extra">{{case </span><span class="reference">user</span><span class="ast-extra"> when </span><span class="reference">_.is-admin</span><span class="ast-extra">}}</span><span class="content">Hello admin user!
+  </span><span class="ast-extra">{{when </span><span class="binary-op"><span class="reference">@date</span><span class="format-op"><span class="ast-extra">#date,</span><span class="binary-op"><span class="string">:H</span><span class="ast-extra"> &lt; </span><span class="number">12</span></span></span></span><span class="ast-extra">}}</span><span class="content">Good morning!
+  </span><span class="ast-extra">{{else}}</span><span class="content">Good day!
+</span><span class="ast-extra">{{/}}</span></span></span></code></pre>
+<li><p>The <code>with</code> block accepts an expression, evaluates it, and sets the result as the context for its body. The <code>with</code> block accepts a an alternative sub-block in the form of an <code>else</code> that will be rendered if the value it is given is false-y. <code class="ast-nodes"><span><span class="with-block"><span class="ast-extra">{{with </span><span class="reference">user</span><span class="ast-extra">}}</span><span class="content">Hello, </span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">name</span><span class="ast-extra">}}</span></span><span class="content">.</span><span class="ast-extra">{{else}}</span><span class="content">Please log in.</span><span class="ast-extra">{{/with}}</span></span></span></code></p></li>
+</ul>
+<h3>Inline</h3>
+<p>Any other interpolators encountered have their contents treated as expressions and will render the resulting value after passing it through the <code>string</code> operator.</p>
 </div>
 
 </body>
