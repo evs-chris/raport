@@ -251,6 +251,13 @@ if (process.env.ENV === 'dev') {
         format: 'iife',
         name: 'play',
         sourcemap: true,
+        globals: {
+          'ractive': 'Ractive',
+          'raport': 'Raport',
+          'design': 'Raport.Design',
+          'raport/index': 'Raport',
+          'design/index': 'Raport.Design',
+        }
       },
       {
         file: 'play/index.min.js',
@@ -258,6 +265,13 @@ if (process.env.ENV === 'dev') {
         name: 'play',
         sourcemap: true,
         plugins: [terser()],
+        globals: {
+          'ractive': 'Ractive',
+          'raport': 'Raport',
+          'design': 'Raport.Design',
+          'raport/index': 'Raport',
+          'design/index': 'Raport.Design',
+        }
       }
     ],
     plugins: [
