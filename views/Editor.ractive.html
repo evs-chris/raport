@@ -13,7 +13,7 @@
 </template>
 
 <template id="viewer">
-  <div class="syntax-editor" {{>extra-attributes}}>
+  <div class="syntax-editor syntax-viewer" {{>extra-attributes}}>
     <code class="ast-nodes">
       <pre>{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}{{#if src.length > 0 && src[src.length - 1] === '\n'}} {{/if}}</pre>
     </code>
@@ -90,6 +90,11 @@
     font-size: 0.875rem !important;
     min-height: 1.75rem !important;
     border: none !important;
+  }
+
+  .syntax-editor.syntax-viewer code {
+    line-height: 0.875rem !important;
+    padding: 0 !important;
   }
 
   .syntax-editor > .editor-pane > code > pre {
