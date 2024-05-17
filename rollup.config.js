@@ -28,6 +28,7 @@ if (process.env.ENV === 'dev') {
       typescript({
         include: ['src/lib/**/*.ts'],
         sourceMap: true,
+        inlineSources: true,
       }),
       sourcemaps(),
       node(),
@@ -70,6 +71,7 @@ if (process.env.ENV === 'dev') {
           'views/*': ['.views/views/*']
         },
         sourceMap: true,
+        inlineSources: true,
       }),
       sourcemaps(),
       node(),
@@ -98,6 +100,7 @@ if (process.env.ENV === 'dev') {
       typescript({
         include: ['src/**/*.ts'],
         sourceMap: true,
+        inlineSources: true,
       }),
       sourcemaps(),
       node(),
@@ -124,6 +127,7 @@ if (process.env.ENV === 'dev') {
       typescript({
         include: ['src/**/*.ts'],
         sourceMap: true,
+        inlineSources: true,
       }),
       sourcemaps(),
       node(),
@@ -166,6 +170,7 @@ if (process.env.ENV === 'dev') {
       typescript({
         include: ['src/lib/**/*.ts'],
         sourceMap: true,
+        inlineSources: true,
       }),
       sourcemaps(),
       node(),
@@ -229,6 +234,7 @@ if (process.env.ENV === 'dev') {
           'views/*': ['.views/views/*']
         },
         sourceMap: true,
+        inlineSources: true,
       }),
       sourcemaps(),
       node(),
@@ -257,6 +263,7 @@ if (process.env.ENV === 'dev') {
     plugins: [
       typescript({
         include: ['src/**/*.ts'],
+        inlineSources: true,
       }),
       sourcemaps(),
       node(),
@@ -297,6 +304,7 @@ if (process.env.ENV === 'dev') {
       typescript({
         include: ['src/**/*.ts'],
         sourceMap: true,
+        inlineSources: true,
       }),
       sourcemaps(),
       node(),

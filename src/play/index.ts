@@ -1,7 +1,14 @@
-import { Delimited, Page, DataSet, PageSizes, parse, parseTemplate, stringify } from 'raport/index';
-import { ReportDesigner, highlight } from 'design/index';
-import Ractive, { InitOpts, ContextHelper } from 'ractive';
+import * as raport from 'raport/index';
+import * as design from 'design/index';
+import Ractive from 'ractive';
 import sample from './sample';
+
+import type { InitOpts, ContextHelper } from 'ractive';
+import type { Delimited, Page } from 'raport/index';
+import { ReportDesigner } from 'design/index';
+
+const { parse, parseTemplate, stringify } = raport;
+const { highlight } = design;
 
 globalThis.highlight = highlight;
 
