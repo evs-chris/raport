@@ -25,7 +25,7 @@
     <div class="scrolled-wrapper widget-tree">
       <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
         {{#with report}}
-        <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : ~/copy ? @.paste(@context) : @.selectWidget('report')" title="{{#if ~/reparent}}Click to move the widget to this container - {{elseif ~/copy}}Click to add a copy of the widget to this container - {{/if}} Path: {{@keypath}}">
+        <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : ~/copy ? @.paste(@context) : @.selectWidget('report')" title="{{#if ~/reparent}}{{#if .type === 'delimited'}}Click to move the selected field to the end of the field list{{'\n'}}{{else}}Click to move the widget to the end of this container{{'\n'}}{{/if}}{{elseif ~/copy}}{{#if .type === 'delimited'}}Click to add a copy of the selected field to the end of the field list{{'\n'}}{{else}}Click to add a copy of the widget to this container{{'\n'}}{{/if}}{{/if}}Path: {{@keypath}}">
           <span class-line on-mouseover="@.set('temp.hover', 'report'), false">
             Report
             <span class=actions>
@@ -189,12 +189,15 @@
 <template id="delimited-fields">
   <div class="delimited children">
     {{#each .fields}}
-      <div class-node class-active="@keypath === ~/temp.expr.path" class-hover="@keypath === ~/temp.expr.hover" on-click="@.editExpr(@context)">
+    <div class-node class-active="@keypath === ~/temp.expr.path" class-hover="@keypath === ~/temp.expr.hover" on-click="@.clickWidget(@context)" title="{{~/reparent ? 'Click to move the selected field above this field\n' : ''}}{{~/copy ? 'Click to paste a copy of the selected field above this field\n' : ''}}Path: {{@keypath}}">
         <span class-line on-mouseover="@.set('temp.expr.hover', @keypath), false" on-mouseout="@.set('temp.expr.hover', ''), false"><span>{{@index + 1}}. {{#if ^^/headers[@index]}}{{^^/headers[@index]}} ({{.}}){{else}}{{.}}{{/if}}</span>
+          <button class=ico title="Copy field" on-click="@.set('copy', @context), false">{{>copy}}</button>
+          <button class=ico title="Move field" on-click="@.set('reparent', @context), false">{{>reparent}}</button>
           <button class="ico field up-arrow" title="Move up (hold the shift key to move to first)" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../', ~/report.headers ? '~/report.headers' : undefined], @index, @event.shiftKey), false">{{>arrow}}</button>
           <button class="ico field down-arrow" title="Move down (hold the shift key to move to last)" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../', ~/report.headers ? '~/report.headers' : undefined], @index, @event.shiftKey), false">{{>arrow}}</button>
           <button class="ico field remove" on-click="@.removeWidget(@context)">{{>times}}</button>
         </span>
+      </div>
     {{/each}}
   </div>
 </template>

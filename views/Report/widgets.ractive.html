@@ -1,7 +1,7 @@
 <div class=children>
   {{#if .type === 'repeater' && .group}}
     {{#each .group}}
-    <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.clickWidget(@context)" on-mouseover="@.set('temp.hover', @keypath), false" title="{{#if ~/reparent}}Click to move the widget to this container - {{elseif ~/copy}}Click to add a copy of the widget to this container - {{/if}} Path: {{@keypath}}">
+    <div class-node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.clickWidget(@context)" on-mouseover="@.set('temp.hover', @keypath), false" title="{{#if ~/reparent}}Click to move the selected {{~/reparent.get('type')}} to the end of this container{{'\n'}}{{elseif ~/copy}}Click to add a copy of the selected {{~/copy.get('type')}} to this container{{'\n'}}{{/if}}Path: {{@keypath}}">
         <span class="line {{@.getNestLevel(@keypath)}}">
           {{#if .widgets.length}}<button on-click="@.set('temp.tree.' + escapeKey(@keypath), ~/temp.tree && ~/temp.tree[@keypath] === false ? true : false), false" class="ico expander">{{#if ~/temp.tree[@keypath] !== false}}-{{else}}+{{/if}}</button>{{/if}}
           <span>group {{@index + 1}} {{>widget-info}}</span>
@@ -26,7 +26,7 @@
   {{/each}}
   {{#if .alternate.type === 'container'}}{{#with .alternate}}{{>special-container 'alternate' as label}}{{/with}}{{/if}}
   {{#each .widgets as widget, @keypath as kp}}
-    <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" class-moving="~/reparent && @keypath === ~/reparent.resolve() || ~/copy && @keypath === ~/copy.resolve()" on-click="@.clickWidget(@context)" on-mouseover="@.set('temp.hover', @keypath), false" title="{{#if !!~/reparent && (!!.widgets || .type === 'container')}}Click to move the widget to this container. - {{elseif !!~/copy && (!!.widgets || .type === 'container')}}Click to add a copy of the widget to this container. Shift click to add a copy of the widget before this container. - {{elseif !!~/copy}}Click to add a copy of the widget before this widget - {{/if}} Path: {{@keypath}}">
+  <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" class-moving="~/reparent && @keypath === ~/reparent.resolve() || ~/copy && @keypath === ~/copy.resolve()" on-click="@.clickWidget(@context)" on-mouseover="@.set('temp.hover', @keypath), false" title="{{#if ~/reparent && (.widgets || .type === 'container')}}Click to move the selected {{~/reparent.get('type')}} to the end of this container.{{'\n'}}{{elseif ~/reparent}}Click to move the selected {{~/reparent.get('type')}} above this {{.type}}.{{'\n'}}{{elseif ~/copy && (.widgets || .type === 'container')}}Click to add a copy of the selected {{~/copy.get('type')}} to this container. Shift click to add a copy of the selected {{~/copy.get('type')}} before this container.{{'\n'}}{{elseif ~/copy}}Click to add a copy of the selected {{~/copy.get('type')}} before this {{.type}}.{{'\n'}}{{/if}}Path: {{@keypath}}">
       <span class="line {{@.getNestLevel(@keypath)}}">
         {{#if .widgets.length || .type === 'repeater'}}<button on-click="@.set('temp.tree.' + escapeKey(@keypath), ~/temp.tree && ~/temp.tree[@keypath] === false ? true : false), false" class="ico expander">{{#if ~/temp.tree[@keypath] !== false}}-{{else}}+{{/if}}</button>{{/if}}
         <span>{{.type}}{{>widget-info}}</span>
@@ -200,7 +200,7 @@
 </template>
 
 <template id="special-container">
-  <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.clickWidget(@context)" on-mouseover="@.set('temp.hover', @keypath), false" title="{{#if ~/reparent}}Click to move the widget to this container - {{elseif ~/copy}}Click to add a copy of the widget to this container. - {{/if}} Path: {{@keypath}}">
+  <div class=node class-active="~/temp.widget === @keypath" class-hover="~/temp.hover === @keypath" on-click="@.clickWidget(@context)" on-mouseover="@.set('temp.hover', @keypath), false" title="{{#if ~/reparent}}Click to move the selected {{~/reparent.get('type')}} to the end of this container{{'\n'}}{{elseif ~/copy}}Click to add a copy of the selected {{~/copy.get('type')}} to this container.{{'\n'}}{{/if}} Path: {{@keypath}}">
     <span class="line {{@.getNestLevel(@keypath)}}">
       {{#if .widgets.length}}<button on-click="@.set('temp.tree.' + escapeKey(@keypath), ~/temp.tree && ~/temp.tree[@keypath] === false ? true : false), false" class="ico expander">{{#if ~/temp.tree[@keypath] !== false}}-{{else}}+{{/if}}</button>{{/if}}
       <span>{{label || 'unknown'}} {{>widget-info}}</span>

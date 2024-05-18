@@ -515,17 +515,27 @@ export class Designer extends Ractive {
     this.set('reparent', undefined);
     if (!w || !target) return;
 
-    let layout: any[];
-    if (Array.isArray(w.get('../../layout'))) {
-      layout = w.splice('../../layout', w.get('@index'), 1).result[0];
-    }
+    if (this.get('report.type') === 'delimited') {
+      const widx = w.get('@index');
+      const obj = w.splice('../', widx, 1).result[0];
+      this.push('target.fields', obj);
+      if (this.get('report.headers')) {
+        const obj = this.splice('report.headers', widx, 1).result[0];
+        this.push('report.headers', obj);
+      }
+    } else {
+      let layout: any[];
+      if (Array.isArray(w.get('../../layout'))) {
+        layout = w.splice('../../layout', w.get('@index'), 1).result[0];
+      }
 
-    if (Array.isArray(target.get('.layout'))) {
-      target.push('.layout', layout || [0, 0]);
-    }
+      if (Array.isArray(target.get('.layout'))) {
+        target.push('.layout', layout || [0, 0]);
+      }
 
-    const obj = w.splice('../', w.get('@index'), 1).result[0];
-    target.push('.widgets', obj);
+      const obj = w.splice('../', w.get('@index'), 1).result[0];
+      target.push('.widgets', obj);
+    }
   }
 
   move(target: ContextHelper) {
@@ -534,33 +544,53 @@ export class Designer extends Ractive {
     if (!w || !target) return;
     const idx = target.get('@index');
 
-    const container = target.get('../../');
-    if (!container || container.type !== 'container' && container !== this.get('report')) return;
+    if (this.get('report.type') === 'delimited') {
+      const widx = w.get('@index');
+      const obj = w.splice('../', widx, 1).result[0];
+      this.splice('report.fields', idx, 0, obj);
+      if (this.get('report.headers')) {
+        const obj = this.splice('report.headers', widx, 1).result[0];
+        this.splice('report.headers', idx, 0, obj);
+      }
+    } else {
+      const container = target.get('../../');
+      if (!container || container.type !== 'container' && container !== this.get('report')) return;
 
-    let layout: any[];
-    if (Array.isArray(w.get('../../layout'))) {
-      layout = w.splice('../../layout', w.get('@index'), 1).result[0];
+      let layout: any[];
+      if (Array.isArray(w.get('../../layout'))) {
+        layout = w.splice('../../layout', w.get('@index'), 1).result[0];
+      }
+
+      if (Array.isArray(target.get('../../layout'))) {
+        target.splice('../../layout', idx, 0, layout || [0, 0]);
+      }
+
+      const obj = w.splice('../', w.get('@index'), 1).result[0];
+      target.splice('../../widgets', idx, 0, obj);
     }
-
-    if (Array.isArray(target.get('../../layout'))) {
-      target.splice('../../layout', idx, 0, layout || [0, 0]);
-    }
-
-    const obj = w.splice('../', w.get('@index'), 1).result[0];
-    target.splice('../../widgets', idx, 0, obj);
   }
 
   paste(target: ContextHelper) {
     const w: ContextHelper = this.get('copy');
-      this.set('copy', undefined);
+    this.set('copy', undefined);
     if (!w || !target) return;
 
-    const obj = cloneDeep(w.get());
-    target.push('widgets', obj);
+    if (this.get('report.type') === 'delimited') {
+      const obj = cloneDeep(w.get());
+      this.push('report.fields', obj);
 
-    if (Array.isArray(target.get('layout'))) {
-      if (Array.isArray(w.get('^^/layout'))) target.push('layout', w.get(`^^/layout.${w.get('@index')}`))
-      else target.push('layout', [0, 0]);
+      if (this.get('report.headers')) {
+        const obj = cloneDeep(this.get(`report.headers.${w.get('@index')}`));
+        this.push('report.headers', obj);
+      }
+    } else {
+      const obj = cloneDeep(w.get());
+      target.push('widgets', obj);
+
+      if (Array.isArray(target.get('layout'))) {
+        if (Array.isArray(w.get('^^/layout'))) target.push('layout', w.get(`^^/layout.${w.get('@index')}`))
+        else target.push('layout', [0, 0]);
+      }
     }
   }
 
@@ -569,17 +599,28 @@ export class Designer extends Ractive {
       this.set('copy', undefined);
     if (!w || !target) return;
 
-    const container = target.get('../../');
-    if (!container || container.type !== 'container' && container !== this.get('report')) return;
-
     const idx = target.get('@index');
 
-    const obj = cloneDeep(w.get());
-    target.splice('../../widgets', idx, 0, obj);
+    if (this.get('report.type') === 'delimited') {
+      const obj = cloneDeep(w.get());
+      const widx = w.get('@index');
+      this.splice('report.fields', idx, 0, obj);
 
-    if (Array.isArray(target.get('../../layout'))) {
-      if (Array.isArray(w.get('^^/layout'))) target.splice('../../layout', idx, 0, w.get(`^^/layout.${w.get('@index')}`))
-      else target.splice('../../layout', idx, 0, [0, 0]);
+      if (this.get('report.headers')) {
+        const obj = cloneDeep(this.get(`report.headers.${widx}`));
+        this.splice('report.headers', idx, 0, obj);
+      }
+    } else {
+      const container = target.get('../../');
+      if (!container || container.type !== 'container' && container !== this.get('report')) return;
+
+      const obj = cloneDeep(w.get());
+      target.splice('../../widgets', idx, 0, obj);
+
+      if (Array.isArray(target.get('../../layout'))) {
+        if (Array.isArray(w.get('^^/layout'))) target.splice('../../layout', idx, 0, w.get(`^^/layout.${w.get('@index')}`))
+        else target.splice('../../layout', idx, 0, [0, 0]);
+      }
     }
   }
 
@@ -590,6 +631,7 @@ export class Designer extends Ractive {
     else if (this.get('reparent')) this.move(target);
     else if (!this.event?.event?.shiftKey && this.get('~/copy') && type === 'container') this.paste(target);
     else if (this.get('~/copy')) this.pasteBefore(target);
+    else if (this.get('report.type') === 'delimited') this.editExpr(target.resolve());
     else this.selectWidget(keypath);
     return false;
   }
@@ -1470,6 +1512,51 @@ export class Designer extends Ractive {
     this.set(sets);
   }
 
+  processExprStr(v: string) {
+    if (!v) {
+      this.set('temp.expr.error', undefined);
+      this.set('temp.expr.ast', undefined);
+    }
+
+    const path = this.get('temp.expr.path');
+    const html = this.get('temp.expr.html') || this.get('temp.expr.template');
+    if (path) this.set(path, v);
+    if (!this.evalLock) {
+      if (typeof v === 'string' && v.trim()) {
+        this.evalLock = true;
+        try {
+          const arr = Array.isArray(v) ? v : [v];
+          for (let i = 0; i < arr.length; i++) {
+            const v = typeof arr[i] === 'string' ? arr[i] : 'text' in arr[i] && typeof arr[i].text === 'string' ? arr[i].text : arr[i];
+            const parsed = (html ? parseTemplate : parse)(v, { detailed: true, contextLines: 3, consumeAll: true });
+            const msg = ('marked' in parsed ? 
+              `${'latest' in parsed ? `${parsed.latest.message || '(no message)'} on line ${parsed.latest.line} at column ${parsed.latest.column}\n\n${parsed.latest.marked}\n\n` : ''}${parsed.message || '(no message)'} on line ${parsed.line} at column ${parsed.column}\n\n${parsed.marked}\n\n` : '') + JSON.stringify(parsed, null, '  ');
+
+            this.set('temp.expr.parsed', msg);
+
+            if ('message' in parsed) {
+              this.set('temp.expr.error', parsed)
+              this.set('temp.expr.errormsg', msg);
+              this.set('temp.expr.ast', undefined);
+            } else {
+              this.set('temp.expr.ast', parsed);
+              this.set('temp.expr.errormsg', undefined);
+              this.set('temp.expr.error', undefined);
+            }
+
+            if (html) this.set('temp.expr.htmlstr', v);
+            else this.set('temp.expr.htmlstr', '');
+
+            if ('message' in parsed) break;
+          }
+        } catch {}
+        this.evalLock = false;
+      } else {
+        this.set('temp.expr.parsed', undefined);
+      }
+    }
+  }
+
   langref = langref;
 }
 
@@ -1578,49 +1665,11 @@ const designerOpts: ExtendOpts<Designer> = {
       } catch {}
       this.evalLock = false;
     },
+    'temp.expr.template'() {
+      this.processExprStr(this.get('temp.expr.str'));
+    },
     'temp.expr.str'(v) {
-      if (!v) {
-        this.set('temp.expr.error', undefined);
-        this.set('temp.expr.ast', undefined);
-      }
-
-      const path = this.get('temp.expr.path');
-      const html = this.get('temp.expr.html') || this.get('temp.expr.template');
-      if (path) this.set(path, v);
-      if (!this.evalLock) {
-        if (typeof v === 'string' && v.trim()) {
-          this.evalLock = true;
-          try {
-            const arr = Array.isArray(v) ? v : [v];
-            for (let i = 0; i < arr.length; i++) {
-              const v = typeof arr[i] === 'string' ? arr[i] : 'text' in arr[i] && typeof arr[i].text === 'string' ? arr[i].text : arr[i];
-              const parsed = (html ? parseTemplate : parse)(v, { detailed: true, contextLines: 3, consumeAll: true });
-              const msg = ('marked' in parsed ? 
-                `${'latest' in parsed ? `${parsed.latest.message || '(no message)'} on line ${parsed.latest.line} at column ${parsed.latest.column}\n\n${parsed.latest.marked}\n\n` : ''}${parsed.message || '(no message)'} on line ${parsed.line} at column ${parsed.column}\n\n${parsed.marked}\n\n` : '') + JSON.stringify(parsed, null, '  ');
-
-              this.set('temp.expr.parsed', msg);
-
-              if ('message' in parsed) {
-                this.set('temp.expr.error', parsed)
-                this.set('temp.expr.errormsg', msg);
-                this.set('temp.expr.ast', undefined);
-              } else {
-                this.set('temp.expr.ast', parsed);
-                this.set('temp.expr.errormsg', undefined);
-                this.set('temp.expr.error', undefined);
-              }
-
-              if (html) this.set('temp.expr.htmlstr', v);
-              else this.set('temp.expr.htmlstr', '');
-
-              if ('message' in parsed) break;
-            }
-          } catch {}
-          this.evalLock = false;
-        } else {
-          this.set('temp.expr.parsed', undefined);
-        }
-      }
+      this.processExprStr(v);
     },
     'temp.expr.ast'(v, o) {
       if (!this.evalLock) {
