@@ -32,7 +32,7 @@
         {{#if ~/project != null}}
           <div>
             <label class-input style-width=20rem>Project Name<input value="{{~/project.name}}" /></label>
-            <button class-plain title="Save all projects to browser storage" on-click="@.saveProjects()">Save Projects</button>
+            <button class-plain title="Save all projects to browser storage (CTRL+s)" on-click="@.saveProjects()">Save Projects</button>
             <button class-plain title="Export this project to a raport/JSON file" on-click="@.download(~/project.name + '.raport-proj', @.stringifyProject())">Export Project</button>
             <button class-plain title="Create a copy of this project" on-click="@.cloneProject()">Clone Project</button>
             <button class-plain title="Import this project definition from a raport/JSON file" on-click="@.importProject(true)">Import Project</button>
