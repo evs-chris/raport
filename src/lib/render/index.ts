@@ -13,10 +13,12 @@ export function maybeComputed<V, T = Exclude<V, Computed>>(v: V, context: Render
   else if (v.x) return evaluate(context, v.x);
 }
 
-export interface ExtendOptions extends ContextExtendOptions {}
+export interface ExtendOptions extends ContextExtendOptions {
+  commit?: { [key: string]: any };
+}
 
 export function extend(context: RenderContext, opts: ExtendOptions): RenderContext {
-  return { report: context.report, context: extendContext(context.context, opts), styles: context.styles, styleMap: context.styleMap };
+  return { parent: context, report: context.report, context: extendContext(context.context, opts), styles: context.styles, styleMap: context.styleMap, commit: opts.commit };
 }
 
 const htmlChars = /[><&]/g;

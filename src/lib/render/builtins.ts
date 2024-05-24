@@ -7,6 +7,27 @@ import { error } from './error';
 import { addStyle, escapeHTML, extend, getWidth, measure, registerRenderer, renderWidget, renderWidgets, RenderContinuation, RenderState, RenderContext, getHeightWithMargin, expandMargin, getWidthWithMargin, isComputed } from './index';
 import { styleClass, style, styleFont, styleImage, styleExtra } from './style';
 
+function onCommit(ctx: RenderContext, key: string, value: any) {
+  let c = ctx;
+  while (c) {
+    if (c.commit) {
+      c.commit[key] = value;
+      return;
+    }
+    c = c.parent;
+  }
+}
+
+function commitContext(ctx: RenderContext) {
+  for (const k in ctx.commit) {
+    let l = ctx.context;
+    while (l) {
+      if (l.special && l.special.values) (l.special.values[k] || (l.special.values[k] = [])).push(ctx.commit[k]);
+      l = l.parent;
+    }
+  }
+}
+
 registerRenderer<Label>('label', (w, ctx, placement) => {
   addStyle(ctx, 'label', `.label {position:absolute;box-sizing:border-box;white-space:normal;}`);
   let str = '';
@@ -14,13 +35,7 @@ registerRenderer<Label>('label', (w, ctx, placement) => {
   let val = (Array.isArray(w.text) ? w.text : [w.text]).map(v => {
     let val = evaluate(ctx, typeof v === 'object' && 'text' in v ? v.text : v);
     if (typeof val === 'string') val = escapeHTML(val);
-    if (typeof v === 'object' && 'id' in v) {
-      let c = ctx.context;
-      while (c) {
-        if (c.special && c.special.values) (c.special.values[v.id] || (c.special.values[v.id] = [])).push(val);
-        c = c.parent;
-      }
-    }
+    if (typeof v === 'object' && 'id' in v) onCommit(ctx, v.id, val);
     str += val;
     sval = val;
 
@@ -33,13 +48,7 @@ registerRenderer<Label>('label', (w, ctx, placement) => {
     };
   }).join('');
 
-  if (w.id) {
-    let c = ctx.context;
-    while (c) {
-      if (c.special && c.special.values) (c.special.values[w.id] || (c.special.values[w.id] = [])).push(str);
-      c = c.parent;
-    }
-  }
+  if (w.id) onCommit(ctx, w.id, str);
 
   if (w.format && w.format.name) {
     const args: ValueOrExpr[] = [{ v: !Array.isArray(w.text) || w.text.length === 1 ? sval : val }, { v: w.format.name }];
@@ -180,15 +189,17 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
     } else {
       for (let i = (state && state.state && state.state.current) || 0; i < arr.length; i++) {
         const c = group && group.grouped ?
-          extend(rctx, { value: arr[i], special: { index: i, values: {} } }) :
+          extend(rctx, { value: arr[i], special: { index: i, values: {} }, commit: {} }) :
           extend(rctx, { value: arr[i], special: { index: i } });
 
         if (group && group.grouped) {
           const s: RenderState<RepeatState> = (state && state.child) || { offset: 0, state: { current: 0, src: arr[i], part: 'group' } };
           r = renderWidget(w, c, { x: 0, y, availableX: availableX - usedX, availableY, maxX: placement.maxX, maxY: placement.maxY }, s);
         } else {
+          c.commit = {};
           if (elide) {
             renderWidget(w.row, c, { x: 0, y: 0, availableX: placement.maxX, maxX: placement.maxX, availableY: placement.maxY, maxY: placement.maxY }, state ? state.child : undefined);
+            commitContext(c);
             continue;
           } else {
             r = renderWidget(w.row, c, { x: usedX, y, availableX: availableX - usedX, maxX: placement.maxX, availableY, maxY: placement.maxY }, state ? state.child : undefined);
@@ -229,8 +240,11 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 
         if (r.continue) {
           if (initY === y && usedY) y += usedY;
-          return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx, newPage: !group || groupNo === false }, child: r.continue } };
+          if (w.row.bridge) commitContext(c);
+          return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'body', src, current: i, context: rctx, newPage: !group || groupNo === false }, child: w.row.bridge || (group && group.grouped) ? r.continue : undefined } };
         }
+
+        commitContext(c);
       }
     }
 
@@ -239,7 +253,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 
   if (w.footer) {
     const fctx = (rctx && rctx.context) || (state && state.state && state.state.context && state.state.context.context);
-    const c = extend(ctx, { special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: groupNo !== false, group: group && group.group, values: (fctx && fctx.special || {}).values } });
+    const c = extend(ctx, { special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: groupNo !== false, group: group && group.group, values: (fctx && fctx.special || {}).values }, commit: {} });
 
     if (group) {
       if (w.groupEnds && w.groupEnds[group.grouped]) r = renderWidget(w.footer, c, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
@@ -247,6 +261,8 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
     } else r = renderWidget(w.footer, c, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
 
     if (r.height > availableY) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'footer', src, current: 0, context: rctx, newPage: true } } }
+
+    commitContext(c);
 
     html += r.output;
     y += r.height;

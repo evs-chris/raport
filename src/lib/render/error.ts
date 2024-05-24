@@ -2,10 +2,12 @@ import { Displayed, Placement } from '../report';
 import { Context } from '../data/index';
 
 export interface RenderContext {
+  parent?: RenderContext;
   report: Displayed;
   styles: StyleRegistry;
   styleMap: StyleMap;
   context: Context;
+  commit?: { [name: string]: any };
 }
 
 export interface StyleRegistry {
