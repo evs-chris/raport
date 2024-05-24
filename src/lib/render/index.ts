@@ -145,6 +145,8 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
 
   r.height += extraHeight;
 
+  r.height = +(r.height.toFixed(8));
+
   return r;
 }
 
@@ -184,6 +186,9 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
     const m = expandMargin(widget, context, placement);
     ps[0][0] += m[3];
     ps[0][1] += m[0];
+
+    // placement starts with availableY shrunk for margins, so offset y by the top margin
+    const yo = m[0] || 0;
 
     if (widget.border) {
       const b = expandBorder(widget, context, placement);
@@ -249,7 +254,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
         } else {
           if (r.cancel) return { output: '', cancel: true };
           const h = r.height || getHeightWithMargin(w, placement, context) || 0;
-          if (y + h > placement.availableY) {
+          if (y - yo + h > placement.availableY) {
             const offset = maxYOffset(ps);
             state = state || { offset };
             state.last = i;

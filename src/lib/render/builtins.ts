@@ -256,11 +256,15 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
     const c = extend(ctx, { special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: groupNo !== false, group: group && group.group, values: (fctx && fctx.special || {}).values }, commit: {} });
 
     if (group) {
-      if (w.groupEnds && w.groupEnds[group.grouped]) r = renderWidget(w.footer, c, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
+      if (w.groupEnds && w.groupEnds[group.grouped]) r = renderWidget(w.footer, c, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY, availableY });
       else r = { output: '', height: 0 };
-    } else r = renderWidget(w.footer, c, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
+    } else r = renderWidget(w.footer, c, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY, availableY });
 
-    if (r.height > availableY) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'footer', src, current: 0, context: rctx, newPage: true } } }
+    if (r.height > availableY) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'footer', current: 0, src, context: rctx, newPage: true } } }
+    else if (r.continue) {
+      if (w.footer.bridge) commitContext(c);
+      return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'footer', src, current: 0, context: rctx, newPage: true }, child: w.footer.bridge ? r.continue : undefined } }
+    }
 
     commitContext(c);
 
