@@ -1,3 +1,14 @@
+## 0.24.4
+
+2024-05-24
+
+### Render
+
+* __BUG:__ Height checking now accounts for float precision by scaling to 8 decimals. This fixes some infinite recursion issues where things fit until you add them together and get a 0.000000000001 bonus added on.
+* __BUG:__ Layouts now account for built-in margin reductions coming into the layout, so a widget 1rem tall in a container with 0.2rem padding that has an availableY of 1.1rem will now render and stick rather than rendering and subsequently triggering a wrap that discards the render.
+* __BUG:__ Repeater footers will now bridge and continue like other containers.
+
+
 ## 0.24.3
 
 2024-05-24
