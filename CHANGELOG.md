@@ -1,3 +1,20 @@
+## 0.24.3
+
+2024-05-24
+
+### Render
+
+* __BUG__: IDed labels within a repeater that breaks will no longer duplicate aggregated values. There is now a commit cycle for IDed labels that the repeater controls to prevent repeated renders of the same row from polluting the values collections. Nested repeaters with IDed footer labels also behave correctly.
+* __BUG__: Nested repeaters will no longer lose rendered data if they trigger a break in a non-bridging parent row.
+
+### Designer
+
+* __BUG__: The expression viewer no longer adds extraneous line height and padding, so label expressions in the designer are more representative of their output and can be viewed fully.
+* There is now a logo favicon.
+* The language reference now covers template expressions.
+* Delimited fields now support move and copy operations.
+
+
 ## 0.24.2
 
 2024-05-11
