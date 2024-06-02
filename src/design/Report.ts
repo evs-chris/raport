@@ -2309,7 +2309,13 @@ registerOperator({
   names: ['log'],
   apply(_name, args) {
     console.log.apply(console, args);
-  }
+  },
+}, {
+  type: 'value',
+  names: ['debugger'],
+  apply(..._args) {
+    debugger;
+  },
 });
 
 let clipEl: HTMLTextAreaElement;
