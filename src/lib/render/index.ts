@@ -129,9 +129,10 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
     if (placement.availableY) placement.availableY -= m[0] + m[2];
   }
 
-  if (w.border && !h) {
+  if (w.border && !h && w.box === 'expand') {
     const b = expandBorder(w, context, placement)
     extraHeight += b[0] + b[2];
+    if (placement.availableY) placement.availableY -= b[0] + b[2];
   }
 
   const r = renderer.render(w, context, placement, state);
@@ -190,13 +191,12 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
     // placement starts with availableY shrunk for margins, so offset y by the top margin
     const yo = m[0] || 0;
 
-    if (widget.border) {
+    if (widget.border && widget.box === 'expand') {
       const b = expandBorder(widget, context, placement);
-      if (placement.maxX) placement.maxX -= b[1] + b[3];
       if (placement.availableX) placement.availableX -= b[1] + b[3];
-      if (placement.maxY) placement.maxY -= b[0] + b[2];
       if (placement.availableY) placement.availableY -= b[0] + b[2];
     }
+
     for (let i = state && state.last || 0; i < widget.widgets.length; i++) {
       let w: Widget = widget.widgets[i];
       if (w.macro) w = expandMacro(w.macro, w, context, placement, state);
@@ -338,7 +338,7 @@ export function getHeight(w: Widget, placement: Placement, context: RenderContex
   } else if (h === 'grow') {
     r = placement.availableY || 0;
   } else if (h === 'auto' || typeof h === 'string' || (h == null && w.type === 'container') || (computed && !h)) {
-    if (b) return computed + b[0] + b[2] || NaN;
+    if (b && w.box === 'expand') return computed + b[0] + b[2] || NaN;
     return computed || NaN;
   }
 
