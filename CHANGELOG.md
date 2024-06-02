@@ -1,3 +1,13 @@
+## 0.24.5
+
+2024-06-02
+
+### Render
+
+* __BUG:__ Groups no longer require headers to be enabled to render the group container.
+* __BUG:__ Header-per-page on a repeater will no longer repeat the header along with a group as the first item on a new page if the group doesn't have headers enabled.
+
+
 ## 0.24.4
 
 2024-05-24
