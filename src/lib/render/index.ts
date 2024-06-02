@@ -119,34 +119,38 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
 
   if (placement.maxY && !isNaN(h) && h > placement.maxY) return error(context, placement);
 
-  if (placement.availableY && h > placement.availableY) return { output: '', continue: { offset: 0 }, cancel: true };
+  if (placement.availableY != null && h > placement.availableY) return { output: '', continue: { offset: 0 }, cancel: true };
 
   let extraHeight = 0;
 
   if (w.margin) {
     const m = expandMargin(w, context, placement);
     extraHeight += m[0] + m[2];
-    if (placement.availableY) placement.availableY -= m[0] + m[2];
+    if (placement.availableY != null) placement.availableY -= m[0] + m[2];
   }
 
   if (w.border && !h && w.box === 'expand') {
     const b = expandBorder(w, context, placement)
     extraHeight += b[0] + b[2];
-    if (placement.availableY) placement.availableY -= b[0] + b[2];
+    if (placement.availableY != null) placement.availableY -= b[0] + b[2];
   }
 
   const r = renderer.render(w, context, placement, state);
   if (typeof r === 'string') return { output: r, height: h, width: getWidthWithMargin(w, placement, context) };
+
+  if (typeof r.height === 'number') r.height = +r.height.toFixed(6);
+  if (typeof r.width === 'number') r.width = +r.width.toFixed(6);
+  if (placement.availableY != null) placement.availableY = +placement.availableY.toFixed(6);
   
   if (placement.maxY && r.height > placement.maxY) return error(context, placement);
 
-  if (isNaN(h) && placement.availableY && r.height > placement.availableY) return { output: '', continue: { offset: 0 }, height: r.height, cancel: true };
+  if (isNaN(h) && placement.availableY != null && r.height > placement.availableY) return { output: '', continue: { offset: 0 }, height: r.height || 0, cancel: true };
 
   r.height = r.height || 0;
 
   r.height += extraHeight;
 
-  r.height = +(r.height.toFixed(8));
+  r.height = +(r.height.toFixed(6));
 
   return r;
 }
@@ -193,8 +197,8 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
 
     if (widget.border && widget.box === 'expand') {
       const b = expandBorder(widget, context, placement);
-      if (placement.availableX) placement.availableX -= b[1] + b[3];
-      if (placement.availableY) placement.availableY -= b[0] + b[2];
+      if (placement.availableX != null) placement.availableX -= b[1] + b[3];
+      if (placement.availableY != null) placement.availableY -= b[0] + b[2];
     }
 
     for (let i = state && state.last || 0; i < widget.widgets.length; i++) {
@@ -206,7 +210,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
       let h = placement && getHeightWithMargin(w, placement, context);
       if (h > placement.maxY) h = 1;
 
-      if (placement && placement.availableY && h > placement.availableY) {
+      if (placement && placement.availableY != null && h > placement.availableY) {
         const offset = maxYOffset(ps);
         state = state || { offset };
         state.last = i;
@@ -351,7 +355,7 @@ export function getHeight(w: Widget, placement: Placement, context: RenderContex
 
 export function getHeightWithMargin(w: Widget, placement: Placement, context: RenderContext, computed?: number, linesize?: boolean): number {
   let h = getHeight(w, placement, context, computed, linesize);
-  if (w.margin) {
+  if (typeof h === 'number' && w.margin) {
     const m = expandMargin(w, context, placement);
     h += m[0] + m[2];
   }

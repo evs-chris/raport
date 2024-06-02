@@ -70,7 +70,7 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
     if (value) wctx.context = extendData(wctx.context, { value, special: { placement, widget: w } });
   }
   const cw = getWidth(w, placement, ctx) || placement.availableX;
-  const r = renderWidgets(w, wctx, { x: 0, y: 0, availableX: cw, availableY: h || placement.availableY, maxX: cw, maxY: h != null ? h : placement.maxY }, state, w.layout);
+  const r = renderWidgets(w, wctx, { x: 0, y: 0, availableX: cw, availableY: h || placement.availableY, maxX: cw, maxY: h != null && !isNaN(h) ? h : placement.maxY }, state, w.layout);
   if (!r.cancel) {
     r.output = `<div${styleClass(ctx, ['container'], style(w, placement, ctx, { computedHeight: h || r.height, container: true }))}>${r.output}</div>`;
     r.height = h || r.height;
@@ -104,6 +104,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
   const m = expandMargin(w, ctx, placement);
   let y = !state || !state.state || state.state.part === 'header' ? m[0] : 0;
   availableY -= y;
+  availableY = +availableY.toFixed(6)
   let group: Group;
   let groupNo: number|boolean = false;
   const newPage = state && state.state && state.state.newPage;
@@ -143,7 +144,10 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
           if (r.height > availableY) {
             if (html) html = `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`;
             return { output: html, height: y, continue: { offset: 0, state: { part: 'group', src, current: 0, newPage: true } } }
-          } else availableY -= r.height;
+          } else {
+            availableY -= r.height;
+            availableY = +availableY.toFixed(6);
+          }
 
           html += r.output;
           y += r.height;
@@ -154,7 +158,10 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
       else r = { output: '', height: 0 };
 
       if (r.height > availableY) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'header', src, current: 0, context: ctx, newPage: true } } }
-      else availableY -= r.height;
+      else {
+        availableY -= r.height;
+        availableY = +availableY.toFixed(6);
+      }
 
       html += r.output;
       y += r.height;
@@ -163,7 +170,10 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
       else r = { output: '', height: 0 };
 
       if (r.height > availableY) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'header', src, current: 0, context: ctx, newPage: true } } }
-      else availableY -= r.height;
+      else {
+        availableY -= r.height;
+        availableY = +availableY.toFixed(6);
+      }
 
       html += r.output;
       y += r.height;
@@ -184,7 +194,10 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
       if (w.alternate) {
         r = renderWidget(w.alternate, rctx, { x: usedX, y, availableX: availableX - usedX, maxX: placement.maxX, availableY, maxY: placement.maxY }, state ? state.child : undefined);
         if (r.height > availableY) return { output: html, height: 0, continue: { offset: 0, state: { part: 'body', src, current: 0, newPage: true } } }
-        else availableY -= r.height;
+        else {
+          availableY -= r.height;
+          availableY = +availableY.toFixed(6);
+        }
 
         html += r.output;
         y += r.height;
@@ -221,6 +234,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
           y += usedY;
           initY = y;
           availableY -= usedY;
+          availableY = +availableY.toFixed(6);
           usedY = 0;
           usedX = 0;
           i--;
@@ -236,6 +250,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
         if (!usedY) {
           y += r.height;
           availableY -= r.height;
+          availableY = +availableY.toFixed(6);
         }
 
         html += r.output;
