@@ -130,7 +130,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
     arr = src;
   }
 
-  if (w.header && (newPage || !state || !state.state || state.state.part === 'header' || state.state.part === 'group')) {
+  if ((w.header || w.group) && (newPage || !state || !state.state || state.state.part === 'header' || state.state.part === 'group')) {
     const hctx = state && state.state && state.state.context && state.state.context.context;
 
     if (group) {
@@ -150,7 +150,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
         }
       }
 
-      if (w.groupHeaders && w.groupHeaders[group.grouped] && (!state || !state.state || !state.state.current) || newPage && w.headerPerPage !== false) r = renderWidget(w.header, c, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
+      if (w.header && (w.groupHeaders && w.groupHeaders[group.grouped] && (!state || !state.state || !state.state.current) || newPage && w.headerPerPage !== false)) r = renderWidget(w.header, c, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
       else r = { output: '', height: 0 };
 
       if (r.height > availableY) return { output: `<div${styleClass(ctx, ['container', 'repeat'], style(w, placement, ctx, { computedHeight: y, container: true }))}>\n${html}</div>`, height: y, continue: { offset: y, state: { part: 'header', src, current: 0, context: ctx, newPage: true } } }
@@ -158,7 +158,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 
       html += r.output;
       y += r.height;
-    } else {
+    } else if (w.header) {
       if (!state || newPage && w.headerPerPage !== false) r = renderWidget(w.header, ctx, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
       else r = { output: '', height: 0 };
 
@@ -169,6 +169,9 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
       y += r.height;
     }
   }
+
+  if (newPage) state.state.newPage = false;
+  if (state && state.child && state.child.state) state.child.state.newPage = false;
 
   let rctx: RenderContext = state && state.state && state.state.context || extend(ctx, { special: { source: group && group.grouped ? group.all : arr, level: group && group.level, grouped: groupNo !== false, group: group && group.group, values: {}, last: arr.length - 1, count: arr.length } });
   const elide = w.row && (isComputed(w.row.elide) ? evaluate(extend(rctx, { special: { placement, widget: w } }), w.row.elide.x) : w.row.elide);
