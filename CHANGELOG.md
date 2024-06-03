@@ -1,11 +1,12 @@
 ## 0.24.6
 
+2024-06-03
+
 ### Render
 
 * __BUG:__ Border widths are no longer considered as taking additional space for box model contain widgets.
 * __BUG:__ Floating point precision should affect scenarios where a widget takes exactly the remaining height, but some weird floatiness causes the calculated height to be 0.000000000001 more than the available space.
 * __BUG:__ Maintaining an available vertical space is now done safely for flowed reports, and having the remaining space be exactly 0 is now correctly handled.
-
 
 ### Designer
 
