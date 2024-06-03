@@ -69,7 +69,7 @@
           {{#if report.type !== 'delimited'}}
             <label><span title="When enabled, widgets will have as few inline styles as possible with common style sets combined into classes. This can significantly reduce the resuling HTML from a report run.">Combine styles into classes?</span><span><input type=checkbox checked="{{report.classifyStyles}}" /></span></label>
             {{#if report.type === 'page'}}
-              <label><span title="The size of the page for this report.">Paper size</span><span><select value="{{report.size}}">{{#each ~/pageSizes}}<option value="{{.}}">{{@key}}</option>{{/each}}</select></span></label>
+              <label><span title="The size of the page for this report.">Paper size</span><span><select on-change="@.set('report.size', ~/pageSizes[@node.value])">{{#each ~/pageSizes}}<option selected="{{JSON.stringify(.) === JSON.stringify(report.size)}}">{{@key}}</option>{{/each}}</select></span></label>
               <label><span title="The orientation of the page for this report.">Orientation</span><span><select value="{{report.orientation}}">
                 <option>landscape</option>
                 <option>portrait</option>
@@ -78,7 +78,7 @@
             {{else}}
               <label><span title="An optional width in rem for this report.">Width</span><span><input type=number value="{{report.width}}" /></span></label>
               {{#if !report.width}}
-                <label><span title="An optional width for this report if not specified directly in rem.">Paper size</span><span><select value="{{report.size}}"><option value="{{undefined}}">(None)</option>{{#each ~/pageSizes}}<option value="{{.}}">{{@key}}</option>{{/each}}</select></span></label>
+                <label><span title="An optional width for this report if not specified directly in rem.">Paper size</span><span><select on-change="@.set('report.size', ~/pageSizes[@node.value])"><option selected="{{!report.size}}">(None)</option>{{#each ~/pageSizes}}<option selected="{{JSON.stringify(.) === JSON.stringify(report.size)}}">{{@key}}</option>{{/each}}</select></span></label>
                 <label><span title="The orientation of the paper specifying the width for this report.">Orientation</span><span><select value="{{report.orientation}}">
                   <option>landscape</option>
                   <option>portrait</option>
