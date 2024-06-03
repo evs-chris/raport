@@ -234,7 +234,9 @@ export class Designer extends Ractive {
     const size = this.get('pageSize');
     const type = this.get('report.type');
     if (type === 'flow') {
-      if (size.width) return `width: ${size.width}rem;`;
+      let res = `margin: auto; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); min-heght: 10rem; background-size: 1rem 1rem; background-image: radial-gradient(circle, ${this.get('@style.border')}80 1px, transparent 1px);`;
+      if (size && size.width) res += `width: ${size.width}rem; box-sizing: border-box;`;
+      return res;
     }
     if (size) {
       return `width: ${size.width}rem; box-sizing: border-box; margin: auto; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${size.margin[0]}rem ${size.margin[1]}rem; min-height: ${size.height}rem; background-size: 1rem 1rem; background-position: ${10.5 - size.margin[0]}rem ${10.5 - size.margin[1]}rem; background-image: radial-gradient(circle, ${this.get('@style.border')}80 1px, transparent 1px);`;

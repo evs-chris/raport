@@ -71,7 +71,7 @@ export interface Displayed<T = {}> extends BaseReport<T> {
 export interface Flow<T = {}> extends Displayed<T> {
   type: 'flow';
   width?: number;
-  margin?: [number, number];
+  margin?: Margin;
   size?: PageSize;
   orientation?: PageOrientation;
 }
@@ -529,10 +529,14 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
   let state: RenderState<any> = null;
 
   let width: number;
-  const margin = report.size && report.size.margin ? expandMargin(report.size, ctx, { x: 0, y: 0, availableX: width, maxX: width }) : [1.5, 1.5, 1.5, 1.5];
 
   if (report.width) width = report.width;
   else if (report.size) width = report.orientation !== 'portrait' ? report.size.height : report.size.width;
+
+  let margin: [number, number, number, number];
+  if (report.margin != null) margin = expandMargin(report, ctx, { x: 0, y: 0, availableX: width, maxX: width });
+  if (!margin && report.size && report.size.margin) margin = expandMargin(report.size, ctx, { x: 0, y: 0, availableX: width, maxX: width });
+  if (!margin) margin = [0, 0, 0, 0];
 
   // account for margins
   if (width) width -= (margin[1] || 0) + (margin[3] || 0);
@@ -570,14 +574,13 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
   return `<html><head><style>
     html { font-size: 100%; margin: 0; padding: 0; }
     body { font-size: 0.83rem; padding: 0; margin: 0;${width ? ` width: ${width}rem;` : ''}; height: ${maxY}rem; position: relative; }
-    .page-back { ${width ? `width: ${width}rem; ` : ''}height: ${maxY}rem; padding: ${margin[0] || 0}rem ${margin[1] || 0}rem ${margin[2] || 0}rem ${margin[3] || 0}rem; position: absolute; left: 0; top: 0; }
+    .page-back { ${width ? `width: ${width}rem; ` : 'width: 100%; box-sizing: border-box; '}padding: ${margin[0] || 0}rem ${margin[1] || 0}rem ${margin[2] || 0}rem ${margin[3] || 0}rem; position: absolute; left: 0; top: 0; }
     #wrapper { height:${maxY}rem; position: relative; ${report.font ? styleFont(report.font, ctx) : ''} }
     .watermark { z-index: 0; }
     .main { z-index: 5; }
     .overlay { z-index: 10; }
     @media screen {
       body { margin: 1rem${width ? ' auto' : ''}; background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem ${margin[2]}rem ${margin[3]}rem !important; }
-      html { background-color: #999; }
     }${Object.entries(ctx.styles).map(([_k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}
   </style>${extras && extras.head || ''}</head><body>\n<div class=page-back><div id=wrapper>${html}</div></div>${extras && extras.foot || ''}</body></html>`;
 }

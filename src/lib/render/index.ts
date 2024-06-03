@@ -243,7 +243,8 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
         }
         if (p.y < 0) {
           p.offsetY = m[0];
-          p.y = (placement.availableY || 1) + p.y - h + 1;
+          if (placement.availableY == null) p.y = 0;
+          else p.y = (placement.availableY || 1) + p.y - h + 1;
         }
 
         const { x, y } = p;

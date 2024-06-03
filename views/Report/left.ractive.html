@@ -74,7 +74,6 @@
                 <option>landscape</option>
                 <option>portrait</option>
               </select></span></label>
-              {{>margin-prop report}}
             {{else}}
               <label><span title="An optional width in rem for this report.">Width</span><span><input type=number value="{{report.width}}" /></span></label>
               {{#if !report.width}}
@@ -85,6 +84,7 @@
                 </select></span></label>
               {{/if}}
             {{/if}}
+            {{>margin-prop report}}
             <label><span title="The base text size in rem for all widgets in this report.">Text Size</span><span><input type=number value="{{~/report.font.size}}" /></span></label>
             <label><span title="The base line hieght in rem for all widgets in this report.">Line Height</span><span><input type=number value="{{~/report.font.line}}" /></span></label>
             <label><span title="The base font family for all widgets in this report.">Font Family</span><span><input value="{{~/report.font.family}}" /></span></label>

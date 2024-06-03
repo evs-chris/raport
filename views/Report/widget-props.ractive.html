@@ -52,6 +52,9 @@
     </span></label>
   {{/if}}
 {{/with}}
+<label><span title="If this evaluates to true, the {{.type}} will be hidden and not affect automatic layouts">Hidden <button class-hide tabindex=-1 /><button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')" tabindex=-1>{{>pencil}}</button></span><span>
+    <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.hide}} tabout /></div>
+  </span></label>
 {{>margin-prop}}
 <label><span title="Setting box to contain will make the margins fit within the designated size. Setting box to expand will expand the width to include the margin. The default depends on the type of sizing, with contain for percentages and expand for others.">Box</span><span>
   <select value="{{.box}}">
@@ -208,12 +211,7 @@
 <template id="page-props">
 </template>
 
-<template id="sure" src="./test.ractive.html" />
-
 <template id="margin-prop">
-  <label><span title="If this evaluates to true, the {{.type}} will be hidden and not affect automatic layouts">Hidden <button class-hide tabindex=-1 /><button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.hide')" tabindex=-1>{{>pencil}}</button></span><span>
-      <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src={{.hide}} tabout /></div>
-    </span></label>
   <label><span title="Additional padding within the borders of the {{.type}}. The base value for this property is a four number tuple with values for the top, right, bottom, and left. A two number tuple is converted to top/bottom and left/right. A single number specifies the same number for all sides.">
       Margin
       {{#if typeof .margin === 'object' && 'x' in .margin}}<button class-hide tabindex=-1 /><button class-ico title="Edit in Expression Editor" on-click="@.editExpr('.margin.x'), false" tabindex=-1>{{>pencil}}</button>{{/if}}
