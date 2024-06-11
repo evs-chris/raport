@@ -67,7 +67,7 @@
             <option value="delimited">Delimited</option>
           </select></span></label>
           {{#if report.type !== 'delimited'}}
-            <label><span title="When enabled, widgets will have as few inline styles as possible with common style sets combined into classes. This can significantly reduce the resuling HTML from a report run.">Combine styles into classes?</span><span><input type=checkbox checked="{{report.classifyStyles}}" /></span></label>
+            <label><span title="When enabled, widgets will have as few inline styles as possible with common style sets combined into classes. This can significantly reduce the resuling HTML from a report run.">Combine styles into classes?</span><span><input type=checkbox checked="{{report.classifyStyles !== false}}" twoway=false on-change="@.set('report.classifyStyles', @node.checked ? undefined : false)" /></span></label>
             {{#if report.type === 'page'}}
               <label><span title="The size of the page for this report.">Paper size</span><span><select on-change="@.set('report.size', ~/pageSizes[@node.value])">{{#each ~/pageSizes}}<option selected="{{JSON.stringify(.) === JSON.stringify(report.size)}}">{{@key}}</option>{{/each}}</select></span></label>
               <label><span title="The orientation of the page for this report.">Orientation</span><span><select value="{{report.orientation}}">
