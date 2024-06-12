@@ -723,7 +723,7 @@ export class Designer extends Ractive {
     } else {
       if (typeof load === 'function') {
         vv.cached = true;
-        vv.data = d = await load(av, this._isplay);
+        vv.data = d = await load(av, this._isplay, this.get('params'), this.get('report'));
       }
     }
     return d;
