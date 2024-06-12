@@ -1,3 +1,13 @@
+## 0.24.7
+
+2024-06-12
+
+### Designer
+
+* The option to classify styles should now be less likely to be accidentally disabled.
+* Custom external data loaders will now be passed additional parameters specifying whether the load is for a full report, what the designer set parameters values are, and the report definition.
+
+
 ## 0.24.6
 
 2024-06-03
