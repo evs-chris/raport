@@ -1514,6 +1514,12 @@ export class Designer extends Ractive {
     this.set(sets);
   }
 
+  treeString(val: any) {
+    if (val === undefined) return 'undefined';
+    const fmt = this.get('temp.expr.treefmt');
+    return evaluate({ val }, fmt === 'string' ? `string(val)` : fmt === 'json' ? 'string(val json:1)' : 'string({ v: val } raport:1)');
+  }
+
   processExprStr(v: string) {
     if (!v) {
       this.set('temp.expr.error', undefined);
@@ -1583,6 +1589,7 @@ const designerOpts: ExtendOpts<Designer> = {
       temp: {
         expr: {
           tab: 'text',
+          expand: {},
         },
         widget: 'report',
         name: 'report',

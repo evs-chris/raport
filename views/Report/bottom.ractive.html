@@ -165,13 +165,18 @@
         <div class-tab class-result class-active-tab="~/temp.expr.tab === 'result'">
           <div class-editor-buttons>
             <div class=toggles>{{#with ~/temp.expr.resulttype as t}}
-              <span class-toggle class-active="!t || t === 'plain'" {{#if t && t !== 'plain'}}on-click="@.set('temp.expr.resulttype', 'plain')"{{/if}} title="Show result as a plain string. Double click to copy the text to the clipboard." on-dblclick="@.copyToClipboard(~/temp.expr.result)">Plain</span>
-              <span class-toggle class-active="t === 'json'" {{#if t !== 'json'}}on-click="@.set('temp.expr.resulttype', 'json')"{{/if}} title="Show result as JSON">JSON</span>
-              <span class-toggle class-active="t === 'raport'" {{#if t !== 'raport'}}on-click="@.set('temp.expr.resulttype', 'raport')"{{/if}} title="Show result as a Raport expression">Raport</span>
+              <span class-toggle class-active="!t || t === 'plain'" {{#if t && t !== 'plain'}}on-click="@.set('temp.expr.resulttype', 'plain')"{{/if}} title="Show result as a plain string. Double click to copy the text to the clipboard." on-dblclick="@.copyToClipboard(~/temp.expr.result)">String</span>
+              <span class-toggle class-active="t === 'json'" {{#if t !== 'json'}}on-click="@.set('temp.expr.resulttype', 'json')"{{/if}} title="Show result as JSON. Double click to copy the JSON to the clipboard." on-dblclick="@.copyToClipboard(JSON.stringify(~/temp.expr.result, null, ~/temp.expr.jsonsquash ? undefined : '  '))">JSON</span>
+              <span class-toggle class-active="t === 'raport'" {{#if t !== 'raport'}}on-click="@.set('temp.expr.resulttype', 'raport')"{{/if}} title="Show result as a Raport expression Double click to copy the raport expression to the clipboard." on-dblclick="@.copyToClipboard(@.unparse(~/temp.expr.result))">Raport</span>
+              <span class-toggle class-active="t === 'tree'" {{#if t !== 'tree'}}on-click="@.set('temp.expr.resulttype', 'tree')"{{/if}} title="Show result as an object tree.">Tree</span>
               <span class-toggle class-active="t === 'html'" {{#if t !== 'html'}}on-click="@.set('temp.expr.resulttype', 'html')"{{/if}} title="Show result as HTML">HTML</span>
             {{/with}}</div>
             <div style="margin-left: 2em;">
-              {{#if ~/temp.expr.resulttype === 'json'}}<label><input type=checkbox bind-checked="~/temp.expr.jsonsquash" title="Enable to display JSON with no additional whitespace" /> Compact?</label>{{/if}}
+              {{#if ~/temp.expr.resulttype === 'json'}}<label title="Enable to display JSON with no additional whitespace"><input type=checkbox bind-checked="~/temp.expr.jsonsquash" /> Compact?</label>{{/if}}
+              {{#if ~/temp.expr.resulttype === 'tree'}}
+                <label title="Change value display format" style="margin-right: 1em;"><select value="{{~/temp.expr.treefmt}}"><option>string</option><option>json</option><option>raport</option></select></label>
+                <label title="Expand all nodes"><input type=checkbox bind-checked="~/temp.expr.expandall" /> Expand all?</label>
+              {{/if}}
             </div>
           </div>
           <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
@@ -184,6 +189,8 @@
                 <code><pre>{{JSON.stringify(~/temp.expr.result, null, ~/temp.expr.jsonsquash ? undefined : '  ')}}</pre></code>
               {{elseif ~/temp.expr.resulttype === 'raport'}}
                 <code><pre>{{@.unparse(~/temp.expr.result)}}</pre></code>
+              {{elseif ~/temp.expr.resulttype === 'tree'}}
+                {{>tree-view ~/temp.expr.result}}
               {{else}}
                 <code><pre>{{~/temp.expr.result}}</pre></code>
               {{/if}}
@@ -387,6 +394,41 @@
 </template>
 
 <template id="bottom-parameters" src="./params.ractive.html" />
+
+<template id=tree-view>
+  {{#if typeof . === 'object'}}
+    <div class=tree-view>
+      <span style="color: #aaa; margin-left: 0.5em;">{{Array.isArray(.) ? '[' : '{'}}</span>
+      <div class=root>
+        {{>tree-node .}}
+      </div>
+      <span style="color: #aaa; margin-left: 0.5em;">{{Array.isArray(.) ? ']' : '}'}}</span>
+    </div>
+  {{else}}
+    {{@.treeString(.)}}
+  {{/if}}
+</template>
+
+<template id=tree-node>
+  <div class=tree-view-tree>
+    {{#each .}}
+      <div class=tree-view-node>
+        <div class=tree-view-key title="{{(@keypath + '').replace(/temp.expr.result./, '')}}">{{@key}}<span style="color: #aaa;">:</span>{{#if typeof . === 'object'}}<span style="color: #aaa; margin-left: 0.5em;">{{Array.isArray(.) ? '[' : '{'}}</span>{{/if}}</div>
+        {{#unless ~/temp.expr.expandall}}<div class=tree-view-expand {{#if typeof . === 'object'}}class-tree-view-show on-click="@.toggle('temp.expr.expand.' + escapeKey(@keypath))"{{/if}}>{{#if ~/temp.expr.expand[@keypath]}}-{{else}}+{{/if}}</div>{{/unless}}
+        <div class=tree-view-value class-tree-view-children="typeof . === 'object' && (~/temp.expr.expandall || ~/temp.expr.expand[@keypath])">
+          {{#if typeof . === 'object'}}
+            {{#if ~/temp.expr.expandall || ~/temp.expr.expand[@keypath]}}
+              {{>tree-node .}}
+              <span style="color: #aaa; margin-left: 0.5em;">{{Array.isArray(.) ? ']' : '}'}}</span>
+            {{else}}
+              <div class=tree-view-type>{{#if Array.isArray(.)}} ]{{else}} }{{/if}}</div>
+            {{/if}}
+          {{else}}{{@.treeString(.)}}{{/if}}
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</template>
 
 <style rel=ractive>
   .bottom-pane pre {
@@ -739,4 +781,15 @@
   .bottom-pane .ops-search:hover {
     opacity: 1;
   }
+
+  .tree-view { overflow: auto; flex-grow: 1; }
+  .tree-view-tree { margin-left: 0.5em; padding-left: 0.5em; border-left: 1px dotted #aaa; }
+  .tree-view-tree:hover { border-left-color: {{@style.theme === 'dark' ? 'cyan' : 'blue'}}; }
+  .tree-view .tree-view-node { white-space: nowrap; }
+  .tree-view .tree-view-key { margin-left: 0.5em; display: inline-block; }
+  .tree-view .tree-view-type { color: #aaa; display: inline-block; }
+  .tree-view .tree-view-value { display: inline-block; vertical-align: top; white-space: pre-wrap; word-break: break-all; }
+  .tree-view .tree-view-children { display: block; }
+  .tree-view .tree-view-expand { display: none; width: 1em; height: 1em; box-sizing: border-box; border: 1px solid #aaa; color: #999; vertical-align: middle; line-height: 0.8em; text-align: center; display: none; cursor: pointer; }
+  .tree-view .tree-view-expand.tree-view-show { display: inline-block; }
 </style>
