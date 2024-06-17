@@ -180,6 +180,7 @@ export class Designer extends Ractive {
     const typ = this.get('report.type');
     return `
       <style>
+        #print { display: none; }
         @media screen {
           :root {
             --fg: ${this.get('@style.out.fg') || this.get('@style.fg')};
@@ -208,6 +209,8 @@ export class Designer extends Ractive {
             color: var(--fg);
             background-color: var(--bg);
           }
+          #print { position: fixed; top: 0.2em; right: 1em; opacity: 0.1; transition: opacity 0.5s ease-in-out; color: var(--bg); background-color: var(--fg); border: 1px solid; border-radius: 0.5em; cursor: pointer; display: inline-block; }
+          #print:hover { opacity: 1; }
         }
       </style>
       <script>
@@ -226,6 +229,12 @@ export class Designer extends Ractive {
           if (ev.ctrlKey && ev.shiftKey && ev.key === 'Enter') window.parent.postMessage('run', '*');
         });
         html.classList.add('scrolled-top');
+        const printbtn = document.createElement('button');
+        printbtn.innerHTML = 'Print';
+        printbtn.setAttribute('id', 'print');
+        printbtn.setAttribute('title', 'Print the report using your browser\\'s print function.\\n\\nThis tends to work best with margins set to none and background/image printing turned on.\\n\\nIt also seems to work best in chromium-based browsers (notably, puppetteer), unless you\\'re okay missing page two in Firefox.');
+        printbtn.addEventListener('click', () => window.print());
+        document.body.appendChild(printbtn);
       </script>
     `;
   }
