@@ -357,7 +357,7 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
 
   if (!fields || !fields.length && values.length) {
     fields = Object.keys(values[0]);
-    if (!headers || !headers.length) headers = Object.keys(values[0]).map(k => `'${k.replace(/'/g, '\\\'')}'`);
+    if (!headers || !headers.length) headers = Object.keys(values[0]);
   }
 
   let res = '';
