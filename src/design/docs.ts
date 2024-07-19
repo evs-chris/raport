@@ -439,8 +439,13 @@ The label map is a nested object with the keys being single key paths in the dif
   ]}
   { op:'round' sig:[
     { proto:'number => number' desc:'Rounds the given number to the nearest integer.' }
-    { proto:'(number, number, string) => number' desc:'Rounds the given number to the nearest decimal specified by the second number using the method specified by the string, defaulting to half-even. Supported methods are half-up, half-down, to-0, from-0, half-even, and half-odd. If the number of places negative, the number will be rounded left from the decimal point.' }
-  ] note:"By default, the single-number signature will round to an integer, but if the round defaults are updated to include all-numeric as true, then it will return numbers rounded to the nearest default place. Round defaults are { places:2 all-numeric:false method::half-even }."}
+    { proto:'(number, number, string) => number' desc:'Rounds the given number to the nearest decimal specified by the second number using the method specified by the string, defaulting to half-even. Supported methods are half-up, half-down, half-to-0, half-from-0, half-even, half-odd, to-0, from-0, up, and down. If the number of places negative, the number will be rounded left from the decimal point. All if the half methods look at the place to the right of the target number of places and round down if the digit is less than 5, up if the digit is more than 5, and based on the specific method if the digit is 5. For the non-half methods, if there is any amount to the right of the target place, the digit in the target place will be rounded based on specific method.' }
+  ] note:"By default, the single-number signature will round to an integer, but if the round defaults are updated to include all-numeric as true, then it will return numbers rounded to the nearest default place. Round defaults are { places:2 all-numeric:false method::half-even }."
+  opts:[
+    { name:'places' type:'number' desc:'The number of places to round to' }
+    { name:'method' type:':half-up|:half-down|:half-to-0|:half-from-0|:half-even|:half-odd|:to-0|:from-0|:up|:down' desc:'The rounding method to use' }
+    { name:'string' type:'boolean' desc:'Return the number as a string rather than a number' }
+  ]}
   { op:'set' sig:[
     { proto:'(string, any) => interval' desc:'Sets the root value specified by the given path in the first argument the value supplied as the second argument and returns the value that was replaced, if any.' }
   ]}

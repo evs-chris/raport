@@ -28,7 +28,13 @@ const generateDefaults = {
   max: 10000,
 };
 
-type RoundingMethod = 'half-up'|'half-down'|'half-even'|'half-odd'|'to-0'|'from-0';
+function stringTimes(str: string, times: number): string {
+  let res = '';
+  for (let i = 0; i < times; i++) res += str;
+  return res;
+}
+
+type RoundingMethod = 'half-up'|'half-down'|'half-even'|'half-odd'|'half-to-0'|'half-from-0'|'to-0'|'from-0'|'up'|'down';
 const roundDefaults = {
   places: 2,
   'all-numeric': false,
@@ -46,6 +52,19 @@ export function round(amt: string|number, settings?: { places: number; method: R
     str += '0';
     dec += '0';
     const l = +`${str.slice(place - dec.length, place - dec.length + 1)}` || 0;
+    const rest = parseInt(str.slice(place - dec.length) + '0');
+    if (type === 'up' && rest > 0) {
+      if (+amt > 0) return (+str.slice(0, place - dec.length) + +`0.${stringTimes('0', place - 1)}1`).toFixed(place);
+      else return str.slice(0, place - dec.length);
+    } else if (type === 'down' && rest > 0) {
+      if (+amt < 0) return (+str.slice(0, place - dec.length) - +`0.${stringTimes('0', place - 1)}1`).toFixed(place);
+      else return str.slice(0, place - dec.length);
+    } else if (type === 'to-0' && rest > 0) {
+      return str.slice(0, place - dec.length);
+    } else if (type === 'from-0' && rest > 0) {
+      if (+amt < 0) return (+str.slice(0, place - dec.length) - +`0.${stringTimes('0', place - 1)}1`).toFixed(place);
+      else return (+str.slice(0, place - dec.length) + +`0.${stringTimes('0', place - 1)}1`).toFixed(place);
+    }
     if (+l < 5) return str.slice(0, place - dec.length);
     else if (+l > 5 || +`${str.slice(1 + place - dec.length)}`) return (+amt).toFixed(place);
     else {
@@ -54,8 +73,8 @@ export function round(amt: string|number, settings?: { places: number; method: R
       if (type === 'half-odd') return (+`${pre}${f % 2 === 0 ? 6 : 4}`).toFixed(place);
       else if (type === 'half-up') return (+`${pre}${+pre > 0 ? 6 : 4}`).toFixed(place);
       else if (type === 'half-down') return (+`${pre}${+pre > 0 ? 4 : 6}`).toFixed(place);
-      else if (type === 'to-0') return (+`${pre}4`).toFixed(place);
-      else if (type === 'from-0') return (+`${pre}6`).toFixed(place);
+      else if (type === 'half-to-0') return (+`${pre}4`).toFixed(place);
+      else if (type === 'half-from-0') return (+`${pre}6`).toFixed(place);
       else return (+`${pre}${f % 2 === 0 ? 4 : 6}`).toFixed(place);
     }
   } else if (place === 0) {
@@ -65,6 +84,19 @@ export function round(amt: string|number, settings?: { places: number; method: R
     str = `${str}00`;
     const p = +str.slice(point - 1, point);
     const n = +str.slice(point + 1, point + 2);
+    const rest = parseInt(str.slice(point + 1) + '0');
+    if (type === 'up' && rest > 0) {
+      if (+amt > 0) return (+str.slice(0, point) + 1).toFixed(0);
+      else return str.slice(0, point);
+    } else if (type === 'down' && rest > 0) {
+      if (+amt < 0) return (+str.slice(0, point) - 1).toFixed(0);
+      else return str.slice(0, point);
+    } else if (type === 'to-0' && rest > 0) {
+      return str.slice(0, point);
+    } else if (type === 'from-0' && rest > 0) {
+      if (+amt < 0) return (+str.slice(0, point) - 1).toFixed(0);
+      else if (+amt > 0) return (+str.slice(0, point) + 1).toFixed(0);
+    }
     if (n < 5) return str.slice(0, point);
     else if (n > 5 || n === 5 && +str.slice(point + 2)) return (+`${str.slice(0, point - 1)}0` + (p + 1) * (+str < 0 ? -1 : 1)).toString();
     else {
@@ -72,30 +104,54 @@ export function round(amt: string|number, settings?: { places: number; method: R
       if (type === 'half-odd') return (base + (p % 2 === 0 ? p + 1 : p) * (+str < 0 ? -1 : 1)).toString()
       else if (type === 'half-up') return (base + (+str > 0 ? p + 1 : p) * (+str < 0 ? -1 : 1)).toString()
       else if (type === 'half-down') return (base + (+str < 0 ? p + 1 : p) * (+str < 0 ? -1 : 1)).toString()
-      else if (type === 'to-0') return base.toString();
-      else if (type === 'from-0') return (base + 1).toString();
+      else if (type === 'half-to-0') return base.toString();
+      else if (type === 'half-from-0') return (base + 1).toString();
       else return (base + (p % 2 === 0 ? p : p + 1) * (+str < 0 ? -1 : 1)).toString();
     }
   } else {
     let str = `${+amt < 0 ? Math.floor(+amt || 0) : Math.ceil(+amt || 0)}`;
-    if (0 - place > str.length) return `0`;
+    if (0 - place > str.length && type !== 'up' && type !== 'down' && type !== 'to-0' && type !== 'from-0') return `0`;
     const n = +str.slice(place, place === -1 ? undefined : place + 1);
+    const rest = +(str.slice(place) + '0');
     let p = str.slice(place - 1, place);
     if (p === '-') p = '';
     const zeroes = `${Math.pow(10, 0 - place).toString().slice(1)}`
     if (!p) {
       const big = `${+str < 0 ? '-' : ''}1${zeroes}`;
+      if (type === 'up') {
+        if (+amt > 0) return big;
+        else return '0';
+      } else if (type === 'down') {
+        if (+amt < 0) return big;
+        else return '0';
+      } else if (type === 'to-0') {
+        return '0';
+      } else if (type === 'from-0') {
+        return big;
+      }
       if (+str > 0 && +str < 5 || +str < 0 && +str > -5) return '0';
       else if (+str > 0 && +str > 5 || +str < 0 && +str < -5) return big;
       else {
         if (type === 'half-odd') return big;
         else if (type === 'half-up') return +str > 0 ? big : '0';
         else if (type === 'half-down') return +str > 0 ? '0' : big;
-        else if (type === 'to-0') return '0';
-        else if (type === 'from-0') return big;
+        else if (type === 'half-to-0') return '0';
+        else if (type === 'half-from-0') return big;
         else return '0';
       }
     } else {
+      if (type === 'up' && rest > 0) {
+        if (+str > 0) return (+(str.slice(0, place) + stringTimes('0', place * -1)) + +`1${stringTimes('0', place * -1)}`).toFixed(0);
+        else return str.slice(0, place) + stringTimes('0', place * -1);
+      } else if (type === 'down' && rest > 0) {
+        if (+str < 0) return (+(str.slice(0, place) + stringTimes('0', place * -1)) - +`1${stringTimes('0', place * -1)}`).toFixed(0);
+        else return str.slice(0, place) + stringTimes('0', place * -1);
+      } else if (type === 'to-0' && rest > 0) {
+        return str.slice(0, place) + stringTimes('0', place * -1);
+      } else if (type === 'from-0' && rest > 0) {
+        if (+str > 0) return (+(str.slice(0, place) + stringTimes('0', place * -1)) + +`1${stringTimes('0', place * -1)}`).toFixed(0);
+        return (+(str.slice(0, place) + stringTimes('0', place * -1)) - +`1${stringTimes('0', place * -1)}`).toFixed(0);
+      }
       if (n < 5) return `${str.slice(0, place)}${zeroes}`
       else if (n > 5 || place < -1 && +`${str.slice(place + 1)}`) return (+`${+str.slice(0, place - 1) || 0}${0}${zeroes}` + +`${+p + 1}${zeroes}` * (+str < 0 ? -1 : 1)).toString();
       else {
@@ -103,8 +159,8 @@ export function round(amt: string|number, settings?: { places: number; method: R
         if (type === 'half-odd') return (base + +`${+p % 2 === 0 ? +p + 1 : +p}${zeroes}` * (+str < 0 ? -1 : 1)).toString();
         else if (type === 'half-up') return (base + +`${+str > 0 ? +p + 1 : +p}${zeroes}` * (+str < 0 ? -1 : 1)).toString();
         else if (type === 'half-down') return (base + +`${+str < 0 ? +p + 1 : +p}${zeroes}` * (+str < 0 ? -1 : 1)).toString();
-        else if (type === 'to-0') return (base + +`${+p}${zeroes}` * (+str < 0 ? -1 : 1)).toString();
-        else if (type === 'from-0') return (base + +`${+p + 1}${zeroes}` * (+str < 0 ? -1 : 1)).toString();
+        else if (type === 'half-to-0') return (base + +`${+p}${zeroes}` * (+str < 0 ? -1 : 1)).toString();
+        else if (type === 'half-from-0') return (base + +`${+p + 1}${zeroes}` * (+str < 0 ? -1 : 1)).toString();
         else return (base + +`${+p % 2 === 0 ? +p : +p + 1}${zeroes}` * (+str < 0 ? -1 : 1)).toString();
       }
     }
@@ -736,9 +792,7 @@ registerOperator(
     if (!isNum(first)) {
       if (values.length === 1 && isNum(values[0]) && +values[0] > 0) {
         if (typeof first === 'string') {
-          let s = '';
-          for (let i = 0; i < values[0]; i++) s += first;
-          return s;
+          return stringTimes(first, +values[0]);
         } else if (Array.isArray(first) && +values[0] < 10000 && first.length < 1000) {
           const res = [];
           for (let i = 0; i < values[0]; i++) res.push.apply(res, first);
@@ -771,9 +825,13 @@ registerOperator(
     if (typeof values[0] !== 'number') return values[0];
     return Math.abs(values[0]);
   }),
-  simple(['round'], (_name: string, [num, precision, method]: [number, number, string]): number => {
-    if (precision !== undefined || roundDefaults['all-numeric']) return +round(num, { places: precision, method: method as any });
-    else return Math.round(num);
+  simple(['round'], (_name: string, [num, precision, method]: [number, number, string], opts): number|string => {
+    precision = precision ?? opts?.places;
+    if (precision !== undefined || roundDefaults['all-numeric']) {
+      const res = round(num, { places: precision, method: (method || opts?.method) as any });
+      if (opts?.string) return res;
+      return +res;
+    } else return Math.round(num);
   }),
   simple(['floor'], (_name: string, values: [number]): number => {
     return Math.floor(values[0]);
