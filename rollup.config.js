@@ -9,6 +9,7 @@ const { version } = require('./package.json');
 const configs = [];
 
 if (process.env.ENV === 'dev') {
+  console.log(`Using dev settings... ${version}`);
   const replaceOpts = { values: { RAPORT_VERSION: `${version}-dev` }, preventAssignment: false, delimiters: ['', ''] };
   // build lib es and umd
   configs.push({
@@ -135,6 +136,7 @@ if (process.env.ENV === 'dev') {
     ],
   });
 } else if (process.env.ENV === 'prod') {
+  console.log(`Using prod settings... ${version}`);
   const replaceOpts = { values: { RAPORT_VERSION: `${version}` }, preventAssignment: false, delimiters: ['', ''] };
   // build lib es and umd with min
   configs.push({
@@ -192,7 +194,8 @@ if (process.env.ENV === 'dev') {
           'raport': 'Raport',
           'ractive': 'Ractive',
           'raport/index': 'Raport',
-        }
+        },
+        plugins: [],
       }, {
         dir: 'design',
         format: 'umd',
@@ -210,6 +213,7 @@ if (process.env.ENV === 'dev') {
         entryFileNames: 'index.js',
         format: 'module',
         sourcemap: true,
+        plugins: [],
       }, {
         dir: 'design',
         entryFileNames: 'index.min.js',

@@ -1982,9 +1982,14 @@ __NOTE:__ By default, the single-number signature will round to an integer, but 
 <dt><code>number => number</code></dt>
 <dd>Rounds the given number to the nearest integer.</dd>
 <dt><code>(number, number, string) => number</code></dt>
-<dd>Rounds the given number to the nearest decimal specified by the second number using the method specified by the string, defaulting to half-even. Supported methods are half-up, half-down, to-0, from-0, half-even, and half-odd. If the number of places negative, the number will be rounded left from the decimal point.</dd>
+<dd>Rounds the given number to the nearest decimal specified by the second number using the method specified by the string, defaulting to half-even. Supported methods are half-up, half-down, half-to-0, half-from-0, half-even, half-odd, to-0, from-0, up, and down. If the number of places negative, the number will be rounded left from the decimal point. All if the half methods look at the place to the right of the target number of places and round down if the digit is less than 5, up if the digit is more than 5, and based on the specific method if the digit is 5. For the non-half methods, if there is any amount to the right of the target place, the digit in the target place will be rounded based on specific method.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>places</code></dt><dd>The number of places to round to</dd><dt><code>method</code></dt><dd>The rounding method to use</dd><dt><code>string</code></dt><dd>Return the number as a string rather than a number</dd>
+</dl>
 </dl>
 <br/>
 
