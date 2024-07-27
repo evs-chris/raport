@@ -90,11 +90,11 @@ Ractive.extendWith(App, {
 
 {{#partial root}}
   <div class=tree-view>
-    {{#if typeof . === 'object'}}<span style="color: #aaa; margin-left: 0.5em;">{{Array.isArray(.) ? '[' : '{'}}</span>{{/if}}
+    {{#if typeof . === 'object' && .}}<span style="color: #aaa; margin-left: 0.5em;">{{Array.isArray(.) ? '[' : '{'}}</span>{{/if}}
     <div class=root>
       {{>tree .}}
     </div>
-    {{#if typeof . === 'object'}}<span style="color: #aaa; margin-left: 0.5em;">{{Array.isArray(.) ? ']' : '}'}}</span>{{/if}}
+    {{#if typeof . === 'object' && .}}<span style="color: #aaa; margin-left: 0.5em;">{{Array.isArray(.) ? ']' : '}'}}</span>{{/if}}
   </div>
 {{/partial}}
 
@@ -102,13 +102,13 @@ Ractive.extendWith(App, {
   <div class=tree>
     {{#each .}}
       <div class=node>
-        <div class=key title="{{(@keypath + '').replace(/.*\\)\\./, '')}}">{{@key}}<span style="color: #aaa;">:</span>{{#if typeof . === 'object'}}<span style="color: #aaa; margin-left: 0.5em;">{{Array.isArray(.) ? '[' : '{'}}</span>{{/if}}</div>
-        {{#unless ~/expandAll}}<div class=expand {{#if typeof . === 'object'}}class-show on-click="@.toggle('expand.' + escapeKey(@keypath))"{{/if}}>{{#if ~/expand[@keypath]}}-{{else}}+{{/if}}</div>{{/unless}}
-        <div class=value class-children="typeof . === 'object' && (~/expandAll || ~/expand[@keypath])">
-          {{#if typeof . === 'object'}}
+        <div class=key title="{{(@keypath + '').replace(/.*\\)\\./, '')}}">{{@key}}<span style="color: #aaa;">:</span>{{#if typeof . === 'object' && .}}<span style="color: #aaa; margin-left: 0.5em;">{{Array.isArray(.) ? '[' : '{'}}</span>{{/if}}</div>
+        {{#unless ~/expandAll}}<div class=expand {{#if typeof . === 'object' && .}}class-show on-click="@.toggle('expand.' + escapeKey(@keypath))"{{/if}}>{{#if ~/expand[@keypath]}}-{{else}}+{{/if}}</div>{{/unless}}
+        <div class=value class-children="typeof . === 'object' && . && (~/expandAll || ~/expand[@keypath])">
+          {{#if typeof . === 'object' && .}}
             {{#if ~/expandAll || ~/expand[@keypath]}}
               {{>tree .}}
-              <span style="color: #aaa; margin-left: 0.5em;">{{Array.isArray(.) ? ']' : '}'}}</span>
+              <span style="color: #aaa; margin-left: 0.25em;">{{Array.isArray(.) ? ']' : '}'}}</span>
             {{else}}
               <div class=type>{{#if Array.isArray(.)}} ]{{else}} }{{/if}}</div>
             {{/if}}
