@@ -45,6 +45,7 @@ export interface FormatDoc {
 export const docs = {
   operators: [] as Array<OperatorDoc>,
   operatorText: {} as { [op: string]: string },
+  languageReference: langref,
 };
 {
   const ops = evaluate(operator_docs) as Array<OperatorDoc>;
