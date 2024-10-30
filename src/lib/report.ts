@@ -448,7 +448,7 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
     }
   }
 
-  for (let w of report.widgets) {
+  for (let w of report.widgets || []) {
     if (w.macro) w = expandMacro(w.macro, w, ctx, { x: 0, y: 0, availableX, availableY, maxX: availableX, maxY }, state);
     let r: RenderResult;
     do {
@@ -565,7 +565,7 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
   if (report.watermark) render(report.watermark, 'watermark');
   let maxY = y || 0;
   y = 0;
-  for (const w of report.widgets) render(w, 'main');
+  for (const w of report.widgets || []) render(w, 'main');
   if (y > maxY) maxY = y;
   y = 0;
   if (report.overlay) render(report.overlay, 'overlay');
