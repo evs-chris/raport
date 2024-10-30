@@ -971,6 +971,7 @@ export function datesDiff(l: Date, r: Date): FullTimeSpan {
     a.setDate(num + 1);
     if (a.getMonth() !== tmp1) {
       a.setDate(1);
+      a.setFullYear(tmp2);
       a.setMonth(tmp1 + 2);
       a.setDate(0);
     } else {
@@ -978,6 +979,7 @@ export function datesDiff(l: Date, r: Date): FullTimeSpan {
       a.setMonth(tmp1 + 1);
       if (tmp1 === 11 ? a.getMonth() !== 0 : a.getMonth() !== tmp1 + 1) {
         a.setDate(1);
+        a.setFullYear(tmp2);
         a.setMonth(tmp1 + 2);
         a.setDate(0);
       }

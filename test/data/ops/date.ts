@@ -15,6 +15,10 @@ q.test('time-span in days with misaligned months', t => {
   t.equal(evaluate(`time-span(#2020-01-31# #2020-02-29# unit::d)`), 29);
 });
 
+q.test('time-span for months on the last day of the month spanning years', t => {
+  t.equal(evaluate(`time-span(#2024-10-30# #2026-09-30# unit::M)`), 23);
+});
+
 q.test('add months', t => {
   t.equal(evaluate(`(#2020-01-31# + #1m#)#date`), '2020-02-29');
 });
