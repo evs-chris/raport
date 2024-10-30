@@ -186,7 +186,7 @@ function equals(l: any, r: any): boolean {
 }
 
 /**
- * Find a the first overlapping substring that contains threshhold percent characters of the smallest string length.
+ * Find the first overlapping substring that contains threshhold percent characters of the smallest string length.
  * @param a - the first string
  * @param b - the second string
  * @param threshhold - defaults to 0.5 - the percentage of the smaller string length needed to match
@@ -201,12 +201,14 @@ export function overlap(a: string, b: string, threshhold: number = 0.5): string 
  * Finds the percentage similarity between two strings based on a minimum threshhold and a fudge factor. The minimum threshhold determins the earliest that the search can return. The fudge factor allows skipping characters in either string, though there is no backtracking.
  * @param a - the first string
  * @param b - the second string
- * @param threshhold - defaults to 0.5 - the required similarity between two substrings, accounting for the fidge factor
+ * @param threshhold - defaults to 0.5 - the required similarity between two substrings, accounting for the fudge factor
  * @param fudges - the number skippable characters in either string without a match
+ * @param whole - adjust the similarity account for the whole string rather than only the first matching substring
  * @returns - the similarity of the first qualifying match
  */
-export function similarity(a: string, b: string, threshhold: number = 0.5, fudges: number = 2): number {
+export function similarity(a: string, b: string, threshhold: number = 0.5, fudges: number = 2, whole = false): number {
   const res = similar(a, b, threshhold, fudges);
+  if (res && whole) return (res[2] || 0) * (((res[0].length / a.length) + (res[1].length / b.length)) / 2);
   return res && res[2] || 0;
 }
 

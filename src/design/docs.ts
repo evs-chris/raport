@@ -462,7 +462,7 @@ To clear a context-local round default, call this with truthy context and unset 
     { proto:'(string, string, number = 0.5, number = 2) => [string, string, number]' desc:'Finds the first similar substrings within the two given strings based on a threshhold (3rd argument, defaults to 50%) and fudge factor (4th argument, defaults to 2). The two similar substrings are returned in a tuple with the similarity percentage.' }
   ]}
   { op:'similarity' sig:[
-    { proto:'(string, string, number = 0.5, number = 2) => [string, string, number]' desc:'Finds the similarity percentage of the first similar substrings within the two given strings using the similar operator.' }
+    { proto:'(string, string, number = 0.5, number = 2) => number' desc:'Finds the similarity percentage of the first similar substrings within the two given strings using the similar operator.' }
   ]}
   { op:['slice' 'substr'] sig:[
     { proto:'any[] => any[]' desc:'Returns a copy of the given array.' }
