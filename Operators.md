@@ -2058,7 +2058,7 @@ To clear a context-local round default, call this with truthy context and unset 
 <dd>
 
 <dl>
-<dt><code>(string, string, number = 0.5, number = 2) => [string, string, number]</code></dt>
+<dt><code>(string, string, number = 0.5, number = 2) => number</code></dt>
 <dd>Finds the similarity percentage of the first similar substrings within the two given strings using the similar operator.</dd>
 </dl>
 

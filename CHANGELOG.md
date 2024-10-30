@@ -1,3 +1,21 @@
+## 0.24.9
+
+2024-10-30
+
+### Data
+
+* __BUG:__ Date diffs that span years on the last day of the month will no longer swallow years.
+* The similarity operator can now be asked for whole string similaroty in addition to the existing matching substring similarity.
+
+### Render
+
+* __BUG?:__ The renderer will no longer crash for report definitions with no widgets array.
+
+### Designer
+
+* The language reference is now exported for library use.
+
+
 ## 0.24.8
 
 2024-07-27
