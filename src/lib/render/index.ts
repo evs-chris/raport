@@ -227,10 +227,13 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
           const l = layout ? layouts[layout as string] || layouts.row : layouts.row;
           p = l(w, offset, m, placement, ps, context);
           if (h > p.availableY) {
-            const offset = maxYOffset(ps);
-            state = state || { offset };
-            state.last = i;
-            return { output: s, continue: state, height: offset };
+            if (w.height === 'grow') h = getHeightWithMargin(w, p, context);
+            if (h > p.availableY) {
+              const offset = maxYOffset(ps);
+              state = state || { offset };
+              state.last = i;
+              return { output: s, continue: state, height: offset };
+            }
           }
         }
 
