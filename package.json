@@ -31,7 +31,7 @@
     "rollup": "^2.42",
     "rollup-plugin-sourcemaps": "^0.6.3",
     "source-map-support": "^0.5",
-    "sprunge": "^0.5.1",
+    "sprunge": "^0.5.2",
     "typescript": "^4"
   },
   "scripts": {
