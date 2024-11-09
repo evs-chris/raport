@@ -687,6 +687,14 @@ registerOperator(
     if (res.slice(0, 7) === '[object') return JSON.stringify(value);
     return res;
   }),
+  simple(['log'], (_name: string, args: any[], _opts, ctx: Context) => {
+    try {
+      ctx.root.log(args);
+    } catch (e) {
+      console.error(e);
+      console.log(...args);
+    }
+  }),
   simple(['call'], (_name: string, args: any[], _opts, ctx: Context): any => {
     if (args[0] != null && typeof args[1] === 'string' && typeof args[0][args[1]] === 'function') {
       const obj = args.shift();

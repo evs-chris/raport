@@ -155,11 +155,17 @@ export class Designer extends Ractive {
     this.push(`${path}.widgets`, widget);
   }
 
+  log = (args: any[]) => {
+    this.push('temp.logs', [evaluate(`#now##date,'H:m:s yyyy-MM-dd'`), args]);
+    console.log(...args);
+  };
+
   async run() {
     const report: Report = this.get('report');
     this._isplay = true;
     const ctx = new Root(cloneDeep(report.context || {}), { parameters: this.get('params') });
     const srcs = await this.buildSources();
+    ctx.log = this.log;
     this._isplay = false;
     let text: string;
     this.fire('running');
@@ -704,6 +710,7 @@ export class Designer extends Ractive {
   async buildRoot(skipSources?: boolean): Promise<Root> {
     const report: Report = this.get('report');
     const res = new Root(cloneDeep(report.context), { parameters: this.get('params') });
+    res.log = this.log;
     if (report.extraContext) evaluate(res, report.extraContext);
     const srcs = await this.buildSources();
     if (!skipSources) applySources(res, report.sources || [], srcs);
@@ -862,6 +869,7 @@ export class Designer extends Ractive {
     const set = !data;
     data = data || this.get('data');
     const ctx = new Root({}, { parameters: this.get('params') });
+    ctx.log = this.log;
     const url = this.evalExpr(data.url, true, ctx);
     const headers: { [key: string]: string } = {};
     if (Array.isArray(data.headers)) {
@@ -2324,12 +2332,6 @@ function joinPath(one: string, two: string) {
 }
 
 registerOperator({
-  type: 'value',
-  names: ['log'],
-  apply(_name, args) {
-    console.log.apply(console, args);
-  },
-}, {
   type: 'value',
   names: ['debugger'],
   apply(..._args) {

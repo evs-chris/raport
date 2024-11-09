@@ -76,6 +76,10 @@
           {{/if}}
           <button title="Modify the current HTML template" class-tab style-display="{{~/temp.expr.html ? '' : 'none'}}" class-active="~/temp.expr.tab === 'html'" on-click="@.set('temp.expr.tab', 'html')">HTML</button>
           <div style-flex-grow=2 />
+          {{#if ~/temp.expr.tab === 'logs'}}<button title="Clear the logs" disabled="{{!~/temp.logs.length}}" on-click="@.set('~/temp.logs', [])" class-ico class-large>{{>times}}</button>{{/if}}
+          {{#if ~/temp.logs.length || ~/temp.bottom.tab === 'logs'}}
+            <button class-tab title="View output from the log operator evaluated in expressions" class-active="~/temp.expr.tab === 'logs'" on-click="@.set('temp.expr.tab', 'logs')" style="margin-left: 1em;">Logs</button>
+          {{/if}}
           <button title="View the result of the current expression's execution" class-tab class-active="~/temp.expr.tab === 'result'" on-click="@.set('temp.expr.tab', 'result')">Result</button>
           {{#if ~/temp.expr.parsed}}
             <button title="View the parse tree of the current expression" class-tab class-active="~/temp.expr.tab === 'parsed'" class-error="~/temp.expr.error" on-click="@.set('temp.expr.tab', 'parsed')">Parsed</button>
@@ -200,6 +204,17 @@
         <div class-tab class-parsed class-active-tab="~/temp.expr.tab === 'parsed'">
           <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
             <code><pre style-margin="1em">{{#if ~/temp.expr.errormsg}}{{~/temp.expr.errormsg}}{{else}}{{#if ~/temp.expr.parsedtype === 'raport'}}{{@.unparse(~/temp.expr.ast)}}{{else}}{{JSON.stringify(~/temp.expr.ast, null, ~/temp.expr.jsonsquash ? '' : '  ')}}{{/if}}{{/if}}</pre></code>
+          </div></div>
+        </div>
+        <div class-tab class-logs class-active-tab="~/temp.expr.tab === 'logs'">
+          <div style="margin-top: 0.2em; border-bottom: 1px dotted rgba(128, 128, 128, 0.5);" />
+          <div class=scrolled-wrapper style-flex-grow=1><div as-scrolled>
+            {{#each ~/temp.logs}}
+              <div class=log-entry>
+                <pre><code>{{this.1.join(' ')}}</code></pre>
+                <div class=time>{{this.0}}</div>
+              </div>
+            {{/each}}
           </div></div>
         </div>
       </div>
@@ -779,6 +794,33 @@
     transition: opacity 0.2s ease-in-out;
   }
   .bottom-pane .ops-search:hover {
+    opacity: 1;
+  }
+
+  .bottom-pane .logs {
+    flex-direction: column;
+  }
+  .bottom-pane .logs .actions {
+    padding: 0.5em;
+    border-bottom: 1px solid;
+  }
+  .bottom-pane .logs .log-entry {
+    padding: 0.5em;
+    border-bottom: 1px dotted rgba(128, 128, 128, 0.5);
+    position: relative;
+  }
+  .bottom-pane .logs .log-entry .time {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10em;
+    background-color: rgba(128, 128, 128, 0.5);
+    opacity: 0.2;
+    transition: opacity 0.2s ease;
+    padding: 0.2em;
+    border-radius: 0 0 0 0.5em;
+  }
+  .bottom-pane .logs .log-entry .time:hover {
     opacity: 1;
   }
 

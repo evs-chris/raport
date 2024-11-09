@@ -730,6 +730,7 @@ export interface RootContext extends Context {
   sources: SourceMap;
   parent: undefined;
   exprs: { [ns: string]: { [key: string]: Value } };
+  log: (...v: any[]) => void;
 }
 
 export class Root implements RootContext {
@@ -742,13 +743,17 @@ export class Root implements RootContext {
   exprs = {} as { [ns: string]: { [key: string]: Value } };
   parser?: ((txt: string) => Value) & { namespace: string };
   path: '' = '';
+  log(v: any[]) {
+    console.log(...v);
+  }
 
-  constructor(root: any = {}, opts?: ExtendOptions & { parameters?: ParameterMap }) {
+  constructor(root: any = {}, opts?: ExtendOptions & { parameters?: ParameterMap; log?: (...v: any[]) => void }) {
     this.value = root;
     if (opts) {
       Object.assign(this.parameters, opts.parameters);
       Object.assign(this.special, opts.special);
       if (opts.parser) this.parser = opts.parser;
+      if (opts.log && typeof opts.log === 'function') this.log = opts.log;
     }
   }
 }
