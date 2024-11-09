@@ -138,6 +138,7 @@ export class Designer extends Ractive {
   _contextText: HTMLTextAreaElement;
   _inited = false;
   _isplay = false;
+  _builtroot: Promise<Root>;
 
   checkResize: () => void;
 
@@ -164,8 +165,8 @@ export class Designer extends Ractive {
     const report: Report = this.get('report');
     this._isplay = true;
     const ctx = new Root(cloneDeep(report.context || {}), { parameters: this.get('params') });
-    const srcs = await this.buildSources();
     ctx.log = this.log;
+    const srcs = await this.buildSources(false);
     this._isplay = false;
     let text: string;
     this.fire('running');
@@ -707,17 +708,19 @@ export class Designer extends Ractive {
     this.toggle('exprExpand.' + Ractive.escapeKey(path));
   }
 
-  async buildRoot(skipSources?: boolean): Promise<Root> {
+  async buildRoot(skipSources?: boolean, sample?: boolean): Promise<Root> {
+    if (sample !== false && this._builtroot) return this._builtroot;
     const report: Report = this.get('report');
     const res = new Root(cloneDeep(report.context), { parameters: this.get('params') });
     res.log = this.log;
     if (report.extraContext) evaluate(res, report.extraContext);
-    const srcs = await this.buildSources();
+    const srcs = await this.buildSources(sample);
     if (!skipSources) applySources(res, report.sources || [], srcs);
+    if (sample !== false) this._builtroot = Promise.resolve(res);
     return res;
   }
 
-  async loadSourceData(av: AvailableSource): Promise<any> {
+  async loadSourceData(av: AvailableSource, sample?: boolean): Promise<any> {
     const load = this.get('actions.loadSourceData');
     const nocache = this._isplay;
     let d: any;
@@ -746,14 +749,14 @@ export class Designer extends Ractive {
     return d;
   }
 
-  async buildSources(): Promise<SourceMap> {
+  async buildSources(sample?: boolean): Promise<SourceMap> {
     const report: Report = this.get('report');
     const avs: AvailableSource[] = this.get('sources') || [];
     const res: SourceMap = {};
     for (const src of report.sources || []) {
       const av = avs.find(s => s.name === src.source);
       if (av) {
-        const data = await this.loadSourceData(av);
+        const data = await this.loadSourceData(av, sample);
         if (data && typeof data === 'object' && 'value' in data) res[av.name] = data;
         else res[av.name] = { value: data };
       }
@@ -761,8 +764,8 @@ export class Designer extends Ractive {
     return res;
   }
 
-  async buildLocalContext(path?: string): Promise<Context> {
-    const root = await this.buildRoot(path && path.slice(0, 'report.sources.'.length) === 'report.sources.');
+  async buildLocalContext(path?: string, sample?: boolean): Promise<Context> {
+    const root = await this.buildRoot(path && path.slice(0, 'report.sources.'.length) === 'report.sources.', sample === false ? sample : true);
     root.special.date = new Date();
     root.special.local = {};
     root.special.locals = {};
@@ -1767,6 +1770,9 @@ const designerOpts: ExtendOpts<Designer> = {
         else if (this.stringifyProject(project) !== saved) this.set('projectChanged', true);
         else this.set('projectChanged', false);
       }, 1000),
+    },
+    'report.parameters report.sources report.context sources'() {
+      this._builtroot = undefined;
     },
     'report.context'(v: any) {
       if (!this._contextText) return;
