@@ -77,7 +77,7 @@
           <button title="Modify the current HTML template" class-tab style-display="{{~/temp.expr.html ? '' : 'none'}}" class-active="~/temp.expr.tab === 'html'" on-click="@.set('temp.expr.tab', 'html')">HTML</button>
           <div style-flex-grow=2 />
           {{#if ~/temp.expr.tab === 'logs'}}<button title="Clear the logs" disabled="{{!~/temp.logs.length}}" on-click="@.set('~/temp.logs', [])" class-ico class-large>{{>times}}</button>{{/if}}
-          {{#if ~/temp.logs.length || ~/temp.bottom.tab === 'logs'}}
+          {{#if ~/temp.logs.length || ~/temp.expr.tab === 'logs'}}
             <button class-tab title="View output from the log operator evaluated in expressions" class-active="~/temp.expr.tab === 'logs'" on-click="@.set('temp.expr.tab', 'logs')" style="margin-left: 1em;">Logs</button>
           {{/if}}
           <button title="View the result of the current expression's execution" class-tab class-active="~/temp.expr.tab === 'result'" on-click="@.set('temp.expr.tab', 'result')">Result</button>

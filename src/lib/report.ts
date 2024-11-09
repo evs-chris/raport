@@ -379,7 +379,11 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
       res += `<tr class=row><th>${idx}</th>${fields.map(f => {
         let val = f ? evaluate(c, f) : '';
         if (val === undefined) val = '';
-        if (typeof val !== 'string') val = `${val}`;
+        if (typeof val !== 'string') {
+          const v = val;
+          val = `${v}`;
+          if (val.slice(0, 7) === '[object') val = JSON.stringify(v);
+        }
         return `<td>${val}</td>`;
       }).join('')}</tr>`;
       idx++;
@@ -397,7 +401,11 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
       res += fields.map(f => {
         let val = f ? evaluate(c, f) : '';
         if (val === undefined) val = '';
-        if (typeof val !== 'string') val = `${val}`;
+        if (typeof val !== 'string') {
+          const v = val;
+          val = `${v}`;
+          if (val.slice(0, 7) === '[object') val = JSON.stringify(v);
+        }
         if (unquote) val = val.replace(unquote, report.quote + report.quote);
         return `${report.quote || ''}${val}${report.quote || ''}`;
       }).join(report.field || ',') + (report.record || '\n');
