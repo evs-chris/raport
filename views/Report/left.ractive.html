@@ -58,6 +58,22 @@
     {{#if ~/temp.widget === 'report'}}
       <div class="growy">
         <div class=sheet>
+          {{#each ~/extraProperties}}
+            <label><span {{#if .tip}}title="{{.tip}}"{{/if}}>{{.label || .name}}</span><span>
+              {{#if .type === 'boolean'}}
+                <input type=checkbox checked="{{~/report[.name]}}" />
+              {{elseif .type === 'number'}}
+                <input type=number value="{{~/report[.name]}}" />
+              {{elseif .options.length}}
+                <select value="{{~/report[.name]}}">{{#each.options}}
+                  {{#if typeof . === 'string'}}<option>{{.}}</option>
+                  {{else}}<option value="{{.value}}">{{.label}}</option>{{/if}}
+                {{/each}}</select>
+              {{else}}
+                <input value="{{~/report[.name]}}" />
+              {{/if}}
+            </span></label>
+          {{/each}}
           <label><span title="The name of this report, which is used for naming files. This is a template, so it must use mustache interpolators for variables.">Name <button class-ico on-click="@.editExpr('report.name', { template: true }), false" tabindex=-1>{{>pencil}}</button></span><span>
             <div style="padding: 0; overflow: auto; max-height: 5em;"><Editor src="{{report.name}}" tabout template /></div>
           </span></label>
