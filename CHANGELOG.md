@@ -1,3 +1,28 @@
+## 0.25.0
+
+2024-11-09
+
+### Render
+
+* __BUG:__ Widgets set to fill height can now be rendered after a non-full-width widget without an infinite loop.
+* __BUG?:__ Delimited fields will now stringify field values that start with `[object` so JSON in a field is not lost.
+
+### Data
+
+* There is now a built-in `log` operator that can be hooked through the root context of an evaluation.
+  * The designer now has a logging tab on the evaluation pane to view accumulated messages without having to access browser devtools.
+
+### Parser
+
+* Symbolic operators can now be parsed either with required space on either side or no space on either side e.g. `x==y` or `x == y`. Mixing spacing is not allowed to avoid ambiguity and for aesthetics. `x ==y` and `x== y` are not allowed. `let a = x + y\n-a` results in `-a` rather than trying to assign `x + y - a` to `a`.
+
+### Designer
+
+* Root context built for expression evaluation and designer context will now be cached until one of the bases for the root context is changed. This should result in much better performance for computation heavy sources and root contexts in the designer.
+* Sources assembled while building root context for expression evaluation and designer context will now be passed a flag indicating that the source is not being requested for a full report run, allowing the source provider to return truncated or cached data.
+* Embedders can now supply `extraProperties` that are added to the report property sheet.
+
+
 ## 0.24.9
 
 2024-10-30
