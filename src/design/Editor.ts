@@ -8,13 +8,17 @@ import autosize from './autosize';
 
 import { debounce } from './util'
 
-const notSpace = /[^\s]/;
-const initSpace = /^(\s*).*/;
+const notSpace = /[^\r \t]/;
+const initSpace = /^([ \t]*).*/;
 
 export class Editor extends Ractive {
   constructor(opts?: InitOpts) {
     super(opts);
   }
+
+  code: HTMLDivElement;
+
+  lock = false;
 
   highlightSyntax() {
     const expr = this.get('src') || '';
@@ -23,138 +27,100 @@ export class Editor extends Ractive {
     const ast = parser(expr, { tree: true, compact: true } as any);
     this.set('ast', ast);
     if (!this.rendered) return;
-    const pre = this.find('pre');
+    const pre = this.find('code');
     if (pre) this.set('lines', breakLines(expr, pre.clientWidth));
   }
 
-  keydown(ev: KeyboardEvent) {
-    let key = ev.key;
-    let shift = ev.shiftKey;
+  sync(el: HTMLInputElement) {
+    this.lock = true;
+    const str = el.innerText.slice(-1) === '\n' ? el.innerText.slice(0, -1) : el.innerText; // strip final \n
+    this.set('src', str);
+    this.lock = false;
+  }
 
-    if (key === 'Backspace') {
-      const n: HTMLTextAreaElement = ev.target as any;
-      const txt = n.value;
-      if (n.selectionStart === n.selectionEnd) {
-        const idx = txt.lastIndexOf('\n', n.selectionStart - 1);
-        const str = txt.substring(idx > 0 ? idx + 1 : 0, n.selectionStart);
-        if (str && !notSpace.test(str) && str.length > 1) {
-          key = 'Tab';
-          shift = true;
-        }
-      }
-    }
+  keyup(ev: KeyboardEvent) {
+    const key = ev.key;
 
-    if (key === 'Home') {
-      const n: HTMLTextAreaElement = ev.target as any;
-      const txt = n.value;
-      if (n.selectionStart) {
-        const idx = txt.lastIndexOf('\n', n.selectionStart - 1);
-        let line = txt.substring(idx > 0 ? idx + 1 : 0, n.selectionStart);
-
-        let space = line.replace(initSpace, '$1');
-        if (!line || notSpace.test(line)) {
-          if (!line) {
-            let nidx = line.indexOf('\n', idx);
-            if (!~nidx) nidx = txt.length;
-            let i = n.selectionStart;
-            for (i; i < nidx; i++) if (notSpace.test(txt[i])) break;
-            n.selectionStart = i;
-          } else {
-            n.selectionStart = n.selectionStart - line.length + space.length;
-          }
-        } else {
-          n.selectionStart = n.selectionStart - line.length;
-        }
-
-        if (!shift) n.selectionEnd = n.selectionStart;
-        return false;
-      }
-    } else if (key === 'Tab') {
-      const n: HTMLTextAreaElement = ev.target as any;
-      let txt = n.value;
-      let pos = [n.selectionStart, n.selectionEnd];
-      let idx: number;
-
-      if (pos[0] === pos[1]) {
-        idx = txt.lastIndexOf('\n', pos[0]);
-        if (this.get('tabout')) {
-          if (txt.length === 0) return true;
-          if (!shift && notSpace.test(txt.substring(idx === -1 ? 0 : idx, pos[0]))) return true;
-        }
-        if (idx === pos[0]) idx = txt.lastIndexOf('\n', idx - 1);
-        if (idx === -1) idx = 0;
-        else idx += 1
-        if (shift) {
-          if (txt.substr(idx, 2) === '  ') {
-            txt = txt.substring(0, idx) + txt.substr(idx + 2);
-            pos[0] = pos[0] - 2;
-            pos[1] = pos[1] - 2;
-          }
-        } else {
-          txt = txt.substring(0, idx) + '  ' + txt.substr(idx);
-          pos[0] = pos[0] + 2;
-          pos[1] = pos[1] + 2;
-        }
-      } else {
-        idx = txt.lastIndexOf('\n', n.selectionEnd);
-        if (idx === pos[0] && idx == pos[1]) idx = txt.lastIndexOf('\n', idx - 1);
-        for (; ~idx && idx > n.selectionStart;) {
-          if (shift) {
-            if (txt.substr(idx + 1, 2) === '  ') {
-              txt = txt.substring(0, idx + 1) + txt.substr(idx + 3);
-              pos[1] = pos[1] - 2;
-            }
-          } else {
-            txt = txt.substring(0, idx + 1) + '  ' + txt.substr(idx + 1);
-            pos[1] = pos[1] + 2;
-          }
-          idx = txt.lastIndexOf('\n', idx - 1);
-        }
-        idx = txt.lastIndexOf('\n', n.selectionStart);
-        if (!~idx) idx = 0;
-        else idx += 1;
-        if (~idx) {
-          if (shift) {
-            if (txt.substr(idx, 2) === '  ') {
-              txt = txt.substring(0, idx) + txt.substr(idx + 2);
-              pos[0] = pos[0] - 2;
-              pos[1] = pos[1] - 2;
-            }
-          } else {
-            txt = txt.substring(0, idx) + '  ' + txt.substr(idx);
-            pos[0] = pos[0] + 2;
-            pos[1] = pos[1] + 2;
-          }
-        }
-      }
-
-      n.value = txt;
-      n.selectionStart = pos[0];
-      n.selectionEnd = pos[1];
-
-      n.dispatchEvent(new InputEvent('input'));
-      n.dispatchEvent(new InputEvent('change'));
+    if (key === 'Enter') {
+      const range = window.getSelection().getRangeAt(0);
+      if (range.startContainer !== range.endContainer || range.startOffset !== range.endOffset || (range.startContainer as any).tagName) return;
+      let txt = range.startContainer.textContent;
+      const start = range.startOffset;
+      const end = range.endOffset;
+      const idx = txt.lastIndexOf('\n', range.startOffset - 2);
+      const line = txt.substring(idx >= 0 ? idx + 1 : 0, end - 1);
+      const space = line.replace(initSpace, '$1');
+      if (!space || space === '\n') return;
+      txt = txt.substring(0, start) + space + txt.substring(end);
+      range.startContainer.textContent = txt;
+      range.setStart(range.startContainer, start + space.length);
+      range.setEnd(range.startContainer, start + space.length);
+      this.sync(this.code as HTMLInputElement);
       return false;
-    } else if (ev.key === 'Enter') {
-      if (ev.ctrlKey) {
+    }
+  }
+
+  keydown(ev: KeyboardEvent) {
+    const key = ev.key;
+    
+    if (key === 'Enter') {
+      if (ev.ctrlKey || ev.metaKey) {
         this.fire('run');
         return false;
       }
-
-      const n: HTMLTextAreaElement = ev.target as any;
-      let txt = n.value;
-      let pos = [n.selectionStart, n.selectionEnd];
-      let idx = txt.lastIndexOf('\n', pos[0] - 1);
-
-      const line = txt.substring(idx >= 0 ? idx + 1 : 0, pos[0]);
-      const space = line.replace(initSpace, '$1');
-      
-      txt = txt.substr(0, pos[0]) + '\n' + space + txt.substr(pos[1]);
-      n.value = txt;
-      n.selectionStart = n.selectionEnd = pos[0] + space.length + 1;
-
-      n.dispatchEvent(new InputEvent('input'));
-      n.dispatchEvent(new InputEvent('change'));
+    } else if (key === 'Tab') {
+      const shift = ev.shiftKey;
+      const range = window.getSelection().getRangeAt(0);
+      const start = range.startContainer;
+      const idx = range.startOffset;
+      let txt = start.textContent;
+      const prev = txt.substring(idx - 1, idx);
+      const next = idx === txt.length ? start.nextSibling : txt.substring(idx, idx + 1);
+      if (!shift && (next === '\n' && !notSpace.test(prev) || !next && txt.length)) return true;
+      if (range.startOffset === range.endOffset && range.startContainer === range.endContainer) {
+        if ((start as any).tagName) {
+          if (start.childNodes.length - 1 !== idx) {
+            var space = document.createTextNode('  ');
+            start.insertBefore(space, start.childNodes[idx]);
+            range.setStart(space, 2);
+            range.setEnd(space, 2);
+            this.sync(this.code as HTMLInputElement);
+          }
+        } else {
+          if (shift) {
+            if (txt.slice(idx - 2, idx) === '  ') {
+              start.textContent = txt.substring(0, idx - 2) + txt.substring(idx);
+              range.setStart(start, idx - 2);
+              range.setEnd(start, idx - 2);
+              this.sync(this.code as HTMLInputElement);
+            }
+          } else {
+            start.textContent = txt.substring(0, idx) + '  ' + txt.substring(idx);
+            range.setStart(start, idx + 2);
+            range.setEnd(start, idx + 2);
+            this.sync(this.code as HTMLInputElement);
+          }
+        }
+      }
+      ev.preventDefault();
+      return false;
+    } else if (key === 'Home') {
+      const range = window.getSelection().getRangeAt(0);
+      let txt = range.startContainer.textContent;
+      let start = range.startOffset;
+      const init = start;
+      const end = range.endOffset;
+      const idx = txt.lastIndexOf('\n', range.startOffset - 1);
+      start = idx >= 0 ? idx + 1 : 0;
+      const first = start;
+      for (let i = start; i < txt.length; i++) if (notSpace.test(txt[i])) { start = i; break; }
+      if (init <= start) {
+        range.setStart(range.startContainer, first);
+        if (init === end) range.setStart(range.startContainer, first);
+      } else {
+        range.setStart(range.startContainer, start);
+        if (init === end) range.setStart(range.startContainer, start);
+      }
       return false;
     }
   }
@@ -167,6 +133,15 @@ Ractive.extendWith(Editor, {
       this.observe('src template', debounce(function() {
         this.highlightSyntax();
       }, 150));
+    },
+    render() {
+      this.code = this.findAll('code')[1] as any;
+      if (this.code && !this.lock) this.code.innerText = this.get('src');
+    },
+  },
+  observe: {
+    src(v: string) {
+      if (this.code && !this.lock) this.code.innerText = v;
     },
   },
   decorators: { autosize },
@@ -185,7 +160,7 @@ export class Viewer extends Ractive {
     const ast = parser(expr, { tree: true, compact: true } as any);
     this.set('ast', ast);
     if (!this.rendered) return;
-    const pre = this.find('pre');
+    const pre = this.find('code');
     if (pre) this.set('lines', breakLines(expr, pre.clientWidth));
   }
 }

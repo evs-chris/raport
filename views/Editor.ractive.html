@@ -1,10 +1,8 @@
 <div class="syntax-editor" {{>extra-attributes}} class-shrinky="~/['no-fill']">
   {{#if ~/lines.length > 4}}<div class="line-nos">{{#each ~/lines}}{{.}}<br />{{/each}}</div>{{/if}}
   <div class="editor-pane">
-    <code class="ast-nodes">
-      <pre>{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}{{#if src.length > 0 && src[src.length - 1] === '\n'}} {{/if}}</pre>
-    </code>
-    <textarea as-autosize class-expr-text {{#if primary}}id="expr-text"{{/if}} spellcheck="false" on-keydown="@.keydown(@event)" on-focus="@.highlightSyntax()">{{src}}</textarea>
+    <code class="ast-nodes">{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}{{#if src.length > 0 && src[src.length - 1] === '\n'}} {{/if}}</code>
+    <code class-expr-text {{#if primary}}id="expr-text"{{/if}} spellcheck="false" on-focus="@.highlightSyntax(), @event.stopPropagation()" contenteditable on-input="@.sync(@node)" on-keydown="@.keydown(@event)" on-keyup="@.keyup(@event)" on-click="@event.preventDefault(), @event.stopPropagation()"></code>
   </div>
 </div>
 
@@ -14,9 +12,7 @@
 
 <template id="viewer">
   <div class="syntax-editor syntax-viewer" {{>extra-attributes}}>
-    <code class="ast-nodes">
-      <pre>{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}{{#if src.length > 0 && src[src.length - 1] === '\n'}} {{/if}}</pre>
-    </code>
+    <code class="ast-nodes">{{>ast-node ast}}{{#if ast.end < src.length}}<span class="ast-fail">{{src.substring(ast.end, src.length)}}</span>{{/if}}{{#if src.length > 0 && src[src.length - 1] === '\n'}} {{/if}}</code>
   </div>
 </template>
 
@@ -60,7 +56,7 @@
     color: {{@style.code.c14}};
   }
 
-  .syntax-editor textarea {
+  .syntax-editor .expr-text {
     position: absolute;
     top: 0;
     font-family: monospace;
@@ -77,6 +73,8 @@
     white-space: pre-wrap;
     word-break: break-all;
     border: none !important;
+    min-width: 100%;
+    outline: none;
   }
 
   .syntax-editor code {
@@ -90,17 +88,12 @@
     font-size: 0.875rem !important;
     min-height: 1.75rem !important;
     border: none !important;
+    word-break: break-all;
+    white-space: pre-wrap;
   }
 
   .syntax-editor.syntax-viewer code {
-    line-height: 0.875rem !important;
-    padding: 0 !important;
-  }
-
-  .syntax-editor > .editor-pane > code > pre {
-    word-break: break-all;
-    white-space: pre-wrap;
-    margin: 0 !important;
+    line-height: 1rem !important;
     padding: 0 !important;
   }
 
