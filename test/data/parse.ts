@@ -36,6 +36,10 @@ q.test('strings', t => {
   t.deepEqual(parse(`"test"`), { v: 'test' });
   t.deepEqual(parse('`test`'), { v: 'test' });
   t.deepEqual(parse(':test'), { v: 'test' });
+  t.deepEqual(parse('"""test"""'), { v: 'test' });
+  t.deepEqual(parse('```test```'), { v: 'test' });
+  t.deepEqual(parse(`'''test'''`), { v: `test` });
+  t.deepEqual(parse('$$$test$$$'), { v: 'test' });
 });
 
 q.test('strings with escapes', t => {

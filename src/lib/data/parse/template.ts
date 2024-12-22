@@ -1,5 +1,5 @@
 import { Value } from '../index';
-import { value, rws, replaceCase } from '../parse';
+import { value, rws, replaceCase, inlineTemplate } from '../parse';
 import { Parser, parser as makeParser, rep, rep1, seq, alt, map, read1To, chars, str, readTo, check, andNot, name } from 'sprunge';
 import { ws } from 'sprunge/lib/json';
 
@@ -7,6 +7,7 @@ const endTxt = '\\{';
 
 const txtEsc = alt(map(str('\\{{'), () => '{{'), map(seq(str('\\'), chars(1)), ([, c]) => c));
 const text = map(rep1(alt(read1To(endTxt, true), txtEsc, andNot(str('{'), str('{')))), txts => ({ v: txts.join('') }), 'text');
+const nestedText = map(rep1(alt(read1To(endTxt + '$'), txtEsc, andNot(str('$'), str('$$')), andNot(str('{'), str('{')))), txts => ({ v: txts.join('') }), 'text');
 
 function tag_value(names: string[]): Parser<[string, Value]> {
   return map(seq(str('{{'), ws, str(...names), rws, value, ws, str('}}')), arr => [arr[2], arr[4]], 'tag');
@@ -92,3 +93,5 @@ function concat(values: Value[]): Value {
 const _parse = makeParser(alt<Value>(map(rep1(content), args => concat(args)), map(ws, () => ({ v: '' }))), { trim: true });
 (_parse as any).namespace = 'template';
 export const parse: typeof _parse & { namespace: string } = _parse as any;
+
+(inlineTemplate as { parser?: Parser<Value> }).parser = map(rep1(alt<Value>({ name: 'inline-template' }, nestedText, each_op, if_op, with_op, case_op, unless_op, interpolator)), args => concat(args));

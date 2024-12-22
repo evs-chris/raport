@@ -1,4 +1,4 @@
-import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name, not, nop, readTo, unwrap } from 'sprunge/lib';
+import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name, not, nop, readTo, unwrap, andNot } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex, JString } from 'sprunge/lib/json';
 import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation, TimeSpanMS, Schema, Field, TypeMap } from './index';
 
@@ -60,6 +60,7 @@ export const value: Parser<Value> = {};
 export const values: Parser<Value> = {};
 export const tpl: Parser<Value> = {};
 export const application: Parser<Value> = {};
+export const inlineTemplate: Parser<Value> = {};
 
 const escmap: { [k: string]: string } = { n: '\n', r: '\r', t: '\t', b: '\b' };
 const pathesc = map(seq(str('\\'), chars(1)), ([, char]) => escmap[char] || char);
@@ -268,10 +269,24 @@ export const typelit = map(seq(str('@['), ws, schema(), ws, str(']')), ([, , v])
 export const parseDate = makeParser(map(seq(opt(str('#')), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), opt(str('#'))), ([, d,]) => d), { trim: true, consumeAll: true, undefinedOnError: true });
 
 export const string = alt<Value>({ primary: true, name: 'string' },
+  bracket(str('$$$'), inlineTemplate, str('$$$')),
   map(seq(str(':'), read1To(endSym, true)), v => ({ v: v[1]})),
+  map(bracket(str('"""'), rep(alt<string>('string-part',
+    read1To('\\"'), JStringEscape, JStringUnicode, JStringHex, andNot(str('"'), str('""')),
+  )), str('"""')), a => ({ v: ''.concat(...a) })),
   map(bracket(str('"'), rep(alt<string>('string-part',
     read1To('\\"'), JStringEscape, JStringUnicode, JStringHex
   )), str('"')), a => ({ v: ''.concat(...a) })), 
+  map(bracket(str(`'''`), rep(alt('string-part',
+    map(read1To(`'\\$\{`, true), v => ({ v } as Value)),
+    map(str('\\$', '$$'), () => ({ v: '$' })),
+    bracket(str('${', '{'), value, str('}'), { primary: true, name: 'string-interpolation' }),
+    map(str('$', '{'), v => ({ v })),
+    map(JStringUnicode, v => ({ v })),
+    map(JStringHex, v => ({ v })),
+    map(JStringEscape, v => ({ v })),
+    map(andNot(str(`'`), str(`''`)), v => ({ v })),
+  )), str(`'''`)), stringInterp),
   map(bracket(str(`'`), rep(alt('string-part',
     map(read1To(`'\\$\{`, true), v => ({ v } as Value)),
     map(str('\\$', '$$'), () => ({ v: '$' })),
@@ -281,6 +296,16 @@ export const string = alt<Value>({ primary: true, name: 'string' },
     map(JStringHex, v => ({ v })),
     map(JStringEscape, v => ({ v })),
   )), str(`'`)), stringInterp),
+  map(bracket(str('```'), rep(alt('string-part',
+    map(read1To('`\\${', true), v => ({ v } as Value)),
+    map(str('\\$', '$$'), () => ({ v: '$' })),
+    bracket(str('${'), value, str('}'), { primary: true, name: 'string-interpolation' }),
+    map(str('$', '{'), v => ({ v })),
+    map(JStringUnicode, v => ({ v })),
+    map(JStringHex, v => ({ v })),
+    map(JStringEscape, v => ({ v })),
+    map(andNot(str('`'), str('``')), v => ({ v })),
+  )), str('```')), stringInterp),
   map(bracket(str('`'), rep(alt('string-part',
     map(read1To('`\\${', true), v => ({ v } as Value)),
     map(str('\\$', '$$'), () => ({ v: '$' })),
