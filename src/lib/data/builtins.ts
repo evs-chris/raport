@@ -801,6 +801,9 @@ registerOperator(
       return values.reduce((a, c) => a + (c === undefined || c === null ? '' : c), '');
     }
   }),
+  simple(['cat'], (_name, values: any[]): any => {
+    return values.reduce((a, c) => a + (c === undefined || c === null ? '' : c), '');
+  }),
   simple(['num'], (_name: string, [v]) => {
     let match: string[];
     if (match = hasNum.exec(v)) return +match[1];

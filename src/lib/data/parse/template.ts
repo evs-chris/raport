@@ -86,7 +86,7 @@ function cond_branches(content: Array<Value|Branch>): Value[] {
 
 function concat(values: Value[]): Value {
   if (values.length === 1) return values[0];
-  return { op: '+', args: values };
+  return { op: 'cat', args: values, meta: '$' };
 }
 
 const _parse = makeParser(alt<Value>(map(rep1(content), args => concat(args)), map(ws, () => ({ v: '' }))), { trim: true });

@@ -112,6 +112,9 @@ The first value in a matcher is used for the comparison, and the second value is
 
 The basis value is available as @case or the shorthand _ in each matcher.' eg:['case 1+1 when 1 then :nope when =>4 - _ == _ then :yep else :other end' 'case(1+1 1 :nope =>4 - _ == _ :yep :other)'] }
   ]}
+  { op:'cat' sig:[
+    { proto:'...any => string' desc:'Concatenates all of the given values into a string.' }
+  ]}
   { op:'ceil' sig:[
     { proto:'number => number' desc:'Returns the given number rounded up to the nearest integer.' }
   ]}

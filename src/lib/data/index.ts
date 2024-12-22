@@ -81,6 +81,7 @@ export interface Operation {
   args?: ValueOrExpr[];
   c?: string[];
   opts?: ValueOrExpr;
+  meta?: any;
 }
 
 export type Sort = ValueOrExpr|SortBy;
