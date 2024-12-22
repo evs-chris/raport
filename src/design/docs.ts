@@ -384,15 +384,15 @@ The label map is a nested object with the keys being single key paths in the dif
   ]}
   { op:'pad' sig:[
     { proto:'(string, number) => string' desc:'Pads the given string with spaces at both ends such that it is at least the given number of characters long.' }
-    { proto:'(string, number, string) => string' desc:'Pads the given string with the final string at both ends such that it is at least the given number of characters long.' }
+    { proto:'(string, number, string) => string' desc:'Pads the given string with the final string at both ends such that it is at least the given number of characters long. If the final string is not a single character, a single space will be used instead.' }
   ]}
   { op:'padl' sig:[
     { proto:'(string, number) => string' desc:'Pads the given string with spaces at the beginning such that it is at least the given number of characters long.' }
-    { proto:'(string, number, string) => string' desc:'Pads the given string with the final string at the beginning such that it is at least the given number of characters long.' }
+    { proto:'(string, number, string) => string' desc:'Pads the given string with the final string at the beginning such that it is at least the given number of characters long. If the final string is not a single character, a single space will be used instead.' }
   ]}
   { op:'padr' sig:[
     { proto:'(string, number) => string' desc:'Pads the given string with spaces at the end such that it is at least the given number of characters long.' }
-    { proto:'(string, number, string) => string' desc:'Pads the given string with the final string at the end such that it is at least the given number of characters long.' }
+    { proto:'(string, number, string) => string' desc:'Pads the given string with the final string at the end such that it is at least the given number of characters long. If the final string is not a single character, a single space will be used instead.' }
   ]}
   { op:'parse' sig:[
     { proto:'string => any' desc:'Parses the given string using the expression parser.' }

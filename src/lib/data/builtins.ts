@@ -864,9 +864,9 @@ registerOperator(
 function pad(where: 'l'|'c'|'r', str: string, count: number, pad: string): string {
   if (typeof str !== 'string') str = '' + str;
   if (!isNum(count)) return str;
-  if (!pad) pad = ' ';
   if (typeof pad !== 'string') pad = '' + pad;
-  if (pad.length < 1) pad = ' ';
+  if (!pad) pad = ' ';
+  if (pad.length !== 1) pad = ' ';
 
   const ct = (count - str.length) / 2;
   for (let i = 0; str.length < count; i++) {
