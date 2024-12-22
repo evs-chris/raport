@@ -267,7 +267,7 @@ export function evaluate(root: Context|{ context: Context }|any, value: ValueOrE
 export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, value?: ValueOrExpr): any {
   let r: Context;
   let e: ValueOrExpr;
-  if (isValueOrExpr(root)) {
+  if (!value && isValueOrExpr(root)) {
     r = new Root();
     e = root;
   } else if (isContext(root)) {
