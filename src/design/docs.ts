@@ -219,6 +219,9 @@ Any other value will be added to the result.
 Each application is passed the state, last value, and index of the call. Each of the arguments is also available a special reference, @state, @last, and @index, respectively.
 
 The global defaults for generate have a max property, defaulting to 10000, that limits the number of iterations that can be run to avoid non-terminating generators.' }
+    { proto:'(range) => number[]' desc:'Iterates the members of the range and returns an array of all of the included numbers. This takes into account excluded numbers and ranges and ignores any inclusive range that includes an infinite bound.
+
+The global defaults for generate have a max property, defaulting to 10000, that limits the number of iterations that can be run to avoid non-terminating generators.' }
   ], opts: [
     { name:'[state]' type:'any' desc:'Any options passed to the operator are sent into the initial application as the state.' }
   ]}

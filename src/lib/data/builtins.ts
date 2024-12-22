@@ -4,7 +4,7 @@ import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseE
 import { parse as parseTemplate } from './parse/template';
 import { parseSchema, unparseSchema } from './parse/schema';
 import { stringify } from './parse/stringify';
-import { range as parseRange } from './parse/range';
+import { range as parseRange, ParseError } from './parse/range';
 import { validate, inspect, isSchema } from './schema';
 import { diff, deepEqual, labelDiff } from './diff';
 import { detect as csvDetect, parse as csvParse } from './csv';
@@ -427,6 +427,7 @@ registerOperator(
     else return evaluate(c, r);
   }),
   simple(['generate'], (_name: string, [apply], opts, ctx) => {
+    let r: ParseError|Array<number|[number, number]|{ not: number|[number, number] }>;
     if (apply && isApplication(apply)) {
       const res = [];
       let state = opts;
@@ -446,6 +447,24 @@ registerOperator(
         else res.push(it);
       }
       return res;
+    } else if ((r = parseRange(apply)) && Array.isArray(r)) {
+      r = r.filter(v => typeof v === 'number' || Array.isArray(v) && !v.find(v => v === Infinity || v === -Infinity) || typeof v === 'object' && !Array.isArray(v));
+      const nums: number[] = [];
+      const no: Array<[number, number]> = [];
+      for (const v of r) if (typeof v === 'object' && !Array.isArray(v)) no.push(typeof v.not === 'number' ? [v.not, v.not] : v.not);
+
+      for (const v of r) {
+        if (nums.length >= generateDefaults.max) break;
+        if (typeof v === 'number' && !no.find(([l, r]) => v >= l && v <= r)) nums.push(v);
+        else if (Array.isArray(v)) {
+          for (let i = v[0]; i <= v[1]; i++) {
+            if (!no.find(([l, r]) => i >= l && i <= r)) nums.push(i);
+            if (nums.length >= generateDefaults.max) break;
+          }
+        }
+      }
+
+      return nums;
     }
     return [];
   }),

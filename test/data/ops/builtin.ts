@@ -316,6 +316,13 @@ q.test('format', t => {
   t.equal(evaluate('(format #2019-4-20# :date :yyyy-MM-dd)'), `2019-04-20`);
 });
 
+q.test('generate', t => {
+  t.deepEqual(evaluate(`generate(=>if not num or num < 0 then {state:{num:2} value:1} else if num < 4 then {state:{num:num+1} value:num})`), [1, 2, 3]);
+  t.deepEqual(evaluate(`generate(=>if not num or num < 0 then {state:{num:2} value:1} else if num < 4 then {state:{num:num+1} value:num} num:2)`), [2, 3]);
+  t.deepEqual(evaluate(`generate('1-10 !5')`), [1, 2, 3, 4, 6, 7, 8, 9, 10]);
+  t.deepEqual(evaluate(`generate('1-10 !<5')`), [5, 6, 7, 8, 9, 10]);
+});
+
 q.test('get', t => {
   t.equal(evaluate('(get (object :foo 42) :foo)'), 42);
   t.equal(evaluate('(get (object :foo (object :bar 42)) "foo.bar")'), 42);
@@ -362,8 +369,8 @@ q.test('in', t => {
   t.notOk(evaluate('[1 2 3] in [1 2 :a :b]'));
   t.ok(evaluate(`99 in '1,2,3,4-100,1000'`));
   t.ok(evaluate(`99 in '>10'`));
+  t.ok(evaluate(`99 in '5000-1'`));
   t.notOk(evaluate(`99 in '<10'`));
-  t.ok(evaluate(`50 not-in '0-100 !50'`));
   t.ok(evaluate(`(=>_ == :d) in { a::b c::d }`));
   t.notOk(evaluate(`(=>_ == :d) in { a::b c::e }`));
   t.ok(evaluate(`(=>@key == :c) in { a::b c::d }`));
@@ -521,6 +528,7 @@ q.test('not-in', t => {
   t.notOk(evaluate(`99 not-in '1,2,3,4-100,1000'`));
   t.notOk(evaluate(`99 not-in '>10'`));
   t.ok(evaluate(`99 not-in '<10'`));
+  t.ok(evaluate(`50 not-in '0-100 !50'`));
   t.notOk(evaluate(`(=>_ == :d) not-in { a::b c::d }`));
   t.ok(evaluate(`(=>_ == :d) not-in { a::b c::e }`));
   t.notOk(evaluate(`(=>@key == :c) not-in { a::b c::d }`));
