@@ -1135,15 +1135,15 @@ registerOperator(
     else if (opts.schema) return parseSchema(v);
     else if (opts.range) return parseRange(v, opts);
     else if (opts.xml) return parseXML(v, opts.strict);
-    else if (opts.csv) {
-      if (opts.detect) opts = Object.assign(csvDetect(v), opts);
+    else if (opts.csv || opts.delimited) {
+      if (opts.detect || (!opts.field && !opts.separator && !opts.record && !opts.quote)) opts = Object.assign(csvDetect(v, opts.context), opts);
       return csvParse(v, opts);
     } else if (opts.base64) return atob(v);
     else return parse(v, opts);
   }),
-  simple(['detect-delimiters'], (_name: string, [data]: any[]) => {
+  simple(['detect-delimiters'], (_name: string, [data, max]: any[], opts) => {
     if (typeof data !== 'string') return {};
-    return csvDetect(data);
+    return csvDetect(data, max ?? opts?.context);
   }),
 );
 

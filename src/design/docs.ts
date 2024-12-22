@@ -155,6 +155,8 @@ The basis value is available as @case or the shorthand _ in each matcher.' eg:['
   { op:'detect-delimeters' sig:[
     { proto:'string => CSVOptions' desc:'Detects the field, record, and quote delimiters from the first 2048 characters of the given string.' }
     { proto:'(string, number) => CSVOptions' desc:'Detects the field, record, and quote delimiters from the first given number of characters of the given string.' }
+  ] opts:[
+    { name:'context' type:'number' desc:'Set the limit for the number of characters to examine from the given string.' }
   ]}
   { op:'diff' sig:[
     { proto:'(any, any) => Diff' desc:'Does a deep comparison of the two arguments returning a map of deep keypath to a tuple of the left value and right value for differing paths.' }
@@ -411,11 +413,14 @@ The label map is a nested object with the keys being single key paths in the dif
     { name:'xml' type:'boolean' desc:'Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.' }
     { name:'strict' type:'boolean' desc:'For the XML parser, be less forgiving about malformed content. Defaults to false.' }
     { name:'csv' type:'boolean' desc:'Use the delimited text parser rather than the expression parser.' }
+    { name:'delimited' type:'boolean' desc:'Use the delimited text parser rather than the expression parser.' }
     { name:'detect' type:'boolean' desc:'If using the delimited parser, detect the delimiters and use them to parse.' }
     { name:'header' type:'boolean' desc:'If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.' }
     { name:'field' type:'string' desc:'If using the delimited parser, use the given string as the field delimiter.' }
     { name:'record' type:'string' desc:'If using the delimited parser, use the given string as the record delimiter.' }
     { name:'quote' type:'string' desc:'If using the delimited parser, use the given string as the field quote.' }
+    { name:'order' type:'boolean' desc:'If set to a falsey value, the fields in resulting objects generated from input with headers will not be keyed in alphabetical order.' }
+    { name:'fixedSize' type:'boolean' desc:'Discard any delimited rows that are not at least as long as the header/first row.' }
   ]}
   { op:'pipe' sig:[
     { proto:'...any => any' desc:'This is a special built-in operator that evaluates its first argument, supplies that as an input to the next argument, supplies that result as an input to the next argument, and so on until the result of the last argument evaluation is returned. If any argument is an operation that does not reference \`@pipe\` or \`_\` as one of its arguments, then \`@pipe\` will be added as the first argument of that operation. Arguments that are applications are automatically applied with the piped value.' }
