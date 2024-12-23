@@ -171,10 +171,12 @@ export class Designer extends Ractive {
     let text: string;
     this.fire('running');
     try {
-      text = run(report, srcs, ctx, {
+      const opts = {
         foot: this.frameExtra(),
         table: this.get('settings.delimitedTable'),
-      });
+      };
+      if (report.type !== 'delimited') Object.assign(opts, this.get('settings.runopts'));
+      text = run(report, srcs, ctx, opts);
     } catch (e) {
       console.error(e);
       text = `<html><head><style>.page { width: 63rem; height: 48rem; position: absolute; overflow: hidden; left: 1.5rem; top: 1.5rem; } .page-back { width: 66rem; height: 51rem; } body { font-size: 0.83rem; } @media screen { html { min-width: 68rem; } body { background-color: #999; display: flex; flex-direction: column; align-items: center; } .page-back { background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); position: relative; overflow: hidden; box-sizing: border-box; margin: 0.5em; } } @media print { body { margin: 0; padding: 0; width:66rem;background-color: none; display: block; height: 357rem } .page-back { position: absolute; box-shadow: none; background-color: none; margin: 0; padding: 0; left: 0rem; } .pb0 { top: 0rem; } .pb1 { top: 51rem; } .pb2 { top: 102rem; } .pb3 { top: 153rem; } .pb4 { top: 204rem; } .pb5 { top: 255rem; } .pb6 { top: 306rem; } } @page { size: 66em 51em; } .container { position:absolute;box-sizing:border-box; } .label {position:absolute;box-sizing:border-box;} pre { margin: 1rem; } h2 { color: red; margin: 1rem; }</style></head><body><div class="page-back"><h2>Report Exception</h2><code><pre>${e}\n${e.stack}</pre></code></div></body></html>`
@@ -185,7 +187,7 @@ export class Designer extends Ractive {
   }
 
   frameExtra() {
-    const typ = this.get('report.type');
+    const delim = this.get('report.type') === 'delimited' || this.get('settings.runopts.delimited');
     return `
       <style>
         #print { display: none; }
@@ -204,7 +206,8 @@ export class Designer extends Ractive {
           body {
             background-color: ${this.get('@style.out.dark') || this.get('@style.dark')};
             padding: 2em;
-          }${typ === 'delimited' ? `
+            color: var(--fg);
+          }${delim ? `
           body {
             display: inline-block;
           }
@@ -212,13 +215,13 @@ export class Designer extends Ractive {
           th, td { padding: 0.15em 0.4em; border: 1px solid rgba(128, 128, 128, 0.5); }
           tr.header th { position: sticky; top: 0; border-bottom: 2px solid; background: var(--bg); z-index: 10; }
           tr.row th { position: sticky; left: 0; padding: 0.15em 0.5em; text-align: right; border-right: 2px solid; background: var(--bg); z-index: 9; }
-          tr:hover td, tr.row:hover th { background: rgba(128, 128, 128, 0.2); }` : ''}
+          tr:hover td, tr.row:hover th { background: rgba(128, 128, 128, 0.2); }` : `
+          #print { position: fixed; top: 0.2em; right: 1em; opacity: 0.1; transition: opacity 0.5s ease-in-out; color: var(--bg); background-color: var(--fg); border: 1px solid; border-radius: 0.5em; cursor: pointer; display: inline-block; }
+          #print:hover { opacity: 1; }`}
           .page-back {
             color: var(--fg);
             background-color: var(--bg);
           }
-          #print { position: fixed; top: 0.2em; right: 1em; opacity: 0.1; transition: opacity 0.5s ease-in-out; color: var(--bg); background-color: var(--fg); border: 1px solid; border-radius: 0.5em; cursor: pointer; display: inline-block; }
-          #print:hover { opacity: 1; }
         }
       </style>
       <script>

@@ -3,6 +3,7 @@ import { Sort, ValueOrExpr, Parameter, ParameterMap, SourceMap, Root, Context, R
 import { renderWidget, RenderContext, RenderResult, RenderState, expandMargin, expandMacro } from './render/index';
 import { styleClass, styleFont } from './render/style';
 
+import { parse } from './data/parse';
 import { parse as parseTemplate } from './data/parse/template';
 
 export type ReportType = 'delimited'|'flow'|'page';
@@ -286,6 +287,14 @@ interface ReportExtras {
   foot?: string;
   /** Run a delimited report to a table instead of using the defined delimiters */
   table?: boolean;
+  /** Run a rendered report as a delimited report */
+  delimited?: boolean;
+  /** Record delimiter if running a rendered report as a delimited report */
+  record?: string;
+  /** Field delimiter if running a rendered report as a delimited report */
+  field?: string;
+  /** Field quoter if running a rendered report as a delimited report */
+  quote?: string;
 }
 
 /** Initialize a parameter map based on the parameters defined by the given report. */
@@ -320,6 +329,7 @@ export function run(report: Report, sources: SourceMap, parameters?: ParameterMa
   }
 
   if (report.type === 'delimited') return runDelimited(report, ctx, { table: extra?.table });
+  else if (extra?.delimited) return runAsDelimited(report, ctx, extra);
   else if (report.type === 'flow') return runFlow(report, ctx, extra);
   else return runPage(report, ctx, extra);
 }
@@ -591,4 +601,33 @@ function runFlow(report: Flow, context: Context, extras?: ReportExtras): string 
       body { margin: 1rem${width ? ' auto' : ''}; background-color: #fff; box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4); padding: ${margin[0]}rem ${margin[1]}rem ${margin[2]}rem ${margin[3]}rem !important; }
     }${Object.entries(ctx.styles).map(([_k, v]) => v).join('\n')}${Object.entries(ctx.styleMap.styles).map(([style, id]) => `.${id} { ${style} }`).join('\n')}
   </style>${extras && extras.head || ''}</head><body>\n<div class=page-back><div id=wrapper>${html}</div></div>${extras && extras.foot || ''}</body></html>`;
+}
+
+function findWidgets(from: Widget, type: string, first?: boolean, results?: Widget[]): Widget[] {
+  results = results || [];
+  if (from.type === type) results.push(from);
+  if (first && results.length) return results;
+  if (from.widgets) for (const w of from.widgets) findWidgets(w, type, first, results);
+  return results;
+}
+
+// TODO: this could try harder to carry context forward and use non-named sources if it seems necessary
+function runAsDelimited(report: Flow|Page, context: Context, extra?: ReportExtras): string {
+  const [repeater] = findWidgets({ type: 'container', widgets: report.widgets }, 'repeater', true) as Repeater[];
+  if (repeater && typeof (repeater?.source as any)?.source === 'string') {
+    let headers: ValueOrExpr[];
+    let fields: ValueOrExpr[];
+    const source = (repeater.source as any).source;
+    const rowContext = repeater.row.context;
+
+    if (repeater.header) {
+      const labels = findWidgets(repeater.header, 'label') as Label[];
+      headers = labels.map(l => typeof l.text === 'string' ? parse(l.text) : l.text) as ValueOrExpr[];
+    }
+
+    fields = (findWidgets(repeater.row, 'label') as Label[]).map(l => l.text) as ValueOrExpr[];
+
+    return runDelimited(Object.assign({ type: 'delimited', headers, fields, source, rowContext }, extra) as Delimited, context, extra?.table ? { table: true } : {});
+  }
+  return '';
 }

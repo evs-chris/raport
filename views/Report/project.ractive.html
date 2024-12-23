@@ -23,6 +23,18 @@
         <label class="input" title="The wrap length for the code formatter for object literals">Object Wrap<input type=number value="{{~/settings.format.wrap_keys}}" /></label>
         <label class="input" title="The wrap length for the code formatter for operator arguments">Argument Wrap<input type=number value="{{~/settings.format.wrap_args}}" /></label>
         <label class="input" title="The wrap length for the code formatter for schema unions">Union Wrap<input type=number value="{{~/settings.format.wrap_union}}" /></label>
+        {{#if ~/report.type !== 'delimited'}}
+          <h3 style="margin-top: 1.5em;">Advanced Rendering Options</h3>
+          <label class=check title="Attempt to run a rendered report as a delimited report. This finds the first repeater in the report, and if it has a named source, extracts any labels from the header and row to create a delimited report."><input type=checkbox checked="{{~/settings.runopts.delimited}}" /> Run as a delimited report?</label>
+          {{#if ~/settings.runopts.delimited}}
+            <label class=check title="Render the delimited report to an html table rather than as plain text."><input type=checkbox checked="{{~/settings.runopts.table}}" /> Output data as a table?</label>
+            {{#if !~/settings.runopts.table}}
+              <label class="input">Record Delimiter<input value="{{~/settings.runopts.record}}" placeholder="\n" /></label>
+              <label class="input">Field Delimiter<input value="{{~/settings.runopts.field}}" placeholder="," /></label>
+              <label class="input">Field Quote<input value="{{~/settings.runopts.quote}}" placeholder="(none)" /></label>
+            {{/if}}
+          {{/if}}
+        {{/if}}
       </div>
     </div>
     <input type="file" style="display: none;" id="project-file" accept="application/json" />
@@ -142,7 +154,7 @@
     cursor: default;
   }
 
-  label.input {
+  label.input, label.check {
     display: inline-block;
     margin: 0 1em 1em 0;
   }
