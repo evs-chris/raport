@@ -314,6 +314,7 @@ q.todo('floor', () => {});
 q.test('format', t => {
   // TODO: test all of the builtins
   t.equal(evaluate('(format #2019-4-20# :date :yyyy-MM-dd)'), `2019-04-20`);
+  t.equal(evaluate(`@date#date,'${'yMdEHmsSkaz'.split('').map(c => '\\\\' + c).join('')}'`), 'yMdEHmsSkaz');
 });
 
 q.test('generate', t => {

@@ -603,7 +603,7 @@ export const formats = `let dateparts = 'Available placeholders are:\\n\\n* y - 
   { name:'case' desc:'Change the casing of the value.' opts:[
     { name:'case' req:1 type:"'upper'|'lower'|'snake'|'kebab'|'pascal'|'camel'|'proper'" desc:'The case format to use.'}
   ]}
-  { name:'date' desc:'Formats the value as a date string using placeholder characters, where repeated characters render more descriptive or padded values. Any non-placeholder characters are rendered as entered. The default format is yyyy-MM-dd. Available placeholders are:\\n\\n* y - year\\n* M - month\\n* d - date\\n* E - day of week\\n* H - hour (24 hour)\\n* h or k - hour (12 hour)\\n* m - minute\\n* s - second\\n* S - millisecond\\n* a - AM/PM\\n* z - timezone offset' opts:[
+  { name:'date' desc:'Formats the value as a date string using placeholder characters, where repeated characters render more descriptive or padded values. Any non-placeholder characters are rendered as entered. The default format is yyyy-MM-dd. Placeholders can be escaped with a \\\\ if the placeholder needs to be included in the output. Available placeholders are:\\n\\n* y - year\\n* M - month\\n* d - date\\n* E - day of week\\n* H - hour (24 hour)\\n* h or k - hour (12 hour)\\n* m - minute\\n* s - second\\n* S - millisecond\\n* a - AM/PM\\n* z - timezone offset' opts:[
     { name:'format' type:'string' desc:'The format template to apply.'}
   ]}
   { name:'dollar' desc:'Formats the value as a dollar amount with two decimal places by default.' opts:[

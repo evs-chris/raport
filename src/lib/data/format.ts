@@ -36,7 +36,7 @@ export function phone(v: string|number): string {
   else return v;
 }
 
-const dateRE = /y+|M+|d+|E+|H+|m+|s+|k+|h+|a+|S+|z+/g;
+const dateRE = /\\.|y+|M+|d+|E+|H+|m+|s+|k+|h+|a+|S+|z+/g;
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 let dateDefault: string;
@@ -71,7 +71,9 @@ export function date(d: string|Date|DateExactRange, fmt: string): string {
   if (!fmt) fmt = dateDefault || 'yyyy-MM-dd';
 
   return fmt.replace(dateRE, m => {
-    if (m[0] === 'y') {
+    if (m[0] === '\\') {
+      return m[1];
+    } else if (m[0] === 'y') {
       return m.length <= 2 ? (`${Y}`).substr(2, 2) : `${Y}`;
     } else if (m[0] === 'M') {
       if (m.length === 1) return `${M + 1}`;
