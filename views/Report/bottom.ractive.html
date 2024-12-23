@@ -57,7 +57,7 @@
       </div>
     </div>
     <div class-tab class-active-tab="!~/temp.bottom.tab || ~/temp.bottom.tab === 'expr'">
-      <div class-editor>
+      <div class-editor {{#if ~/temp.expr.tab !== 'ast' && ~/temp.expr.tab !== 'text' && ~/temp.expr.tab !== 'html'}}style="max-width: 100%;"{{/if}}>
         <div class-actions>
           <button title="Evaluate the current expression (CTRL+Enter)" disabled="{{!~/temp.expr.str}}" on-click="@.eval()" class-error="~/temp.expr.error" class-ico class-large>{{>play}}</button>
           <button title="Modify the current expression" class-tab class-active="~/temp.expr.tab === 'text'" on-click="@.set('temp.expr.tab', 'text')">{{#if ~/temp.expr.template}}Template{{else}}Text{{/if}}</button>

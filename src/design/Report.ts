@@ -966,19 +966,7 @@ export class Designer extends Ractive {
     if (prefix) ref = `${prefix[0]}${ref}`;
     if (this.get('temp.expr.html') || this.get('temp.expr.template')) ref = `{{${ref}}}`;
 
-    if (tab === 'text') {
-      const node = getLastFocus() as HTMLInputElement;
-      if (!node) return;
-
-      const cur = node.value;
-      const pos = [node.selectionStart, node.selectionEnd];
-      node.value = cur.substring(0, pos[0]) + ref + cur.substr(pos[1]);
-      node.selectionStart = node.selectionEnd = pos[0] + ref.length;
-
-      node.dispatchEvent(new InputEvent('input'));
-      node.dispatchEvent(new InputEvent('change'));
-      node.focus();
-    } else if (tab === 'html') {
+    if (tab === 'html' || tab === 'text') {
       return this.command('insertText', false, ref);
     } else if (tab === 'ast') {
       const active = this.get('temp.expr.partpath') || 'temp.expr.ast';
