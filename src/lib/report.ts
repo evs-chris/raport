@@ -381,7 +381,7 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
   if (options?.table) {
     let idx = 1;
     for (const value of values) {
-      const c = extend(context, { value });
+      const c = extend(context, { value, special: { index: idx - 1 } });
       if (report.rowContext) {
         if (!c.locals) c.locals = {};
         const v = evaluate(c, report.rowContext);
@@ -402,8 +402,9 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
     res = `<table>${res}</table>`;
   } else {
     const unquote: RegExp = report.quote ? new RegExp(report.quote, 'g') : undefined;
+    let index = 0;
     for (const value of values) {
-      const c = extend(context, { value });
+      const c = extend(context, { value, special: { index } });
       if (report.rowContext) {
         if (!c.locals) c.locals = {};
         const v = evaluate(c, report.rowContext);
@@ -420,6 +421,7 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
         if (unquote) val = val.replace(unquote, report.quote + report.quote);
         return `${report.quote || ''}${val}${report.quote || ''}`;
       }).join(report.field || ',') + (report.record || '\n');
+      index++;
     }
   }
 
