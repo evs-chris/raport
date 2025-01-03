@@ -615,12 +615,11 @@ function findWidgets(from: Widget, type: string, first?: boolean, results?: Widg
 }
 
 // TODO: this could try harder to carry context forward and use non-named sources if it seems necessary
-function runAsDelimited(report: Flow|Page, context: Context, extra?: ReportExtras): string {
+function runAsDelimited(report: Flow|Page, context: RootContext, extra?: ReportExtras): string {
   const [repeater] = findWidgets({ type: 'container', widgets: report.widgets }, 'repeater', true) as Repeater[];
   if (repeater && typeof (repeater?.source as any)?.source === 'string') {
     let headers: ValueOrExpr[];
     let fields: ValueOrExpr[];
-    const source = (repeater.source as any).source;
     const rowContext = repeater.row.context;
 
     if (repeater.header) {
@@ -629,6 +628,20 @@ function runAsDelimited(report: Flow|Page, context: Context, extra?: ReportExtra
     }
 
     fields = (findWidgets(repeater.row, 'label') as Label[]).map(l => l.text) as ValueOrExpr[];
+
+    const source = '_tmp';
+    if (typeof repeater.source === 'object') {
+      const src = repeater.source;
+      let data;
+      if ('source' in src) {
+        const s = src as ReportSource;
+        let base = context.sources[s.source] || { value: [] };
+        if (s.base) base = { value: evaluate(extend(context, { value: base.value, special: { source: base } }), s.base) };
+        if (s.filter || s.sort || s.group) base = filter(base, s.filter, s.sort, s.group, context);
+        data = toDataSet(base);
+      } else data = toDataSet(evaluate(context, src));
+      context.sources._tmp = data;
+    }
 
     return runDelimited(Object.assign({ type: 'delimited', headers, fields, source, rowContext }, extra) as Delimited, context, extra?.table ? { table: true } : {});
   }
