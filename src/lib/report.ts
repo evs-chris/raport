@@ -259,6 +259,7 @@ export interface Repeater extends Widget {
   footer?: Container;
   alternate?: Container;
   headerPerPage?: boolean;
+  headerRepeat?: number;
 }
 
 export interface MeasureFont {

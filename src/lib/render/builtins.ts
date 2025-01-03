@@ -206,6 +206,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
       }
     } else {
       for (let i = (state && state.state && state.state.current) || 0; i < arr.length; i++) {
+        let row = false;
         const c = group && group.grouped ?
           extend(rctx, { value: arr[i], special: { index: i, values: {} }, commit: {} }) :
           extend(rctx, { value: arr[i], special: { index: i } });
@@ -221,6 +222,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
             continue;
           } else {
             r = renderWidget(w.row, c, { x: usedX, y, availableX: availableX - usedX, maxX: placement.maxX, availableY, maxY: placement.maxY }, state ? state.child : undefined);
+            row = true;
           }
         }
 
@@ -261,6 +263,12 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
 
         html += r.output;
         commit = true;
+
+        if (row && w.header && ctx.report.type === 'flow' && w.headerRepeat > 0 && i + 1 && (i + 1) % w.headerRepeat === 0) {
+          const h = renderWidget(w.header, ctx, { x: 0, y, availableX: placement.availableX, maxX: placement.maxX, maxY: placement.maxY });
+          html += h.output;
+          y += h.height;
+        }
 
         if (r.continue) {
           if (initY === y && usedY) y += usedY;

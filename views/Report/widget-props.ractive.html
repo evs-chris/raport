@@ -343,6 +343,9 @@
   {{#if repeater.header && ~/report.type === 'page'}}
     <label><span title="If enabled, the header will be rerendered at the beginning of each new page.">Header Per Page?</span><span><input type=checkbox twoway=false on-change="@context.toggle('.headerPerPage')" checked="{{.headerPerPage !== false}}" /></span></label>
   {{/if}}
+  {{#if repeater.header && ~/report.type === 'flow'}}
+    <label><span title="If set to a positive integer greater than 0, the header will be rerendered after the given number of rows.">Header Repeat</span><span><input type=number value="{{.headerRepeat}}" /></span></label>
+  {{/if}}
   {{#if repeater.header && repeater.group.length}}
     <label><span title="If enabled, the header will be rendered before all of the groups.">Show Header?</span><span><input type=checkbox checked="{{repeater.groupHeaders[repeater.group.length]}}" /></span></label>
   {{/if}}
