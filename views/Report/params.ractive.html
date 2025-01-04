@@ -7,7 +7,7 @@
   {{#each ~/report.parameters}}{{#if .name}}
     <div class-param>
       {{#if .type === 'boolean'}}
-        <label class-check><input type=checkbox checked="{{~/params[.name]}}" /> {{.label || .name}}?</label>
+        <label class-check><input type=checkbox checked="{{~/params[.name]}}" /> {{.label || .name}}</label>
       {{elseif .options.length}}
         <label class-pick>{{.label || .name}}<select value="{{~/params[.name]}}">
           {{#each .options}}
