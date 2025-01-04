@@ -473,6 +473,7 @@ function runPage(report: Page, context: Context, extras?: ReportExtras): string 
     if (w.macro) w = expandMacro(w.macro, w, ctx, { x: 0, y: 0, availableX, availableY, maxX: availableX, maxY }, state);
     let r: RenderResult;
     do {
+      context.special.page = page + 1;
       r = renderWidget(w, ctx, { x: 0, y, availableX, availableY, maxX: availableX, maxY }, state);
       pages[page] += r.output;
       if (r.continue) {
