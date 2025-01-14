@@ -312,7 +312,7 @@ The label map is a nested object with the keys being single key paths in the dif
     { proto:'(string, any) => interval' desc:'Sets the local value specified by the given path in the first argument the value supplied as the second argument and returns the value that was replaced, if any.' }
   ]}
   { op:['len' 'length'] sig:[
-    { proto:'any => number' desc:'Returns the length of the given value or 0 if it has none.' }
+    { proto:'string|array|dataset|object => number' desc:'Returns the length of a given string or array, the length of a given array dataset, the number of keys in a given object, or 0.' }
   ]}
   { op:'like' sig:[
     { bin:1 proto:'(string, string) => any' desc:'Checks to see if the first string matches the second string used as a pattern case sensitively.' }

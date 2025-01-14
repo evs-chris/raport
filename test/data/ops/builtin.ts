@@ -454,7 +454,14 @@ q.todo('keys', () => {});
 q.todo('label-diff', () => {});
 q.todo('last', () => {});
 q.todo('let', () => {});
-q.todo('len, length', () => {});
+
+q.test('len, length', t => {
+  t.equal(evaluate('len([1 2 3])'), 3);
+  t.equal(evaluate('len(:123)'), 3);
+  t.equal(evaluate('len({ a:1 b:2 c:3 })'), 3);
+  t.equal(evaluate('length(source([1 2 3 4]))'), 4);
+  t.equal(evaluate('len(69)'), 0);
+});
 
 q.test(`like`, t => {
   t.equal(evaluate('(like :SomeThing :*et*)'), false);
