@@ -774,7 +774,7 @@ registerOperator(
       const eq = equal;
       equal = (l: any, r: any) => evalApply(ctx, eq, [l, r]);
     }
-    return diff(left, right, equal);
+    return diff(left, right, { equal, keys: opts?.keys });
   }),
   simple(['label-diff'], (_, [diff, label], opts) => {
     return labelDiff(diff, label, opts as any);

@@ -50,13 +50,18 @@ function checkIdentity(map: IdentityMap, path: string) {
   return map[`${p}[]`];
 }
 
-export function diff(v1: any, v2: any, equal?: Equalizer): Diff {
-  const type = equal && typeof equal === 'object' ? equal.type : equal;
-  const eq = typeof type === 'function' ? type : type === 'strict' ? strictEqual : type === 'sql' ? sqlEqual : looseEqual;
-  return _diff(v1, v2, '', {}, eq, typeof equal === 'object' ? equal.identity : undefined);
+export interface DiffOpts {
+  equal?: Equalizer;
+  keys?: 'all'|'common';
 }
 
-function _diff(v1: any, v2: any, path: string, diff: Diff, equal: (v1: any, v2: any) => boolean, ident?: IdentityMap): Diff {
+export function diff(v1: any, v2: any, opts?: DiffOpts): Diff {
+  const type = opts?.equal && typeof opts.equal === 'object' ? opts.equal.type : opts?.equal;
+  const eq = typeof type === 'function' ? type : type === 'strict' ? strictEqual : type === 'sql' ? sqlEqual : looseEqual;
+  return _diff(v1, v2, '', {}, eq, typeof opts?.equal === 'object' ? opts?.equal.identity : undefined, opts?.keys || 'all');
+}
+
+function _diff(v1: any, v2: any, path: string, diff: Diff, equal: (v1: any, v2: any) => boolean, ident?: IdentityMap, keyMode?: 'all'|'common'): Diff {
   if (typeof v1 !== 'object' || typeof v2 !== 'object') {
     if (v1 === v2) return diff;
     diff[path] = [v1, v2];
@@ -87,8 +92,13 @@ function _diff(v1: any, v2: any, path: string, diff: Diff, equal: (v1: any, v2: 
   } else {
     const _v1 = v1 || {};
     const _v2 = v2 || {};
-    const ks = Object.keys(_v1);
-    for (const k of Object.keys(_v2)) if (!~ks.indexOf(k)) ks.push(k);
+    const ks: string[] = [];
+    if (keyMode === 'common') {
+      for (const k of Object.keys(_v1)) if (k in _v2) ks.push(k);
+    } else {
+      ks.push.apply(ks, Object.keys(_v1));
+      for (const k of Object.keys(_v2)) if (!~ks.indexOf(k)) ks.push(k);
+    }
 
     for (const k of ks) {
       const vv1 = _v1[k];

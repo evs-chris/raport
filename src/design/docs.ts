@@ -163,6 +163,7 @@ The basis value is available as @case or the shorthand _ in each matcher.' eg:['
     { proto:'(any, any, equal) => Diff' desc:'Does a deep comparison of the two arguments returning a map of deep keypath to a tuple of the left value and right value for differing paths. The third argument is used as the equality check for comparisons (see equal named argument).' }
   ] opts:[
     { name::equal type:"'strict'|'loose'|'sql'|(any, any) => boolaen" desc:'What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.' }
+     { name::keys type:"'all'|'common'" desc:'Which keys to include in object comparisons. The default all will result in any key in either object being compared. common will result in only keys preset in both objects being compared.' }
   ]}
   { op:'does-not-contain' sig:[
     { bin:1 proto:'(any[], any) => boolean' desc:'Returns false if the second argument is found in the first argument array using indexOf.' }
