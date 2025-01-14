@@ -1,4 +1,4 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, evaluate, evalApply, evalValue, evalParse, template, extend, formats, virtualFormats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator, OperatorOptions, sort, toDataSet } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, evaluate, evalApply, evalValue, evalParse, template, extend, formats, virtualFormats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator, OperatorOptions, sort, toDataSet, Root } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseExpr, parse } from './parse';
 import { parse as parseTemplate } from './parse/template';
@@ -778,6 +778,18 @@ registerOperator(
   }),
   simple(['label-diff'], (_, [diff, label], opts) => {
     return labelDiff(diff, label, opts as any);
+  }),
+  simple(['patch'], (_, values, opts) => {
+    const dir = opts?.dir || 'forward';
+    const base = JSON.parse(JSON.stringify(values.shift() || {}));
+    const r = new Root(base);
+    if (dir === 'backward') {
+      const vals = values.slice().reverse();
+      for (const v of vals) for (const path in v) safeSet(r, path, v[path][0]);
+    } else {
+      for (const v of values) for (const path in v) safeSet(r, path, v[path][1]);
+    }
+    return base;
   }),
 );
 

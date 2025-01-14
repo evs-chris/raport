@@ -2,6 +2,10 @@ import { evaluate, registerOperator, unregisterOperator, Operator, Root, parse, 
 
 const q = QUnit;
 
+function jsoncmp(a: any, b: any): [string, string] {
+  return [JSON.stringify(a), JSON.stringify(b)];
+}
+
 q.module('data/ops/builtin');
 
 q.test('%', t => {
@@ -598,6 +602,13 @@ q.todo('pad', () => {});
 q.todo('padl', () => {});
 q.todo('padr', () => {});
 q.todo('parse', () => {});
+
+q.test('patch', t => {
+  t.deepEqual(evaluate('patch({a:1} {a:[1 2] b:[undefined 3]})'), { a: 2, b: 3 });
+  t.equal(...jsoncmp(evaluate('patch({a:2 b:3} {a:[1 2] b:[undefined 3]} dir::backward)'), { a: 1 }));
+  t.deepEqual(evaluate('patch({a:1 c:{test:true}} {a:[1 2] b:[undefined 3]} {"c.test":[true :sure]})'), { a: 2, b: 3, c: { test: 'sure' } });
+  t.equal(...jsoncmp(evaluate('patch({a:2 b:3 c:{test::sure}} {a:[1 2] b:[undefined 3]} {"c.test":[true :sure]} dir::backward)'), { a: 1, c: { test: true } }));
+});
 
 q.test('pipe', t => {
   t.deepEqual(evaluate(`pipe([1 2 3] filter(=>_ != 1) map(=>_ * 2))`), [4, 6]);
