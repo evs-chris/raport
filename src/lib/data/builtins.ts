@@ -781,13 +781,22 @@ registerOperator(
   }),
   simple(['patch'], (_, values, opts) => {
     const dir = opts?.dir || 'forward';
+    const strict = opts?.strict;
     const base = JSON.parse(JSON.stringify(values.shift() || {}));
     const r = new Root(base);
     if (dir === 'backward') {
       const vals = values.slice().reverse();
-      for (const v of vals) for (const path in v) safeSet(r, path, v[path][0]);
+      if (strict) {
+        for (const v of vals) for (const path in v) if (safeGet(r, path) == v[path][1]) safeSet(r, path, v[path][0]);
+      } else {
+        for (const v of vals) for (const path in v) safeSet(r, path, v[path][0]);
+      }
     } else {
-      for (const v of values) for (const path in v) safeSet(r, path, v[path][1]);
+      if (strict) {
+        for (const v of values) for (const path in v) if (safeGet(r, path) == v[path][0]) safeSet(r, path, v[path][1]);
+      } else {
+        for (const v of values) for (const path in v) safeSet(r, path, v[path][1]);
+      }
     }
     return base;
   }),

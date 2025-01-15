@@ -605,7 +605,11 @@ q.todo('parse', () => {});
 
 q.test('patch', t => {
   t.deepEqual(evaluate('patch({a:1} {a:[1 2] b:[undefined 3]})'), { a: 2, b: 3 });
+  t.deepEqual(evaluate('patch({a:99} {a:[1 2] b:[undefined 3]})'), { a: 2, b: 3 });
+  t.deepEqual(evaluate('patch({a:3} {a:[1 2] b:[undefined 3]} strict:1)'), { a: 3, b: 3 });
   t.equal(...jsoncmp(evaluate('patch({a:2 b:3} {a:[1 2] b:[undefined 3]} dir::backward)'), { a: 1 }));
+  t.equal(...jsoncmp(evaluate('patch({a:99 b:3} {a:[1 2] b:[undefined 3]} dir::backward)'), { a: 1 }));
+  t.equal(...jsoncmp(evaluate('patch({a:3 b:3} {a:[1 2] b:[undefined 3]} dir::backward strict:1)'), { a: 3 }));
   t.deepEqual(evaluate('patch({a:1 c:{test:true}} {a:[1 2] b:[undefined 3]} {"c.test":[true :sure]})'), { a: 2, b: 3, c: { test: 'sure' } });
   t.equal(...jsoncmp(evaluate('patch({a:2 b:3 c:{test::sure}} {a:[1 2] b:[undefined 3]} {"c.test":[true :sure]} dir::backward)'), { a: 1, c: { test: true } }));
 });

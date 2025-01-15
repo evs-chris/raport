@@ -427,6 +427,7 @@ The label map is a nested object with the keys being single key paths in the dif
     { proto:'(any,...Diff) => any' desc:'Applies the given diffs to a deep copy of the given object. The direction of the patch can be changed with a named argument. By default, patches are applied in the order given using the new values of the patch to place in the result object. When run backward, the patch list is reversed, and the patches are applied in order using the old values of the patch to place in the result object.' }
   ] opts: [
     { name:'dir' type:"'forward'|'backward'" desc:'If unsupplied or forward, patches are applied in given order using the new values. If backward, patches are applied in reverse order using the old values.' }
+    { name:'strict' type:'boolean' desc:'If strict is truthy, each diff entry that is applied will ensure that the current state of the object matches the starting point of the diff before updating the object.' }
   ]}
   { op:'pipe' sig:[
     { proto:'...any => any' desc:'This is a special built-in operator that evaluates its first argument, supplies that as an input to the next argument, supplies that result as an input to the next argument, and so on until the result of the last argument evaluation is returned. If any argument is an operation that does not reference \`@pipe\` or \`_\` as one of its arguments, then \`@pipe\` will be added as the first argument of that operation. Arguments that are applications are automatically applied with the piped value.' }
