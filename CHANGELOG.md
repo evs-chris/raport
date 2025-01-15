@@ -1,3 +1,37 @@
+## 0.26.0
+
+2025-01-15
+
+### Data
+
+* __BUG:__ The `evaluate` function will no longer try to use the context position as an expression if there is a given expression. The avoids having `evaluate({ r: 'something' }, 'r == :something')` evaluate `something` as a reference.
+* __BREAKING__: The `length`/`len` operator now works explicitly with strings, arrays, array datasets, and not just any object with a length attribute. If passed a non-array, non-dataset object, the number of keys will be returned. This is technically a breaking change but unlikely to have any actual negative effects.
+* The `pad`, `padl`, and `padr` functions will now accept any value that converts to a single character string as padding.
+* The `generate` function can now operator on a range.
+* There is now a `cat` operator that replaces `+` for joining template portions, as `cat` will not consider actual addition under any circumstances.
+* Date formats now support escpaing format characters so they can be included in the formatted date.
+* Delimited reports now have access to the `@index` special reference corresponding to the index of the current row in the source dataset.
+* Paged reports now have access to the `@page` special reference in any expression, where it was previously limited to page headers and footers.
+* `diff` now has an option to compare only keys common to both objects.
+* There is now a `patch` operator that can apply the results of one or more diffs to an object. The default moves forward, taking the object from the start point to the end point, but there is also an option to start with the end point and reverse to the starting point. There is also a strict mode that ensures the current value matches the starting point in the diff before adjusting to the ending point on a per-path basis.
+
+### Parser
+
+* The delimited text parser can now read markdown and some forms of ASCII table, and the detect function will produce a parsing config suitable for parsing tables.
+* There is now experimental support for quoting strings with triple quotes to make embedding possibly quoted data, like csv or table data. Triple double-quoted strings do not support interpolation, but triple single-quoted strings do. There is not yet support for unparsing/stringifying triple quoted strings.
+* There is now experimental support for inline templates in expressions using triple dollar signs as quotes. Everything within the dollar quotes is parsed as template, so block tags and interpolators can be used in raport expressions. There is also not yet support for unparsing/stringifying inline templates.
+
+### Render
+
+* The report runner can now run some rendered reports as delimited by finding the first repeater widget and creating a delimited definition using the expressions from row, and optionally, header label widgets.
+* Repeaters now have the option to repeat their headers at regular intervals to make long report data easier to follow.
+
+### Designer
+
+* __BREAKING:__ The designer expression editor now uses a contenteditable div since textarea text wrapping and pre wrapping cannot be forced to be consistent. This does break some functionality with editing text, such as selected indent/outdent, since contenteditable can't be treated as just text.
+* Boolean parameter labels will no longer add a question mark at the end of their label in the parameter editor.
+
+
 ## 0.25.0
 
 2024-11-09

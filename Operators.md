@@ -477,6 +477,22 @@ The basis value is available as @case or the shorthand _ in each matcher.</dd>
 
 <dl><dt>
 
+### `cat`
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>...any => string</code></dt>
+<dd>Concatenates all of the given values into a string.</dd>
+</dl>
+
+</dl>
+<br/>
+
+<dl><dt>
+
 ### `ceil`
 ---
 
@@ -675,6 +691,11 @@ The strings strict (===), loose (==), and sql (loose plus numbers, dates, and bo
 <dd>Detects the field, record, and quote delimiters from the first given number of characters of the given string.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>context</code></dt><dd>Set the limit for the number of characters to examine from the given string.</dd>
+</dl>
 </dl>
 <br/>
 
@@ -696,7 +717,7 @@ The strings strict (===), loose (==), and sql (loose plus numbers, dates, and bo
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd>
+<dt><code>equal</code></dt><dd>What type of equality check should be used to determine whether two values are different. The strings strict (===), loose (==), and sql (loose plus numbers, dates, and booleans have special handling when they are or are compared to strings) will use a built-in equality check.</dd><dt><code>keys</code></dt><dd>Which keys to include in object comparisons. The default all will result in any key in either object being compared. common will result in only keys preset in both objects being compared.</dd>
 </dl>
 </dl>
 <br/>
@@ -943,6 +964,10 @@ If the result is an object matching { value?: any, state?: any }, then the value
 Any other value will be added to the result.
 
 Each application is passed the state, last value, and index of the call. Each of the arguments is also available a special reference, @state, @last, and @index, respectively.
+
+The global defaults for generate have a max property, defaulting to 10000, that limits the number of iterations that can be run to avoid non-terminating generators.</dd>
+<dt><code>(range) => number[]</code></dt>
+<dd>Iterates the members of the range and returns an array of all of the included numbers. This takes into account excluded numbers and ranges and ignores any inclusive range that includes an infinite bound.
 
 The global defaults for generate have a max property, defaulting to 10000, that limits the number of iterations that can be run to avoid non-terminating generators.</dd>
 </dl>
@@ -1330,8 +1355,8 @@ The label map is a nested object with the keys being single key paths in the dif
 <dd>
 
 <dl>
-<dt><code>any => number</code></dt>
-<dd>Returns the length of the given value or 0 if it has none.</dd>
+<dt><code>string|array|dataset|object => number</code></dt>
+<dd>Returns the length of a given string or array, the length of a given array dataset, the number of keys in a given object, or 0.</dd>
 </dl>
 
 </dl>
@@ -1346,8 +1371,8 @@ The label map is a nested object with the keys being single key paths in the dif
 <dd>
 
 <dl>
-<dt><code>any => number</code></dt>
-<dd>Returns the length of the given value or 0 if it has none.</dd>
+<dt><code>string|array|dataset|object => number</code></dt>
+<dd>Returns the length of a given string or array, the length of a given array dataset, the number of keys in a given object, or 0.</dd>
 </dl>
 
 </dl>
@@ -1749,8 +1774,8 @@ If there is context-local rounding set, it will be applied to the result (see se
 <dl>
 <dt><code>(string, number) => string</code></dt>
 <dd>Pads the given string with spaces at both ends such that it is at least the given number of characters long.</dd>
-<dt><code>(string, number, string) => string</code></dt>
-<dd>Pads the given string with the final string at both ends such that it is at least the given number of characters long.</dd>
+<dt><code>(string, number, stringy) => string</code></dt>
+<dd>Pads the given string with the final string at both ends such that it is at least the given number of characters long. If the final string is not a single character, a single space will be used instead.</dd>
 </dl>
 
 </dl>
@@ -1767,8 +1792,8 @@ If there is context-local rounding set, it will be applied to the result (see se
 <dl>
 <dt><code>(string, number) => string</code></dt>
 <dd>Pads the given string with spaces at the beginning such that it is at least the given number of characters long.</dd>
-<dt><code>(string, number, string) => string</code></dt>
-<dd>Pads the given string with the final string at the beginning such that it is at least the given number of characters long.</dd>
+<dt><code>(string, number, stringy) => string</code></dt>
+<dd>Pads the given string with the final string at the beginning such that it is at least the given number of characters long. If the final string is not a single character, a single space will be used instead.</dd>
 </dl>
 
 </dl>
@@ -1785,8 +1810,8 @@ If there is context-local rounding set, it will be applied to the result (see se
 <dl>
 <dt><code>(string, number) => string</code></dt>
 <dd>Pads the given string with spaces at the end such that it is at least the given number of characters long.</dd>
-<dt><code>(string, number, string) => string</code></dt>
-<dd>Pads the given string with the final string at the end such that it is at least the given number of characters long.</dd>
+<dt><code>(string, number, stringy) => string</code></dt>
+<dd>Pads the given string with the final string at the end such that it is at least the given number of characters long. If the final string is not a single character, a single space will be used instead.</dd>
 </dl>
 
 </dl>
@@ -1808,7 +1833,28 @@ If there is context-local rounding set, it will be applied to the result (see se
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.</dd><dt><code>strict</code></dt><dd>For the XML parser, be less forgiving about malformed content. Defaults to false.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd>
+<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.</dd><dt><code>strict</code></dt><dd>For the XML parser, be less forgiving about malformed content. Defaults to false.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>delimited</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd><dt><code>order</code></dt><dd>If set to a falsey value, the fields in resulting objects generated from input with headers will not be keyed in alphabetical order.</dd><dt><code>fixedSize</code></dt><dd>Discard any delimited rows that are not at least as long as the header/first row.</dd>
+</dl>
+</dl>
+<br/>
+
+<dl><dt>
+
+### `patch`
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>(any,...Diff) => any</code></dt>
+<dd>Applies the given diffs to a deep copy of the given object. The direction of the patch can be changed with a named argument. By default, patches are applied in the order given using the new values of the patch to place in the result object. When run backward, the patch list is reversed, and the patches are applied in order using the old values of the patch to place in the result object.</dd>
+</dl>
+
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>dir</code></dt><dd>If unsupplied or forward, patches are applied in given order using the new values. If backward, patches are applied in reverse order using the old values.</dd><dt><code>strict</code></dt><dd>If strict is truthy, each diff entry that is applied will ensure that the current state of the object matches the starting point of the diff before updating the object.</dd>
 </dl>
 </dl>
 <br/>
@@ -2697,7 +2743,7 @@ The case format to use.
 </dt>
 <dd>
 
-Formats the value as a date string using placeholder characters, where repeated characters render more descriptive or padded values. Any non-placeholder characters are rendered as entered. The default format is yyyy-MM-dd. Available placeholders are:
+Formats the value as a date string using placeholder characters, where repeated characters render more descriptive or padded values. Any non-placeholder characters are rendered as entered. The default format is yyyy-MM-dd. Placeholders can be escaped with a \ if the placeholder needs to be included in the output. Available placeholders are:
 
 * y - year
 * M - month
