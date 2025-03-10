@@ -1860,7 +1860,7 @@ const designerOpts: ExtendOpts<Designer> = {
             this.set('tab', 'result');
             ev.stopPropagation();
             ev.preventDefault();
-          } else if (ev.key === 'Enter' && document.activeElement.tagName !== 'TEXTAREA') {
+          } else if (ev.key === 'Enter' && !(document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'CODE')) {
             this.set({
               'temp.expr.tab': 'text',
               'show.bottom': true,
