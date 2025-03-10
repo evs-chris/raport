@@ -892,14 +892,25 @@ registerOperator(
   simple(['ceil'], (_name: string, values: [number]): number => {
     return Math.ceil(values[0]);
   }),
-  simple(['rand', 'random'], (_name: string, [min, max, dec]: [number, number|boolean, boolean]): number => {
-    let res: number;
-    if (min == null) return Math.random();
-    else if (typeof max !== 'number') res = Math.random() * min;
-    else if (typeof max === 'number') res = Math.random() * (max - min) + min;
+  simple(['rand', 'random'], (_name: string, args: any[]): any => {
+    if (!args.length || typeof args[0] === 'number') {
+      const [min, max, dec] = args;
+      let res: number;
+      if (min == null) return Math.random();
+      else if (typeof max !== 'number') res = Math.random() * min;
+      else if (typeof max === 'number') res = Math.random() * (max - min) + min;
 
-    if (max === true || dec === true) return res;
-    else return Math.round(res);
+      if (max === true || dec === true) return res;
+      else return Math.round(res);
+    } else if (Array.isArray(args[0])) {
+      const arr = args[0];
+      return arr[Math.floor(Math.random() * arr.length)];
+    } else if (typeof args[0] === 'string' && typeof args[1] === 'number') {
+      let res = '';
+      const [str, count] = args;
+      for (let i = 0; i < count; i++) res += str[Math.floor(Math.random() * str.length)];
+      return res;
+    } 
   }),
 );
 

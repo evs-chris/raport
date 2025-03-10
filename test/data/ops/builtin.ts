@@ -621,7 +621,21 @@ q.test('pipe', t => {
   t.deepEqual(evaluate(`pipe([1 2 3] filter(=>_ != 1) map(=>_ * 2))`), [4, 6]);
 });
 
-q.todo('rand, random', () => {});
+q.test('rand, random', t => {
+  t.ok(typeof evaluate('rand()') === 'number');
+  for (let i = 0; i < 100; i++) {
+    const r = evaluate('rand(1 10)');
+    t.ok(r >= 1 && r <= 10);
+  }
+  const s = evaluate('rand(:abcdefg 5)');
+  t.equal(s.length, 5);
+  t.ok(/[abcdefg]{5}/.test(s));
+  for (let i = 0; i < 10; i++) {
+    const a = evaluate('rand([1 69 99])');
+    t.ok([1, 69, 99].includes(a));
+  }
+});
+
 q.todo('reduce', () => {});
 q.todo('replace-all', () => {});
 q.todo('replace', () => {});

@@ -438,6 +438,8 @@ The label map is a nested object with the keys being single key paths in the dif
     { proto:'(number, true) => number' desc:'Returns a random floating point number between 1 and the given number, inclusive.' }
     { proto:'(number, number) => number' desc:'Returns a random integer between the given numbers, inclusive.' }
     { proto:'(number, number, true) => number' desc:'Returns a random floating point number between the given numbers, inclusive.' }
+    { proto:'(string, number) => string' desc:'Returns a string consisting of the given characters randomly selected the given number of times.' }
+    { proto:'(any[]) => any' desc:'Returns a random entry from the given array.' }
   ]}
   { op:'reduce' sig:[
     { proto:'(any[], application, any) => any' desc:'Folds the given array into the final argument value by passing each element in the given array into the application with the result of the last application (or the final argument for the first iteration) and returns the result of the final application.' }
