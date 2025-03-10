@@ -87,6 +87,9 @@ q.test('==', t => {
 q.test('is', t => {
   t.ok(evaluate('{ a:10 } is @[{a:number b?:string}]'));
   t.notOk(evaluate('{ b::10 } is @[{a:number b?:string}]'));
+  t.ok(evaluate('[1 2 3] is @[any[]] and [:a :b 69] is @[Array<any>]'));
+  t.notOk(evaluate('[[1] [:a]] is @[Array<number[]>]'));
+  t.ok(evaluate('[[1] [:a]] is @[Array<Array<string|number>>]'));
 });
 
 q.test('!=', t => {

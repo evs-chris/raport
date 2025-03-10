@@ -524,7 +524,7 @@ export default parse;
 export function schema() {
   const type: Parser<Schema> = {};
   const conditions = opt(seq(ws, rep1sep(map(seq(name(str('?'), { name: 'condition', primary: true }), ws, application), ([, , a]) => a), rws, 'disallow')));
-  const value = map(seq(str('string[]', 'number[]', 'boolean[]', 'date[]', 'any', 'string', 'number', 'boolean', 'date'), not(read1To(endRef))), ([s]) => ({ type: s } as Schema), { name: 'type', primary: true });
+  const value = map(seq(str('any[]', 'string[]', 'number[]', 'boolean[]', 'date[]', 'any', 'string', 'number', 'boolean', 'date'), not(read1To(endRef))), ([s]) => ({ type: s === 'any[]' ? 'array' : s } as Schema), { name: 'type', primary: true });
   const typedef = comment('c', map(seq(str('type'), ws, name(ident, { name: 'type', primary: true }), ws, str('='), ws, type), ([, , name, , , , type]) => ({ name, type } as { name: string, type: Schema, c?: string[] })));
   const typedefs = map(rep1sep(typedef, read1(' \t\n;'), 'allow'), defs => defs.reduce((a, c) => (c.type.desc = c.c, a[c.name] = c.type, a), {} as TypeMap));
   const ref = map(seq(ident, opt(str('[]'))), ([ref, arr]) => ({ type: arr ? 'array' : 'any', ref } as Schema), { name: 'type', primary: true });
@@ -564,7 +564,10 @@ export function schema() {
   const tuple = map(seq(str('['), ws, repsep(type, read1(' \t\r\n,'), 'allow'), ws, str(']'), opt(str('[]'))), ([, , types, , , arr]) => {
     return { type: arr ? 'tuple[]' : 'tuple', types } as Schema;
   });
-  const maybe_union = map(rep1sep(seq(alt<Schema>(value, object, tuple, literal, ref), conditions), seq(ws, str('|'), ws), 'disallow'), list => {
+  const maybe_union: Parser<Schema> = {};
+  const union_array: Parser<Schema> = {};
+
+  maybe_union.parser = map(rep1sep(seq(alt<Schema>(value, object, tuple, literal, union_array, ref), conditions), seq(ws, str('|'), ws), 'disallow'), list => {
     const types = list.map(([t, c]) => {
       if (c && c[1] && c[1].length) t.checks = c[1];
       return t;
@@ -572,12 +575,12 @@ export function schema() {
     if (types.length === 1) return types[0];
     else return { type: 'union', types: types } as Schema;
   });
-  const union_array = alt<Schema>(
+  union_array.parser = alt<Schema>(
     map(seq(str('Array<'), ws, maybe_union, ws, str('>')), ([, , union], fail) => {
       if (union.type === 'union') return { type: 'union[]', types: union.types } as Schema;
       else if (union.type === 'literal') fail('literal types cannot be array types');
-      else if (union.type === 'array' || ~union.type.indexOf('[]')) fail('array types cannot be array types');
-      else if (union.type === 'any') fail('any cannot be an array type');
+      else if (union.type === 'array' || ~union.type.indexOf('[]')) return { type: 'union[]', types: [union] } as Schema;
+      else if (union.type === 'any') return { type: 'array' } as Schema;
       else {
         union.type += '[]';
         return union;
