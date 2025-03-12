@@ -692,6 +692,7 @@ registerOperator(
     if (typeof opts === 'object') {
       if (opts.json) return JSON.stringify(value);
       if (opts.schema) return unparseSchema(value);
+      if (opts.base64) return btoa(value);
       else if (opts.raport) {
         let v = stringify(value, opts);
         if (v === undefined) v = stringify({ v: value }, opts);

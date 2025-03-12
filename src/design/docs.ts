@@ -525,9 +525,11 @@ If no sorts are provided, an identity sort will be applied to the keys.' }
   { op:'string' sig:[
     { proto:'any => string' desc:'Politely stringifies the given value, meaning that there are no undefined, null, or object prototype values strings returned.' }
   ] opts: [
-    { name:'json' type:'boolean' desc:'Forces the output string to be JSON.' }
-    { name:'raport' type:'boolean' desc:'Forces the output string to be a raport expresion. This can be paired with any options to the stringify function supplied by raport.' }
-    { name:'string' type:'boolean' desc:'Processes the value as a styled string.' }
+    { name:'json' type:'boolean' desc:'Outputs the value as JSON.' }
+    { name:'raport' type:'boolean' desc:'Outputs the value as a raport expresion. This can be paired with any options to the stringify function supplied by raport.' }
+    { name:'schema' type:'boolean' desc:'Outputs the value as a raport schema.' }
+    { name:'base64' type:'booolean' desc:'Outputs the value encoded as base64.' }
+    { name:'styled' type:'boolean' desc:'Processes the value as a styled string.' }
   ]}
   { op:'wrap-count' sig:[
     { proto:'string,number?,font?' desc:'Calculates the number of lines that the given string will occupy in the given width in rem using the given font. If the width is not specified, the @widget.width or @placement.availableX will be used. If the font is not specified, the @widget.font will be used. Inherited fonts are not considered.' }
