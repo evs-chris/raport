@@ -77,6 +77,7 @@ export interface ValidationError {
   actual?: string;
   expected?: string;
   value?: any;
+  literal?: boolean;
 }
 
 export function validate(value: any, schema: Schema|string, mode?: 'strict'|'missing'|'loose'): ValidationResult {
@@ -104,7 +105,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
   }
   let { checks } = _schema;
   const { type, fields, rest, types, literal } = _schema;
-  if (!checkType(value, schema.type === 'array' ? 'array' : type, literal, required)) return [{ error: `type mismatch for${required ? ' required' : ''} '${type}'`, actual: unparseSchema(inspect(value)), value, path, expected: unparseSchema(_schema, true) }];
+  if (!checkType(value, schema.type === 'array' ? 'array' : type, literal, required)) return [{ error: `type mismatch for${required ? ' required' : ''} ${type}`, actual: unparseSchema(inspect(value)), value, path, expected: unparseSchema(_schema, true), literal: type === 'literal' }];
 
   if (_schema !== schema && schema.checks) {
     if (!checks) checks = schema.checks;
@@ -145,9 +146,11 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
           ok = true;
           break;
         } else if (miss && tmp.find(e => e.type === 'missing') || tmp.find(e => e.type === 'check')) {
-          legit = tmp.filter(e => miss && e.type === 'missing' || e.type === 'check');
+          const t = tmp.filter(e => miss && e.type === 'missing' || e.type === 'check');
         } else if (tmp.find(e => e.path !== p))  {
-          legit = tmp;
+          if (!legit) legit = tmp
+          else if (tmp.length < legit.length) legit = tmp;
+          else if (legit.filter(e => e.literal).length > tmp.filter(e => e.literal).length) legit = tmp;
         }
       }
       if (!ok && !legit) errs.push({ error: `type mismatch for union`, actual: unparseSchema(inspect(v)), expected: unparseSchema({ type: 'union', types }), value: v, path: p });
@@ -165,7 +168,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
       }
       if (fields) {
         for (const f of fields) {
-          if (f.required && !(f.name in v)) errs.push({ error: `requried field ${f.name} is missing`, path: join(p, f.name) });
+          if (f.required && !(f.name in v)) errs.push({ error: `required field '${f.name}' is missing`, path: join(p, f.name), expected: f.type });
           else if (v && f.name in v && (tmp = _validate(v[f.name], f, mode, join(p, f.name), extend(ctx, { value: v[f.name], path: join(p, f.name) }), f.required)) !== true) errs.push.apply(errs, tmp);
         }
       }
@@ -175,7 +178,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
           if (v[k] != null && (tmp = _validate(v[k], rest, mode, join(p, k), extend(ctx, { value: v[k], path: join(p, k) }))) !== true) errs.push.apply(errs, tmp);
         }
       } else if (mode === 'strict' && v) {
-        for (const k in v) if (v[k] != null && !fields || !fields.find(f => f.name === k)) errs.push({ error: `unknown field ${k}`, path: p, type: 'strict', value: v[k] });
+        for (const k in v) if (v[k] != null && !fields || !fields.find(f => f.name === k)) errs.push({ error: `unknown field '${k}'`, path: p, type: 'strict', value: v[k] });
       }
     }
   }
