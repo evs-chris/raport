@@ -1166,6 +1166,7 @@ registerOperator(
     else if (opts.template || opts.tpl) return parseTemplate(v, opts);
     else if (opts.time) return parseTime(v, opts);
     else if (opts.expr) return parseExpr(v, opts);
+    else if (opts.json) return JSON.parse(v);
     else if (opts.schema) return parseSchema(v);
     else if (opts.range) return parseRange(v, opts);
     else if (opts.xml) return parseXML(v, opts.strict);

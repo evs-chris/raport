@@ -410,6 +410,7 @@ The label map is a nested object with the keys being single key paths in the dif
     { name:'template' type:'boolean' desc:'Use the template parser rather than the expression parser.' }
     { name:'time' type:'boolean' desc:'Use the time parser rather than the expression parser.' }
     { name:'schema' type:'boolean' desc:'Use the schema parser rather than the expression parser.' }
+    { name:'json' type:'boolean' desc:'Use a JSON parser rather than the expression parser.' }
     { name:'base64' type:'boolean' desc:'Use a base64 parser to decode a base64 encoded string.' }
     { name:'xml' type:'boolean' desc:'Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.' }
     { name:'strict' type:'boolean' desc:'For the XML parser, be less forgiving about malformed content. Defaults to false.' }
