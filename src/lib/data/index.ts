@@ -504,7 +504,7 @@ function hasPipeRef(ref: Reference): boolean {
   return path.k[0] === '_' || path.p === '@' && path.k[0] === 'pipe';
 }
 
-function applyOperator(root: Context, operation: Operation): any {
+export function applyOperator(root: Context, operation: Operation): any {
   const op = opMap[operation.op];
 
   // if the operator doesn't exist, try a local, pipe, or skip

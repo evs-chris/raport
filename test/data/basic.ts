@@ -100,3 +100,11 @@ q.test('parser namespaces cache politely', t => {
   t.equal(exprCount, 1);
   t.equal(tplCount, 1);
 });
+
+q.test(`calling operators as formats`, t => {
+  t.equal(evaluate(`:asdf#upper`), 'ASDF');
+  t.deepEqual(evaluate(`'number'#parse(schema:1)`), { type: 'number' });
+  t.equal(evaluate(`123#add(10)`), 133);
+  t.deepEqual(evaluate(`[1 2 3]#map(=>_ + 1)`), [2, 3, 4]);
+  t.equal(evaluate(`let foo = |a b| => '({a}) {b#upper}'; :asdf#foo(:bar)`), '(asdf) BAR');
+});

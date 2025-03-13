@@ -1,4 +1,4 @@
-import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, evaluate, evalApply, evalValue, evalParse, template, extend, formats, virtualFormats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator, OperatorOptions, sort, toDataSet, Root } from './index';
+import { filter, safeGet, safeSet, registerOperator, CheckResult, ValueOperator, ValueOrExpr, Context, evaluate, evalApply, evalValue, evalParse, template, extend, formats, virtualFormats, registerFormat, dateRelToRange, dateRelToExactRange, dateRelToDate, isDateRel, isKeypath, isTimespan, isApplication, dateAndTimespan, addTimespan, isValue, datesDiff, DateRel, getOperator, applyOperator, OperatorOptions, sort, toDataSet, Root } from './index';
 import { date, dollar, ordinal, number, phone } from './format';
 import { timespans, isTimespanMS, timeSpanToNumber, parseTime, parseDate, parseExpr, parse } from './parse';
 import { parse as parseTemplate } from './parse/template';
@@ -1126,19 +1126,14 @@ registerOperator(
     let [v, fmt, ...s] = args;
     const op = formats[fmt];
     if (!op) {
-      const op = getOperator(fmt);
+      let op: any = getOperator(fmt);
+      if (!op) {
+        const o = safeGet(ctx, fmt) || safeGet(ctx.root, fmt);
+        if (isApplication(o)) op = o
+      }
       if (op) {
         const args = [v, ...s];
-        if (op.type === 'aggregate') return op.apply(fmt, Array.isArray(v) ? v : [v], s.map(v => ({ v })), (opts || virtualFormats[fmt]) as any, ctx);
-        if (op.type === 'checked') {
-          for (let i = 0; i < args.length; i++) {
-            const res = op.checkArg(fmt, i, args.length - 1, args[i], (opts || virtualFormats[fmt]) as any, ctx, { v: args[i] });
-            if (typeof res !== 'object' || !('result' in res)) continue;
-            else return res.result;
-          }
-          return op.apply(fmt, args, (opts || virtualFormats[fmt]) as any, ctx);
-        }
-        return op.apply(fmt, args, (opts || virtualFormats[fmt]) as any, ctx);
+        return applyOperator(ctx, { op: fmt, args: args.map(v => isApplication(v) ? v : ({ v })), opts: { v: opts || virtualFormats[fmt] } });
       } else return `${v}`;
     } else return op.apply(v, s, (opts || op.defaults) as any);
   }),

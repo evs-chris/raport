@@ -159,10 +159,15 @@ Operators that are called in LISP or call syntax may also accept named arguments
 
 ### Formats
 
-There is a built-in format operator that formats values as strings using registered formatters. One example is the `date` formatter that outputs `date` values as strings in the `yyyy-MM-dd` format by default. It can also accept an argument that specifies the format to use when converting the date to a string. The `format` operator can be called explicitly or, since formatting values as strings is a fairly common need, using a special postfix format operation syntax that is a `#` followed by the name of the formatter and optionally any argument expressions separated by `,`s with no whitespaces. The following are equivalent:
+There is a built-in format operator that formats values as strings using registered formatters. One example is the `date` formatter that outputs `date` values as strings in the `yyyy-MM-dd` format by default. It can also accept an argument that specifies the format to use when converting the date to a string. The `format` operator can be called explicitly or, since formatting values as strings is a fairly common need, using a special postfix format operation syntax that is a `#` followed by the name of the formatter and optionally any argument expressions separated by `,`s with no whitespaces. The arguments to a postfix format may also be surrounded with parentheses, which also enables passing named arguments. The following are equivalent:
 
 * `format(@date :date 'MM/dd/yyyy')`
 * `@date#date,'MM/dd/yyyy'`
+* `@date#date(:MM/dd/yyyy)`
+
+Any format expression that calls a formatter that is not registered will look for an operator with a matching name. If one is found, the matching operator will be called with the format value as the first argument, the format arguments as successive arguments, and any named arguments passed through.
+
+If no registered formatters or matching operators are found, the format operator will return its passed value directly.
 
 ### Pipes
 
