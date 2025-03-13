@@ -1,3 +1,26 @@
+## 0.26.1
+
+2025-03-11
+
+### Data
+
+* The `rand`/`random` operator now supports generating a random string from a set of characters and returning a random element from an array.
+* Matching schemas against unions will now prefer to relay the union member with the fewest errors or with matching literals rather than simply relaying the errors of the last case. This tends to make errors with unions for tagged types much more relevant.
+* The `parse` operator now has explicit support for JSON.
+* The `string` operator now has an option to produce base64.
+* The `format` operator and its postfix sugar now delegate to the regular operator application logic if there is no matching registered formatter.
+
+### Parser
+
+* Schemas can now include nested array types e.g. `Array<number[]>`.
+* Schema unions can now include multiple array types e.g. `Array<{ foo: number }>|Array<string>`.
+* Schema array types can now be specified as `any`, which is slightly different than the `[]` empty tuple, though it usually doesn't matter when checking a type against a schema.
+
+### Designer
+
+* __BUG:__ ctrl+enter will once again execute expressions in the evaluation pane.
+
+
 ## 0.26.0
 
 2025-01-15

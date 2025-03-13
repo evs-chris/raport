@@ -1833,7 +1833,7 @@ If there is context-local rounding set, it will be applied to the result (see se
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.</dd><dt><code>strict</code></dt><dd>For the XML parser, be less forgiving about malformed content. Defaults to false.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>delimited</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd><dt><code>order</code></dt><dd>If set to a falsey value, the fields in resulting objects generated from input with headers will not be keyed in alphabetical order.</dd><dt><code>fixedSize</code></dt><dd>Discard any delimited rows that are not at least as long as the header/first row.</dd>
+<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>json</code></dt><dd>Use a JSON parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.</dd><dt><code>strict</code></dt><dd>For the XML parser, be less forgiving about malformed content. Defaults to false.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>delimited</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd><dt><code>order</code></dt><dd>If set to a falsey value, the fields in resulting objects generated from input with headers will not be keyed in alphabetical order.</dd><dt><code>fixedSize</code></dt><dd>Discard any delimited rows that are not at least as long as the header/first row.</dd>
 </dl>
 </dl>
 <br/>
@@ -1913,6 +1913,10 @@ If there is context-local rounding set, it will be applied to the result (see se
 <dd>Returns a random integer between the given numbers, inclusive.</dd>
 <dt><code>(number, number, true) => number</code></dt>
 <dd>Returns a random floating point number between the given numbers, inclusive.</dd>
+<dt><code>(string, number) => string</code></dt>
+<dd>Returns a string consisting of the given characters randomly selected the given number of times.</dd>
+<dt><code>(any[]) => any</code></dt>
+<dd>Returns a random entry from the given array.</dd>
 </dl>
 
 </dl>
@@ -1937,6 +1941,10 @@ If there is context-local rounding set, it will be applied to the result (see se
 <dd>Returns a random integer between the given numbers, inclusive.</dd>
 <dt><code>(number, number, true) => number</code></dt>
 <dd>Returns a random floating point number between the given numbers, inclusive.</dd>
+<dt><code>(string, number) => string</code></dt>
+<dd>Returns a string consisting of the given characters randomly selected the given number of times.</dd>
+<dt><code>(any[]) => any</code></dt>
+<dd>Returns a random entry from the given array.</dd>
 </dl>
 
 </dl>
@@ -2251,7 +2259,7 @@ If no sorts are provided, an identity sort will be applied to the keys.</dd>
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>json</code></dt><dd>Forces the output string to be JSON.</dd><dt><code>raport</code></dt><dd>Forces the output string to be a raport expresion. This can be paired with any options to the stringify function supplied by raport.</dd><dt><code>string</code></dt><dd>Processes the value as a styled string.</dd>
+<dt><code>json</code></dt><dd>Outputs the value as JSON.</dd><dt><code>raport</code></dt><dd>Outputs the value as a raport expresion. This can be paired with any options to the stringify function supplied by raport.</dd><dt><code>schema</code></dt><dd>Outputs the value as a raport schema.</dd><dt><code>base64</code></dt><dd>Outputs the value encoded as base64.</dd><dt><code>styled</code></dt><dd>Processes the value as a styled string.</dd>
 </dl>
 </dl>
 <br/>
