@@ -103,7 +103,7 @@ Exmaple: `'1, 3, 5, 7, >10'`, `'22-33 44 55-66'`, `'1-100 !23 !34 !88'`
 
 REL is built around contexts that are somewhat analogous to stack frames that have an inherent base value. When an expression is being evaluated there is usually some value that is currently in scope as the focus of the context. The value of at the base of the current scope is available as the special reference `@value` or `_`. If the value happens to have properties, they can be referenced directly by their names e.g. in a context with a value of `{ foo: 21, bar: 22 }`, the reference `foo` will resolve to `21` when evaluated.
 
-Each context also has a local lexical scope attached to it that is not directly connected with the underlying data in the context. This allows for passing named arguments to applications or utilyzing locally scoped variables without clobbering the associated data in the context. Some operators will introduce a new lexical scope while retaining the exising context, while others may introduce both a new context and a new lexical scope.
+Each context also has a local lexical scope attached to it that is not directly connected with the underlying data in the context. This allows for passing named arguments to applications or utilizing locally scoped variables without clobbering the associated data in the context. Some operators will introduce a new lexical scope while retaining the exising context, while others may introduce both a new context and a new lexical scope.
 
 If the value resolved by a reference happens to have a nested structure built of object and/or arrays, further children of the primary property can be accessed using dotted path or bracketed path notation e.g. `foo.bar`, `array.1.prop` or `array[1].prop`, and `foo[:ba + :r]`. The bracketed notation allows for expressions to be used when resolving names. References are always resolved safely to `undefined`, so doing something like `{ foo::bar }.baz.bat` does not cause an error.
 
@@ -138,14 +138,14 @@ Example: `let foo = 10`, `set ~name = :Joe`, `let ^^type = { size: 22, id::1 }`
 
 ## Operations
 
-Operators are the foundational component of REL, as everything within REL other than a few of the primitive literals, references, and comments are built as operators. An operator may be called using LISP syntax, call syntax, or in many cases special syntax such as unary or boolean syntax. The following are equivalent:
+Operators are the foundational component of REL, as everything within REL other than a few of the primitive literals, references, and comments are built as operators. An operator may be called using LISP syntax, call syntax, or in many cases special syntax such as unary or binary syntax. The following are equivalent:
 
 * `(if foo > 10 :large foo < 5 :small :medium)`
 * `if(foo > 10 :large foo < 5 :small :medium)`
 * `if foo > 10 then :large elif foo < 5 then :small else :medium`
 * `if foo > 10 { :large } elif foo < 5 { :small } else { :medium }`
 
-Most operators are limited to LISP and call syntax because that's how they're most reasonably used. `+`, `-`, and `not` are available as unary operators. Supported binary operators in order of precedence are exponentiation (`**`), mutiplication/division/modulus/int division (`*`, `/`, `%`, `/%`), addition/subtraction (`+`, `-`), comparison (`>=`, `>`, `<=`, `<`, `ilike`, `in`, `like`, `not-ilike`, `not-like`, `not-in`, `contains`, `does-not-contain`, `gt`, `gte`, `lt`, `lte`), equality (`is`, `is-not`, `==`, `!=`, `deep-is`, `deep-is-not`, `strict-is`, `strict-is-not`, `===`, `!==`), boolean and (`and`, `&&`), boolean or (`or`, `\|\|`) and nullish coalescing (`??`). At least one space is required on either side of a binary operator.
+Most operators are limited to LISP and call syntax because that's how they're most reasonably used. `+`, `-`, and `not` are available as unary operators. Supported binary operators in order of precedence are exponentiation (`**`), mutiplication/division/modulus/int division (`*`, `/`, `%`, `/%`), addition/subtraction (`+`, `-`), comparison (`>=`, `>`, `<=`, `<`, `ilike`, `in`, `like`, `not-ilike`, `not-like`, `not-in`, `contains`, `does-not-contain`, `gt`, `gte`, `lt`, `lte`), equality (`is`, `is-not`, `==`, `!=`, `deep-is`, `deep-is-not`, `strict-is`, `strict-is-not`, `===`, `!==`), boolean and (`and`, `&&`), boolean or (`or`, `\|\|`) and nullish coalescing (`??`). At least one space is required on either side of a binary operator, unless it is symbolic, in which case it must have either zero spaces on either side or at least one space on either side.
 
 Most operators take a number of arguments, which are passed within their `()`s. Some operators will evaluate their arguments lazily, like `and` and `or`, and others will evaluate all of their arguments before processing them. Some operators will implicitly operate on their nearest data source, and these are internally configured as aggregate operators, including `sum` and `avg`.
 
@@ -176,7 +176,7 @@ Processing data often calls operators on the results of calling operators on the
 * `join(map(filter(things =>count > 10) =>name) ', ')`
 * `pipe(things filter(=>count > 10) map(=>name) join(', '))`
 
-The latter is a bit longer, but considerably more easy to follow.
+The latter is a bit longer, but tends to be easier to follow the value through the flow, especially when the intermediate steps get longer or more complicated.
 
 ## Flow Control
 
