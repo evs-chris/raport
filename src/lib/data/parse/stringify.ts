@@ -235,12 +235,15 @@ function stringifyOp(value: Operation): string {
     return stringifyCase(value);
   } else if (op === '+' && value.args && value.args.length > 1 && findNestedStringOpL(op, value)) {
     const args = flattenNestedBinopsL(op, value);
-    return `'${args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[{']/g, v => `\\${v}`).replace(/\$$/, '\\$') : `{${_stringify(a)}}`).join('')}'`
+    if (value.meta && value.meta.q) {
+      const re = new RegExp(`(\\{|${value.meta.q})`, 'g');
+      return `${value.meta.q}${args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(re, v => `\\$1`).replace(/\$$/, '\\$') : `{${_stringify(a)}}`).join('')}${value.meta.q}`
+    } else return `'${args.map(a => typeof a !== 'string' && 'v' in a && typeof a.v === 'string' ? a.v.replace(/[{']/g, v => `\\${v}`).replace(/\$$/, '\\$') : `{${_stringify(a)}}`).join('')}'`
   } else if ((op === 'fmt' || op === 'format') && value.args && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'string') {
     const val = value.args[0];
     let vs = _stringify(val);
     if (typeof val !== 'string' && 'op' in val && (binops.includes(val.op) || unops.includes(val.op))) vs = `(${vs})`;
-    if (value.opts) return `${vs}#${[value.args[1].v]}${wrapArgs('(', value.args.slice(2), value.opts, ')')}`;
+    if (value.opts || value.args?.length > 3) return `${vs}#${[value.args[1].v]}${wrapArgs('(', value.args.slice(2), value.opts, ')')}`;
     else return `${vs}#${[value.args[1].v].concat(value.args.slice(2).map(a => _stringify(a))).join(',')}`;
   } else if (binops.includes(op) && value.args && value.args.length > 1 && !value.opts && (!deepops.includes(op) || value.args.length === 2)) {
     let parts = value.args.map((a, i) => stringifyBinopArg(op, a, i === 0 ? 1 : 2));
@@ -273,6 +276,8 @@ function stringifyOp(value: Operation): string {
     return `${op} ${path} = ${_stringify(value.args[1])}`;
   } else if (op === 'get' && value.args.length === 2 && typeof value.args[1] === 'object' && 'v' in value.args[1] && typeof value.args[1].v === 'object' && 'k' in value.args[1].v) {
     return `${_stringify(value.args[0])}${_stringify({ r: { k: ['r'].concat(value.args[1].v.k) } }).substr(1)}`;
+  } else if (op === 'cat' && value.meta?.q === '$$$') {
+    return `$$$${stringifyTemplate(value.args)}$$$`;
   } else if (call_op.test(op)) {
     return wrapArgs(`${op}(`, value.args || [], value.opts, ')', 0);
   } else {
@@ -298,6 +303,7 @@ function stringifyLiteral(value: Literal): string {
   } else if (typeof value.v === 'string') {
     if (_tpl) return value.v.replace(/\\(.)/g, '\\\\$1').replace(/{{/g, '\\{{');
     if ((_key || !_noSym) && !checkIdent.test(value.v) && value.v.length) return `${_key ? '' : ':'}${value.v}`;
+    else if (value.q) return `${value.q}${value.v.replace(new RegExp(value.q, 'g'), `\\${value.q}`)}${value.q}`;
     else if (!~value.v.indexOf("'")) return `'${value.v.replace(/[{']/g, v => `\\${v}`).replace(/\${/g, '\\${')}'`;
     else if (!~value.v.indexOf('`')) return `\`${value.v.replace(/[{`]/g, v => `\\${v}`).replace(/\${/g, '\\${')}\``;
     else if (!~value.v.indexOf('"')) return `"${value.v}"`;
@@ -611,6 +617,14 @@ function stringifyCase(op: Operation): string {
   if (!block && _level) str += `${split}end`;
 
   return str;
+}
+
+function stringifyTemplate(parts: ValueOrExpr[]) {
+  const start = _tpl;
+  _tpl = true;
+  const res = parts.map(p => _stringify(p)).join('');
+  _tpl = start;
+  return res;
 }
 
 function stringifyTemplateBlock(op: Operation): string {

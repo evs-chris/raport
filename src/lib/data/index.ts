@@ -598,7 +598,7 @@ export function isOperation(v: any): v is Operation {
 
 export interface Reference { r: string|Keypath; c?: string[] };
 export interface Application { a: Value; n?: string[]; c?: string[] };
-export interface Literal { v: any; s?: 1; c?: string[] };
+export interface Literal { v: any; s?: 1; c?: string[]; q?: string };
 
 export function isApplication(v: any): v is Application {
   if (typeof v !== 'object' || !('a' in v) || typeof v.a !== 'object') return false;

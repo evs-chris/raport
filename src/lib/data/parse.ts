@@ -92,7 +92,7 @@ export const ref = map(keypath, (r, err) => {
   return { r };
 }, { primary: true, name: 'reference' });
 
-function stringInterp(parts: Value[]): Value {
+function stringInterp(parts: Value[], q?: string): Value {
   const res = parts.reduce((a, c) => {
     if (a.length) {
       if ('v' in c && 'v' in a[a.length - 1] && typeof c.v === 'string' && typeof (a[a.length - 1] as Literal).v === 'string') (a[a.length - 1] as Literal).v += c.v;
@@ -107,7 +107,7 @@ function stringInterp(parts: Value[]): Value {
 
   if (res.length === 0) return { v: '' };
   else if (res.length === 1) return res[0];
-  return { op: '+', args: res };
+  return { op: '+', args: res, meta: q ? { q } : undefined };
 }
 
 const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 'month', 'minutes', 'minute', 'milliseconds', 'millisecond', 'mm', 'ms', 'm', 'weeks', 'week', 'w', 'days', 'day', 'd', 'hours', 'hour', 'h', 'seconds', 'second', 's')), ws), parts => {
@@ -273,7 +273,7 @@ export const string = alt<Value>({ primary: true, name: 'string' },
   map(seq(str(':'), read1To(endSym, true)), v => ({ v: v[1]})),
   map(bracket(str('"""'), rep(alt<string>('string-part',
     read1To('\\"'), JStringEscape, JStringUnicode, JStringHex, andNot(str('"'), str('""')),
-  )), str('"""')), a => ({ v: ''.concat(...a) })),
+  )), str('"""')), a => ({ v: ''.concat(...a), q: '"""' })),
   map(bracket(str('"'), rep(alt<string>('string-part',
     read1To('\\"'), JStringEscape, JStringUnicode, JStringHex
   )), str('"')), a => ({ v: ''.concat(...a) })), 
@@ -286,7 +286,7 @@ export const string = alt<Value>({ primary: true, name: 'string' },
     map(JStringHex, v => ({ v })),
     map(JStringEscape, v => ({ v })),
     map(andNot(str(`'`), str(`''`)), v => ({ v })),
-  )), str(`'''`)), stringInterp),
+  )), str(`'''`)), v => stringInterp(v, "'''")),
   map(bracket(str(`'`), rep(alt('string-part',
     map(read1To(`'\\$\{`, true), v => ({ v } as Value)),
     map(str('\\$', '$$'), () => ({ v: '$' })),
@@ -295,7 +295,7 @@ export const string = alt<Value>({ primary: true, name: 'string' },
     map(JStringUnicode, v => ({ v })),
     map(JStringHex, v => ({ v })),
     map(JStringEscape, v => ({ v })),
-  )), str(`'`)), stringInterp),
+  )), str(`'`)), v => stringInterp(v)),
   map(bracket(str('```'), rep(alt('string-part',
     map(read1To('`\\${', true), v => ({ v } as Value)),
     map(str('\\$', '$$'), () => ({ v: '$' })),
@@ -305,7 +305,7 @@ export const string = alt<Value>({ primary: true, name: 'string' },
     map(JStringHex, v => ({ v })),
     map(JStringEscape, v => ({ v })),
     map(andNot(str('`'), str('``')), v => ({ v })),
-  )), str('```')), stringInterp),
+  )), str('```')), v => stringInterp(v, '```')),
   map(bracket(str('`'), rep(alt('string-part',
     map(read1To('`\\${', true), v => ({ v } as Value)),
     map(str('\\$', '$$'), () => ({ v: '$' })),
@@ -314,7 +314,7 @@ export const string = alt<Value>({ primary: true, name: 'string' },
     map(JStringUnicode, v => ({ v })),
     map(JStringHex, v => ({ v })),
     map(JStringEscape, v => ({ v })),
-  )), str('`')), stringInterp),
+  )), str('`')), v => stringInterp(v)),
 );
 export const literal = map(alt('literal', map(JNum, v => v, { primary: true, name: 'number' }), keywords, date), v => {
   if (v instanceof Date || v == null || typeof v !== 'object') return { v };
