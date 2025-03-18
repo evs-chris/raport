@@ -712,7 +712,13 @@ export class Designer extends Ractive {
   }
 
   async buildRoot(skipSources?: boolean, sample?: boolean): Promise<Root> {
-    if (sample !== false && this._builtroot) return this._builtroot;
+    if (sample !== false && this._builtroot) {
+      // clear locals to avoid weird state
+      return this._builtroot.then(r => {
+        (r as any).locals = {};
+        return r;
+      });;
+    }
     const report: Report = this.get('report');
     const res = new Root(cloneDeep(report.context), { parameters: this.get('params') });
     res.log = this.log;
