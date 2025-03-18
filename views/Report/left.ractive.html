@@ -22,7 +22,7 @@
       {{#if ~/reparent}}<button class="ico large" on-click="@.set('reparent', undefined)" title="Cancel move [Esc]">{{>reparent, true as cancel}}</button>{{/if}}
       <button class="ico large" on-click="@.treeScrollToActive()" title="Scroll active widget into view">{{>scrollto}}</button>
     </div>
-    <div class="scrolled-wrapper widget-tree">
+    <div class="scrolled-wrapper widget-tree" style="min-height: 33vh;">
       <div class=tree as-scrolled on-mouseout="@.set('temp.hover', ''), false">
         {{#with report}}
         <div class-node class-active="~/temp.widget === 'report'" class-hover="~/temp.hover === 'report'" on-click="~/reparent ? @.reparent(@context) : ~/copy ? @.paste(@context) : @.selectWidget('report')" title="{{#if ~/reparent}}{{#if .type === 'delimited'}}Click to move the selected field to the end of the field list{{'\n'}}{{else}}Click to move the widget to the end of this container{{'\n'}}{{/if}}{{elseif ~/copy}}{{#if .type === 'delimited'}}Click to add a copy of the selected field to the end of the field list{{'\n'}}{{else}}Click to add a copy of the widget to this container{{'\n'}}{{/if}}{{/if}}Path: {{@keypath}}">
@@ -51,7 +51,7 @@
     </div>
   {{/if}}
   {{#if ~/temp.widget && !~/show.hideprops}}
-  <div class="scrolled-wrapper"><div as-scrolled>
+  <div class="scrolled-wrapper" style="min-height: 33vh;"><div as-scrolled>
     <div class=header>
       <h3>{{~/temp.name[0].toUpperCase()}}{{~/temp.name.substr(1)}} Properties</h3>
     </div>
