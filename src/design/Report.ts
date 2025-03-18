@@ -1583,6 +1583,18 @@ export class Designer extends Ractive {
     }
   }
 
+  sortManual(ctx: ContextHelper) {
+    const c: Widget = ctx.get('.');
+    if (c.type === 'container' && Array.isArray(c.layout)) {
+      const all = (c.layout as any[]).map((l, i) => ({ widget: c.widgets[i], layout: l }));
+      const res = evaluate({ all }, `sort(all '[=>layout.1 ?? layout.y =>layout.0 ?? layout.x]')`);
+      ctx.set({
+        '.widgets': res.map(e => e.widget),
+        '.layout': res.map(e => e.layout),
+      });
+    }
+  }
+
   langref = langref;
 }
 

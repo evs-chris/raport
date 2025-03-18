@@ -91,6 +91,7 @@
         <option value="auto">Auto Layout</option>
         <option value="manual">Manual Layout</option>
       </select>
+      {{#if ctx.layout === 'manual'}}<span class-btn style="margin-left: 2em;" on-click="@.sortManual(@context)" title="Sort children by their y, x coordinates.">Sort</span>{{/if}}
     </div>
     {{/with}}
     <div class-widgets class-manual="Array.isArray(.layout)" style="height: {{heightMargin}};" on-mouseover="@.set('temp.hover', @keypath)">
