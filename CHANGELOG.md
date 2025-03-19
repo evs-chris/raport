@@ -1,3 +1,20 @@
+## 0.27.0
+
+2025-03-19
+
+### Parser
+
+* __BREAKING__: Bracketed paths now support indicating that an index should be applied from the end rather than the start by ducking the index (following it with a <). This removes support for accessing array indexs from the right by passing a negative number, which was undocumented but still makes this a breaking change.
+* Bracketed paths can now accept an additional index, which may also be ducked, that turns the access into a slice for array and string values. The order of the slice is maintained based on the given indices, so giving a larger index first will result in a reversed slice.
+* Triple quoted strings and inline templates can now be stringified.
+
+### Designer
+
+* __BUG:__ Evaluations with locals will now clear the locals before evaluating on subsequent runs. This avoids locals that are removed from the evaluated expression still having a value.
+* Containers with manual layouts now support sorting their children according to their y, x coordinates, making it easier to find adjacent children in the list.
+* The left panes now have a minimum height of 1/3 of the viewport.
+
+
 ## 0.26.1
 
 2025-03-11
