@@ -188,7 +188,8 @@ export function safeGet(root: Context, path: string|Keypath): any {
         }
       }
     } else {
-      const first = parts[0];
+      let first = parts[0];
+      if (typeof first === 'object' && 'v' in first) first = first.v;
       if (first === '_') {
         if (ctx.special && ctx.special.pipe) o = ctx.special.pipe;
         idx++;
@@ -205,8 +206,25 @@ export function safeGet(root: Context, path: string|Keypath): any {
     for (let i = idx; i < parts.length; i++) {
       const part = parts[i];
       const v = typeof part !== 'object' ? part : evalValue(root, part);
-      if (Array.isArray(o) && typeof v === 'number' && v < 0) o = o[o.length + v];
-      else o = o && o[v];
+      if (o != null && typeof v === 'number' && typeof part === 'object' && typeof o.length === 'number') {
+        if ('slice' in part && part.slice && typeof part.slice === 'object') {
+          let start = 'anchor' in part && part.anchor === 'end' ? o.length - 1 - v : v;
+          if (start < 0) start = 0;
+          if (start > o.length - 1) start = o.length - 1;
+          const e = typeof part.slice !== 'object' ? part : evalValue(root, part.slice);
+          let end = 'anchor' in part.slice && part.slice.anchor === 'end' ? o.length - 1 - e : e;
+          if (end < 0) end = 0;
+          if (end > o.length - 1) end = o.length - 1;
+          const dir = start > end ? -1 : 1;
+          let res = typeof o === 'string' ? '' : [];
+          for (let i = start; i !== end + dir; i += dir) typeof res === 'string' ? res = res + o[i] : res.push(o[i]);
+          o = res;
+        } else if ('anchor' in part && part.anchor === 'end') {
+          o = o[o.length - 1 - v];
+        } else {
+          o = o[v];
+        }
+      } else o = o && o[v];
       if (o === null || o === undefined) return;
     }
 
@@ -249,15 +267,20 @@ export function safeSet(root: Context, path: string|Keypath, value: any, islet?:
     const last = keys.length - 1;
     for (let i = 0; i < last; i++) {
       if (typeof o !== 'object' && typeof o !== 'function' || !o) return;
-      const key = keys[i];
+      let key = keys[i];
+      const part = parts[i];
+      if (o != null && typeof key === 'number' && typeof part === 'object' && 'anchor' in part && part.anchor === 'end' && typeof o.length === 'number') key = o.length - key;
       const next = keys[i + 1];
       if (!(key in o) || o[key] == null) o[key] = typeof next === 'number' ? [] : {};
       o = o[key];
     }
     
     if (o) {
-      const cur = o[keys[last]];
-      o[keys[last]] = value;
+      const part = parts[last];
+      let k = keys[last];
+      if (o != null && typeof k === 'number' && typeof part === 'object' && 'anchor' in part && part.anchor === 'end' && typeof o.length === 'number') k = o.length- 1 - k;
+      const cur = o[k];
+      o[k] = value;
       return cur;
     }
   }
@@ -577,7 +600,7 @@ export function applyOperator(root: Context, operation: Operation): any {
 export interface Keypath {
   u?: number;
   p?: '!'|'~'|'*'|'@';
-  k: Array<string|number|Value>;
+  k: Array<string|number|Value|ValueWithAnchor>;
 }
 
 export function isKeypath(v: any): v is string|Keypath {
@@ -684,6 +707,7 @@ export interface FullTimeSpan {
 
 export type ValueOrExpr = string|Value;
 export type Value = Reference | Literal | Operation | Application | ParseError;
+export type ValueWithAnchor = Value & { anchor?: 'start'|'end'; slice?: ValueWithAnchor };
 
 export function isValueOrExpr(o: any): o is ValueOrExpr {
   return typeof o === 'string' || isValue(o);

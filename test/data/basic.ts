@@ -3,6 +3,8 @@ import { isContext } from '../../src/lib/data/index';
 
 const q = QUnit;
 
+const e = evaluate;
+
 q.module('data/basic');
 
 q.test(`contexts are safely detected`, t => {
@@ -107,4 +109,25 @@ q.test(`calling operators as formats`, t => {
   t.equal(evaluate(`123#add(10)`), 133);
   t.deepEqual(evaluate(`[1 2 3]#map(=>_ + 1)`), [2, 3, 4]);
   t.equal(evaluate(`let foo = |a b| => '({a}) {b#upper}'; :asdf#foo(:bar)`), '(asdf) BAR');
+});
+
+q.test(`special bracketed paths`, t => {
+  t.equal(e(`'abcdefg'[0]`), 'a');
+  t.equal(e(`'abcdefg'[0<]`), 'g');
+  t.equal(e(`'abcdefg'[1<]`), 'f');
+  t.equal(e(`'abcdefg'[1]`), 'b');
+  t.equal(e(`{foo::bar}[:foo<]`), 'bar');
+  t.equal(e(`[1 2 3 4 5 6 7][0]`), 1);
+  t.equal(e(`[1 2 3 4 5 6 7][0<]`), 7);
+  t.equal(e(`[1 2 3 4 5 6 7][1]`), 2);
+  t.equal(e(`[1 2 3 4 5 6 7][1<]`), 6);
+  t.equal(e(`'asdf'[-1]`), undefined);
+  t.equal(e(`[1 2 3][-1]`), undefined);
+  t.equal(e(`'abcdefg'[0 1]`), 'ab');
+  t.equal(e(`'abcdefg'[0< 1<]`), 'gf');
+  t.equal(e(`'abcdefg'[1< 0<]`), 'fg');
+  t.equal(e(`'abcdefg'[1 0<]`), 'bcdefg');
+  t.equal(e(`'abcdefg'[1< 0]`), 'fedcba');
+  t.deepEqual(e(`[1 2 3 4 5 6 7][0 1]`), [1, 2]);
+  t.deepEqual(e(`[1 2 3 4 5 6 7][0< 1<]`), [7, 6]);
 });

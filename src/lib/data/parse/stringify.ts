@@ -1,4 +1,4 @@
-import { ValueOrExpr, Operation, Literal, DateRel, DateRelRange, isDateRel, isTimespan, TimeSpan, isApplication } from '../index';
+import { ValueOrExpr, Operation, Literal, DateRel, DateRelRange, isDateRel, isTimespan, TimeSpan, isApplication, ValueWithAnchor } from '../index';
 import { endRef, isTimespanMS, timespans, timeSpanToNumber } from '../parse';
 import { Schema } from '../index';
 
@@ -156,7 +156,10 @@ function _stringify(value: ValueOrExpr): string {
       stringed = `${fill('^', r.u || 0)}${r.p || ''}${r.k.map((p, i) => {
         if (typeof p === 'string' && checkIdent.test(p)) return `${i ? '' : '_'}[${_stringify({ v: p })}]`;
         else if (typeof p === 'string' || typeof p === 'number') return `${i ? '.' : ''}${p}`;
-        else return `[${_stringify(p)}]`
+        else {
+          const v = p as ValueWithAnchor;
+          return `[${_stringify(p)}${v.anchor === 'end' ? '<' : ''}${v.slice ? ` ${_stringify(v.slice)}${v.slice.anchor === 'end' ? '<' : ''}` : ''}]`
+        }
       }).join('')}`;
     }
   } else if ('op' in value) {

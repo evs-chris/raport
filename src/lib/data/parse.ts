@@ -1,6 +1,6 @@
 import { parser as makeParser, Parser, bracket, opt, alt, seq, str, istr, map, read, chars, repsep, rep1sep, read1To, read1, skip1, rep, rep1, check, verify, name, not, nop, readTo, unwrap, andNot } from 'sprunge/lib';
 import { ws, digits, JNum, JStringEscape, JStringUnicode, JStringHex, JString } from 'sprunge/lib/json';
-import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation, TimeSpanMS, Schema, Field, TypeMap } from './index';
+import { Value, DateRel, DateRelToDate, DateRelRange, DateRelSpan, DateExactRange, Literal, Keypath, TimeSpan, Operation, TimeSpanMS, Schema, Field, TypeMap, ValueWithAnchor } from './index';
 
 export const timespans = {
   y: 0,
@@ -66,9 +66,18 @@ const escmap: { [k: string]: string } = { n: '\n', r: '\r', t: '\t', b: '\b' };
 const pathesc = map(seq(str('\\'), chars(1)), ([, char]) => escmap[char] || char);
 const pathident = map(rep1(alt('ref-part', read1To(endRef, true), pathesc)), parts => parts.join(''), 'keypath-part');
 const dotpath = map(seq(str('.'), pathident), ([, part]) => part);
-const bracketpath = bracket(seq(str('['), ws), value, seq(ws, str(']')));
+const valueAnchor = map(seq(value, ws, opt(str('<')), ws, opt(seq(value, ws, opt(str('<'))))), ([v, , a, , s]) => {
+  if (a) (v as ValueWithAnchor).anchor = 'end';
+  if (s) {
+    const r = v as ValueWithAnchor;
+    r.slice = s[0];
+    if (s[2]) r.slice.anchor = 'end';
+  }
+  return v
+});
+const bracketpath = bracket(seq(str('['), ws), valueAnchor, seq(ws, str(']')));
 export const keypath = map(seq(alt<'!'|'~'|'*'|[string,string]>('ref-sigil', str('!', '~', '*') as any, seq(read('^'), opt(str('@', '.')))), alt<string|Value>('keypath', pathident, bracketpath), rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([prefix, init, parts]) => {
-  const res: Keypath = { k: [init].concat(parts).map(p => typeof p === 'object' && 'v' in p && (typeof p.v === 'string' || typeof p.v === 'number') ? p.v : p) };
+  const res: Keypath = { k: [init].concat(parts).map(p => typeof p === 'object' && 'v' in p && (typeof p.v === 'string' || typeof p.v === 'number') && !('anchor' in p) && !('slice' in p) ? p.v : p) };
   if (Array.isArray(prefix)) {
     if (prefix[0]) res.u = prefix[0].length;
     if (prefix[1] === '@') res.p = '@';
@@ -78,7 +87,7 @@ export const keypath = map(seq(alt<'!'|'~'|'*'|[string,string]>('ref-sigil', str
   return res;
 }, 'keypath');
 export const localpath = map(seq(read('^'), pathident, rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([prefix, init, parts]) => {
-  const res: Keypath = { k: ([init] as Array<string|Value>).concat(parts).map(p => typeof p === 'object' && 'v' in p && (typeof p.v === 'string' || typeof p.v === 'number') ? p.v : p) };
+  const res: Keypath = { k: ([init] as Array<string|Value>).concat(parts).map(p => typeof p === 'object' && 'v' in p && (typeof p.v === 'string' || typeof p.v === 'number' && !('anchor' in p) && !('slice' in p)) ? p.v : p) };
   if (prefix) res.u = prefix.length;
   return res;
 }, 'localpath');
