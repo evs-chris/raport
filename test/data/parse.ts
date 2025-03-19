@@ -36,7 +36,7 @@ q.test('strings', t => {
   t.deepEqual(parse(`"test"`), { v: 'test' });
   t.deepEqual(parse('`test`'), { v: 'test' });
   t.deepEqual(parse(':test'), { v: 'test' });
-  t.deepEqual(parse('"""test"""'), { v: 'test' });
+  t.deepEqual(parse('"""test"""'), { v: 'test', q: '"""' });
   t.deepEqual(parse('```test```'), { v: 'test' });
   t.deepEqual(parse(`'''test'''`), { v: `test` });
   t.deepEqual(parse('$$$test$$$'), { v: 'test' });

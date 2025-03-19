@@ -261,10 +261,10 @@ q.test('deep-is', t => {
   t.ok(evaluate(`deep-is(:false false equal::sql)`));
 });
 
-q.todo('diff', t => {
-  t.deepEqual(evaluate('diff({ a:1 b::2 c:3 } { a:2 b:2 })'), { a: [1, 2], c: [3] });
-  t.deepEqual(evaluate('diff({ a:1 b::2 c:3 } { a:2 b:2 } equal::strict)'), { a: [1, 2], b: ['2', 2], c: [3] });
-  t.deepEqual(evaluate('diff({ a:1 b:2 c:3 } { a:2 b:2 } keys::common)'), { a: [1, 2] });
+q.test('diff', t => {
+  t.equal(JSON.stringify(evaluate('diff({ a:1 b::2 c:3 } { a:2 b:2 })')), JSON.stringify({ a: [1, 2], c: [3, null] }));
+  t.equal(JSON.stringify(evaluate('diff({ a:1 b::2 c:3 } { a:2 b:2 } equal::strict)')), JSON.stringify({ a: [1, 2], b: ['2', 2], c: [3, null] }));
+  t.equal(JSON.stringify(evaluate('diff({ a:1 b:2 c:3 } { a:2 b:2 } keys::common)')), JSON.stringify({ a: [1, 2] }));
 });
 
 q.test('does-not-contain', t => {
