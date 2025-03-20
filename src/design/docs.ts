@@ -417,7 +417,7 @@ The label map is a nested object with the keys being single key paths in the dif
     { name:'csv' type:'boolean' desc:'Use the delimited text parser rather than the expression parser.' }
     { name:'delimited' type:'boolean' desc:'Use the delimited text parser rather than the expression parser.' }
     { name:'detect' type:'boolean' desc:'If using the delimited parser, detect the delimiters and use them to parse.' }
-    { name:'header' type:'boolean' desc:'If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.' }
+    { name:'header' type:'boolean|string[]|object' desc:'Only applies when using the delimited parser. If an array, each array element will be used as the header for the corresponding field in the rows. This will not consume the first row of non-tabular data to be used as the header. If an object, each header will be replaced with its corresponding value in the map if it is a non-empty string, removed if it is a non-nullish falsey value, or left alone if it is a nullish value. This will consume the first row of non-tabular data to use as a header. If a truthy value, the first row of non-tabular data will be consumed to be used as a header.' }
     { name:'field' type:'string' desc:'If using the delimited parser, use the given string as the field delimiter.' }
     { name:'record' type:'string' desc:'If using the delimited parser, use the given string as the record delimiter.' }
     { name:'quote' type:'string' desc:'If using the delimited parser, use the given string as the field quote.' }

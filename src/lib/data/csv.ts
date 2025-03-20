@@ -16,19 +16,20 @@ export function csv(options?: CSVOptions) {
   const unquotedField = readTo(opts.record + opts.field, true);
   const field: IParser<string> = alt(quotedField, unquotedField);
   const record = verify(rep1sep(field, seq(ws, str(opts.field), ws)), s => s.length > 1 || s[0].length > 0 || 'empty record');
-  const csv: IParser<string[][]> = repsep(record, str(opts.record), 'allow');
+  const csv: IParser<string[][]> = map(seq(skip(' \r\n\t'), repsep(record, str(opts.record), 'allow'), skip(' \r\n\t')), ([, csv]) => csv);
 
   const _parse = parser(csv, { consumeAll: true });
 
   return function parse(input: string, options?: ParseOptions) {
     const res: ParseNode|string[][]|ParseError = _parse(input, options);
     if (Array.isArray(res) && res.length > 0) {
-      if (opts.header) {
-        const header: Array<[string, number]> = res.shift().map((k, i) => [k, i]);
-        header.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
-        for (let i = 0; i < res.length; i++) {
-          for (let j = 0; j < header.length; j++) (res[i] as any)[header[j][0]] = res[i][header[j][1]];
-        }
+      let header: Array<[string, number]> = undefined;
+      if (Array.isArray(opts.header)) header = opts.header.map((k, i) => [k, i]);
+      else if (typeof opts.header === 'object') header = res.shift().map((k, i) => [opts.header[k] ?? k, i]).filter(o => o[0]) as any[];
+      else if (!!opts.header) header = res.shift().map((k, i) => [k, i]);
+      if (header) {
+        header.sort((a, b) => `${a}`.toLowerCase() < `${b}`.toLowerCase() ? -1 : `${a}`.toLowerCase() > `${b}`.toLowerCase() ? 1 : 0);
+        return res.map(v => header.reduce((a, c) => (a[c[0]] = v[c[1]], a), {} as any));
       }
     }
 
@@ -42,7 +43,7 @@ export interface CSVOptions {
   quote: string;
   fixedSize?: boolean;
   order?: boolean;
-  header?: boolean;
+  header?: boolean|string[]|{[k: string]:any};
 }
 
 // TODO: handle ascii curses tables?
@@ -109,7 +110,7 @@ function isTableOpts(opts?: DelimitedOptions): opts is TableOptions {
   return opts && 'table' in opts && opts.table === 1;
 }
 
-export function parse(data: string, options?: DelimitedOptions & { header: true }): any[];
+export function parse(data: string, options?: DelimitedOptions & { header: true|1|string[]|{[k: string]: any} }): any[];
 export function parse(data: string, options?: DelimitedOptions & { header?: false }): string[][];
 export function parse(data: string, options?: DelimitedOptions): Array<string[]|any> {
   let values: string[][];
@@ -128,13 +129,17 @@ export function parse(data: string, options?: DelimitedOptions): Array<string[]|
   }
 
   if (options.header && values.length) {
-    const header = values.shift().map((k, i) => [k, i]);
-    if (options.order ?? true) header.sort((a, b) => {
-      const l = `${a}`.toLowerCase();
-      const r = `${b}`.toLowerCase();
-      return l < r ? -1 : l > r ? 1 : 0;
-    });
-    return values.map(v => header.reduce((a, c) => (a[c[0]] = v[c[1]], a), {} as any));
+    let header: Array<[string, number]> = undefined;
+    if (Array.isArray(options.header)) {
+      header = options.header.map((k, i) => [k, i]);
+      if (isTableOpts(options)) values.shift();
+    } else if (typeof options.header === 'object') {
+      header = values.shift().map((k, i) => [options.header[k] ?? k, i]).filter(o => o[0]) as any[];
+    } else if (!!options.header) header = values.shift().map((k, i) => [k, i]);
+    if (header) {
+      header.sort((a, b) => `${a}`.toLowerCase() < `${b}`.toLowerCase() ? -1 : `${a}`.toLowerCase() > `${b}`.toLowerCase() ? 1 : 0);
+      return values.map(v => header.reduce((a, c) => (a[c[0]] = v[c[1]], a), {} as any));
+    }
   }
   return values;
 }
