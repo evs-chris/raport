@@ -555,7 +555,7 @@ export function schema() {
   const rest = map(seq(str('...'), ws, str(':'), ws, type), ([, , , , type]) => {
     return Object.assign({ name: '...' }, type) as Field;
   });
-  const object: Parser<Schema> = map(seq(str('{'), ws, repsep(comment('desc', alt(key, rest)), read1(' \t\n,;'), 'allow'), ws, str('}'), opt(str('[]'))), ([, , keys, , , arr], fail) => {
+  const object: Parser<Schema> = map(seq(str('{'), ws, repsep(comment('desc', alt('interface parts', key, rest)), read1(' \t\n,;'), 'allow'), ws, str('}'), opt(str('[]'))), ([, , keys, , , arr], fail) => {
     const rests = keys.filter(k => k.name === '...');
     if (rests.length > 1) fail('only one object rest can be specified');
     else {
@@ -576,7 +576,7 @@ export function schema() {
   const maybe_union: Parser<Schema> = {};
   const union_array: Parser<Schema> = {};
 
-  maybe_union.parser = map(rep1sep(seq(alt<Schema>(value, object, tuple, literal, union_array, ref), conditions), seq(ws, str('|'), ws), 'disallow'), list => {
+  maybe_union.parser = map(rep1sep(seq(alt<Schema>('union', value, object, tuple, literal, union_array, ref), conditions), seq(ws, str('|'), ws), 'disallow'), list => {
     const types = list.map(([t, c]) => {
       if (c && c[1] && c[1].length) t.checks = c[1];
       return t;
@@ -584,7 +584,7 @@ export function schema() {
     if (types.length === 1) return types[0];
     else return { type: 'union', types: types } as Schema;
   });
-  union_array.parser = alt<Schema>(
+  union_array.parser = alt<Schema>('union array',
     map(seq(str('Array<'), ws, maybe_union, ws, str('>')), ([, , union], fail) => {
       if (union.type === 'union') return { type: 'union[]', types: union.types } as Schema;
       else if (union.type === 'literal') fail('literal types cannot be array types');
@@ -596,10 +596,9 @@ export function schema() {
       }
     }),
     map(seq(str('('), ws, maybe_union, ws, str(')')), ([, , union]) => union),
-    maybe_union,
   );
 
-  type.parser = map(seq(union_array, conditions), ([type, checks]) => {
+  type.parser = map(seq(maybe_union, conditions), ([type, checks]) => {
     if (checks && checks[1] && checks[1].length) type.checks = checks[1];
     return type;
   });

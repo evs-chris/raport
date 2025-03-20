@@ -172,3 +172,20 @@ q.test(`object literal`, t => {
   t.deepEqual(parse('{ foo:12 :bar:21 baz:asdf }'), { op: 'object', args: [{ v: 'foo' }, { v: 12 }, { v: 'bar' }, { v: 21 }, { v: 'baz' }, { r: { k: ['asdf'] } }] });
   t.deepEqual(parse('{ foo:12 :bar:21 baz::asdf }'), { v: { foo: 12, bar: 21, baz: 'asdf' } });
 });
+
+q.test('schemas', t => {
+  const r = parse(`
+let s1 = @[any]
+let s2 = @[any[]]
+let s3 = @[Array<any>]
+let s4 = @[Array<Array<string>>]
+let s5 = @[
+  type Foo = Array<any[]>
+  type Bar = { type:'name' name:string }
+  type Baz = [string number ({ foo:string } | 22 | Array<any[]>)]
+  Foo | Bar | Baz | 21
+]
+let s6 = @[string ? =>_.length > 5]
+  `, { consumeAll: true });
+  t.ok(!('message' in r));
+});
