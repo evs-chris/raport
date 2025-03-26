@@ -34,7 +34,7 @@ export class Editor extends Ractive {
   sync(el: HTMLInputElement) {
     this.lock = true;
     const str = el.innerText.slice(-1) === '\n' ? el.innerText.slice(0, -1) : el.innerText; // strip final \n
-    this.set('src', str);
+    this.set('src', str || '');
     this.lock = false;
   }
 
@@ -136,12 +136,12 @@ Ractive.extendWith(Editor, {
     },
     render() {
       this.code = this.findAll('code')[1] as any;
-      if (this.code && !this.lock) this.code.innerText = this.get('src');
+      if (this.code && !this.lock) this.code.innerText = this.get('src') || '';
     },
   },
   observe: {
     src(v: string) {
-      if (this.code && !this.lock) this.code.innerText = v;
+      if (this.code && !this.lock) this.code.innerText = v || '';
     },
   },
   decorators: { autosize },
