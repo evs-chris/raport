@@ -486,6 +486,7 @@ registerOperator(
   }),
   simple(['object'], (_name: string, values: any[]) => {
     const res: any = {};
+    if (values.length === 1 && Array.isArray(values[0])) values = values[0];
     for (let i = 0; i < values.length; i += 2) {
       res[values[i]] = values[i + 1];
     }

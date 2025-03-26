@@ -387,6 +387,7 @@ The label map is a nested object with the keys being single key paths in the dif
   ]}
   { op:'object' sig:[
     { proto:'(...(string, any)) => object' desc:'Returns an object assembled from the arguments where each odd argument is a key and the subsequent even argument is its value.' eg: 'object(:key1 99 :key2 73)' }
+    { proto:'(any[]) => object' desc:'Returns an object assembled from the given array members where each odd entry is a key and the subsequent even entry is its value.' eg: 'object([:key1 99 :key2 73])' }
   ]}
   { op:'overlap' sig:[
     { proto:'(string, string, number = 0.5) => string' desc:"Returns the first overlapping substring within the two given strings that is at least the given percentage of the smallest string's length long using the similar operator." }
