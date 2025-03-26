@@ -213,9 +213,11 @@ export class Designer extends Ractive {
           }
           table { border-collapse: collapse; }
           th, td { padding: 0.15em 0.4em; border: 1px solid rgba(128, 128, 128, 0.5); }
-          tr.header th { position: sticky; top: 0; border-bottom: 2px solid; background: var(--bg); z-index: 10; }
-          tr.row th { position: sticky; left: 0; padding: 0.15em 0.5em; text-align: right; border-right: 2px solid; background: var(--bg); z-index: 9; }
-          tr:hover td, tr.row:hover th { background: rgba(128, 128, 128, 0.2); }` : `
+          th.index { border-right: 2px solid; }
+          thead tr th { position: sticky; top: 0; border-bottom: 2px solid; background: var(--bg); z-index: 10; }
+          tbody tr th { position: sticky; left: 0; padding: 0.15em 0.5em; text-align: right; border-right: 2px solid; background: var(--bg); z-index: 9; }
+          tbody tr:nth-child(2n+1) td { background-color: rgba(128, 128, 128, 0.05); }
+          tbody tr:hover td, tbody tr:hover th { background: rgba(128, 128, 128, 0.2); }` : `
           #print { position: fixed; top: 0.2em; right: 1em; opacity: 0.1; transition: opacity 0.5s ease-in-out; color: var(--bg); background-color: var(--fg); border: 1px solid; border-radius: 0.5em; cursor: pointer; display: inline-block; }
           #print:hover { opacity: 1; }`}
           .page-back {

@@ -374,11 +374,12 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
   let res = '';
   if (headers) {
     const ctx = extend(context, { parser: parseTemplate });
-    if (options?.table) res += `<tr class=header><th style="border-right: 2px solid;"></th>${headers.map(h => `<th>${evaluate(ctx, h)}</th>`).join('')}</tr>`;
+    if (options?.table) res += `<thead><tr><th class=index></th>${headers.map(h => `<th>${evaluate(ctx, h)}</th>`).join('')}</tr></thead>`;
     else res += headers.map(h => `${report.quote || ''}${evaluate(ctx, h)}${report.quote || ''}`).join(report.field || ',') + (report.record || '\n');
   }
 
   if (options?.table) {
+    res += '<tbody>'
     let idx = 1;
     for (const value of values) {
       const c = extend(context, { value, special: { index: idx - 1 } });
@@ -387,7 +388,7 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
         const v = evaluate(c, report.rowContext);
         if (v) c.value = v;
       }
-      res += `<tr class=row><th>${idx}</th>${fields.map(f => {
+      res += `<tr><th class=index>${idx}</th>${fields.map(f => {
         let val = f ? evaluate(c, f) : '';
         if (val === undefined) val = '';
         if (typeof val !== 'string') {
@@ -399,6 +400,7 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
       }).join('')}</tr>`;
       idx++;
     }
+    res += '</tbody>';
     res = `<table>${res}</table>`;
   } else {
     const unquote: RegExp = report.quote ? new RegExp(report.quote, 'g') : undefined;
