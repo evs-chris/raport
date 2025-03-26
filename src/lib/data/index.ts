@@ -803,7 +803,7 @@ export interface ExtendOptions {
 
 export function extend(context: Context, opts: ExtendOptions): Context {
   return {
-    parent: opts.fork ? (context.parent || context.root) : context,
+    parent: opts.fork && (!opts.value || opts.value === context.value) ? (context.parent || context.root) : context,
     root: context.root,
     path: opts.path || '',
     value: 'value' in opts ? opts.value : context.value,

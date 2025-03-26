@@ -131,3 +131,25 @@ q.test(`special bracketed paths`, t => {
   t.deepEqual(e(`[1 2 3 4 5 6 7][0 1]`), [1, 2]);
   t.deepEqual(e(`[1 2 3 4 5 6 7][0< 1<]`), [7, 6]);
 });
+
+q.test('lexical scoping contexts', t => {
+  t.equal(e(`let a = 10; if true { a }`), 10);
+  t.equal(e(`let a = 10; if true then a`), 10);
+  t.equal(e({ a: 10 }, `if true { a }`), 10);
+  t.equal(e({ a: 10 }, `if true { let a = 20 }; a`), 10);
+  t.equal(e({ a: 10 }, `if true then a`), 10);
+  t.deepEqual(e(`with({ a: 10 } =>{ with({ a: 20 } =>{ [a ^a] }) })`), [20, 10]);
+  t.deepEqual(e(`with({ a: 10 } =>{ with({ a: 20 } |c|=>{ [a ^a] }) })`), [20, 10]);
+  t.deepEqual(e(`with({ a: 10 } |b|=>{ with({ a: 20 } =>{ [a ^a] }) })`), [20, 10]);
+  t.deepEqual(e(`with({ a: 10 } |b|=>{ with({ a: 20 } |c|=>{ [a ^a] }) })`), [20, 10]);
+  t.deepEqual(e(`with({ a: 10 } =>with({ a: 20 } =>[a ^a]))`), [20, 10]);
+  t.deepEqual(e(`with({ a: 10 } =>with({ a: 20 } |c|=>[a ^a]))`), [20, 10]);
+  t.deepEqual(e(`with({ a: 10 } |b|=>with({ a: 20 } =>[a ^a]))`), [20, 10]);
+  t.deepEqual(e(`with({ a: 10 } |b|=>with({ a: 20 } |c|=>[a ^a]))`), [20, 10]);
+  t.deepEqual(e({ a: 20 }, `each([{ a: 10 }] |v|=>{ [a ^a] })`), '10,20');
+  t.deepEqual(e({ a: 20 }, `each([{ a: 10 }] =>{ [a ^a] })`), '10,20');
+  t.deepEqual(e({ a: 20 }, `each([{ a: 10 }] |v|=>[a ^a])`), '10,20');
+  t.deepEqual(e({ a: 20 }, `each([{ a: 10 }] =>[a ^a])`), '10,20');
+  t.deepEqual(e(`each({ a: 10 } |v|=>{ each([{ a: 20 }] |w|=>[@index ^@key]) })`), '0,a');
+  t.equal(e({ a: 10 }, `find([{ a:69 b:420 } { a:10 b:20 } { a:30 b:40 }] =>a == ^a).b`), '20');
+});

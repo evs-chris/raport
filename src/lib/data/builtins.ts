@@ -1250,12 +1250,12 @@ registerOperator({
   apply(_name: string, [value, body]: [any[]|object, ValueOrExpr], opts, ctx: Context) {
     if (Array.isArray(value)) {
       const last = value.length - 1;
-      return value.map((v, i) => evalApply(extend(ctx, { value: v, special: { last, index: i, key: i, 'last-key': last } }), body, [v, i])).join(opts?.join || '');
+      return value.map((v, i) => evalApply(ctx, body, [v, i], { last, index: i, key: i, 'last-key': last })).join(opts?.join || '');
     } else if (typeof value === 'object' && value) {
       const entries = Object.entries(value);
       const lastKey = entries[entries.length - 1][0];
       const last = entries.length - 1;
-      return Object.entries(value).map(([k, v], i) => evalApply(extend(ctx, { value: v, special: { last, 'last-key': lastKey, index: i, key: k } }), body, [v, k])).join('');
+      return Object.entries(value).map(([k, v], i) => evalApply(ctx, body, [v, k], { last, 'last-key': lastKey, index: i, key: k })).join('');
     } else {
       return '';
     }
@@ -1273,7 +1273,7 @@ registerOperator({
     } else return { result: value };
   },
   apply(_name: string, [value, body]: [any, ValueOrExpr], _opts, ctx: Context) {
-    return evalApply(extend(ctx, { value }), body, [value]);
+    return evalApply(ctx, body, [value]);
   }
 }, {
   type: 'checked',
@@ -1444,7 +1444,7 @@ registerOperator({
   apply(_name: string, _arr: any[], args: ValueOrExpr[], opts, ctx: Context) {
     const last = args.length - 1;
     if (last < 0) return;
-    const c = extend(ctx, { locals: opts && opts.implicit ? ctx.locals || {} : {}, fork: !ctx.locals });
+    const c = opts?.implicit ? ctx : extend(ctx, { locals: {}, fork: !ctx.locals });
     for (let i = 0; i < last; i++) evalParse(c, args[i]);
     const res = evalParse(c, args[last]);
     if (opts && opts.implicit) ctx.locals = c.locals;

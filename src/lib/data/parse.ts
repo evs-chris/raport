@@ -513,7 +513,14 @@ block.parser = map(bracket(
 value.parser = unwrap(comment('c', operation));
 
 const namedArg: Parser<[Value, Value]> = map(seq(ident, str(':'), ws, value), ([k, , , v]) => [{ v: k }, v], 'named-arg');
-application.parser = map(seq(opt(bracket(check(str('|'), ws), rep1sep(opName, read1(space + ','), 'allow'), seq(str('|'), ws))), str('=>', '=\\'), ws, value), ([names, , , value]) => (names ? { a: value, n: names } : { a: value }), { primary: true, name: 'application' });
+application.parser = map(seq(opt(bracket(check(str('|'), ws), rep1sep(opName, read1(space + ','), 'allow'), seq(str('|'), ws))), str('=>', '=\\'), ws, value), ([names, , , value]) => {
+  const res: Value = { a: value };
+  if (names) res.n = names;
+  if ('op' in value && value.op === 'block') {
+    value.opts = Object.assign({}, value.opts, { v: { implicit: 1 } });
+  }
+  return res;
+}, { primary: true, name: 'application' });
 args.parser = map(repsep(alt<[Value, Value] | Value>('argument', namedArg, value), read1(space + ','), 'allow'), (args) => {
   const [plain, obj] = args.reduce((a, c) => ((Array.isArray(c) ? a[1].push(c) : a[0].push(c)), a), [[], []] as [Array<Value>, Array<[Value, Value]>]);
   if (obj.length) return [plain, objectOp(obj)];
