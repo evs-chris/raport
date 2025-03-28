@@ -224,6 +224,10 @@ export function safeGet(root: Context, path: string|Keypath): any {
         } else {
           o = o[v];
         }
+      } else if (Array.isArray(v) && o && typeof o === 'object') {
+        const r = {};
+        for (const f of v) if (f in o) r[f] = o[f];
+        o = r;
       } else o = o && o[v];
       if (o === null || o === undefined) return;
     }

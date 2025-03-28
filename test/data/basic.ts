@@ -130,6 +130,8 @@ q.test(`special bracketed paths`, t => {
   t.equal(e(`'abcdefg'[1< 0]`), 'fedcba');
   t.deepEqual(e(`[1 2 3 4 5 6 7][0 1]`), [1, 2]);
   t.deepEqual(e(`[1 2 3 4 5 6 7][0< 1<]`), [7, 6]);
+  t.deepEqual(e(`{ a:1 b:2 c:3 }[[:a :c]]`), { a: 1, c: 3 });
+  t.deepEqual(e(`{ b:2 c:3 }[[:a :c :d]]`), { c: 3 });
 });
 
 q.test('lexical scoping contexts', t => {
