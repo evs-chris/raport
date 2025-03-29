@@ -1304,8 +1304,29 @@ registerOperator({
 }, {
   type: 'aggregate',
   names: ['count'],
-  apply(_name: string, arr: any[], args: ValueOrExpr[], _opts, ctx: Context) {
-    if (args.length) return arr.filter((e, i) => evalApply(ctx, args[0], [e, i])).length;
+  apply(_name: string, arr: any[], args: ValueOrExpr[], opts, ctx: Context) {
+    if (opts?.partition && isApplication(opts.partition)) {
+      return arr.reduce((a, e, i) => {
+        const key = evalApply(ctx, opts.partition, [e, i]);
+        if (key in a) a[key]++;
+        else a[key] = 1;
+        return a;
+      }, {});
+    } else if (opts?.sub && typeof opts.sub === 'object' && !Object.values(opts.sub).find(o => !isApplication(o))) {
+      return arr.reduce((a, e, i) => {
+        for (const k in opts.sub) {
+          let res = evalApply(ctx, opts.sub[k], [e, i]);
+          if (!res) continue;
+          if (typeof res === 'string') res = [res];
+          else if (!Array.isArray(res)) res = [k];
+          for (const k of res) {
+            if (k in a) a[k]++;
+            else a[k] = 1;
+          }
+        }
+        return a;
+      }, {});
+    } else if (args.length) return arr.filter((e, i) => evalApply(ctx, args[0], [e, i])).length;
     else return arr.length;
   }
 }, {

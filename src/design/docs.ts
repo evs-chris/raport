@@ -138,6 +138,9 @@ The basis value is available as @case or the shorthand _ in each matcher.' eg:['
   { op:'count' sig:[
     { proto:'any[] => number' desc:'Returns the number of entries in the given array.' }
     { agg:1 proto:'() => number' desc:'Counts the number of entries in the current source.' }
+  ] opts:[
+    { name::partition type::application desc:'Build a count object where the keys are determined by the application and the count associated with each keys is how many times the application produces the key when applying it to each value in the array.' }
+    { name::sub type::object desc:'Build a count object where the keys are determined by the sub object. Each key of the sub object must be an application. If the application returns a string, it will be used as the key. If it returns an array, each member will be used as a key. If it returns an otherise trutch value, the key associated with the application will be used as the key. The counts in the resulting object represent how many times each key appeared when each application was applied to each value in the array.' }
   ]}
   { op:'date' sig:[
     { proto:'string => date' desc:'Parses the given date as a platform date (JS), using the builtin parser first and the platform parser if that fails.' }
