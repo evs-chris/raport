@@ -1,10 +1,37 @@
+## 0.28.0
+
+2025-03-29
+
+### Parser
+
+* __BUG:__ The parser will no longer infinitely recurse with some array schemas.
+* __BREAKING:__ Applications with a block operator now share lexical scope/context with the block. This is *technically* a breaking change, but it generally has the effect of making accessing ancestor contexts much more intuitive.
+* The delimited parser now allows blank lines before and after the data.
+* The delimited parser can now accept a list of headers, allowing replacement of embedded headers or providing headers for data that has none.
+* The delimited parser can now accept a header map application that can be used to change headers embedded in the data.
+
+### Render
+
+* Render delimited report to HTML will now use more semantic tables.
+* Array of array data soures can now be run as delimited reports with automatically generated fields.
+
+### Designer
+
+* The expression editor will no longer populate with undefined for unset expressions.
+
+### Data
+
+* Accessing an object with an a array key will now return a new object containing only the keys that are in the array and the source object.
+* The `count` operator can now be used for more complex cases using additional named arguments. `partition` allows returning a key for each value in the counted array. `sub` allows returning one or more keys and multiple applications for each value in the counted array. The result of either of the new modes is an object with the resulting keys and counts for each key.
+
+
 ## 0.27.0
 
 2025-03-19
 
 ### Parser
 
-* __BREAKING__: Bracketed paths now support indicating that an index should be applied from the end rather than the start by ducking the index (following it with a <). This removes support for accessing array indexs from the right by passing a negative number, which was undocumented but still makes this a breaking change.
+* __BREAKING:__ Bracketed paths now support indicating that an index should be applied from the end rather than the start by ducking the index (following it with a <). This removes support for accessing array indexs from the right by passing a negative number, which was undocumented but still makes this a breaking change.
 * Bracketed paths can now accept an additional index, which may also be ducked, that turns the access into a slice for array and string values. The order of the slice is maintained based on the given indices, so giving a larger index first will result in a reversed slice.
 * Triple quoted strings and inline templates can now be stringified.
 
