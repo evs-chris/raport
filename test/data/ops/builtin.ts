@@ -365,6 +365,61 @@ q.test('if', t => {
 
   t.equal(e({ base: [{ foo: 'bar' }] }, `{ let sam = :sam; map(base, =>{ let sam = :mas; foo + ^sam + sam })[0] }`), 'barsammas');
 
+  t.equal(e('if true then :yep'), 'yep');
+  t.equal(e('if true then :yep 10'), 10);
+  t.equal(e('if true then :yep end'), 'yep');
+  t.equal(e('if true then :yep end 10'), 10);
+  t.equal(e('if true then :yep fi'), 'yep');
+  t.equal(e('if true then :yep fi 10'), 10);
+  t.equal(e('if true { :yep }'), 'yep');
+  t.equal(e('if true { :yep } 10'), 10);
+  t.equal(e('if true { :yep } end'), 'yep');
+  t.equal(e('if true { :yep } end 10'), 10);
+  t.equal(e('if true { :yep } fi'), 'yep');
+  t.equal(e('if true { :yep } fi 10'), 10);
+  t.equal(e('if true then :yep else :nope'), 'yep');
+  t.equal(e('if true then :yep else :nope 10'), 10);
+  t.equal(e('if true { :yep } else { :nope }'), 'yep');
+  t.equal(e('if true { :yep } else { :nope } 10'), 10);
+  t.equal(e('if true { :yep } else { :nope } end'), 'yep');
+  t.equal(e('if true { :yep } else { :nope } end 10'), 10);
+  t.equal(e('if true { :yep } else { :nope } fi'), 'yep');
+  t.equal(e('if true { :yep } else { :nope } fi 10'), 10);
+  t.equal(e('if true then :yep else { :nope }'), 'yep');
+  t.equal(e('if true then :yep else { :nope } 10'), 10);
+  t.equal(e('if false { :yep } else { :nope }'), 'nope');
+  t.equal(e('if false { :yep } else { :nope } 10'), 10);
+  t.equal(e('if false { :yep } else :nope'), 'nope');
+  t.equal(e('if false { :yep } else :nope 10'), 10);
+  t.equal(e('if false then :yep else { :nope }'), 'nope');
+  t.equal(e('if false then :yep else { :nope } 10'), 10);
+  t.equal(e('if false then :yep else if true then :mid else :nope'), 'mid');
+  t.equal(e('if false then :yep else if true then :mid else :nope 10'), 10);
+  t.equal(e('if false then :yep else if 10 > 20 then :mid else if true then :end else :nope'), 'end');
+  t.equal(e('if false then :yep else if 10 > 20 then :mid else if true then :end else :nope 10'), 10);
+  t.equal(e('if false then :yep else if 10 > 20 then :mid else if true then :end else :nope end'), 'end');
+  t.equal(e('if false then :yep else if 10 > 20 then :mid else if true then :end else :nope end 10'), 10);
+  t.equal(e('if false then :yep else if 10 > 20 then :mid else if true then :end end'), 'end');
+  t.equal(e('if false then :yep else if 10 > 20 then :mid else if true then :end end 10'), 10);
+  t.equal(e('if false { :yep } else if 10 > 20 { :mid } else if true { :end } else { :nope }'), 'end');
+  t.equal(e('if false { :yep } else if 10 > 20 { :mid } else if true { :end } else { :nope } 10'), 10);
+  t.equal(e('if false { :yep } else if 10 > 20 { :mid } else if true { :end } else { :nope } end'), 'end');
+  t.equal(e('if false { :yep } else if 10 > 20 { :mid } else if true { :end } else { :nope } end 10'), 10);
+  t.equal(e('if false then :yep else if 10 > 20 { :mid } else if true { :end } else :nope end'), 'end');
+  t.equal(e('if false then :yep else if 10 > 20 { :mid } else if true { :end } else :nope end 10'), 10);
+  t.equal(e('if false { :yep } else if 10 > 20 then :mid else if true { :end } end'), 'end');
+  t.equal(e('if false { :yep } else if 10 > 20 then :mid else if true { :end } end 10'), 10);
+  t.equal(e('if false then :yep elseif true then :mid else :nope'), 'mid');
+  t.equal(e('if false then :yep elseif true then :mid else :nope 10'), 10);
+  t.equal(e('if false then :yep elsif true then :mid else :nope'), 'mid');
+  t.equal(e('if false then :yep elsif true then :mid else :nope 10'), 10);
+  t.equal(e('if false then :yep elif true then :mid else :nope'), 'mid');
+  t.equal(e('if false then :yep elif true then :mid else :nope 10'), 10);
+  t.equal(e('if true then if false then :nope else :yep end else :doublenope'), 'yep');
+  t.equal(e('if true then if true then :nope else :yep end else :doublenope'), 'nope');
+  t.equal(e('if false then if true then :nope else :yep end else :doublenope'), 'doublenope');
+  t.equal(e('if false then if true then :nope end else if true { :yep } else :doublenope'), 'yep');
+
   unregisterOperator(op);
 });
 
@@ -403,6 +458,8 @@ q.test('in', t => {
   t.notOk(e(`:a in { e::b c::d }`));
   t.ok(e(`[:a :c] in { a::b c::d }`));
   t.notOk(e(`[:a :e] in { e::b c::d }`));
+  t.ok(e(`'ok' in 'tokomak'`));
+  t.notOk(e(`'no' in 'tokomak'`));
 });
 
 q.test('index', t => {
@@ -883,7 +940,38 @@ q.test('unique', t => {
 });
 
 // q.todo('unique-map', t => { t.expect(0); });
-// q.todo('unless', t => { t.expect(0); });
+
+q.test('unless', t => {
+  t.equal(e('unless false then :yep'), 'yep');
+  t.equal(e('unless false then :yep 10'), 10);
+  t.equal(e('unless false then :yep end'), 'yep');
+  t.equal(e('unless false then :yep end 10'), 10);
+  t.equal(e('unless false then :yep else :nope'), 'yep');
+  t.equal(e('unless false then :yep else :nope 10'), 10);
+  t.equal(e('unless false then :yep else :nope end'), 'yep');
+  t.equal(e('unless false then :yep else :nope end 10'), 10);
+  t.equal(e('unless true then :yep else :nope'), 'nope');
+  t.equal(e('unless true then :yep else :nope 10'), 10);
+  t.equal(e('unless true then :yep else :nope end'), 'nope');
+  t.equal(e('unless true then :yep else :nope end 10'), 10);
+  t.equal(e('unless false { :yep }'), 'yep');
+  t.equal(e('unless false { :yep } 10'), 10);
+  t.equal(e('unless false { :yep } end'), 'yep');
+  t.equal(e('unless false { :yep } end 10'), 10);
+  t.equal(e('unless false { :yep } else { :nope }'), 'yep');
+  t.equal(e('unless false { :yep } else { :nope } 10'), 10);
+  t.equal(e('unless false { :yep } else { :nope } end'), 'yep');
+  t.equal(e('unless false { :yep } else { :nope } end 10'), 10);
+  t.equal(e('unless true { :yep } else :nope'), 'nope');
+  t.equal(e('unless true { :yep } else :nope 10'), 10);
+  t.equal(e('unless true { :yep } else :nope end'), 'nope');
+  t.equal(e('unless true { :yep } else :nope end 10'), 10);
+  t.equal(e('unless true then :yep else { :nope }'), 'nope');
+  t.equal(e('unless true then :yep else { :nope } 10'), 10);
+  t.equal(e('unless true then :yep else { :nope } end'), 'nope');
+  t.equal(e('unless true then :yep else { :nope } end 10'), 10);
+});
+
 // q.todo('unparse', t => { t.expect(0); });
 // q.todo('upper', t => { t.expect(0); });
 // q.todo('valid', t => { t.expect(0); });
