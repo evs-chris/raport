@@ -702,6 +702,8 @@ registerOperator(
       else if (value == null) return '';
     }
 
+    if (isDateRel(value)) return fmtDate(value, 'yyyy-MM-dd HH:mm:ssz');
+
     if (Array.isArray(value)) return value.join(', ');
 
     let res = `${value}`;

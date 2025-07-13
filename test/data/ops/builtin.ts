@@ -913,6 +913,7 @@ q.test('string', t => {
   t.equal(e('string(10 raport:1)'), '10');
   t.equal(e('string(10 json:1)'), '10');
   t.equal(e('string("|b|hello" styled:1)'), '<span style="font-weight:bold;">hello</span>');
+  t.equal(e('string(#2021z#)'), '2021-01-01 00:00:00+0');
 });
 
 // q.todo('sum', t => { t.expect(0); });
