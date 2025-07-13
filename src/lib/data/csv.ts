@@ -28,7 +28,7 @@ export function csv(options?: CSVOptions) {
       else if (typeof opts.header === 'object') header = res.shift().map((k, i) => [opts.header[k] ?? k, i]).filter(o => o[0]) as any[];
       else if (!!opts.header) header = res.shift().map((k, i) => [k, i]);
       if (header) {
-        header.sort((a, b) => `${a}`.toLowerCase() < `${b}`.toLowerCase() ? -1 : `${a}`.toLowerCase() > `${b}`.toLowerCase() ? 1 : 0);
+        if ((opts as any).order !== false) header.sort((a, b) => `${a}`.toLowerCase() < `${b}`.toLowerCase() ? -1 : `${a}`.toLowerCase() > `${b}`.toLowerCase() ? 1 : 0);
         return res.map(v => header.reduce((a, c) => (a[c[0]] = v[c[1]], a), {} as any));
       }
     }
@@ -137,7 +137,7 @@ export function parse(data: string, options?: DelimitedOptions): Array<string[]|
       header = values.shift().map((k, i) => [options.header[k] ?? k, i]).filter(o => o[0]) as any[];
     } else if (!!options.header) header = values.shift().map((k, i) => [k, i]);
     if (header) {
-      header.sort((a, b) => `${a}`.toLowerCase() < `${b}`.toLowerCase() ? -1 : `${a}`.toLowerCase() > `${b}`.toLowerCase() ? 1 : 0);
+      if (options?.order !== false) header.sort((a, b) => `${a}`.toLowerCase() < `${b}`.toLowerCase() ? -1 : `${a}`.toLowerCase() > `${b}`.toLowerCase() ? 1 : 0);
       return values.map(v => header.reduce((a, c) => (a[c[0]] = v[c[1]], a), {} as any));
     }
   }
