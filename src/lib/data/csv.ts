@@ -12,9 +12,9 @@ export function csv(options?: CSVOptions) {
 
   const ws = skip(' \t\r\n'.replace(opts.field, '').replace(opts.record, '').replace(opts.quote, ''));
   const quote = str(opts.quote || '"');
-  const quotedField = bracket(seq(ws, quote), map(rep(alt(readTo(opts.quote), map(seq(quote, quote), () => ''))), r => concat(r)), seq(quote, ws));
+  const quotedField = bracket(seq(ws, quote), map(rep(alt(readTo(opts.quote || '"'), map(seq(quote, quote), () => ''))), r => concat(r)), seq(quote, ws));
   const unquotedField = readTo(opts.record + opts.field, true);
-  const field: IParser<string> = alt(quotedField, unquotedField);
+  const field: IParser<string> = opts.quote ? alt(quotedField, unquotedField) : unquotedField;
   const record = verify(rep1sep(field, seq(ws, str(opts.field), ws)), s => s.length > 1 || s[0].length > 0 || 'empty record');
   const csv: IParser<string[][]> = map(seq(skip(' \r\n\t'), repsep(record, str(opts.record), 'allow'), skip(' \r\n\t')), ([, csv]) => csv);
 

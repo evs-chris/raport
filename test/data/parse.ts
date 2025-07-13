@@ -1,4 +1,4 @@
-import { parse } from '../../src/lib/index';
+import { parse, evaluate as e } from '../../src/lib/index';
 
 const q = QUnit;
 
@@ -188,4 +188,33 @@ let s5 = @[
 let s6 = @[string ? =>_.length > 5]
   `, { consumeAll: true });
   t.ok(!('message' in r));
+});
+
+q.test(`csv no quotes`, t => {
+  const v = e(`parse("""
+a|b""|c
+""" csv:1 quote:undefined)`);
+  t.deepEqual(v, [['a', 'b""', 'c']]);
+});
+
+q.test(`csv with quotes`, t => {
+  const v = e(`parse("""
+'a' |b""| 'c'
+""" csv:1 quote:"'")`);
+  t.deepEqual(v, [['a', 'b""', 'c']]);
+});
+
+q.test(`csv detect quotes`, t => {
+  const v = e(`parse("""
+'a',b"",'c'
+""" csv:1)`);
+  t.deepEqual(v, [['a', 'b""', 'c']]);
+});
+
+q.test(`csv with header`, t => {
+  const v = e(`parse("""
+f1,f2,'f 3'
+'a',b"",'c'
+""" csv:1 header:1)`);
+  t.deepEqual(v, [{ f1: 'a', f2: 'b""', 'f 3': 'c' }]);
 });

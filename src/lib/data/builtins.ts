@@ -1168,7 +1168,7 @@ registerOperator(
     else if (opts.range) return parseRange(v, opts);
     else if (opts.xml) return parseXML(v, opts.strict);
     else if (opts.csv || opts.delimited) {
-      if (opts.detect || (!opts.field && !opts.separator && !opts.record && !opts.quote)) opts = Object.assign(csvDetect(v, opts.context), opts);
+      if (opts.detect || !opts.field || !opts.record) opts = Object.assign(csvDetect(v, opts.context), opts);
       return csvParse(v, opts);
     } else if (opts.base64) return atob(v);
     else return parse(v, opts);
