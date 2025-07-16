@@ -389,9 +389,13 @@ function rightassoc(left: Value, more: Array<[string, string, string, Value]>) {
   return { op, args: [left, right] };
 }
 
-export const binop_e = map(seq(operand, rep(alt(
-  seq(nop, name(str('**'), 'exp op'), nop, operand),
-  seq(rws, name(str('**'), 'exp op'), rws, operand),
+export const binop_pipe = map(seq(operand, rep(alt(
+  seq(nop, name(str('|'), 'pipe op'), nop, operand),
+  seq(rws, name(str('|'), 'pipe op'), rws, operand),
+))), ([arg1, more]) => more.length ? ({ op: 'pipe', args: [arg1].concat((more || []).map(a => a[3])), meta: { op: 1 } }) : arg1, 'pipe-op');
+export const binop_e = map(seq(binop_pipe, rep(alt(
+  seq(nop, name(str('**'), 'exp op'), nop, binop_pipe),
+  seq(rws, name(str('**'), 'exp op'), rws, binop_pipe),
 ))), ([arg1, more]) => more.length ? rightassoc(arg1, more) : arg1, 'exp-op');
 export const binop_md = map(seq(binop_e, rep(alt(
   seq(nop, name(str('*', '/%', '/', '%'), 'muldiv-op'), nop, binop_e),

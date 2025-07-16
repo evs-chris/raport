@@ -685,8 +685,11 @@ q.test('patch', t => {
   t.equal(...jsoncmp(e('patch({a:2 b:3 c:{test::sure}} {a:[1 2] b:[undefined 3]} {"c.test":[true :sure]} dir::backward)'), { a: 1, c: { test: true } }));
 });
 
-q.test('pipe', t => {
+q.test('pipe, |', t => {
   t.deepEqual(e(`pipe([1 2 3] filter(=>_ != 1) map(=>_ * 2))`), [4, 6]);
+  t.deepEqual(e(`[1 2 3]|filter(=>_ != 1)|map(=>_ * 2)`), [4, 6]);
+  t.deepEqual(e(`[1 2 3] | filter(=>_ != 1) | map(=>_ * 2)`), [4, 6]);
+  t.deepEqual(e(`[1 2 3]|filter(=>_ != 1) | map(=>_ * 2)`), [4, 6]);
 });
 
 q.test('rand, random', t => {

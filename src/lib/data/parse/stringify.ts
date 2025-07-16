@@ -10,6 +10,8 @@ export interface ListOverride {
   union?: boolean|number;
   args?: boolean|number;
   keys?: boolean|number;
+  ops?: boolean|number;
+  opchain?: boolean|number;
 }
 
 interface _ListOverride {
@@ -17,6 +19,8 @@ interface _ListOverride {
   union: number;
   args: number;
   keys: number;
+  ops: number;
+  opchain: number;
 }
 
 export type StringifyOpts = SimpleStringifyOpts | SExprStringifyOpts;
@@ -41,6 +45,8 @@ export interface BaseStringifyOpts {
 export interface SimpleStringifyOpts extends BaseStringifyOpts {
   /** Render all operations as s-expressions rather than sugary raport expressions. */
   SExprOps?: false;
+  /** How to render pipes: op as a binary operator, call as a function call, or default/undefined as originally specified */
+  pipes?: 'op'|'call';
 }
 export interface SExprStringifyOpts extends BaseStringifyOpts {
   /** Render all operations as s-expressions rather than sugary raport expressions. */
@@ -60,24 +66,26 @@ let _noobj: boolean = false;
 let _tpl: boolean = false;
 let _tplmode: boolean = false;
 let _noindent: boolean = false;
-let _listwrap: _ListOverride = { array: 60, union: 60, args: 60, keys: 60 };
+let _listwrap: _ListOverride = { array: 60, union: 60, args: 60, keys: 60, ops: 30, opchain: 60 };
 let _html: boolean = false;
 let _nochecks: boolean = false;
+let _pipes: 'op'|'call'|undefined;
 
 let _level = 0;
 let _first = false;
 
 const deepops = ['===', '!==', 'deep-is', 'deep-is-not'];
-const binops = deepops.concat(['**', '*', '/%', '/', '%', '+', '-', '>=', 'gte', '>', 'gt', '<=', 'lte', '<', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'strict-is', 'strict-is-not', 'and', '&&', 'or', '||', '??']);
+const binops = deepops.concat(['|', '**', '*', '/%', '/', '%', '+', '-', '>=', 'gte', '>', 'gt', '<=', 'lte', '<', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is', 'is-not', '==', '!=', 'strict-is', 'strict-is-not', 'and', '&&', 'or', '||', '??']);
 const unops = ['+', 'not'];
 const precedence = {
-  '**': 1,
-  '*': 2, '/%': 2, '/': 2, '%': 2,
-  '+': 3, '-': 3,
-  '>=': 4, '>': 4, '<=': 4, '<': 4, in: 4, like: 4, ilike: 4, 'not-in': 4, 'not-like': 4, 'not-ilike': 4, 'contains': 4, 'does-not-contain': 4, gt: 4, gte: 4, lt: 4, lte: 4,
-  'is': 5, 'is-not': 5, '==': 5, '!=': 5, 'strict-is': 5, 'strict-is-not': 5, 'deep-is': 5, 'deep-is-not': 5, '===': 5, '!==': 5,
-  'and': 6, '&&': 6,
-  'or': 7, '||': 7, '??': 7,
+  '|': 1,
+  '**': 2,
+  '*': 3, '/%': 3, '/': 3, '%': 3,
+  '+': 4, '-': 4,
+  '>=': 5, '>': 5, '<=': 5, '<': 5, in: 5, like: 5, ilike: 5, 'not-in': 5, 'not-like': 5, 'not-ilike': 5, 'contains': 5, 'does-not-contain': 5, gt: 5, gte: 5, lt: 5, lte: 5,
+  'is': 6, 'is-not': 6, '==': 6, '!=': 6, 'strict-is': 6, 'strict-is-not': 6, 'deep-is': 6, 'deep-is-not': 6, '===': 6, '!==': 6,
+  'and': 7, '&&': 7,
+  'or': 8, '||': 8, '??': 8,
 }
 
 const call_op = /^[-a-zA-Z_$0-9]/;
@@ -96,15 +104,16 @@ export function stringify(value: ValueOrExpr, opts?: StringifyOpts): string {
   _first = true;
   if ('listWrap' in opts) {
     const o = opts.listWrap;
-    if (typeof o === 'boolean') _listwrap = !o ? { array: 0, union: 0, args: 0, keys: 0 } : { array: 1, union: 1, args: 1, keys: 1 };
-    else if (typeof o === 'number') _listwrap = { array: o, union: o, args: o, keys: o };
+    if (typeof o === 'boolean') _listwrap = !o ? { array: 0, union: 0, args: 0, keys: 0, ops: 0, opchain: 0 } : { array: 1, union: 1, args: 1, keys: 1, ops: 30, opchain: 1 };
+    else if (typeof o === 'number') _listwrap = { array: o, union: o, args: o, keys: o, ops: 30, opchain: o };
     else {
       const b = !o.base ? 0 : o.base === true ? 1 : o.base;
       _listwrap = Object.keys(_listwrap).reduce((a, c) => (a[c] = c in o && o[c] != null ? (!o[c] ? 0 : o[c] === true ? 1 : o[c]) : b, a), {} as any);
     }
-  } else _listwrap = { array: 60, union: 60, args: 60, keys: 60 };
+  } else _listwrap = { array: 60, union: 60, args: 60, keys: 60, ops: 30, opchain: 60 };
   _html = opts.htmlSafe;
   _nochecks = opts.noChecks;
+  _pipes = (opts as any).pipes;
   if (!_sexprops && typeof value === 'object' && value && 'op' in value && value.op === 'block') return stringifyRootBlock(value);
   else return _stringify(value);
 }
@@ -250,7 +259,7 @@ function stringifyOp(value: Operation): string {
     else return `${vs}#${[value.args[1].v].concat(value.args.slice(2).map(a => _stringify(a))).join(',')}`;
   } else if (binops.includes(op) && value.args && value.args.length > 1 && !value.opts && (!deepops.includes(op) || value.args.length === 2)) {
     let parts = value.args.map((a, i) => stringifyBinopArg(op, a, i === 0 ? 1 : 2));
-    const long = parts.find(p => p.length > 30 || ~p.indexOf('\n')) || parts.reduce((a, c) => a + c.length, 0) && parts.length > 2;
+    const long = parts.find(p => p.length > _listwrap.ops || ~p.indexOf('\n')) || parts.reduce((a, c) => a + c.length, 0) > _listwrap.opchain && parts.length > 2;
     const split = _noindent ? ' ' : long ? `\n${padl('', '  ', _level + 1)}` : ' ';
     if (split.length > 1 || (!_noindent && long)) parts = [parts[0]].concat(parts.slice(1).map(p => indentAll('  ', p)));
     return `${parts[0]} ${op}${split}${parts.slice(1).join(` ${op}${split.length > 1 ? `${split}` : split}`)}`;
@@ -281,6 +290,12 @@ function stringifyOp(value: Operation): string {
     return `${_stringify(value.args[0])}${_stringify({ r: { k: ['r'].concat(value.args[1].v.k) } }).substr(1)}`;
   } else if (op === 'cat' && value.meta?.q === '$$$') {
     return `$$$${stringifyTemplate(value.args)}$$$`;
+  } else if (op === 'pipe' && (_pipes === 'op' || !_pipes && value.meta?.op) && value.args?.length > 1) {
+    let parts = value.args.map((a, i) => stringifyBinopArg('|', a, i === 0 ? 1 : 2));
+    const long = parts.find(p => p.length > _listwrap.ops || ~p.indexOf('\n')) || parts.reduce((a, c) => a + c.length, 0) > _listwrap.opchain && parts.length > 2;
+    const split = _noindent ? ' ' : long ? `\n${padl('', '  ', _level + 1)}` : ' ';
+    if (split.length > 1 || (!_noindent && long)) parts = [parts[0]].concat(parts.slice(1).map(p => indentAll('  ', p)));
+    return `${parts[0]} |${split}${parts.slice(1).join(` |${split.length > 1 ? `${split}` : split}`)}`;
   } else if (call_op.test(op)) {
     return wrapArgs(`${op}(`, value.args || [], value.opts, ')', 0);
   } else {
@@ -545,7 +560,7 @@ function stringifyIf(op: Operation): string {
   const parts = op.args.map((a, i) => _stringify(block && (i % 2 === 1 || i === last) && !isBlock(a) ? { op: 'block', args: [a] } : a));
   _level--;
 
-  const long = parts.find(p => p.length > 30 || ~p.indexOf('\n')) || '';
+  const long = parts.find(p => p.length > _listwrap.ops || ~p.indexOf('\n')) || '';
   let split = _noindent ? '' : parts.length > 3 || long ? `\n${padl('', '  ', _level)}` : '';
   const cindent = long && `${split}  ` || ' ';
   split = split || ' ';
@@ -597,7 +612,7 @@ function stringifyCase(op: Operation): string {
   });
   _level--;
 
-  const long = parts.find(p => p.length > 30 || ~p.indexOf('\n')) || '';
+  const long = parts.find(p => p.length > _listwrap.ops || ~p.indexOf('\n')) || '';
   let split = _noindent ? '' : parts.length > 3 || long ? `\n${padl('', '  ', _level)}` : '';
   const wsplit = split ? `${split}  ` : ' ';
   const cindent = long && `${wsplit}  ` || ' ';
