@@ -539,7 +539,7 @@ export default parse;
 export function schema() {
   const type: Parser<Schema> = {};
   const conditions = opt(seq(ws, rep1sep(map(seq(name(str('?'), { name: 'condition', primary: true }), ws, application), ([, , a]) => a), rws, 'disallow')));
-  const value = map(seq(str('any[]', 'string[]', 'number[]', 'boolean[]', 'date[]', 'any', 'string', 'number', 'boolean', 'date'), not(read1To(endRef))), ([s]) => ({ type: s === 'any[]' ? 'array' : s } as Schema), { name: 'type', primary: true });
+  const value = map(seq(str('any[]', 'string[]', 'number[]', 'boolean[]', 'date[]', 'object[]', 'value[]', 'any', 'string', 'number', 'boolean', 'date', 'object', 'value'), not(read1To(endRef))), ([s]) => ({ type: s === 'any[]' ? 'array' : s } as Schema), { name: 'type', primary: true });
   const typedef = comment('c', map(seq(str('type'), ws, name(ident, { name: 'type', primary: true }), ws, str('='), ws, type), ([, , name, , , , type]) => ({ name, type } as { name: string, type: Schema, c?: string[] })));
   const typedefs = map(rep1sep(typedef, read1(' \t\n;'), 'allow'), defs => defs.reduce((a, c) => (c.type.desc = c.c, a[c.name] = c.type, a), {} as TypeMap));
   const ref = map(seq(ident, opt(str('[]'))), ([ref, arr]) => ({ type: arr ? 'array' : 'any', ref } as Schema), { name: 'type', primary: true });
@@ -595,7 +595,7 @@ export function schema() {
       if (union.type === 'union') return { type: 'union[]', types: union.types } as Schema;
       else if (union.type === 'literal') fail('literal types cannot be array types');
       else if (union.type === 'array' || ~union.type.indexOf('[]')) return { type: 'union[]', types: [union] } as Schema;
-      else if (union.type === 'any') return { type: 'array' } as Schema;
+      else if (union.type === 'any') return { type: 'array', ref: union.ref } as Schema;
       else {
         union.type += '[]';
         return union;

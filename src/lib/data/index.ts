@@ -62,7 +62,7 @@ export class CachedDataSource<R = any> implements DataSource<any, R> {
 export interface SourceMap { [key: string]: DataSet }
 
 export type ValueType = 'string'|'number'|'boolean'|'date'|'object'|'literal';
-export type ArrayType = 'string[]'|'number[]'|'boolean[]'|'date[]'|'object[]'|'tuple[]'|'union[]';
+export type ArrayType = 'string[]'|'number[]'|'boolean[]'|'date[]'|'object[]'|'tuple[]'|'union[]'|'value[]';
 export type Type = ValueType|ArrayType|'value'|'array'|'union'|'tuple'|'any';
 
 export interface Field extends Schema {

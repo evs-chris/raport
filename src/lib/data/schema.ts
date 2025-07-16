@@ -203,6 +203,7 @@ export function checkType(value: any, type?: Type, literal?: any, required?: boo
       return true;
 
     case 'value': return !Array.isArray(value) && !!~values.indexOf(typeof value) && (typeof value !== 'object' || isDate(value));
+    case 'value[]': return Array.isArray(value) && value.reduce((a, c) => a && !Array.isArray(c) && !!~values.indexOf(typeof c) && (typeof c !== 'object' || isDate(c)), true);
 
     case 'array':
     case 'tuple':
