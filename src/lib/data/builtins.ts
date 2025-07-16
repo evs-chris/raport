@@ -850,6 +850,10 @@ registerOperator(
       if (values.length === 1 && isNum(values[0]) && +values[0] > 0) {
         if (typeof first === 'string') {
           return stringTimes(first, +values[0]);
+        } else if (isApplication(first) && +values[0] < 10000) {
+          const res = [];
+          for (let i = 0; i < +values[0]; i++) res.push(evalApply(ctx, first, [i]));
+          return res;
         } else if (Array.isArray(first) && +values[0] < 10000 && first.length < 1000) {
           const res = [];
           for (let i = 0; i < values[0]; i++) res.push.apply(res, first);
