@@ -1,3 +1,22 @@
+## 0.29.0
+
+2025-07-17
+
+### Parser
+
+* __BUG__: The CSV parser now supports explicitly disabled quoting.
+* The CSV parser now supports returning objects with their keys in source order rather than alphabetized.
+* Conditional branches can now mix expression and block syntax in the same operation.
+* There is now a binary operator version of the pipe operator that has the highest precedence of the binary operators. This makes it a little more convenient to use the pipe operator coming from shell/handlebars-ish syntaxes.
+
+### Data
+
+* __BUG:__ Schema validations against the `object` type will now verify that the target is not an array. This also includes `object[]` checks.
+* __BREAKING:__ Literal and platform dates are now stringifed as timestamps when passed to the `string` operator. This is technically breaking, but probably more in line with expectations, especially for literal dates.
+* There is now a `value[]` schema type to match the `value` type that will only match arrays of `value`s.
+* An application can now be multipled to build an array e.g. `(=>rand(1 100)) * 10` will result in an array of 10 random numbers between 1 and 100. The index of the member being generated is passed into the application.
+
+
 ## 0.28.0
 
 2025-03-29

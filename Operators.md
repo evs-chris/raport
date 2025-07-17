@@ -95,6 +95,8 @@ If there is context-local rounding set, it will be applied to the result (see se
 <dd>Returns the given string copied number times if the number is positive.</dd>
 <dt><code>(any[], number) => any[]</code> (binary)</dt>
 <dd>Returns the given array concatenated number times if the array has fewer than 1,000 elements and the number is positive and less than 10,000.</dd>
+<dt><code>(application, number) => any[]</code> (binary)</dt>
+<dd>Returns an array of the results of the application called once with each index the given y concatenated number times if the array has fewer than 1,000 elements and the number is positive and less than 10,000.</dd>
 </dl>
 
 </dl>
@@ -596,6 +598,11 @@ The basis value is available as @case or the shorthand _ in each matcher.</dd>
 <dd>Counts the number of entries in the current source.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>partition</code></dt><dd>Build a count object where the keys are determined by the application and the count associated with each keys is how many times the application produces the key when applying it to each value in the array.</dd><dt><code>sub</code></dt><dd>Build a count object where the keys are determined by the sub object. Each key of the sub object must be an application. If the application returns a string, it will be used as the key. If it returns an array, each member will be used as a key. If it returns an otherise trutch value, the key associated with the application will be used as the key. The counts in the resulting object represent how many times each key appeared when each application was applied to each value in the array.</dd>
+</dl>
 </dl>
 <br/>
 
@@ -1575,6 +1582,8 @@ If there is context-local rounding set, it will be applied to the result (see se
 <dd>Returns the given string copied number times if the number is positive.</dd>
 <dt><code>(any[], number) => any[]</code> (binary)</dt>
 <dd>Returns the given array concatenated number times if the array has fewer than 1,000 elements and the number is positive and less than 10,000.</dd>
+<dt><code>(application, number) => any[]</code> (binary)</dt>
+<dd>Returns an array of the results of the application called once with each index the given y concatenated number times if the array has fewer than 1,000 elements and the number is positive and less than 10,000.</dd>
 </dl>
 
 </dl>
@@ -1726,6 +1735,9 @@ If there is context-local rounding set, it will be applied to the result (see se
 <dt><code>(...(string, any)) => object</code></dt>
 <dd>Returns an object assembled from the arguments where each odd argument is a key and the subsequent even argument is its value.</dd>
 <dd>e.g. <code>object(:key1 99 :key2 73)</code></dd>
+<dt><code>(any[]) => object</code></dt>
+<dd>Returns an object assembled from the given array members where each odd entry is a key and the subsequent even entry is its value.</dd>
+<dd>e.g. <code>object([:key1 99 :key2 73])</code></dd>
 </dl>
 
 </dl>
@@ -1833,7 +1845,7 @@ If there is context-local rounding set, it will be applied to the result (see se
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>json</code></dt><dd>Use a JSON parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.</dd><dt><code>strict</code></dt><dd>For the XML parser, be less forgiving about malformed content. Defaults to false.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>delimited</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>If using the delimited parser, treat the first result as a header and use it to build objects with field names based on the header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd><dt><code>order</code></dt><dd>If set to a falsey value, the fields in resulting objects generated from input with headers will not be keyed in alphabetical order.</dd><dt><code>fixedSize</code></dt><dd>Discard any delimited rows that are not at least as long as the header/first row.</dd>
+<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>json</code></dt><dd>Use a JSON parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.</dd><dt><code>strict</code></dt><dd>For the XML parser, be less forgiving about malformed content. Defaults to false.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>delimited</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>Only applies when using the delimited parser. If an array, each array element will be used as the header for the corresponding field in the rows. This will not consume the first row of non-tabular data to be used as the header. If an object, each header will be replaced with its corresponding value in the map if it is a non-empty string, removed if it is a non-nullish falsey value, or left alone if it is a nullish value. This will consume the first row of non-tabular data to use as a header. If a truthy value, the first row of non-tabular data will be consumed to be used as a header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd><dt><code>order</code></dt><dd>If set to a falsey value, the fields in resulting objects generated from input with headers will not be keyed in alphabetical order.</dd><dt><code>fixedSize</code></dt><dd>Discard any delimited rows that are not at least as long as the header/first row.</dd>
 </dl>
 </dl>
 <br/>
@@ -1861,14 +1873,14 @@ If there is context-local rounding set, it will be applied to the result (see se
 
 <dl><dt>
 
-### `pipe`
+### `pipe` (alias `|`)
 ---
 
 </dt>
 <dd>
 
 <dl>
-<dt><code>...any => any</code></dt>
+<dt><code>...any => any</code> (binary)</dt>
 <dd>This is a special built-in operator that evaluates its first argument, supplies that as an input to the next argument, supplies that result as an input to the next argument, and so on until the result of the last argument evaluation is returned. If any argument is an operation that does not reference `@pipe` or `_` as one of its arguments, then `@pipe` will be added as the first argument of that operation. Arguments that are applications are automatically applied with the piped value.</dd>
 </dl>
 
@@ -2642,6 +2654,22 @@ __NOTE:__ The schema of an error is @[{ error: string; type?: 'strict'; path?: s
 <dl>
 <dt><code>width</code></dt><dd>A named version of the second positional argument.</dd><dt><code>font</code></dt><dd>A named version of the third positional argument. This is an object with the relevant parts of the interface conforming to { family?:string, size?:number, line?:number, metric?: number }. family defaults to "sans", size defaults to 0.83, line defaults to size, and metric defaults to the constant pixel width of the font at 16px per em e.g. sans: 7.4, serif: 6.7, mono: 7.85, and narrow: 5.9.</dd><dt><code>family</code></dt><dd>Overrides the given font family.</dd><dt><code>size</code></dt><dd>Overrides the given font size.</dd><dt><code>line</code></dt><dd>Overrides the given font line height.</dd><dt><code>metric</code></dt><dd>Overrides the given font metric.</dd><dt><code>break-word</code></dt><dd>Determines whether words that exceed the width should be broken, defaulting to true.</dd>
 </dl>
+</dl>
+<br/>
+
+<dl><dt>
+
+### `|` (alias `pipe`)
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>...any => any</code> (binary)</dt>
+<dd>This is a special built-in operator that evaluates its first argument, supplies that as an input to the next argument, supplies that result as an input to the next argument, and so on until the result of the last argument evaluation is returned. If any argument is an operation that does not reference `@pipe` or `_` as one of its arguments, then `@pipe` will be added as the first argument of that operation. Arguments that are applications are automatically applied with the piped value.</dd>
+</dl>
+
 </dl>
 <br/>
 
