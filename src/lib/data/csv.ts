@@ -25,10 +25,12 @@ export function csv(options?: CSVOptions) {
     if (Array.isArray(res) && res.length > 0) {
       let header: Array<[string, number]> = undefined;
       if (Array.isArray(opts.header)) header = opts.header.map((k, i) => [k, i]);
-      else if (typeof opts.header === 'object') header = res.shift().map((k, i) => [opts.header[k] ?? k, i]).filter(o => o[0]) as any[];
-      else if (!!opts.header) header = res.shift().map((k, i) => [k, i]);
+      else if (typeof opts.header === 'object') {
+        if (Object.keys(opts.header).find(k => !/^\d+$/.test(k))) header = res.shift().map((k, i) => [opts.header[k] ?? k, i]).filter(o => o[0]) as any[];
+        else header = Object.entries(opts.header).map(([i, k]) => [`${k}`, +i]);
+      } else if (!!opts.header) header = res.shift().map((k, i) => [k, i]);
       if (header) {
-        if ((opts as any).order !== false) header.sort((a, b) => `${a}`.toLowerCase() < `${b}`.toLowerCase() ? -1 : `${a}`.toLowerCase() > `${b}`.toLowerCase() ? 1 : 0);
+        if ((opts as any).order !== false && (opts as any).order !== 0) header.sort((a, b) => `${a}`.toLowerCase() < `${b}`.toLowerCase() ? -1 : `${a}`.toLowerCase() > `${b}`.toLowerCase() ? 1 : 0);
         return res.map(v => header.reduce((a, c) => (a[c[0]] = v[c[1]], a), {} as any));
       }
     }
@@ -134,10 +136,11 @@ export function parse(data: string, options?: DelimitedOptions): Array<string[]|
       header = options.header.map((k, i) => [k, i]);
       if (isTableOpts(options)) values.shift();
     } else if (typeof options.header === 'object') {
-      header = values.shift().map((k, i) => [options.header[k] ?? k, i]).filter(o => o[0]) as any[];
+      if (Object.keys(options.header).find(k => !/^\d+$/.test(k))) header = values.shift().map((k, i) => [options.header[k] ?? k, i]).filter(o => o[0]) as any[];
+      else header = Object.entries(options.header).map(([i, k]) => [`${k}`, +i]);
     } else if (!!options.header) header = values.shift().map((k, i) => [k, i]);
     if (header) {
-      if (options?.order !== false) header.sort((a, b) => `${a}`.toLowerCase() < `${b}`.toLowerCase() ? -1 : `${a}`.toLowerCase() > `${b}`.toLowerCase() ? 1 : 0);
+      if (options?.order !== false && (options?.order as any) !== 0) header.sort((a, b) => `${a}`.toLowerCase() < `${b}`.toLowerCase() ? -1 : `${a}`.toLowerCase() > `${b}`.toLowerCase() ? 1 : 0);
       return values.map(v => header.reduce((a, c) => (a[c[0]] = v[c[1]], a), {} as any));
     }
   }

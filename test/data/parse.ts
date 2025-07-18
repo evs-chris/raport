@@ -218,3 +218,24 @@ f1,f2,'f 3'
 """ csv:1 header:1)`);
   t.deepEqual(v, [{ f1: 'a', f2: 'b""', 'f 3': 'c' }]);
 });
+
+q.test(`csv with custom header names`, t => {
+  const v = e(`parse("""
+name|st|age|height
+joe|GA|69|6-2
+susan|CA|32|5-9
+jordan|KS|19|4-11
+""" csv:1 header:{name::Name st::State age:false})`);
+  t.deepEqual(v[0], { Name: 'joe', State: 'GA', height: '6-2' });
+  t.deepEqual(v[2], { Name: 'jordan', State: 'KS', height: '4-11' });
+});
+
+q.test(`csv with custom provided custom header`, t => {
+  const v = e(`parse("""
+joe|GA|69|6-2
+susan|CA|32|5-9
+jordan|KS|19|4-11
+""" csv:1 header:{0::Name 1::State 3::height})`);
+  t.deepEqual(v[0], { Name: 'joe', State: 'GA', height: '6-2' });
+  t.deepEqual(v[2], { Name: 'jordan', State: 'KS', height: '4-11' });
+});
