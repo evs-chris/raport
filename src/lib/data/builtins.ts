@@ -294,6 +294,18 @@ export function inRange(v: number, range: Array<number|[number, number]|{ not: n
   return found && !excluded;
 }
 
+const IntervalMap = {
+  y: 'year',
+  m: 'month',
+  d: 'day',
+  h: 'hour',
+  mm: 'minute',
+  s: 'second',
+  ms: 'millisecond',
+}
+const Intervals = Object.keys(IntervalMap);
+const IntervalNames = Object.values(IntervalMap);
+
 // basic ops
 registerOperator(
   simple(['is', 'is-not', '==', '!='], (name: string, values: any[]): boolean => {
@@ -694,7 +706,9 @@ registerOperator(
       if (opts.json) return JSON.stringify(value);
       if (opts.schema) return unparseSchema(value);
       if (opts.base64) return btoa(value);
-      else if (opts.raport) {
+      if (isTimespan(value) && (opts.interval || typeof value !== 'number' && !('interval' in opts))) {
+        return timespanToString(value, opts);
+      } else if (opts.raport) {
         let v = stringify(value, opts);
         if (v === undefined) v = stringify({ v: value }, opts);
         return v;
@@ -1549,6 +1563,10 @@ registerFormat('time', function(n, [fmt], opts) {
   return fmtDate(n, fmt ?? opts?.format ?? this.defaults.format);
 }, { format: 'HH:mm:ss' });
 
+registerFormat('timespan', function(n, _, opts) {
+  return timespanToString(n, opts);
+});
+
 registerFormat('timestamp', function(n, [fmt], opts) {
   return fmtDate(n, fmt ?? opts?.format ?? this.defaults.format);
 }, { format: 'yyyy-MM-dd HH:mm:ss' });
@@ -1663,6 +1681,37 @@ function _objectToXML(val: any, depth: number, indent: number|undefined, propnam
     }, '');
   }
   return escapeHTML(val);
+}
+
+function timespanToString(value: any, opts: any) {
+  if (isTimespan(value)) {
+    opts = opts || {};
+    if (opts.precision === 'min') opts.precision = 'mm';
+    let parts: number[];
+    if (typeof value === 'number' || 'ms' in value) {
+      let val = typeof value === 'object' && 'ms' in value ? value.ms : +value;
+      parts = [0, 0, Math.floor(val / 86400000)];
+      val = val - parts[2] * 86400000;
+      parts.push(Math.floor(val / 3600000));
+      val = val - parts[3] * 3600000;
+      parts.push(Math.floor(val / 60000));
+      val = val - parts[4] * 60000;
+      parts.push(Math.floor(val / 1000));
+      parts.push(val - parts[5] * 1000);
+    } else parts = (value as any).d;
+    const res = [];
+    const fmt = opts.fmt || opts.format || 'long';
+    let idx = -1;
+    for (let i = 0; i < parts.length; i++) {
+      const p = Intervals[i];
+      if (opts.precision && (idx = Intervals.indexOf(opts.precision)) && ~idx && idx < i) break;
+      const part = `${parts[i] || 0}`;
+      if (fmt === 'long' && parts[i]) res.push(`${part} ${IntervalNames[i]}${parts[i] !== 1 ? 's' : ''}`);
+      else if (fmt === 'short' && parts[i]) res.push(`${part}${p}`);
+      else if (fmt.includes('timer') && (parts[i] || i > 2)) res.push(i < 3 ? `${res.length >  0 ? `${fmt.includes('long') ? ',' : ''} ` : ''}${part}${fmt.includes('long') ? ` ${IntervalNames[i]}${parts[i] !== 1 ? 's' : ''}` : p}` : i === 3 ? ` ${part || '0'}` : `${i === 6 ? '.' : ':'}${pad('l', part, i === 6 ? 3 : 2, '0')}`);
+    }
+    return res.join(fmt === 'long' ? ', ' : fmt === 'short' ? ' ' : '');
+  } else return value;
 }
 
 registerFormat('base64', val => {

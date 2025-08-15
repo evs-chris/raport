@@ -119,7 +119,7 @@ function stringInterp(parts: Value[], q?: string): Value {
   return { op: '+', args: res, meta: q ? { q } : undefined };
 }
 
-const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 'month', 'minutes', 'minute', 'milliseconds', 'millisecond', 'mm', 'ms', 'm', 'weeks', 'week', 'w', 'days', 'day', 'd', 'hours', 'hour', 'h', 'seconds', 'second', 's')), ws), parts => {
+const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 'month', 'minutes', 'minute', 'milliseconds', 'millisecond', 'min', 'mm', 'ms', 'm', 'weeks', 'week', 'w', 'days', 'day', 'd', 'hours', 'hour', 'h', 'seconds', 'second', 's')), ws), parts => {
   const span = { y: 0, m: 0, d: 0, h: 0, mm: 0, s: 0, ms: 0 };
   for (let i = 0; i < parts.length; i++) {
     if (parts[i][2][0] === 'y') span.y += parts[i][0];
@@ -128,7 +128,7 @@ const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 
     else if (parts[i][2][0] === 'w') span.d += parts[i][0] * 7;
     else if (parts[i][2][0] === 'h') span.h += parts[i][0];
     else if (parts[i][2][0] === 's') span.s += parts[i][0];
-    else if (parts[i][2] === 'mm' || parts[i][2] === 'minutes' || parts[i][2] === 'minute') span.mm += parts[i][0];
+    else if (parts[i][2] === 'mm' || parts[i][2] === 'min' || parts[i][2] === 'minutes' || parts[i][2] === 'minute') span.mm += parts[i][0];
     else if (parts[i][2] === 'ms' || parts[i][2] === 'milliseconds' || parts[i][2] === 'millisecond') span.ms += parts[i][0];
   }
 

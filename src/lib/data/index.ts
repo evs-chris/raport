@@ -931,7 +931,7 @@ export function dateRelToExactRange(rel: DateRel): DateExactRange {
 }
 
 export function isTimespan(v: any): v is TimeSpan {
-  return typeof v === 'number' || (typeof v === 'object' && Array.isArray(v.d)) || isTimespanMS(v);
+  return typeof v === 'number' || (v && typeof v === 'object' && Array.isArray(v.d)) || isTimespanMS(v);
 }
 
 export function addTimespan(l: TimeSpan, r: TimeSpan): TimeSpan {

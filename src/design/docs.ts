@@ -535,6 +535,9 @@ If no sorts are provided, an identity sort will be applied to the keys.' }
     { name:'schema' type:'boolean' desc:'Outputs the value as a raport schema.' }
     { name:'base64' type:'booolean' desc:'Outputs the value encoded as base64.' }
     { name:'styled' type:'boolean' desc:'Processes the value as a styled string.' }
+    { name:'interval' type:'boolean' desc:'Process the value as a timespan, turning it into a human readable time interval.' }
+    { name:'format' type:"'long'|'short'|'timer'|'longtimer'" desc:'When paired with interval, allows changing the format of the human readable timespan.' }
+    { name:'precision' type:"'y'|'m'|'d'|'h'|'mm'|'s'|'ms'" desc:'When paired with interval, limit the output to the given unit and every larger unit.' }
   ]}
   { op:'wrap-count' sig:[
     { proto:'string,number?,font?' desc:'Calculates the number of lines that the given string will occupy in the given width in rem using the given font. If the width is not specified, the @widget.width or @placement.availableX will be used. If the font is not specified, the @widget.font will be used. Inherited fonts are not considered.' }
@@ -586,6 +589,18 @@ If no sorts are provided, an identity sort will be applied to the keys.' }
   ]}
   { op:'unparse' sig:[
     { proto:'any => string' desc:'Stringifies the given value as a raport expression.' }
+  ] opts:[
+    { name:'noSymbols' type:'boolean' desc:'If truthy, disables the use of symbol-style strings.' }
+    { name:'SExprOps' type:'boolean' desc:'If truthy, renders all operations as S-Expressions rather than sugary raport expressions.' }
+    { name:'listCommas' type:'boolean' desc:'If truthy, enables outputting array and argument lists with comma separators.' }
+    { name:'listWrap' type:'boolean|number|object' desc:'If a number, sets the target line length before triggering a wrap to a new line for lists of things like arrays, object contents, and operator arguments. If an object, can set individual wrapping targets as booleans or numbers. Available keys in the object for targets are base (that will be used for any other unspecified value), array, union (for type unions in schemas), args (for function call arguments), keys (for object literal contents ), ops (to specify if a binary operator argument is long), and opchain (to specify the number of characters to target when wrapping binary operator chains). If truthy, will wrap lists at a default 60 characters.' }
+    { name:'template' type:'boolean' desc:'If truthy, outputs template formatted expressions.' }
+    { name:'noIndent' type:'boolean' desc:'If truthy, outputs unindented single-line expressions.' }
+    { name:'htmlSafe' type:'boolean' desc:'If truthy, outputs HTML-friendly binary operators.' }
+    { name:'noChecks' type:'boolean' desc:'If truthy, outputs schema types without inline checks.' }
+    { name:'pipes' type:"'op'|'call'" desc:'If :op, outputs all pipe operations as binary operator chains. If :call, outputs all pipe operators as pipe operator calls. If not supplied, outputs all pipe operations as they were when parsed.' }
+    { name:'noArrayLiterals' type:'boolean' desc:'If truthy and combined with SExprOps, outputs arrays as array operator calls rather than literals.' }
+    { name:'noObjectLiterals' type:'boolean' desc:'If truthy and combined with SExprOps, outputs objects as object operator calls rather than literals.' }
   ]}
   { op:'upper' sig:[
     { proto:'string => string' desc:'Converts the given string to upper case.' }
@@ -649,6 +664,10 @@ export const formats = `let dateparts = 'Available placeholders are:\\n\\n* y - 
     { name:'format' type:'string' desc:'The format template to apply.'}
   ]}
   { name:'styled' desc:'Processes the value as a styled string.' }
+  { name:'timespan' desc:'Formats a timespan as a human readable string.' opts:[
+    { name:'precision' type:"'y'|'m'|'d'|'h'|'mm'|'s'|'ms'" desc:'Limit the precision of the output. For instance, to get years down to minutes, pass :mm and seconds and milliseconds will be left off.' }
+    { name:'format' type:"'long'|'short'|'timer'|'longtimer'" desc:'Set the format of the output string, where long includes full words, short includes only the unit shorthand, timer presents the hours to milliseconds in a clock format, and timerlong is timer with full names for the days or greater units.' }
+  ]}
   { name:'timestamp' desc:'Formats a date value as a timestamp using placeholder characters, where repeated characters render more descriptive or padded values. Any non-placeholder characters are rendered as entered. The default format is yyyy-MM-dd HH:mm:ss. {dateparts}' opts:[
     { name:'format' type:'string' desc:'The format template to apply.'}
   ]}

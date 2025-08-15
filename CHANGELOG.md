@@ -1,3 +1,17 @@
+## 0.29.1
+
+Unreleased
+
+### Parser
+
+* `min` is now accepted as a minute unit when parsing intervals.
+
+### Data
+
+* The `string` operator will now stringify intervals.
+* There is now a `timespan` formatter to format intervals.
+
+
 ## 0.29.0
 
 2025-07-17

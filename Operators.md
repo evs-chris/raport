@@ -1845,7 +1845,7 @@ If there is context-local rounding set, it will be applied to the result (see se
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>json</code></dt><dd>Use a JSON parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.</dd><dt><code>strict</code></dt><dd>For the XML parser, be less forgiving about malformed content. Defaults to false.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>delimited</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>Only applies when using the delimited parser. If an array, each array element will be used as the header for the corresponding field in the rows. This will not consume the first row of non-tabular data to be used as the header. If an object, each header will be replaced with its corresponding value in the map if it is a non-empty string, removed if it is a non-nullish falsey value, or left alone if it is a nullish value. This will consume the first row of non-tabular data to use as a header. If a truthy value, the first row of non-tabular data will be consumed to be used as a header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd><dt><code>order</code></dt><dd>If set to a falsey value, the fields in resulting objects generated from input with headers will not be keyed in alphabetical order.</dd><dt><code>fixedSize</code></dt><dd>Discard any delimited rows that are not at least as long as the header/first row.</dd>
+<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>json</code></dt><dd>Use a JSON parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.</dd><dt><code>strict</code></dt><dd>For the XML parser, be less forgiving about malformed content. Defaults to false.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>delimited</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>Only applies when using the delimited parser. If an array, each array element will be used as the header for the corresponding field in the rows. This will not consume the first row of non-tabular data to be used as the header. If an object with non-numeric keys, each header will be replaced with its corresponding value in the map if it is a non-empty string, removed if it is a non-nullish falsey value, or left alone if it is a nullish value. This will consume the first row of non-tabular data to use as a header. If an object with numeric keys, the results will be objects with the header map values as keys and the corresponding field index as values. This will not consume any data, so if there is a header row, it will need to be removed from the resulting data. If a truthy value, the first row of non-tabular data will be consumed to be used as a header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd><dt><code>order</code></dt><dd>If set to false or 0, the fields in resulting objects generated from input with headers will not be keyed in alphabetical order.</dd><dt><code>fixedSize</code></dt><dd>Discard any delimited rows that are not at least as long as the header/first row.</dd>
 </dl>
 </dl>
 <br/>
@@ -2271,7 +2271,7 @@ If no sorts are provided, an identity sort will be applied to the keys.</dd>
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>json</code></dt><dd>Outputs the value as JSON.</dd><dt><code>raport</code></dt><dd>Outputs the value as a raport expresion. This can be paired with any options to the stringify function supplied by raport.</dd><dt><code>schema</code></dt><dd>Outputs the value as a raport schema.</dd><dt><code>base64</code></dt><dd>Outputs the value encoded as base64.</dd><dt><code>styled</code></dt><dd>Processes the value as a styled string.</dd>
+<dt><code>json</code></dt><dd>Outputs the value as JSON.</dd><dt><code>raport</code></dt><dd>Outputs the value as a raport expresion. This can be paired with any options to the stringify function supplied by raport.</dd><dt><code>schema</code></dt><dd>Outputs the value as a raport schema.</dd><dt><code>base64</code></dt><dd>Outputs the value encoded as base64.</dd><dt><code>styled</code></dt><dd>Processes the value as a styled string.</dd><dt><code>interval</code></dt><dd>Process the value as a timespan, turning it into a human readable time interval.</dd><dt><code>format</code></dt><dd>When paired with interval, allows changing the format of the human readable timespan.</dd><dt><code>precision</code></dt><dd>When paired with interval, limit the output to the given unit and every larger unit.</dd>
 </dl>
 </dl>
 <br/>
@@ -2539,6 +2539,11 @@ __NOTE:__ If there's no way to get an accurate result from the given timespan e.
 <dd>Stringifies the given value as a raport expression.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>noSymbols</code></dt><dd>If truthy, disables the use of symbol-style strings.</dd><dt><code>SExprOps</code></dt><dd>If truthy, renders all operations as S-Expressions rather than sugary raport expressions.</dd><dt><code>listCommas</code></dt><dd>If truthy, enables outputting array and argument lists with comma separators.</dd><dt><code>listWrap</code></dt><dd>If a number, sets the target line length before triggering a wrap to a new line for lists of things like arrays, object contents, and operator arguments. If an object, can set individual wrapping targets as booleans or numbers. Available keys in the object for targets are base (that will be used for any other unspecified value), array, union (for type unions in schemas), args (for function call arguments), keys (for object literal contents ), ops (to specify if a binary operator argument is long), and opchain (to specify the number of characters to target when wrapping binary operator chains). If truthy, will wrap lists at a default 60 characters.</dd><dt><code>template</code></dt><dd>If truthy, outputs template formatted expressions.</dd><dt><code>noIndent</code></dt><dd>If truthy, outputs unindented single-line expressions.</dd><dt><code>htmlSafe</code></dt><dd>If truthy, outputs HTML-friendly binary operators.</dd><dt><code>noChecks</code></dt><dd>If truthy, outputs schema types without inline checks.</dd><dt><code>pipes</code></dt><dd>If :op, outputs all pipe operations as binary operator chains. If :call, outputs all pipe operators as pipe operator calls. If not supplied, outputs all pipe operations as they were when parsed.</dd><dt><code>noArrayLiterals</code></dt><dd>If truthy and combined with SExprOps, outputs arrays as array operator calls rather than literals.</dd><dt><code>noObjectLiterals</code></dt><dd>If truthy and combined with SExprOps, outputs objects as object operator calls rather than literals.</dd>
+</dl>
 </dl>
 <br/>
 
@@ -3095,6 +3100,35 @@ Formats a date value as a time string using placeholder characters, where repeat
 <dt><code>format</code> - <code>string</code></dt><dd>
 
 The format template to apply.
+
+</dd>
+</dl></dd></dl>
+</dd></dl>
+<br/>
+
+<dl><dt>
+
+### `timespan`
+---
+
+</dt>
+<dd>
+
+Formats a timespan as a human readable string.
+
+<dl><dt>
+
+#### <ins>Options</ins>
+
+</dt><dd><dl>
+
+<dt><code>precision</code> - <code>'y'|'m'|'d'|'h'|'mm'|'s'|'ms'</code></dt><dd>
+
+Limit the precision of the output. For instance, to get years down to minutes, pass :mm and seconds and milliseconds will be left off.
+
+</dd><dt><code>format</code> - <code>'long'|'short'|'timer'|'longtimer'</code></dt><dd>
+
+Set the format of the output string, where long includes full words, short includes only the unit shorthand, timer presents the hours to milliseconds in a clock format, and timerlong is timer with full names for the days or greater units.
 
 </dd>
 </dl></dd></dl>

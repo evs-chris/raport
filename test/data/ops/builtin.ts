@@ -917,6 +917,11 @@ q.test('string', t => {
   t.equal(e('string(10 json:1)'), '10');
   t.equal(e('string("|b|hello" styled:1)'), '<span style="font-weight:bold;">hello</span>');
   t.equal(e('string(#2021z#)'), '2021-01-01 00:00:00+0');
+  t.equal(e('string(#1y2m3d4h5mm6s7ms#)'), '1 year, 2 months, 3 days, 4 hours, 5 minutes, 6 seconds, 7 milliseconds');
+  t.equal(e('string(#1y2m3d4h5mm6s7ms# format::short)'), '1y 2m 3d 4h 5mm 6s 7ms');
+  t.equal(e('string(#1y2m3d4h5mm6s7ms# format::timer)'), '1y 2m 3d 4:05:06.007');
+  t.equal(e('string(#1y2m3d4h5mm6s7ms# format::timerlong)'), '1 year, 2 months, 3 days 4:05:06.007');
+  t.equal(e('string(#2y1m1d1h1mm1s1ms#)'), '2 years, 1 month, 1 day, 1 hour, 1 minute, 1 second, 1 millisecond');
 });
 
 // q.todo('sum', t => { t.expect(0); });
