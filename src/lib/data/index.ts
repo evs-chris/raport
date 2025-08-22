@@ -533,12 +533,24 @@ function hasPipeRef(ref: Reference): boolean {
 
 export function applyOperator(root: Context, operation: Operation): any {
   const op = opMap[operation.op];
+  let opts = operation.opts ? evalParse(root, operation.opts) : undefined;
+  let args = operation.args || [];
+  if (opts && opts._) {
+    if (Array.isArray(opts._)) {
+      args = opts._.map(a => ({ v: a }));
+    } else if (typeof opts._ === 'object') {
+      if (opts._.options) opts = Object.assign({}, opts._.options, opts);
+      else opts = Object.assign({}, opts._, opts);
+      if (Array.isArray(opts.arguments)) args = opts.arguments.map(a => ({ v: a }));
+    }
+  }
 
   // if the operator doesn't exist, try a local, pipe, or skip
   if (!op) {
     const local = safeGet(root, operation.op) || safeGet(root.root, operation.op);
     if (isApplication(local)) {
-      return evalApply(root, local, (operation.args || []).map(a => evalParse(root, a)));
+      args = args.map(a => evalParse(root, a));
+      return evalApply(root, local, args, { options: opts, arguments: args });
     } else if (operation.op === 'pipe') { // handle the special built-in pipe operator
       if (!operation.args || !operation.args.length) return true;
       let v = evalParse(root, operation.args[0]);
@@ -554,40 +566,37 @@ export function applyOperator(root: Context, operation: Operation): any {
     return true;
   }
 
-  let args: any[];
   if (op.type === 'checked') {
-    args = [];
-    const flts = operation.args || [];
+    const _args = [];
+    const flts = args;
     const ctx = op.extend ? extend(root, {}) : root;
-    const opts = operation.opts ? evalParse(ctx, operation.opts) : undefined;
     for (let i = 0; i < flts.length; i++) {
       const a = flts[i];
       const arg = evalParse(ctx, a);
       const res = op.checkArg(operation.op, i, flts.length - 1, arg, opts, ctx, a);
-      if (res === 'continue') args.push(arg);
+      if (res === 'continue') _args.push(arg);
       else if ('skip' in res) {
         i += res.skip;
-        if ('value' in res) args.push(res.value);
+        if ('value' in res) _args.push(res.value);
       } else if ('result' in res) return res.result;
     }
 
-    return op.apply(operation.op, args, opts, ctx);
+    return op.apply(operation.op, _args, opts, ctx);
   } else if (op.type === 'value') {
-    args = (operation.args || []).map(a => evalParse(root, a));
-    return op.apply(operation.op, args, operation.opts ? evalParse(root, operation.opts) : undefined, root);
+    args = args.map(a => evalParse(root, a));
+    return op.apply(operation.op, args, opts, root);
   } else {
     let arr: any[];
     const ctx = op.extend ? extend(root, {}) : root;
-    const args = (operation.args || []).slice();
-    const opts = operation.opts ? evalParse(ctx, operation.opts) : undefined;
+    const _args = args.slice();
     let arg: any;
     if (!op.value) {
-      arg = evalParse(ctx, args[0]);
+      arg = evalParse(ctx, _args[0]);
       if (Array.isArray(arg)) {
-        args.shift();
+        _args.shift();
         arr = arg;
       } else if (typeof arg === 'object' && 'value' in arg && Array.isArray(arg.value)) {
-        args.shift();
+        _args.shift();
         arr = arg.value;
       }
       if (!arr) {
@@ -597,7 +606,7 @@ export function applyOperator(root: Context, operation: Operation): any {
         else arr = [];
       }
     }
-    return op.apply(operation.op, Array.isArray(arr) ? arr : [], args, opts, ctx);
+    return op.apply(operation.op, Array.isArray(arr) ? arr : [], _args, opts, ctx);
   }
 }
 

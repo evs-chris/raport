@@ -155,3 +155,17 @@ q.test('lexical scoping contexts', t => {
   t.deepEqual(e(`each({ a: 10 } |v|=>{ each([{ a: 20 }] |w|=>[@index ^@key]) })`), '0,a');
   t.equal(e({ a: 10 }, `find([{ a:69 b:420 } { a:10 b:20 } { a:30 b:40 }] =>a == ^a).b`), '20');
 });
+
+q.test('special operation argument calling conventions', t => {
+  const ctx = new Root();
+  e(ctx, 'set opts = =>@options; set args = =>@arguments');
+  t.deepEqual(e(ctx, 'opts(a:10)'), { a: 10 });
+  t.deepEqual(e(ctx, 'opts(_:{a:11})'), { a: 11, _: { a: 11 } });
+  t.deepEqual(e(ctx, 'opts(_:{options:{a:12}})'), { a: 12, _: { options: { a: 12 } } });
+  t.deepEqual(e(ctx, 'args(2 :b)'), [2, 'b']);
+  t.deepEqual(e(ctx, 'args(_:[1 :a])'), [1, 'a']);
+  t.deepEqual(e(ctx, 'args(2 :b _:[3 :a])'), [3, 'a']);
+  t.deepEqual(e(ctx, 'args(_:{ arguments: [4 :a] })'), [4, 'a']);
+  t.deepEqual(e(ctx, 'args(2 :b _:{ arguments: [5 :a] })'), [5, 'a']);
+  t.deepEqual(e(ctx, 'args(_:{ options: { arguments: [6 :a] } })'), [6, 'a']);
+});

@@ -782,6 +782,9 @@ export function languageReference(zoom = 100, theme = 'dark') {
     display: inline-block;
     border: 1px solid;
   }
+  details summary { font-size: 1.2em; font-weight: 600; }
+  details table { border-collapse: collapse; margin: 1em; }
+  details table td { border: 1px solid; padding: 0.25em; }
   li { margin: 0.5rem 0; line-height: 1.75rem; }
   .dark code { border-color: #777; }
   .light code { border-color: #ddd; }
@@ -931,7 +934,7 @@ export function languageReference(zoom = 100, theme = 'dark') {
 <p>Numbers may have an optional leading <code>-</code>, one or more digits, optionally separated by <code>_</code>, an optional <code>.</code> followed by one or more digits, optionally separated by <code>_</code>, and an optional <code>e</code> followed by an optional <code>-</code> and one or more digits, optionally separated by <code>_</code>.</p>
 <p>Example: <code><span class=ast-nodes><span class="number">1</span></span></code>, <code><span class=ast-nodes><span class="number">-1</span></span></code>, <code><span class=ast-nodes><span class="number">0.1</span></span></code>, <code><span class=ast-nodes><span class="number">-0.1</span></span></code>, <code><span class=ast-nodes><span class="number">111_000</span></span></code>, <code><span class=ast-nodes><span class="number">-5_0</span></span></code>, <code><span class=ast-nodes><span class="number">3.14159e-10</span></span></code></p>
 <h3 id="strings">Strings</h3>
-<p>Strings come in five different flavors: symbolic, single-quoted with optional interpolation, quoted, triple-quoted, and inline template. The symbolic form is constructed of a leading <code>:</code> followed character that is not whitespace or one of <code>():{}[]&lt;&gt;,;\\&amp;#</code> or a quote.</p>
+<p>Strings come in five different flavors: symbolic, single-quoted with optional interpolation, quoted, triple-quoted, and inline template. The symbolic form is constructed of a leading <code>:</code> followed by one or more characters that is not whitespace or one of <code>():{}[]&lt;&gt;,;\\&amp;#</code> or a quote.</p>
 <p>Single-quoted strings may be quoted with <code>&#39;</code> or <code>&#96;</code>, and interpolators are contained within <code>{}</code>, optionally prefixed with <code>$</code>.</p>
 <p>Triple quoted strings start and end with a matching set of three matching quote characters. Non-interpolated triple quoted strings start and end with <code>&quot;&quot;&quot;</code>. Interpolated triple quoted strings start and end with either <code>&#39;&#39;&#39;</code> or <code>&#96;&#96;&#96;</code>. The non-interpolated form is particularly useful for pasting small data sets from markdown tables, csv, or CLI command output like psql data into an expression without having to worry about escaping quotes.</p>
 <p>Quoted strings may have any character within escaped with <code>\\</code>, including the interpolation delimiters within single-quoted strings. Any characters that are not the terminating quote are included in the string, including newlines.</p>
@@ -1005,6 +1008,145 @@ export function languageReference(zoom = 100, theme = 'dark') {
 <p>Parent contexts are also available from their children by applying the context pop prefix <code>^</code> one or more times to a reference e.g. <code><span class="ast-nodes"><span class="reference">^foo</span></span></code> will resolve to whatever <code><span class="ast-nodes"><span class="reference">foo</span></span></code> would resolve to in the parent context, and <code><span class="ast-nodes"><span class="reference"><span class="ast-extra">^^^foo.bar[</span><span class="number">9</span><span class="ast-extra">]</span></span></span></code> will resolve to whatever <code><span class="ast-nodes"><span class="reference"><span class="ast-extra">foo.bar[</span><span class="number">9</span><span class="ast-extra">]</span></span></span></code> would resolve to in the great-grandparent context.</p>
 <p>The root context value is also available in any context by prefixing a reference with the root context prefix <code>~</code> e.g. <code><span class="ast-nodes"><span class="reference">~foo.bar</span></span></code> will resolve to <code><span class="ast-nodes"><span class="reference">foo.bar</span></span></code> in the root context.</p>
 <p>Report definitions may include named data sources that are kept in a separate namespace from the report root context value.  These data sources are available in any context by prefixing their name with a <code>*</code> e.g. <code><span class="ast-nodes"><span class="reference">*people</span></span></code> would resolve to the data passed or retrieved for the <code>people</code> data source.</p>
+<details id="special-references"><summary>Special References</summary>
+  <table>
+  <thead>
+    <tr><th>Reference</th><th>Scope</th><th>Value</th></tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>@value</td>
+    <td>any</td>
+    <td>The value of the current context. This is useful for passing the whole value of a context as an argument.</td>
+  </tr>
+  <tr>
+    <td>@options</td>
+    <td>operator</td>
+    <td>The named arguments passed to the nearest operation in the context stack.</td>
+  </tr>
+  <tr>
+    <td>@arguments</td>
+    <td>application operator</td>
+    <td>The arguments passed to the nearest application called as an operator in the context stack.</td>
+  </tr>
+  <tr>
+    <td>@index</td>
+    <td>repeater, each</td>
+    <td>The index of the nearest iteration.</td>
+  </tr>
+  <tr>
+    <td>@key</td>
+    <td>repeater, each</td>
+    <td>The key of the nearest iteration. For array iteration, this is the same as the <code>@index</code>.</td>
+  </tr>
+  <tr>
+    <td>@last</td>
+    <td>repeater, each</td>
+    <td>The index of the final nearest iteration.</td>
+  </tr>
+  <tr>
+    <td>@last-key</td>
+    <td>repeater, each</td>
+    <td>The key of the nearest final iteration. For array iteration, this is the same as the <code>@last</code>.</td>
+  </tr>
+  <tr>
+    <td>@count</td>
+    <td>repeater, each</td>
+    <td>The total number of iterations for the nearest iterable.</td>
+  </tr>
+  <tr>
+    <td>@case</td>
+    <td>case condition</td>
+    <td>The value that is being checked against the conditional branches.</td>
+  </tr>
+  <tr>
+    <td>@pipe</td>
+    <td>pipe arguments</td>
+    <td>The value from the previous piped argument.</td>
+  </tr>
+  <tr>
+    <td>@sources</td>
+    <td>any</td>
+    <td>The root context sources.</td>
+  </tr>
+  <tr>
+    <td>@parameters</td>
+    <td>any</td>
+    <td>The root context parameters.</td>
+  </tr>
+  <tr>
+    <td>@local</td>
+    <td>any</td>
+    <td>The locals for the immediate context.</td>
+  </tr>
+  <tr>
+    <td>@locals</td>
+    <td>any</td>
+    <td>The locals for the nearest context that has any.</td>
+  </tr>
+  <tr>
+    <td>@special</td>
+    <td>any</td>
+    <td>The specials for the immediate context.</td>
+  </tr>
+  <tr>
+    <td>@specials</td>
+    <td>any</td>
+    <td>The specials for the nearest context that has any.</td>
+  </tr>
+  <tr>
+    <td>@group</td>
+    <td>repeater</td>
+    <td>The nearest group by value, if any.</td>
+  </tr>
+  <tr>
+    <td>@grouped</td>
+    <td>repeater</td>
+    <td>Whether the current context is within a group.</td>
+  </tr>
+  <tr>
+    <td>@level</td>
+    <td>repeater</td>
+    <td>The nearest group level, if any.</td>
+  </tr>
+  <tr>
+    <td>@source</td>
+    <td>source, repeater</td>
+    <td>The nearest source, if any.</td>
+  </tr>
+  <tr>
+    <td>@values</td>
+    <td>repeater</td>
+    <td>An object with keys pointing to an array of values collected from labels in the repeater ids mapping to keys.</td>
+  </tr>
+  <tr>
+    <td>@placement</td>
+    <td>width, height, margin, hide, br expressions</td>
+    <td>The computed placement for the widget for which the property is being computed.</td>
+  </tr>
+  <tr>
+    <td>@widget</td>
+    <td>widgth, height, margin, hide, br expressions</td>
+    <td>The widget definition for the widget for which the property is being computed.</td>
+  </tr>
+  <tr>
+    <td>@page</td>
+    <td>page header, footer, watermark, and overlay</td>
+    <td>The current page number being rendered, starting with <code>1</code>.</td>
+  </tr>
+  <tr>
+    <td>@pages</td>
+    <td>page header, footer, watermark, and overlay</td>
+    <td>The number of pages in the report output.</td>
+  </tr>
+  <tr>
+    <td>@size</td>
+    <td>page header, footer, watermark, and overlay</td>
+    <td>An object with <code>x</code> and <code>y</code> properties corresponding to the usable width and height of the page.</td>
+  </tr>
+  </tbody>
+  </table>
+</details>
 </div>
 
 <h2 id="comments">Comments</h2>
@@ -1044,6 +1186,10 @@ export function languageReference(zoom = 100, theme = 'dark') {
 </ul>
 <p>Any format expression that calls a formatter that is not registered will look for an operator with a matching name. If one is found, the matching operator will be called with the format value as the first argument, the format arguments as successive arguments, and any named arguments passed through.</p>
 <p>If no registered formatters or matching operators are found, the format operator will return its passed value directly.</p>
+<h3 id="call-applications">Calling Applications</h3>
+<p>Some form of reusable logic construct is helpful when handling repeated complex operations. In most languages functions and methods serve this purpose. In REL, an application can be assigned to a reference, in either data or the context stack, and called with the same syntax as an operation. The body of the application will have access to the <code>@options</code> and <code>@arguments</code> special references, as there is no way to bind named arguments passed to an application to names. There is also no other way to accept variadic arguments for an application.</p>
+<pre><code style="display: block;"><span class="ast-nodes"><span class="let"><span class="ast-extra">let </span><span class="reference">opts</span><span class="ast-extra"> = </span><span class="application"><span class="ast-extra">=&gt;</span><span class="call"><span class="ast-extra">log(</span><span class="string"><span class="ast-extra">$$$</span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">@options</span><span class="ast-extra">}}</span></span><span class="ast-extra"> </span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">@arguments</span><span class="ast-extra">}}</span></span><span class="ast-extra">$$$</span></span><span class="ast-extra">)</span></span></span></span>
+<span class="call"><span class="ast-extra">opts(</span><span class="number">1</span><span class="ast-extra"> </span><span class="string">:a</span><span class="ast-extra"> name:</span><span class="string">:opts</span><span class="ast-extra"> action:</span><span class="string">:log</span><span class="ast-extra">)</span></span></span></code></pre>
 <h3 id="pipes">Pipes</h3>
 <p>Processing data often calls operators on the results of calling operators on the results of calling operators, resulting in large nested argument lists that can become hard to keep track of. To address this, REL has a special built-in <code>pipe</code> operator that accepts a starting value and forwards it through the list of calls supplied to it as arguments, replacing the value with the result of the previous call each time. If one of the arguments to a call is <code>_</code>, the call will be evaluated as-is, but if no reference to <code>_</code> appears in the call arguments list, <code>_</code> will be supplied as the first argument. The following are equivalent:</p>
 <ul>
@@ -1052,6 +1198,15 @@ export function languageReference(zoom = 100, theme = 'dark') {
 <li><code><span class="ast-nodes"><span class="reference">things</span><span class="ast-extra"> <span class="binary-op">|</span> </span><span class="call"><span class="ast-extra">filter(</span><span class="application"><span class="ast-extra">=&gt;</span><span class="binary-op"><span class="reference">count</span><span class="ast-extra"> &gt; </span><span class="number">10</span></span></span><span class="ast-extra">)</span></span><span class="ast-extra"> <span class="binary-op">|</span> </span><span class="call"><span class="ast-extra">map(</span><span class="application"><span class="ast-extra">=&gt;</span><span class="reference">name</span></span><span class="ast-extra">)</span></span><span class="ast-extra"> <span class="binary-op">|</span> </span><span class="call"><span class="ast-extra">join(</span><span class="string">', '</span><span class="ast-extra">)</span></span></span></code></li>
 </ul>
 <p>The latter are a bit longer, but tend to be easier to follow the value through the flow, especially when the intermediate steps get longer or more complicated. The binary pipe operator is parsed with the highest precedence, above exponentiation, so any other binary operators in a chain will end up with piped values as operands.</p>
+<h3 id="calling-conventions">Calling Conventions</h3>
+<p>Many operators will accept either an array or variadic arguments as operands. For those that only accept variadic arguments that need to be called with an unknown number of arguments from data, there is a calling convention using a special named argument (<code>_</code>, since it is not usable as a reference other than context value) to supply an array of arguments e.g. <code><span class="ast-nodes"><span class="call"><span class="ast-extra">op(_:</span><span class="array"><span class="ast-extra">[</span><span class="number">1</span><span class="ast-extra"> </span><span class="number">2</span><span class="ast-extra"> </span><span class="number">3</span><span class="ast-extra">]</span></span><span class="ast-extra">)</span></span></span></code>. Any arguments supplied using the <code>_</code> convention will lose access to any lazy evaluation that may have been applied by the operator.</p>
+<p>Similarly, for operators that accept named arguments that need to be called with an unknown set of arguments from data, the same special named argument can be used with an object to directly supply named arguments e.g. <code><span class="ast-nodes"><span class="call"><span class="ast-extra">op(_:</span><span class="object"><span class="ast-extra">{ arg1:</span><span class="number">1</span><span class="ast-extra"> arg2:</span><span class="string">:a</span><span class="ast-extra"> }</span></span><span class="ast-extra">)</span></span></span></code>. Named arguments applied directly the function will override any supplied through the <code>_</code> convention.</p>
+<p>Both of these conventions can be applied at the same time by passing an options object that includes <code>options</code> and/or <code>arguments</code> keys with corresponding values for each. Because of the way the options convention is applied, the options value may also contain an <code>arguments</code> array that will be used to override the arguments for the operator e.g.</p>
+<ul>
+  <li><code><span class="ast-nodes"><span class="call"><span class="ast-extra">op(_:</span><span class="object"><span class="ast-extra">{options:</span><span class="object"><span class="ast-extra">{a:</span><span class="string">:1</span><span class="ast-extra"> b:</span><span class="string">:2</span><span class="ast-extra">}</span></span><span class="ast-extra"> arguments:</span><span class="array"><span class="ast-extra">[</span><span class="number">1</span><span class="ast-extra"> </span><span class="number">2</span><span class="ast-extra">]</span></span><span class="ast-extra">}</span></span><span class="ast-extra">)</span></span></span></code>
+  <li><code><span class="ast-nodes"><span class="call"><span class="ast-extra">op(_:</span><span class="object"><span class="ast-extra">{options:</span><span class="object"><span class="ast-extra">{a:</span><span class="string">:1</span><span class="ast-extra"> b:</span><span class="string">:2</span><span class="ast-extra"> arguments:</span><span class="array"><span class="ast-extra">[</span><span class="number">1</span><span class="ast-extra"> </span><span class="number">2</span><span class="ast-extra">]</span></span><span class="ast-extra">}</span></span><span class="ast-extra">}</span></span><span class="ast-extra">)</span></span></span></code> has the same resulting arguemtns.
+  <li><code><span class="ast-nodes"><span class="call"><span class="ast-extra">op(_:</span><span class="object"><span class="ast-extra">{options:</span><span class="object"><span class="ast-extra">{a:</span><span class="string">:1</span><span class="ast-extra"> b:</span><span class="string">:2</span><span class="ast-extra"> arguments:</span><span class="array"><span class="ast-extra">[</span><span class="number">3</span><span class="ast-extra"> </span><span class="number">4</span><span class="ast-extra">]</span></span><span class="ast-extra">}</span></span><span class="ast-extra"> arguments:</span><span class="array"><span class="ast-extra">[</span><span class="number">1</span><span class="ast-extra"> </span><span class="number">2</span><span class="ast-extra">]</span></span><span class="ast-extra">}</span></span><span class="ast-extra">)</span></span></span></code> will result in <code>3</code> and <code>4</code> as the arguments.
+</ul>
 </div>
 
 <h2 id="flow-control">Flow Control</h2>
@@ -1078,6 +1233,26 @@ export function languageReference(zoom = 100, theme = 'dark') {
   when </span><span class="binary-op"><span class="reference">_</span><span class="ast-extra"> &gt;= </span><span class="number">18</span></span><span class="ast-extra"> then </span><span class="string">'ok'</span><span class="ast-extra">
   else </span><span class="string">'NaN, I guess'</span></span>
 </code></pre>
+</div>
+
+<h2 id="templates">Templates</h2>
+<div class=indent>
+<p>There are some contexts in which output is always a string, like names and HTML. In these cases it makes sense not to require wrapping the entire string in a set of quotes and using nested interpolators or concatenation. For this purpose, Raport has a template version of expressions that are similar to mustache or handlebars templates, where double curly braces delimit interpolation with special cases for iteration, branching, and context management, and everything else is plain text, including any special characters.</p>
+<h3>Blocks</h3>
+<p>There are five special interpolators that are treated as blocks with bodies and require a closing delimiter to indicate where their body ends. The opening delimiter includes the special name, and the closing delimiter includes a <code>/</code>, optionally followed by any text, typically the special name e.g. <code class="ast-nodes"><span><span class="if-block"><span class="ast-extra">{{if </span><span class="reference">user.logged-in</span><span class="ast-extra">}}</span><span class="content">Hello, </span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">user.name</span><span class="ast-extra">}}</span></span><span class="content">!</span><span class="ast-extra">{{/if}}</span></span></span></code>. Most of the block operators also accept sub-interpolators that split their body into multiple parts. This is used for different branches in an <code>if</code> and an alternative body for an <code>each</code> that has nothing to iterate over. Every sub-block will start with <code>else</code>, <code>else if</code>. <code>elseif</code>, <code>elsif</code>, <code>elif</code>, or <code>when</code>. The sub-blocks do not have their own closing delimiter.</p>
+<ul>
+<li><p>The <code>each</code> block accepts an expression that evaluates to a data source and renders its body once for each value in the source with the value set as the context of the body. The current index is available as <code>@index</code>, the last index is available as <code>@last</code>, the current key is available as <code>@key</code>, and the last key is available as <code>@last-key</code>. The body of an <code>each</code> may specify an alternative for use if there is nothing to iterate over using an <code>else</code> tag e.g. <pre><code class="ast-nodes"><span><span class="each-block"><span class="ast-extra">{{each </span><span class="reference">order.items</span><span class="ast-extra">}}</span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">name</span><span class="ast-extra">}}</span></span><span class="content"> - </span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">quantity</span><span class="ast-extra">}}</span></span><span class="content">
+</span><span class="ast-extra">{{else}}</span><span class="content">No items.</span><span class="ast-extra">{{/}}</span></span></span></code></pre></p></li>
+<li><p>The <code>if</code> block accepts an expression that evaluates to a boolean, and if the value is truthy, renders its body. The body of an <code>if</code> block can supply multiple alternate sub-blocks using <code>else if</code> interpolators, that each accept an expression, and a final <code>else</code> interpolator that does not accept an expression e.g. <code class="ast-nodes"><span><span class="interpolator"><span class="ast-extra">{{</span><span class="let"><span class="ast-extra">let </span><span class="reference">month</span><span class="ast-extra"> = </span><span class="binary-op"><span class="ast-extra">+(</span><span class="binary-op"><span class="reference">@date</span><span class="format-op"><span class="ast-extra">#date,</span><span class="string">:M</span></span></span><span class="ast-extra">)</span></span></span><span class="ast-extra">}}</span></span><span class="if-block"><span class="ast-extra">{{if </span><span class="binary-op"><span class="reference">month</span><span class="ast-extra"> in </span><span class="string">'11-12 1-3'</span></span><span class="ast-extra">}}</span><span class="content">Chilly outside, isn't it?</span><span class="ast-extra">{{else if </span><span class="binary-op"><span class="reference">month</span><span class="ast-extra"> == </span><span class="number">4</span></span><span class="ast-extra">}}</span><span class="content">Is it raining?</span><span class="ast-extra">{{else if </span><span class="binary-op"><span class="reference">month</span><span class="ast-extra"> in </span><span class="string">'7 8'</span></span><span class="ast-extra">}}</span><span class="content">Geez it's hot.</span><span class="ast-extra">{{else}}</span><span class="content">Nice out today, no?</span><span class="ast-extra">{{/if}}</span></span></span></code></p></li>
+<li><p>The <code>unless</code> block accepts an expression that evaluates to a boolan, and if the value is <strong>not</strong> truthy, renders its body e.g. <code class="ast-nodes"><span><span class="unless-block"><span class="ast-extra">{{unless </span><span class="reference">logged-in</span><span class="ast-extra">}}</span><span class="content">Please log in.</span><span class="ast-extra">{{/unless}}</span></span></span></code>. The <code>unless</code> block does not support any sub-blocks.</p></li>
+<li><p>The <code>case</code> block accepts an expression, the keyword <code>when</code>, and another expression. The first expression is evaluated, and the second expression is used with the first <code>when</code> block. The sub-blocks must be either <code>when</code> blocks, which accept an expression argument, or a final <code>else</code> block that is rendered if none of the <code>when</code> blocks match e.g. <pre><code class="ast-nodes"><span><span class="case-block"><span class="ast-extra">{{case </span><span class="reference">user</span><span class="ast-extra"> when </span><span class="reference">_.is-admin</span><span class="ast-extra">}}</span><span class="content">Hello admin user!
+  </span><span class="ast-extra">{{when </span><span class="binary-op"><span class="reference">@date</span><span class="format-op"><span class="ast-extra">#date,</span><span class="binary-op"><span class="string">:H</span><span class="ast-extra"> &lt; </span><span class="number">12</span></span></span></span><span class="ast-extra">}}</span><span class="content">Good morning!
+  </span><span class="ast-extra">{{else}}</span><span class="content">Good day!
+</span><span class="ast-extra">{{/}}</span></span></span></code></pre>
+<li><p>The <code>with</code> block accepts an expression, evaluates it, and sets the result as the context for its body. The <code>with</code> block accepts a an alternative sub-block in the form of an <code>else</code> that will be rendered if the value it is given is false-y. <code class="ast-nodes"><span><span class="with-block"><span class="ast-extra">{{with </span><span class="reference">user</span><span class="ast-extra">}}</span><span class="content">Hello, </span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">name</span><span class="ast-extra">}}</span></span><span class="content">.</span><span class="ast-extra">{{else}}</span><span class="content">Please log in.</span><span class="ast-extra">{{/with}}</span></span></span></code></p></li>
+</ul>
+<h3>Inline</h3>
+<p>Any other interpolators encountered have their contents treated as expressions and will render the resulting value after passing it through the <code>string</code> operator.</p>
 </div>
 
 <h2 id="styled-text">Styled Text</h2>
@@ -1118,26 +1293,6 @@ export function languageReference(zoom = 100, theme = 'dark') {
 <li><code>rotate</code> - rotates the block by the given number of turns. The direction may be specified as <code>left</code> or <code>right</code> and defaults to right. An addition set of coordinates may be supplied to set the point of rotation, and they may be numbers corresponding to <code>rem</code>, percentages, or relative values <code>top</code>, <code>left</code>, <code>bottom</code>, <code>right</code>, and <code>center</code>. The order of <code>move</code> and <code>rotate</code> tags will affect how they are applied.</li>
 <li><code>width</code>, <code>w</code> - sets the width of the block in <code>rem</code>, e.g., <code>|w=10|this is 10rem wide</code>. The width does not include any padding or margin, in contrast to the behavior of the width and margin properties of raport widgets. Width may also be set as a percentage of its container, making it easier to align text within a widget e.g., <code>|w=100%,align=center|this is centered in the container</code>.</li>
 </ul>
-</div>
-
-<h2 id="templates">Templates</h2>
-<div class=indent>
-<p>There are some contexts in which output is always a string, such as names and HTML output. In these cases it makes sense not to require wrapping the entire string in a set of quotes and using nested interpolators or concatenation. For this purpose, Raport has a template version of expressions that are similar to mustache or handlebars templates, where double curly braces delimit interpolation with special cases for iteration, branching, and context management, and everything else is plain text, including any special characters.</p>
-<h3>Blocks</h3>
-<p>There are five special interpolators that are treated as blocks with bodies and require a closing delimiter to indicate where their body ends. The opening delimiter includes the special name, and the closing delimiter includes a <code>/</code>, optionally followed by any text, typically the special name e.g. <code class="ast-nodes"><span><span class="if-block"><span class="ast-extra">{{if </span><span class="reference">user.logged-in</span><span class="ast-extra">}}</span><span class="content">Hello, </span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">user.name</span><span class="ast-extra">}}</span></span><span class="content">!</span><span class="ast-extra">{{/if}}</span></span></span></code>. Most of the block operators also accept sub-interpolators that split their body into multiple parts. This is used for different branches in an <code>if</code> and an alternative body for an <code>each</code> that has nothing to iterate over. Every sub-block will start with <code>else</code>, <code>else if</code>. <code>elseif</code>, <code>elsif</code>, <code>elif</code>, or <code>when</code>. The sub-blocks do not have their own closing delimiter.</p>
-<ul>
-<li><p>The <code>each</code> block accepts an expression that evaluates to a data source and renders its body once for each value in the source with the value set as the context of the body. The current index is available as <code>@index</code>, the last index is available as <code>@last</code>, the current key is available as <code>@key</code>, and the last key is available as <code>@last-key</code>. The body of an <code>each</code> may specify an alternative for use if there is nothing to iterate over using an <code>else</code> tag e.g. <pre><code class="ast-nodes"><span><span class="each-block"><span class="ast-extra">{{each </span><span class="reference">order.items</span><span class="ast-extra">}}</span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">name</span><span class="ast-extra">}}</span></span><span class="content"> - </span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">quantity</span><span class="ast-extra">}}</span></span><span class="content">
-</span><span class="ast-extra">{{else}}</span><span class="content">No items.</span><span class="ast-extra">{{/}}</span></span></span></code></pre></p></li>
-<li><p>The <code>if</code> block accepts an expression that evaluates to a boolean, and if the value is truthy, renders its body. The body of an <code>if</code> block can supply multiple alternate sub-blocks using <code>else if</code> interpolators, that each accept an expression, and a final <code>else</code> interpolator that does not accept an expression e.g. <code class="ast-nodes"><span><span class="interpolator"><span class="ast-extra">{{</span><span class="let"><span class="ast-extra">let </span><span class="reference">month</span><span class="ast-extra"> = </span><span class="binary-op"><span class="ast-extra">+(</span><span class="binary-op"><span class="reference">@date</span><span class="format-op"><span class="ast-extra">#date,</span><span class="string">:M</span></span></span><span class="ast-extra">)</span></span></span><span class="ast-extra">}}</span></span><span class="if-block"><span class="ast-extra">{{if </span><span class="binary-op"><span class="reference">month</span><span class="ast-extra"> in </span><span class="string">'11-12 1-3'</span></span><span class="ast-extra">}}</span><span class="content">Chilly outside, isn't it?</span><span class="ast-extra">{{else if </span><span class="binary-op"><span class="reference">month</span><span class="ast-extra"> == </span><span class="number">4</span></span><span class="ast-extra">}}</span><span class="content">Is it raining?</span><span class="ast-extra">{{else if </span><span class="binary-op"><span class="reference">month</span><span class="ast-extra"> in </span><span class="string">'7 8'</span></span><span class="ast-extra">}}</span><span class="content">Geez it's hot.</span><span class="ast-extra">{{else}}</span><span class="content">Nice out today, no?</span><span class="ast-extra">{{/if}}</span></span></span></code></p></li>
-<li><p>The <code>unless</code> block accepts an expression that evaluates to a boolan, and if the value is <strong>not</strong> truthy, renders its body e.g. <code class="ast-nodes"><span><span class="unless-block"><span class="ast-extra">{{unless </span><span class="reference">logged-in</span><span class="ast-extra">}}</span><span class="content">Please log in.</span><span class="ast-extra">{{/unless}}</span></span></span></code>. The <code>unless</code> block does not support any sub-blocks.</p></li>
-<li><p>The <code>case</code> block accepts an expression, the keyword <code>when</code>, and another expression. The first expression is evaluated, and the second expression is used with the first <code>when</code> block. The sub-blocks must be either <code>when</code> blocks, which accept an expression argument, or a final <code>else</code> block that is rendered if none of the <code>when</code> blocks match e.g. <pre><code class="ast-nodes"><span><span class="case-block"><span class="ast-extra">{{case </span><span class="reference">user</span><span class="ast-extra"> when </span><span class="reference">_.is-admin</span><span class="ast-extra">}}</span><span class="content">Hello admin user!
-  </span><span class="ast-extra">{{when </span><span class="binary-op"><span class="reference">@date</span><span class="format-op"><span class="ast-extra">#date,</span><span class="binary-op"><span class="string">:H</span><span class="ast-extra"> &lt; </span><span class="number">12</span></span></span></span><span class="ast-extra">}}</span><span class="content">Good morning!
-  </span><span class="ast-extra">{{else}}</span><span class="content">Good day!
-</span><span class="ast-extra">{{/}}</span></span></span></code></pre>
-<li><p>The <code>with</code> block accepts an expression, evaluates it, and sets the result as the context for its body. The <code>with</code> block accepts a an alternative sub-block in the form of an <code>else</code> that will be rendered if the value it is given is false-y. <code class="ast-nodes"><span><span class="with-block"><span class="ast-extra">{{with </span><span class="reference">user</span><span class="ast-extra">}}</span><span class="content">Hello, </span><span class="interpolator"><span class="ast-extra">{{</span><span class="reference">name</span><span class="ast-extra">}}</span></span><span class="content">.</span><span class="ast-extra">{{else}}</span><span class="content">Please log in.</span><span class="ast-extra">{{/with}}</span></span></span></code></p></li>
-</ul>
-<h3>Inline</h3>
-<p>Any other interpolators encountered have their contents treated as expressions and will render the resulting value after passing it through the <code>string</code> operator.</p>
 </div>
 
 </body>
