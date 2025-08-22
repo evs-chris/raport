@@ -77,11 +77,10 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
     r.width = getWidthWithMargin(w, placement, ctx);
   }
   if ((r.cancel || r.continue) && !w.bridge) {
-    const state = r.continue || {} as RenderState;
+    // must start fresh
+    const state = { attempt: r.continue?.attempt || 0 } as RenderState;
     state.offset = 0;
-    // must start over
-    delete state.last;
-    state.attempt = (state.attempt || 0) + 1;
+    state.attempt++;
     if (state.attempt > 1) return error(ctx, placement);
     return { continue: state, output: '' };
   } else if (r.continue) {
