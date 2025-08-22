@@ -1269,13 +1269,15 @@ registerOperator({
   },
   apply(_name: string, [value, body]: [any[]|object, ValueOrExpr], opts, ctx: Context) {
     if (Array.isArray(value)) {
-      const last = value.length - 1;
-      return value.map((v, i) => evalApply(ctx, body, [v, i], { last, index: i, key: i, 'last-key': last })).join(opts?.join || '');
+      const count = value.length;
+      const last = count - 1;
+      return value.map((v, i) => evalApply(ctx, body, [v, i], { last, index: i, key: i, 'last-key': last, count })).join(opts?.join || '');
     } else if (typeof value === 'object' && value) {
       const entries = Object.entries(value);
       const lastKey = entries[entries.length - 1][0];
-      const last = entries.length - 1;
-      return Object.entries(value).map(([k, v], i) => evalApply(ctx, body, [v, k], { last, 'last-key': lastKey, index: i, key: k })).join('');
+      const count = entries.length;
+      const last = count - 1;
+      return Object.entries(value).map(([k, v], i) => evalApply(ctx, body, [v, k], { last, 'last-key': lastKey, index: i, key: k, count })).join('');
     } else {
       return '';
     }
