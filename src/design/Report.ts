@@ -864,7 +864,9 @@ export class Designer extends Ractive {
               ctx = extend(ctx, { value: evaluate(ctx, '@value.0') || evaluate(ctx, '@value.all.0') });
               root.special.index = 0;
             } else if (parts[0] === 'footer') {
-              root.special.values = {};
+              const values = gatherLabelIDs(loc.row, {});
+              root.special.values = values;
+              ctx = extend(ctx, { value: Object.assign({}, values) });
             }
 
             if (parts[0] === 'row' || parts[0] === 'footer') {
@@ -2146,6 +2148,13 @@ function nameForWidget(type: string, path: string): string {
     else if (!isNaN(+prop) && p.pop() === 'group') return `Repeater Group ${+prop + 1} `;
   }
   return `${type} `;
+}
+
+function gatherLabelIDs(widget: Widget, ids: { [k: string]: number }): { [k: string]: number } {
+  if (!widget) return ids;
+  if ('id' in widget) ids[widget.id] = Object.keys(ids).length;
+  if ('widgets' in widget) for (const w of widget.widgets) gatherLabelIDs(w, ids);
+  return ids;
 }
 
 function tryParseData(str: string, header?: boolean): any {
