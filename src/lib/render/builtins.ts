@@ -78,9 +78,8 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
   }
   if ((r.cancel || r.continue) && !w.bridge) {
     // must start fresh
-    const state = { attempt: r.continue?.attempt || 0 } as RenderState;
+    const state = { attempt: r.continue?.attempt || 1 } as RenderState;
     state.offset = 0;
-    state.attempt++;
     if (state.attempt > 1) return error(ctx, placement);
     return { continue: state, output: '' };
   } else if (r.continue) {

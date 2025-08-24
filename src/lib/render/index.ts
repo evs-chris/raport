@@ -246,8 +246,23 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
         }
         if (p.y < 0) {
           p.offsetY = m[0];
+          if (isNaN(h)) {
+            p.y = (placement.availableY || 1) + p.y;
+            const r = error(context, p, 'Negative y position requires height');
+            s += r.output;
+            ps.unshift([p.x, p.y, getWidthWithMargin(w, placement, context), r.height]);
+            continue;
+          }
           if (placement.availableY == null) p.y = 0;
           else p.y = (placement.availableY || 1) + p.y - h + 1;
+          if (p.y < 0) {
+            const offset = maxYOffset(ps);
+            state = state || { offset };
+            state.last = i;
+            state.attempt = (state.attempt || 0) + 1;
+            if (state.attempt > 1) return error(context, placement, 'Negative y position underflow error');
+            return { output: s, continue: state, height: offset };
+          }
         }
 
         const { x, y } = p;
