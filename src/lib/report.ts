@@ -175,8 +175,8 @@ export interface Widget extends Style {
   box?: 'expand'|'contain';
   hide?: ValueOrExpr;
   br?: boolean|Computed;
-  bg?: ValueOrExpr;
-  radius?: ValueOrExpr;
+  bg?: ValueOrExpr|Computed;
+  radius?: ValueOrExpr|Computed;
 
   // container
   widgets?: Widget[];

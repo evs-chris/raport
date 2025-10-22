@@ -1,4 +1,4 @@
-import { Borders, Font, Placement, Widget } from '../report';
+import { Borders, Font, Placement, Widget, Computed } from '../report';
 import { expandMargin, expandBorder, getHeightWithMargin, maybeComputed, getWidthWithMargin, RenderContext } from './index';
 import { ValueOrExpr } from '../data/index';
 
@@ -68,7 +68,7 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   return [s, i];
 }
 
-export function styleExtra(w: { bg?: ValueOrExpr; radius?: ValueOrExpr }, context: RenderContext): string {
+export function styleExtra(w: { bg?: ValueOrExpr|Computed; radius?: ValueOrExpr|Computed }, context: RenderContext): string {
   let s = '';
 
   const bg = maybeComputed(w.bg, context);
