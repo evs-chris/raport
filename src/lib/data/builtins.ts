@@ -508,18 +508,18 @@ registerOperator(
     if (typeof str !== 'string') return [str];
     else return str.split(split || '');
   }),
-  simple(['filter'], (_name: string, values: any[], _opts, ctx: Context): any => {
+  simple(['filter'], (_name: string, values: any[], opts, ctx: Context): any => {
     let [arr, flt, sorts, groups] = values;
     if (!Array.isArray(arr)) {
       if (arr && Array.isArray(arr.value)) arr = arr.value;
       else if (typeof arr === 'object' && arr) {
         let step = Object.entries(arr).filter((e, i) => evalApply(ctx, flt, [e[1], i, e[0]], { index: i, key: e[0] }));
-        if (sorts) step = sort(ctx, step, sorts, (c, b, v) => evalApply(c, b, [v[1], v[0]], { key: v[0] }));
+        if (sorts) step = sort(ctx, step, sorts, (c, b, v) => evalApply(c, b, [v[1], v[0]], { key: v[0] }), opts as any);
         return step.reduce((a, c) => (a[c[0]] = c[1], a), {});
       }
       else return [];
     }
-    return filter({ value: arr }, flt, sorts, groups, ctx).value;
+    return filter({ value: arr }, flt, sorts, groups, ctx, opts as any).value;
   }),
   simple(['source'], (_name: string, values: any[], _opts, ctx): any => {
     const [val, app] = values;
@@ -535,18 +535,18 @@ registerOperator(
     }
     return filter({ value: arr }, null, null, groups, ctx).value;
   }),
-  simple(['sort'], (_name: string, values: any[], _opts, ctx: Context): any => {
+  simple(['sort'], (_name: string, values: any[], opts, ctx: Context): any => {
     let [arr, sorts] = values;
     if (!Array.isArray(arr)) {
       if (arr && Array.isArray(arr.value)) arr = arr.value;
       else if (arr && typeof arr === 'object') {
         if (!sorts) sorts = [{ a: { r: { p: '@', k: ['key'] } } }];
-        return sort(ctx, Object.entries(arr), sorts, (c, b, v) => evalApply(c, b, [v[1], v[0]], { key: v[0] })).reduce((a, c) => (a[c[0]] = c[1], a), {});
+        return sort(ctx, Object.entries(arr), sorts, (c, b, v) => evalApply(c, b, [v[1], v[0]], { key: v[0] }), opts as any).reduce((a, c) => (a[c[0]] = c[1], a), {});
       }
       else return {};
     }
     if (!sorts) sorts = [{ a: { r: { k: ['_'] } } }];
-    return sort(ctx, arr.slice(), sorts);
+    return sort(ctx, arr.slice(), sorts, undefined, opts as any);
   }),
   simple(['time-span', 'time-span-ms'], (_name: string, args: any[], opts: any): any => {
     const namedArgs = opts || {};

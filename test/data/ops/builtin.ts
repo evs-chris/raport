@@ -894,6 +894,11 @@ q.test('sort', t => {
   t.equal(JSON.stringify(e('sort({ b::a c::a a::a } `-@key`)')), JSON.stringify({ c: 'a', b: 'a', a: 'a' }));
   t.equal(JSON.stringify(e('sort({ b::b c::a a::c } =>_)')), JSON.stringify({ c: 'a', b: 'b', a: 'c' }));
   t.deepEqual(e('set ~foo = [1 2 3 4]; sort(~foo =>0 - _); ~foo'), [1, 2, 3, 4]);
+  t.deepEqual(e('sort([3 4 1 2] invert:true)'), [4, 3, 2, 1]);
+  t.deepEqual(e('sort([:aa :ba :bc :ab] [=>_[0] =>_[1]])'), ['aa', 'ab', 'ba', 'bc']);
+  t.deepEqual(e('sort([:aa :ba :bc :ab] [=>_[0] `-_[1]`])'), ['ab', 'aa', 'bc', 'ba']);
+  t.deepEqual(e('sort([:aa :ba :bc :ab] [=>_[0] =>_[1]] invert:[1])'), ['ab', 'aa', 'bc', 'ba']);
+  t.deepEqual(e('sort([:aa :ba :bc :ab] "if @invert then [=>_[1] =>_[0]] else [=>[0] =>[1]]" invert:1)'), ['bc', 'ab', 'ba', 'aa']);
 });
 
 q.test('source', t => {

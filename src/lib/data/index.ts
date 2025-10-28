@@ -400,10 +400,16 @@ export function getOperator<T extends Operator = Operator>(name: string): T {
   return opMap[name] as T;
 }
 
+export interface SortOptions {
+  invert?: boolean | 'first' | number[];
+}
+
 const _defaultGetValue = (c: Context, b: ValueOrExpr, v: any) => evalApply(c, b, [v]);
-export function sort(context: Context, arr: any[], sorts: Sort[]|ValueOrExpr, getValue?: (context: Context, by: ValueOrExpr, v: any) => any): any[] {
+export function sort(context: Context, arr: any[], sorts: Sort[] | ValueOrExpr, getValue?: (context: Context, by: ValueOrExpr, v: any) => any, options?: SortOptions): any[] {
   let sortArr: Sort[];
-  
+
+  context = extend(context, { special: { invert: options?.invert !== undefined && options.invert !== false } });
+
   if (Array.isArray(sorts)) {
     sortArr = sorts;
   } else if (isApplication(sorts)) {
@@ -449,6 +455,9 @@ export function sort(context: Context, arr: any[], sorts: Sort[]|ValueOrExpr, ge
       return false;
     });
 
+    const invopt = options?.invert === 'first' ? [0] : options?.invert;
+    const invert: number[] = sortArr.map((_, i) => Array.isArray(invopt) ? (invopt.includes(i) ? -1 : 1) : (invopt ? -1 : 1));
+
     arr.sort((a, b) => {
       for (let i = 0; i < sortArr.length; i++) {
         const s = sortArr[i];
@@ -456,13 +465,13 @@ export function sort(context: Context, arr: any[], sorts: Sort[]|ValueOrExpr, ge
         const by: ValueOrExpr = typeof s === 'string' ? s : s && (s as any).by ? (s as any).by : s;
         const l = getValue(context, by, a);
         const r = getValue(context, by, b);
-        const cmp = l == null && r != null ? -1 
+        const cmp = l == null && r != null ? -1
           : l != null && r == null ? 1
-          : (l < r) === (r < l) ? 0
-          : l < r ? -1
-          : l > r ? 1
-          : 0;
-        if (cmp) return (desc ? -1 : 1) * cmp;
+            : (l < r) === (r < l) ? 0
+              : l < r ? -1
+                : l > r ? 1
+                  : 0;
+        if (cmp) return (desc ? -1 : 1) * invert[i] * cmp;
       }
       return 0;
     });
@@ -471,9 +480,13 @@ export function sort(context: Context, arr: any[], sorts: Sort[]|ValueOrExpr, ge
   return arr;
 }
 
-export function filter(arr: any[], filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context|any): any[];
-export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context|any): DataSet;
-export function filter(ds: DataSet|any[], filter?: ValueOrExpr, sorts?: Sort[]|ValueOrExpr, groups?: Array<ValueOrExpr>|ValueOrExpr, context?: Context|any): DataSet|any[] {
+export interface FilterOptions {
+  invert?: boolean | 'first' | number[];
+}
+
+export function filter(arr: any[], filter?: ValueOrExpr, sorts?: Sort[] | ValueOrExpr, groups?: Array<ValueOrExpr> | ValueOrExpr, context?: Context | any, options?: FilterOptions): any[];
+export function filter(ds: DataSet, filter?: ValueOrExpr, sorts?: Sort[] | ValueOrExpr, groups?: Array<ValueOrExpr> | ValueOrExpr, context?: Context | any, options?: FilterOptions): DataSet;
+export function filter(ds: DataSet | any[], filter?: ValueOrExpr, sorts?: Sort[] | ValueOrExpr, groups?: Array<ValueOrExpr> | ValueOrExpr, context?: Context | any, options?: FilterOptions): DataSet | any[] {
   const _ds = Array.isArray(ds) ? { value: ds } : ds;
   if (!_ds || !Array.isArray(_ds.value)) return _ds;
   let _context: Context;
@@ -490,7 +503,7 @@ export function filter(ds: DataSet|any[], filter?: ValueOrExpr, sorts?: Sort[]|V
     });
   }
 
-  if (sorts) sort(_context, values, sorts);
+  if (sorts) sort(_context, values, sorts, undefined, options);
 
   if (groups && !Array.isArray(groups)) groups = [groups];
 
@@ -557,7 +570,7 @@ export function applyOperator(root: Context, operation: Operation): any {
       for (let i = 1; i < operation.args.length; i++) {
         let a = operation.args[i];
         if (isOperation(a) && (!a.args || !a.args.find(a => isReference(a) && hasPipeRef(a)))) a = Object.assign({}, a, { args: [{ r: { k: ['pipe'], p: '@' } } as ValueOrExpr].concat(a.args || []) });
-        
+
         if (isApplication(a)) v = evalApply(root, a, [v]);
         else v = evalParse(extend(root, { special: { pipe: v } }), a);
       }

@@ -140,8 +140,8 @@ The basis value is available as @case or the shorthand _ in each matcher.' eg:['
     { proto:'any[] => number' desc:'Returns the number of entries in the given array.' }
     { agg:1 proto:'() => number' desc:'Counts the number of entries in the current source.' }
   ] opts:[
-    { name::partition type::application desc:'Build a count object where the keys are determined by the application and the count associated with each keys is how many times the application produces the key when applying it to each value in the array.' }
-    { name::sub type::object desc:'Build a count object where the keys are determined by the sub object. Each key of the sub object must be an application. If the application returns a string, it will be used as the key. If it returns an array, each member will be used as a key. If it returns an otherise trutch value, the key associated with the application will be used as the key. The counts in the resulting object represent how many times each key appeared when each application was applied to each value in the array.' }
+    { name::partition type::application desc:'Build a count object where the keys are determined by the application and the count associated with each key is how many times the application produces the key when applying it to each value in the array.' }
+    { name::sub type::object desc:'Build a count object where the keys are determined by the sub object. Each key of the sub object must be an application. If the application returns a string, it will be used as the key. If it returns an array, each member will be used as a key. If it returns an otherise truthy value, the key associated with the application will be used as the key. The counts in the resulting object represent how many times each key appeared when each application was applied to each value in the array.' }
   ]}
   { op:'date' sig:[
     { proto:'string => date' desc:'Parses the given date as a platform date (JS), using the builtin parser first and the platform parser if that fails.' }
@@ -197,6 +197,8 @@ The basis value is available as @case or the shorthand _ in each matcher.' eg:['
     { proto:'(any[], application, sort[]) => any[]' desc:'Filters the given array using the given application to remove entries that return a false-y result. The result is then sorted using the given sort array.' }
     { proto:'(object, application, sort[]) => object' desc:'Filters the given object using the given application to remove entries that return a false-y result. The result is then sorted using the given sort array.' }
     { proto:'(any[], application, sort[], application|application[]) => any[]' desc:'Filters the given array using the given application to remove entries that return a false-y result. The result is then sorted using the given sort array. The result is finally grouped by the final application or array of applications.' }
+  ] opts:[
+    { name:'invert' type:'boolean|:first|number[]' desc:'Inverts the result of the sort, if any. If true, all sort segments will be inverted. If an array, each segment index in the array will be inverted. :first is a slightly more clear shorthand for [0]. The special reference, invert, is available to the sort expression during evaluation as true if there is an inversion passed in.' }
   ]}
   { op:'find' sig:[
     { proto:'(any[], application) => any' desc:'Finds the first element in the given array that matches the given application and returns it.' }
@@ -510,6 +512,8 @@ Any array elements that are strings may indicate direction with a leading + or -
 Any array elements that are applications are applied directly to get a comparison value.
 Any arguments that are objects may include a by key with an application value along with asc, desc, or dir flags.
 If no sorts are provided, an identity sort will be applied to the keys.' }
+  ] opts:[
+    { name:'invert' type:'boolean|:first|number[]' desc:'Inverts the result of the sort. If true, all sort segments will be inverted. If an array, each segment index in the array will be inverted. :first is a slightly more clear shorthand for [0]. The special reference, invert, is available to the sort expression during evaluation as true if there is an inversion passed in.' }
   ]}
   { op:'source' sig:[
     { proto:'any => DataSet' desc:'Creates a DataSet from the given value, or returns the value if it is already a DataSet.' }
