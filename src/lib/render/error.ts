@@ -24,6 +24,6 @@ export function addStyle(context: RenderContext, id: string, style: string) {
 }
 
 export function error(context: RenderContext, placement: Placement, message: string = 'Widget overflow error') {
-    addStyle(context, 'error', `.error { position: absolute; box-sizing: border-box; color: red; border: 1px dotted; width: 100%; height: 2rem; padding: 0.5rem; }`);
-    return { output: `<div class="error" style="top: ${placement.y}rem;">${message}</div>`, height: 2 };
+  addStyle(context, 'error', `.error { position: absolute; box-sizing: border-box; color: red; border: 1px dotted; width: 100%; height: 2rem; padding: 0.5rem; }`);
+  return { output: `<div class="error" style="top: ${placement.y}rem;">${message}</div>`, height: 2 };
 }

@@ -76,7 +76,7 @@ const valueAnchor = map(seq(value, ws, opt(str('<')), ws, opt(seq(value, ws, opt
   return v
 });
 const bracketpath = bracket(seq(str('['), ws), valueAnchor, seq(ws, str(']')));
-export const keypath = map(seq(alt<'!'|'~'|'*'|[string,string]>('ref-sigil', str('!', '~', '*') as any, seq(read('^'), opt(str('@', '.')))), alt<string|Value>('keypath', pathident, bracketpath), rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([prefix, init, parts]) => {
+export const keypath = map(seq(alt<'!' | '~' | '*' | [string, string]>('ref-sigil', str('!', '~', '*') as any, seq(read('^'), opt(str('@', '.')))), alt<string | Value>('keypath', pathident, bracketpath), rep(alt<string | Value>('keypath', dotpath, bracketpath))), ([prefix, init, parts]) => {
   const res: Keypath = { k: [init].concat(parts).map(p => typeof p === 'object' && 'v' in p && (typeof p.v === 'string' || typeof p.v === 'number') && !('anchor' in p) && !('slice' in p) ? p.v : p) };
   if (Array.isArray(prefix)) {
     if (prefix[0]) res.u = prefix[0].length;
@@ -86,8 +86,8 @@ export const keypath = map(seq(alt<'!'|'~'|'*'|[string,string]>('ref-sigil', str
   }
   return res;
 }, 'keypath');
-export const localpath = map(seq(read('^'), pathident, rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([prefix, init, parts]) => {
-  const res: Keypath = { k: ([init] as Array<string|Value>).concat(parts).map(p => typeof p === 'object' && 'v' in p && (typeof p.v === 'string' || typeof p.v === 'number' && !('anchor' in p) && !('slice' in p)) ? p.v : p) };
+export const localpath = map(seq(read('^'), pathident, rep(alt<string | Value>('keypath', dotpath, bracketpath))), ([prefix, init, parts]) => {
+  const res: Keypath = { k: ([init] as Array<string | Value>).concat(parts).map(p => typeof p === 'object' && 'v' in p && (typeof p.v === 'string' || typeof p.v === 'number' && !('anchor' in p) && !('slice' in p)) ? p.v : p) };
   if (prefix) res.u = prefix.length;
   return res;
 }, 'localpath');
@@ -150,7 +150,7 @@ const timespan = map(rep1sep(seq(JNum, ws, istr('years', 'year', 'y', 'months', 
   }
 }, { primary: true, name: 'timespan' });
 
-export const timezone = map(seq(ws, alt<string|[string, string, [string, string]]>('timezone',
+export const timezone = map(seq(ws, alt<string | [string, string, [string, string]]>('timezone',
   istr('z'),
   seq(opt(chars(1, '+-')), alt(chars(4, digits), chars(2, digits), chars(1, digits)),
     opt(seq(str(':'), chars(2, digits)))
@@ -196,7 +196,7 @@ export const timeexact = alt<[number, number?, number?, number?]>(
   map(istr('end'), () => [23, 59, 59, 999]),
 );
 
-export const parseTime = makeParser(alt<number|[number, number?, number?, number?]>(map(seq(timeexact, opt(seq(ws, timezone))), ([tm, z]) => {
+export const parseTime = makeParser(alt<number | [number, number?, number?, number?]>(map(seq(timeexact, opt(seq(ws, timezone))), ([tm, z]) => {
   if (z) tm.push(z[1]);
   return tm;
 }), timezone), { trim: true, consumeAll: true, undefinedOnError: true });
@@ -224,7 +224,7 @@ const daterel = alt<DateRel>('date',
     return val;
   }),
   map(seq(istr('in'), rws, timespan), v => (typeof v[2] === 'number' || isTimespanMS(v[2]) ? { f: 'n', o: timeSpanToNumber(v[2]) } : { f: 'n', o: v[2].d })),
-  map(seq(timespan, rws, alt<string|any[]>('relative time anchor', istr('ago'), seq(istr('from'), rws, istr('now'))), opt(timezone)), ([span, , ref, tz]) => {
+  map(seq(timespan, rws, alt<string | any[]>('relative time anchor', istr('ago'), seq(istr('from'), rws, istr('now'))), opt(timezone)), ([span, , ref, tz]) => {
     let val: DateRelSpan;
     if (typeof span === 'number' || isTimespanMS(span)) {
       val = { f: 'n', o: timeSpanToNumber(span) * (ref === 'ago' ? -1 : 1) };
@@ -241,7 +241,7 @@ function setIndex<T, U = Array<T>>(array: U, index: number, value: T): U {
   array[index] = value;
   return array;
 }
-export const dateexact: Parser<Date|DateRel> = map(seq(
+export const dateexact: Parser<Date | DateRel> = map(seq(
   chars(4, digits),
   opt(seq(chars(1, '-/'), read1(digits),
     opt(seq(chars(1, '-/'), read1(digits)))
@@ -271,21 +271,21 @@ export const dateexact: Parser<Date|DateRel> = map(seq(
   }
 });
 
-export const date = bracket(str('#'), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), str('#'), { primary: true, name: 'date' });
+export const date = bracket(str('#'), alt<Date | DateRel | TimeSpan>('date', dateexact, daterel, timespan), str('#'), { primary: true, name: 'date' });
 
 export const typelit = map(seq(str('@['), ws, schema(), ws, str(']')), ([, , v]) => ({ v, s: 1 } as Value), { name: 'typelit', primary: true });
 
-export const parseDate = makeParser(map(seq(opt(str('#')), alt<Date|DateRel|TimeSpan>('date', dateexact, daterel, timespan), opt(str('#'))), ([, d,]) => d), { trim: true, consumeAll: true, undefinedOnError: true });
+export const parseDate = makeParser(map(seq(opt(str('#')), alt<Date | DateRel | TimeSpan>('date', dateexact, daterel, timespan), opt(str('#'))), ([, d,]) => d), { trim: true, consumeAll: true, undefinedOnError: true });
 
 export const string = alt<Value>({ primary: true, name: 'string' },
   bracket(str('$$$'), inlineTemplate, str('$$$')),
-  map(seq(str(':'), read1To(endSym, true)), v => ({ v: v[1]})),
+  map(seq(str(':'), read1To(endSym, true)), v => ({ v: v[1] })),
   map(bracket(str('"""'), rep(alt<string>('string-part',
     read1To('\\"'), JStringEscape, JStringUnicode, JStringHex, andNot(str('"'), str('""')),
   )), str('"""')), a => ({ v: ''.concat(...a), q: '"""' })),
   map(bracket(str('"'), rep(alt<string>('string-part',
     read1To('\\"'), JStringEscape, JStringUnicode, JStringHex
-  )), str('"')), a => ({ v: ''.concat(...a) })), 
+  )), str('"')), a => ({ v: ''.concat(...a) })),
   map(bracket(str(`'''`), rep(alt('string-part',
     map(read1To(`'\\$\{`, true), v => ({ v } as Value)),
     map(str('\\$', '$$'), () => ({ v: '$' })),
@@ -425,13 +425,13 @@ binop.parser = map(binop_or, v => v, { primary: true, name: 'binary-op' });
 
 const branch_body = alt(map(seq(str('then'), rws, value), ([, , v]) => v), block);
 if_op.parser = alt({ primary: true, name: 'conditional' },
-  map(seq(str('if'), rws, value, rws, branch_body, rep(seq(rws, not(str('end', 'fi')), str('else if ', 'elseif', 'elsif', 'elif'), rws, value, rws, branch_body)), opt(seq(ws, str('else'), rws, value)), opt(seq(ws, str('end', 'fi')))), ([,, cond1,, body1, elifs, el]) => {
+  map(seq(str('if'), rws, value, rws, branch_body, rep(seq(rws, not(str('end', 'fi')), str('else if ', 'elseif', 'elsif', 'elif'), rws, value, rws, branch_body)), opt(seq(ws, str('else'), rws, value)), opt(seq(ws, str('end', 'fi')))), ([, , cond1, , body1, elifs, el]) => {
     const op = { op: 'if', args: [cond1, body1] };
-    for (const [,,,, cond,, body] of elifs) op.args.push(cond, body);
+    for (const [, , , , cond, , body] of elifs) op.args.push(cond, body);
     if (el) op.args.push(el[3]);
     return op;
   }, 'if'),
-  map(seq(str('unless'), rws, value, rws, branch_body, opt(seq(rws, str('else'), rws, value)), opt(seq(rws, str('end')))), ([,, cond,, hit, miss]) => {
+  map(seq(str('unless'), rws, value, rws, branch_body, opt(seq(rws, str('else'), rws, value)), opt(seq(rws, str('end')))), ([, , cond, , hit, miss]) => {
     const op = { op: 'unless', args: [cond, hit] };
     if (miss) op.args.push(miss[3]);
     return op;
@@ -453,13 +453,13 @@ export function replaceCase(op: Operation): boolean {
   return found;
 }
 
-export const case_branch = alt<[undefined|Value, Value]>(
-  map(seq(rws, not(str('end', 'esac')), str('when'), rws, value, rws, str('then'), rws, value), ([,,,, cond,,,, hit]) => [cond, hit], 'when-branch'),
-  map(seq(rws, not(str('end', 'esac')), str('else'), rws, value), ([,,,, hit]) => [undefined, hit], 'else-branch'),
-  map(seq(rws, not(str('end', 'esac')), str('when'), rws, value, rws, block), ([,,,, cond,, hit]) => [cond, hit], 'when-block'),
+export const case_branch = alt<[undefined | Value, Value]>(
+  map(seq(rws, not(str('end', 'esac')), str('when'), rws, value, rws, str('then'), rws, value), ([, , , , cond, , , , hit]) => [cond, hit], 'when-branch'),
+  map(seq(rws, not(str('end', 'esac')), str('else'), rws, value), ([, , , , hit]) => [undefined, hit], 'else-branch'),
+  map(seq(rws, not(str('end', 'esac')), str('when'), rws, value, rws, block), ([, , , , cond, , hit]) => [cond, hit], 'when-block'),
 );
 case_op.parser = alt(
-  map(seq(str('case'), rws, value, rep(case_branch), opt(seq(rws, str('end', 'esac')))), ([,, val, branches]) => {
+  map(seq(str('case'), rws, value, rep(case_branch), opt(seq(rws, str('end', 'esac')))), ([, , val, branches]) => {
     const op = { op: 'case', args: [val] };
     for (let i = 0; i < branches.length; i++) {
       if (branches[i][0] === undefined) op.args.push(branches[i][1]);
@@ -475,7 +475,7 @@ case_op.parser = alt(
 );
 
 function postfix_path(parser: Parser<Value>): Parser<Value> {
-  return map(seq(parser, rep(alt<string|Value>('keypath', dotpath, bracketpath))), ([v, k]) => {
+  return map(seq(parser, rep(alt<string | Value>('keypath', dotpath, bracketpath))), ([v, k]) => {
     if (k.length) return { op: 'get', args: [v, { v: { k } }] };
     else return v;
   }, 'postfix-path-op');
@@ -493,8 +493,8 @@ array.parser = map(bracket(
 
 function objectOp(pairs: [Value, Value][]): Value {
   return pairs.filter(p => !('v' in p[0] && 'v' in p[1])).length ?
-  { op: 'object', args: pairs.reduce((a, c) => (a.push(c[0], c[1]), a), []) } : 
-  { v: pairs.reduce((a, c) => (a[(c[0] as Literal).v] = (c[1] as Literal).v, a), {}) };
+    { op: 'object', args: pairs.reduce((a, c) => (a.push(c[0], c[1]), a), []) } :
+    { v: pairs.reduce((a, c) => (a[(c[0] as Literal).v] = (c[1] as Literal).v, a), {}) };
 }
 
 object.parser = map(bracket(
@@ -550,8 +550,8 @@ export function schema() {
     return res;
   });
   const literal = alt<Schema>(
-    { name: 'literal', primary: true }, 
-    map(alt<string|number>(JString, JNum), v => {
+    { name: 'literal', primary: true },
+    map(alt<string | number>(JString, JNum), v => {
       return { type: 'literal', literal: v } as Schema;
     }),
     map(str('true', 'false', 'null', 'undefined'), v => {

@@ -4,7 +4,7 @@ const decRE = /(\d)(?=(\d{3})+\.)/g;
 const intRE = /(\d)(?=(\d{3})+$)/g;
 const isNumRE = /^[-0-9\\.,]+$/;
 
-export function number(v: string|number, dec: number = 2, group: string = ',', negative: 'sign'|'wrap'|'both' = 'sign'): string {
+export function number(v: string | number, dec: number = 2, group: string = ',', negative: 'sign' | 'wrap' | 'both' = 'sign'): string {
   v = typeof v !== 'number' ? parseFloat(v || '') : v;
   if (isNaN(v)) return '';
   const neg = v < 0;
@@ -15,7 +15,7 @@ export function number(v: string|number, dec: number = 2, group: string = ',', n
   else return v;
 }
 
-export function dollar(v: string, alt: string, dec: number = 2, group: string = ',', sign: string = '$', negative: 'sign'|'wrap'|'both' = 'sign'): string {
+export function dollar(v: string, alt: string, dec: number = 2, group: string = ',', sign: string = '$', negative: 'sign' | 'wrap' | 'both' = 'sign'): string {
   if (v != null && isNumRE.test(v)) {
     if (!isNaN(+v)) return `${sign}${number(v, dec, group, negative)}`;
     else return alt !== undefined ? alt : v;
@@ -24,7 +24,7 @@ export function dollar(v: string, alt: string, dec: number = 2, group: string = 
   }
 }
 
-export function phone(v: string|number): string {
+export function phone(v: string | number): string {
   if (!v) v = '';
   if (typeof v !== 'string') v = v.toString();
   v = v || '';
@@ -40,7 +40,7 @@ const dateRE = /\\.|y+|M+|d+|E+|H+|m+|s+|k+|h+|a+|S+|z+/g;
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 let dateDefault: string;
-export function date(d: string|Date|DateExactRange, fmt: string): string {
+export function date(d: string | Date | DateExactRange, fmt: string): string {
   if (!d) return '';
   let Y: number, M: number, D: number, DD: number, H: number, MM: number, S: number, SS: number, Z: number;
 
@@ -125,11 +125,11 @@ export function date(d: string|Date|DateExactRange, fmt: string): string {
   });
 }
 
-date.setDefault = function(format?: string) {
+date.setDefault = function (format?: string) {
   dateDefault = format;
 }
 
-export function ordinal(num: number|string, group?: string): string {
+export function ordinal(num: number | string, group?: string): string {
   num = number(num, 0, group);
   let n = `${num}`;
   n = n.substr(-2, 2);

@@ -6,7 +6,7 @@ import { styleClass, styleFont } from './render/style';
 import { parse } from './data/parse';
 import { parse as parseTemplate } from './data/parse/template';
 
-export type ReportType = 'delimited'|'flow'|'page';
+export type ReportType = 'delimited' | 'flow' | 'page';
 
 export type Report<T = {}> = Delimited<T> | Flow<T> | Page<T>;
 
@@ -14,9 +14,9 @@ export interface PartSource {
   /** Filters to apply to the base value of the data source */
   filter?: ValueOrExpr;
   /** Sorts to apply to the base value of the data source */
-  sort?: Sort[]|ValueOrExpr;
+  sort?: Sort[] | ValueOrExpr;
   /** Groupings to apply to the base data source */
-  group?: Array<ValueOrExpr>|ValueOrExpr;
+  group?: Array<ValueOrExpr> | ValueOrExpr;
   /** An expression to apply to the base data source before filtering, sorting, or grouping */
   base?: ValueOrExpr;
   /** The name of the data source to be pulled from the root context */
@@ -87,7 +87,7 @@ export interface Page<T = {}> extends Displayed<T> {
   margin?: Margin;
 }
 
-export type Dimension = number|{ percent: number };
+export type Dimension = number | { percent: number };
 
 export interface PageSize {
   width: number;
@@ -95,7 +95,7 @@ export interface PageSize {
   margin: [number, number];
 }
 
-export type PageOrientation = 'portrait'|'landscape';
+export type PageOrientation = 'portrait' | 'landscape';
 export const PageSizes: { [name: string]: PageSize } = {
   letter: {
     width: 51,
@@ -125,15 +125,15 @@ export function pageOffset(num: number, size: PageSize): number {
 
 // Attributes
 export interface Font {
-  size?: number|Computed;
-  family?: string|Computed;
-  weight?: number|Computed;
-  color?: string|Computed;
-  align?: 'left'|'right'|'center'|'justify'|Computed;
-  line?: number|Computed;
+  size?: number | Computed;
+  family?: string | Computed;
+  weight?: number | Computed;
+  color?: string | Computed;
+  align?: 'left' | 'right' | 'center' | 'justify' | Computed;
+  line?: number | Computed;
   right?: number;
-  pre?: boolean|Computed;
-  clamp?: boolean|Computed;
+  pre?: boolean | Computed;
+  clamp?: boolean | Computed;
 }
 
 export interface Placement {
@@ -146,7 +146,7 @@ export interface Placement {
   offsetX?: number;
   offsetY?: number;
 }
-export type Layout = Array<[number, number]>|Placement[]|'row'|string;
+export type Layout = Array<[number, number]> | Placement[] | 'row' | string;
 
 export interface Borders {
   top?: number;
@@ -157,10 +157,10 @@ export interface Borders {
 
 export interface Style {
   font?: Font;
-  border?: number|Borders|number[]|string;
+  border?: number | Borders | number[] | string;
 }
 
-export type Margin = number|[number, number]|[number, number, number, number];
+export type Margin = number | [number, number] | [number, number, number, number];
 
 export interface Computed {
   x: ValueOrExpr;
@@ -169,14 +169,14 @@ export interface Computed {
 // Widgets
 export interface Widget extends Style {
   type: string;
-  width?: Dimension|Computed|'grow'; // default 100%
-  height?: Dimension|'auto'|Computed|'grow'; // optional, defaulting to 1
-  margin?: Margin|Computed;
-  box?: 'expand'|'contain';
+  width?: Dimension | Computed | 'grow'; // default 100%
+  height?: Dimension | 'auto' | Computed | 'grow'; // optional, defaulting to 1
+  margin?: Margin | Computed;
+  box?: 'expand' | 'contain';
   hide?: ValueOrExpr;
-  br?: boolean|Computed;
-  bg?: ValueOrExpr|Computed;
-  radius?: ValueOrExpr|Computed;
+  br?: boolean | Computed;
+  bg?: ValueOrExpr | Computed;
+  radius?: ValueOrExpr | Computed;
 
   // container
   widgets?: Widget[];
@@ -186,20 +186,20 @@ export interface Widget extends Style {
   macro?: string;
 
   // label
-  text?: ValueOrExpr|Array<ValueOrExpr|Span>;
+  text?: ValueOrExpr | Array<ValueOrExpr | Span>;
   format?: LabelFormat;
   id?: string;
   styled?: boolean;
 
   // image
   url?: ValueOrExpr;
-  fit?: 'cover'|'stretch'|Computed;
+  fit?: 'cover' | 'stretch' | Computed;
 
   // html
   html?: ValueOrExpr;
 
   // repeater
-  source?: PartSource|ValueOrExpr;
+  source?: PartSource | ValueOrExpr;
   header?: Container;
   group?: Container[];
   groupEnds?: boolean[];
@@ -210,7 +210,7 @@ export interface Widget extends Style {
   headerPerPage?: boolean;
 
   // repeater row
-  elide?: boolean|Computed;
+  elide?: boolean | Computed;
 }
 
 export interface Container extends Widget {
@@ -218,13 +218,13 @@ export interface Container extends Widget {
   layout?: Layout;
   context?: ValueOrExpr;
   bridge?: boolean;
-  elide?: boolean|Computed;
+  elide?: boolean | Computed;
   macro?: string;
 }
 
 export interface Image extends Widget {
   url: ValueOrExpr;
-  fit?: 'cover'|'stretch'|Computed;
+  fit?: 'cover' | 'stretch' | Computed;
 }
 
 export interface Span {
@@ -239,7 +239,7 @@ export interface LabelFormat {
   args?: ValueOrExpr[];
 }
 export interface Label extends Widget {
-  text: ValueOrExpr|Array<ValueOrExpr|Span>;
+  text: ValueOrExpr | Array<ValueOrExpr | Span>;
   format?: LabelFormat;
   id?: string;
   styled?: boolean;
@@ -250,7 +250,7 @@ export interface HTML extends Widget {
 }
 
 export interface Repeater extends Widget {
-  source: PartSource|ValueOrExpr;
+  source: PartSource | ValueOrExpr;
   header?: Container;
   group?: Container[];
   groupEnds?: boolean[];
@@ -264,13 +264,13 @@ export interface Repeater extends Widget {
 
 export interface MeasureFont {
   /** The font family for the label. The built-in estimator only works with sans, serif, narrow, and mono fonts, which should be relatively metric-compatible with Arial, Times New Roman, Arial Narrow, and, well, any fixed-width font. */
-  family?: 'sans'|'serif'|'narrow'|'mono'|string|Computed;
+  family?: 'sans' | 'serif' | 'narrow' | 'mono' | string | Computed;
   /** Font size in rem, where 1rem is 16px or 12pt based on the report html element style */
-  size?: number|Computed;
+  size?: number | Computed;
   /** The line-height of the rendered font in rem */
-  line?: number|Computed;
+  line?: number | Computed;
   /** Average width in px at font-size 16px. If this is supplied, it won't be guessed based on the font name. */
-  metric?: number|Computed;
+  metric?: number | Computed;
   /** Break words that exceed the line length */
   'break-word'?: boolean;
 }
@@ -299,7 +299,7 @@ interface ReportExtras {
 }
 
 /** Initialize a parameter map based on the parameters defined by the given report. */
-export function initParameters(report: Report, sources: SourceMap, parameters?: ParameterMap|Root): ParameterMap {
+export function initParameters(report: Report, sources: SourceMap, parameters?: ParameterMap | Root): ParameterMap {
   const ctx = parameters && 'root' in parameters && parameters.root === parameters ? parameters as Root : new Root(Object.assign({}, report.context), { parameters });
   ctx.parameters = Object.assign({}, report.defaultParams, ctx.parameters);
   const inits: ParameterMap = {};
@@ -318,7 +318,7 @@ export function initParameters(report: Report, sources: SourceMap, parameters?: 
 }
 
 /** Run the given report to string. If the report is displayed, the result will be HTML. Otherwise, it will be plain text. */
-export function run(report: Report, sources: SourceMap, parameters?: ParameterMap|Root, extra?: ReportExtras): string {
+export function run(report: Report, sources: SourceMap, parameters?: ParameterMap | Root, extra?: ReportExtras): string {
   const ctx = parameters && 'root' in parameters && parameters.root === parameters ? parameters as Root : new Root(Object.assign({}, report.context), { parameters });
 
   if (report.sources) applySources(ctx, report.sources, sources);
@@ -623,7 +623,7 @@ function findWidgets(from: Widget, type: string, first?: boolean, results?: Widg
 }
 
 // TODO: this could try harder to carry context forward and use non-named sources if it seems necessary
-function runAsDelimited(report: Flow|Page, context: RootContext, extra?: ReportExtras): string {
+function runAsDelimited(report: Flow | Page, context: RootContext, extra?: ReportExtras): string {
   const [repeater] = findWidgets({ type: 'container', widgets: report.widgets }, 'repeater', true) as Repeater[];
   if (repeater && typeof (repeater?.source as any)?.source === 'string') {
     let headers: ValueOrExpr[];

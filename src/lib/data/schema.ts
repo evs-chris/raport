@@ -72,7 +72,7 @@ function getType(v: any): Type {
 export type ValidationResult = ValidationError[] | true;
 export interface ValidationError {
   error: string;
-  type?: 'strict'|'check'|'missing';
+  type?: 'strict' | 'check' | 'missing';
   path?: string;
   actual?: string;
   expected?: string;
@@ -80,7 +80,7 @@ export interface ValidationError {
   literal?: boolean;
 }
 
-export function validate(value: any, schema: Schema|string, mode?: 'strict'|'missing'|'loose'): ValidationResult {
+export function validate(value: any, schema: Schema | string, mode?: 'strict' | 'missing' | 'loose'): ValidationResult {
   if (typeof schema === 'string') {
     const parsed = parseSchema(schema);
     if ('message' in parsed) return [{ error: 'invalid schema' }];
@@ -92,7 +92,7 @@ export function validate(value: any, schema: Schema|string, mode?: 'strict'|'mis
   return _validate(value, schema, mode, '', ctx);
 }
 
-function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose', path: string, ctx: Context, required?: boolean): ValidationResult {
+function _validate(value: any, schema: Schema, mode: 'strict' | 'missing' | 'loose', path: string, ctx: Context, required?: boolean): ValidationResult {
   schema = schema || {};
   let _schema = schema;
   const errs: ValidationError[] = [];
@@ -147,7 +147,7 @@ function _validate(value: any, schema: Schema, mode: 'strict'|'missing'|'loose',
           break;
         } else if (miss && tmp.find(e => e.type === 'missing') || tmp.find(e => e.type === 'check')) {
           const t = tmp.filter(e => miss && e.type === 'missing' || e.type === 'check');
-        } else if (tmp.find(e => e.path !== p))  {
+        } else if (tmp.find(e => e.path !== p)) {
           if (!legit) legit = tmp
           else if (tmp.length < legit.length) legit = tmp;
           else if (legit.filter(e => e.literal).length > tmp.filter(e => e.literal).length) legit = tmp;

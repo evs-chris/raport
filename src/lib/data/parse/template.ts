@@ -26,14 +26,14 @@ interface Branch {
   value?: Value;
 }
 
-type Content = Value|Branch;
+type Content = Value | Branch;
 
 function branch(names: string[], value?: boolean): Parser<Branch> {
   if (value) return map(tag_value(names), ([name, value]) => ({ name, value }));
   else return map(seq(str('{{'), ws, str(...names), ws, str('}}')), ([, , name]) => ({ name }), 'tag');
 }
 
-function min_one<T>(values: Parser<Array<T>>): Parser<Array<T|Value>> {
+function min_one<T>(values: Parser<Array<T>>): Parser<Array<T | Value>> {
   return map(values, v => v.length < 1 ? [{ v: '' }] : v);
 }
 
@@ -62,7 +62,7 @@ function apply_first(content: Value[]): Value[] {
   return content;
 }
 
-function cond_branches(content: Array<Value|Branch>): Value[] {
+function cond_branches(content: Array<Value | Branch>): Value[] {
   const res: Value[] = [];
   let args = [];
   let hasTag = false;

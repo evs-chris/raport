@@ -8,20 +8,22 @@ q.test('checked op', t => {
 
   let n = 0;
   const args = [1, 'foo', false];
-  const op: Operator = { type: 'checked', names: ['tmp'], apply(_name, args) {
-    t.equal(args.length, 3);
-    t.equal(args[0], 1);
-    t.equal(args[1], 'foo');
-    t.equal(args[2], false);
-    return 'sure';
-  }, checkArg(name, num, last, value) {
-    t.equal(name, 'tmp');
-    t.equal(n++, num);
-    t.equal(last, 2);
-    t.equal(value, args[num]);
+  const op: Operator = {
+    type: 'checked', names: ['tmp'], apply(_name, args) {
+      t.equal(args.length, 3);
+      t.equal(args[0], 1);
+      t.equal(args[1], 'foo');
+      t.equal(args[2], false);
+      return 'sure';
+    }, checkArg(name, num, last, value) {
+      t.equal(name, 'tmp');
+      t.equal(n++, num);
+      t.equal(last, 2);
+      t.equal(value, args[num]);
 
-    return 'continue';
-  } };
+      return 'continue';
+    }
+  };
 
   registerOperator(op);
 
@@ -35,16 +37,18 @@ q.test('checked op short circuit', t => {
 
   let n = 0;
   const args = [1, 'foo', false];
-  const op: Operator = { type: 'checked', names: ['tmp'], apply() {
-    t.ok(false, 'should have short circuited');
-  }, checkArg(name, num, last, value) {
-    t.equal(name, 'tmp');
-    t.equal(n++, num);
-    t.equal(last, 2);
-    t.equal(value, args[num]);
+  const op: Operator = {
+    type: 'checked', names: ['tmp'], apply() {
+      t.ok(false, 'should have short circuited');
+    }, checkArg(name, num, last, value) {
+      t.equal(name, 'tmp');
+      t.equal(n++, num);
+      t.equal(last, 2);
+      t.equal(value, args[num]);
 
-    return { result: 'done' };
-  } };
+      return { result: 'done' };
+    }
+  };
 
   registerOperator(op);
 
@@ -58,21 +62,23 @@ q.test('checked op skip', t => {
 
   let n = 0;
   const args = [1, 'foo', false];
-  const op: Operator = { type: 'checked', names: ['tmp'], apply(_name, args) {
-    t.equal(args.length, 2);
-    t.equal(args[0], 1);
-    t.equal(args[1], false);
-    return 'sure';
-  }, checkArg(name, num, last, value) {
-    t.equal(name, 'tmp');
-    t.equal(n++, num);
-    t.equal(last, 2);
-    t.equal(value, args[num]);
+  const op: Operator = {
+    type: 'checked', names: ['tmp'], apply(_name, args) {
+      t.equal(args.length, 2);
+      t.equal(args[0], 1);
+      t.equal(args[1], false);
+      return 'sure';
+    }, checkArg(name, num, last, value) {
+      t.equal(name, 'tmp');
+      t.equal(n++, num);
+      t.equal(last, 2);
+      t.equal(value, args[num]);
 
-    if (num === 0) n++;
+      if (num === 0) n++;
 
-    return num === 0 ? { skip: 1, value } : 'continue';
-  } };
+      return num === 0 ? { skip: 1, value } : 'continue';
+    }
+  };
   const nop: Operator = { type: 'value', names: ['foo-nope'], apply() { t.ok(false, 'should have skipped second arg'); } };
 
   registerOperator(op, nop);

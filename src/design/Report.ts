@@ -14,24 +14,24 @@ import { operators as operator_docs, formats as format_docs, languageReference a
 export { highlight } from './Editor';
 
 export interface OperatorDoc {
-  op: string|string[];
+  op: string | string[];
   alias?: string;
   note?: string;
   sig: Array<{
     bin?: 1; un?: 1; agg?: 1; fmt?: 1;
     proto: string;
     desc: string;
-    eg?: string|string[];
+    eg?: string | string[];
   }>;
   opts?: Array<{
-    name: string|string[];
+    name: string | string[];
     type: string,
     desc: string;
   }>
 }
 
 export interface FormatDoc {
-  name: string|string[];
+  name: string | string[];
   alias?: boolean;
   desc: string;
   opts?: Array<{
@@ -75,7 +75,7 @@ ${doc.opts.map(o => `${Array.isArray(o.name) ? `${o.name[0]} (alias ${o.name.sli
       const val: any = { op, sig: [{ fmt: 1, proto: op, desc: f.desc }], opts: f.opts };
       if (i > 0) val.alias = true;
       docs.operators.push(val);
-      const txt = `${n}${all.length > 1 ? ` (alias: ${all.filter(nn => n !== nn).join(', ')})`: ''}${f.opts ? ` - #${n},${f.opts.map(o => `${o.name}${o.req ? '' : '?'}`).join(',')}` : ''}
+      const txt = `${n}${all.length > 1 ? ` (alias: ${all.filter(nn => n !== nn).join(', ')})` : ''}${f.opts ? ` - #${n},${f.opts.map(o => `${o.name}${o.req ? '' : '?'}`).join(',')}` : ''}
 ${f.desc ? `${f.desc}
 ` : ''}
 ${f.opts ? `
@@ -101,7 +101,7 @@ export interface JSONFetchSource {
   name: string;
   type: 'fetch';
   url: string;
-  method: 'GET'|'POST'|'PUT';
+  method: 'GET' | 'POST' | 'PUT';
   fetch: boolean;
   body?: string;
   headers?: Array<[string, string]>;
@@ -295,7 +295,7 @@ export class Designer extends Ractive {
 
   calcWidth(w: Widget, context: ContextHelper): string {
     if (!w.width || isComputed(w.width)) return '100%';
-    else if (w.width === 'grow' && Array.isArray(context.get('../../layout'))) return `(100% - ${context.get(`../../layout[${context.get('@index')}][0]`) || 0}rem)`; 
+    else if (w.width === 'grow' && Array.isArray(context.get('../../layout'))) return `(100% - ${context.get(`../../layout[${context.get('@index')}][0]`) || 0}rem)`;
     else if (typeof w.width === 'object' && 'percent' in w.width) return `${w.width.percent}%`;
     else if (typeof w.width === 'number') return `${w.width}rem`;
     else return '100%';
@@ -398,7 +398,7 @@ export class Designer extends Ractive {
 
   async eval() {
     const start = Date.now();
-    const str: string|any[] = this.get('temp.expr.str');
+    const str: string | any[] = this.get('temp.expr.str');
     let v: string = this.get('temp.expr.path');
     if (v && v.startsWith('widget.')) v = v.replace('widget', this.get('temp.widget'));
     const ctx = await this.buildLocalContext(v);
@@ -505,7 +505,7 @@ export class Designer extends Ractive {
     if (!this.get('show.proppop')) this.set('show.props', false);
   }
 
-  moveUp(ctx: ContextHelper, path?: string|string[], index?: number, end?: boolean) {
+  moveUp(ctx: ContextHelper, path?: string | string[], index?: number, end?: boolean) {
     const idx = index !== undefined ? index : ctx.get('@index');
     path = path || '../';
     if (!Array.isArray(path)) path = [path];
@@ -519,7 +519,7 @@ export class Designer extends Ractive {
     }
   }
 
-  moveDown(ctx: ContextHelper, path?: string|string[], index?: number, end?: boolean) {
+  moveDown(ctx: ContextHelper, path?: string | string[], index?: number, end?: boolean) {
     const idx = index !== undefined ? index : ctx.get('@index');
     path = path || '../';
     if (!Array.isArray(path)) path = [path];
@@ -620,7 +620,7 @@ export class Designer extends Ractive {
 
   pasteBefore(target: ContextHelper) {
     const w: ContextHelper = this.get('copy');
-      this.set('copy', undefined);
+    this.set('copy', undefined);
     if (!w || !target) return;
 
     const idx = target.get('@index');
@@ -676,7 +676,7 @@ export class Designer extends Ractive {
     return document.execCommand(name, ui || false, value === undefined ? null : value);
   }
 
-  retypeASTNode(path: string, type: 'operator'|'reference'|'string'|'number'|'undefined') {
+  retypeASTNode(path: string, type: 'operator' | 'reference' | 'string' | 'number' | 'undefined') {
     if (type === 'operator') {
       this.set(path, { op: '+' });
     } else if (type === 'reference') {
@@ -898,7 +898,7 @@ export class Designer extends Ractive {
       const txt = await res.text();
       if (set) this.set('data.data', txt);
       return txt;
-    }  catch {}
+    } catch { }
   }
 
   getSchema(ctx: Context) {
@@ -1051,7 +1051,7 @@ export class Designer extends Ractive {
     URL.revokeObjectURL(url);
   }
 
-  reportToString(compact: boolean, js: boolean, strings: 'json'|'template') {
+  reportToString(compact: boolean, js: boolean, strings: 'json' | 'template') {
     const json = this.get('report');
     if (!compact) return JSON.stringify(json, null, 2);
     else {
@@ -1159,11 +1159,11 @@ export class Designer extends Ractive {
     return /\.row\./.test(path);
   }
 
-  getPartStrings(arr: Array<string|{ text: string }>): string {
+  getPartStrings(arr: Array<string | { text: string }>): string {
     return arr.map(c => (c as any).text || c).join(' + ');
   }
 
-  nodeForPosition(pos: number, name?: true): ParseError|ParseNode[] {
+  nodeForPosition(pos: number, name?: true): ParseError | ParseNode[] {
     const str = this.get('temp.expr.str');
     const r = (this.get('temp.expr.html') || this.get('temp.expr.template') ? parseTemplate : parse)(str, { tree: true });
     if ('message' in r) return r;
@@ -1207,7 +1207,7 @@ export class Designer extends Ractive {
       if (ctx.get('^^/group')) ctx.splice('^^/group', ctx.get('@index'), 1);
       if (ctx.get('^^/group.length') === 0) ctx.set({ '^^/group': undefined, '^^/groupEnds': undefined });
     }
-    else if (ctx.get('../type') === 'repeater') ctx.set('../' + key, undefined); 
+    else if (ctx.get('../type') === 'repeater') ctx.set('../' + key, undefined);
     else if (path === 'report.header' || path === 'report.footer' || path === 'report.watermark' || path === 'report.overlay') this.set(path, undefined);
     else {
       if (Array.isArray(ctx.get('^^/layout'))) ctx.splice('^^/layout', ctx.get('@index'), 1);
@@ -1218,7 +1218,7 @@ export class Designer extends Ractive {
     }
   }
 
-  checkLink(type: 'expr'|'import'|'source'|'param'|'field', path?: string) {
+  checkLink(type: 'expr' | 'import' | 'source' | 'param' | 'field', path?: string) {
     let link: ReadLinkResult;
     if (type === 'import') link = this.readLink('data');
     else if (type === 'param') link = this.readLink('param');
@@ -1559,7 +1559,7 @@ export class Designer extends Ractive {
           for (let i = 0; i < arr.length; i++) {
             const v = typeof arr[i] === 'string' ? arr[i] : 'text' in arr[i] && typeof arr[i].text === 'string' ? arr[i].text : arr[i];
             const parsed = (html ? parseTemplate : parse)(v, { detailed: true, contextLines: 3, consumeAll: true });
-            const msg = ('marked' in parsed ? 
+            const msg = ('marked' in parsed ?
               `${'latest' in parsed ? `${parsed.latest.message || '(no message)'} on line ${parsed.latest.line} at column ${parsed.latest.column}\n\n${parsed.latest.marked}\n\n` : ''}${parsed.message || '(no message)'} on line ${parsed.line} at column ${parsed.column}\n\n${parsed.marked}\n\n` : '') + JSON.stringify(parsed, null, '  ');
 
             this.set('temp.expr.parsed', msg);
@@ -1579,7 +1579,7 @@ export class Designer extends Ractive {
 
             if ('message' in parsed) break;
           }
-        } catch {}
+        } catch { }
         this.evalLock = false;
       } else {
         this.set('temp.expr.parsed', undefined);
@@ -1685,7 +1685,7 @@ const designerOpts: ExtendOpts<Designer> = {
     },
   },
   observe: {
-    'report.type'(v: 'delimited'|'page'|'flow') {
+    'report.type'(v: 'delimited' | 'page' | 'flow') {
       if (v === 'delimited') {
         if (!this.get('report.fields')) this.set('report.fields', []);
       } else {
@@ -1697,7 +1697,7 @@ const designerOpts: ExtendOpts<Designer> = {
       this.evalLock = true;
       try {
         this.set(k.replace('temp', 'report'), (parse(`'${v.replace(/'/g, '\\\'')}'`) as Literal).v);
-      } catch {}
+      } catch { }
       this.evalLock = false;
     },
     'report.quote report.record report.field'(v: string, _o, k: string) {
@@ -1705,7 +1705,7 @@ const designerOpts: ExtendOpts<Designer> = {
       this.evalLock = true;
       try {
         this.set(k.replace('report', 'temp'), JSON.stringify(v).slice(1, -1));
-      } catch {}
+      } catch { }
       this.evalLock = false;
     },
     'temp.expr.template'() {
@@ -1728,7 +1728,7 @@ const designerOpts: ExtendOpts<Designer> = {
           } else {
             this.set('temp.expr.htmlstr', '');
           }
-        } catch {}
+        } catch { }
         this.evalLock = false;
       }
     },
@@ -1776,7 +1776,7 @@ const designerOpts: ExtendOpts<Designer> = {
       window.localStorage.setItem('settings', JSON.stringify(v));
     },
     'project projectSaved': {
-      handler: debounce(function() {
+      handler: debounce(function () {
         const project = this.get('project');
         const saved = this.get('projectSaved');
         if (!project) this.set('projectChanged', false);
@@ -1793,7 +1793,7 @@ const designerOpts: ExtendOpts<Designer> = {
       let str = this._contextText.value;
       try {
         str = JSON.stringify(JSON.parse(str), null, 2);
-      } catch {}
+      } catch { }
       if (str !== target) {
         this._contextText.value = target;
         this.autosize(this._contextText);
@@ -2020,7 +2020,7 @@ const designerOpts: ExtendOpts<Designer> = {
           node.classList.add('scroll-top', 'scroll-bottom');
         }
       }
-      const scrollb = function() {
+      const scrollb = function () {
         if (tm) return;
         tm = setTimeout(scroll, 250);
       }
@@ -2085,7 +2085,7 @@ const designerOpts: ExtendOpts<Designer> = {
     invalidated(node) {
       const ctx = this.getContext(node);
       return {
-        teardown() {},
+        teardown() { },
         invalidate() {
           if (ctx.hasListener('invalidate')) ctx.raise('invalidate', {});
         }
@@ -2169,7 +2169,7 @@ function tryParseData(str: string, header?: boolean): any {
     }
 
     const brace = /[\{\[]/.exec(str);
-    if (brace && brace.index >=0 && brace.index <= 20) {
+    if (brace && brace.index >= 0 && brace.index <= 20) {
       const res = evaluate(str);
       if (typeof res === 'string') {
         try {
@@ -2279,7 +2279,7 @@ function stripDefaults(json: any): any {
 }
 
 const fmtOpts = { throw: true, consumeAll: true };
-function fmt(str: Computed|ValueOrExpr|Array<ValueOrExpr|Span>, template?: boolean, compact?: boolean, stringifyOpts?: StringifyOpts): Computed|ValueOrExpr|Array<ValueOrExpr|Span> {
+function fmt(str: Computed | ValueOrExpr | Array<ValueOrExpr | Span>, template?: boolean, compact?: boolean, stringifyOpts?: StringifyOpts): Computed | ValueOrExpr | Array<ValueOrExpr | Span> {
   if (typeof str !== 'string' && typeof str !== 'object') return str;
   const parser = template ? parseTemplate : parse;
   const opts = Object.assign(fmtOpts, { template });
@@ -2342,7 +2342,7 @@ function fmtAll(json: any, compact?: boolean, fopts?: StringifyOpts): any {
 }
 
 const plainKeys = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
-function jsonToJS(json: any, strings: 'json'|'template'): string {
+function jsonToJS(json: any, strings: 'json' | 'template'): string {
   if (typeof json === 'number') return `${json}`;
   else if (typeof json === 'boolean') return json ? 'true' : 'false';
   else if (json === null) return 'null';

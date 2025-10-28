@@ -21,7 +21,7 @@ export function csv(options?: CSVOptions) {
   const _parse = parser(csv, { consumeAll: true });
 
   return function parse(input: string, options?: ParseOptions) {
-    const res: ParseNode|string[][]|ParseError = _parse(input, options);
+    const res: ParseNode | string[][] | ParseError = _parse(input, options);
     if (Array.isArray(res) && res.length > 0) {
       let header: Array<[string, number]> = undefined;
       if (Array.isArray(opts.header)) header = opts.header.map((k, i) => [k, i]);
@@ -45,7 +45,7 @@ export interface CSVOptions {
   quote: string;
   fixedSize?: boolean;
   order?: boolean;
-  header?: boolean|string[]|{[k: string]:any};
+  header?: boolean | string[] | { [k: string]: any };
 }
 
 // TODO: handle ascii curses tables?
@@ -55,7 +55,7 @@ export function table(options?: TableOptions) {
 
   return function parse(input: string, options?: ParseOptions) {
     const parts = input.split(/\r?\n/).filter(v => v);
-    
+
     if (parts[1][0] === '|') {
       for (let i = 0; i < parts.length; i++) {
         const p = parts[i];
@@ -112,9 +112,9 @@ function isTableOpts(opts?: DelimitedOptions): opts is TableOptions {
   return opts && 'table' in opts && opts.table === 1;
 }
 
-export function parse(data: string, options?: DelimitedOptions & { header: true|1|string[]|{[k: string]: any} }): any[];
+export function parse(data: string, options?: DelimitedOptions & { header: true | 1 | string[] | { [k: string]: any } }): any[];
 export function parse(data: string, options?: DelimitedOptions & { header?: false }): string[][];
-export function parse(data: string, options?: DelimitedOptions): Array<string[]|any> {
+export function parse(data: string, options?: DelimitedOptions): Array<string[] | any> {
   let values: string[][];
   if (isTableOpts(options)) {
     values = table(options)(data);

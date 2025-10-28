@@ -74,12 +74,12 @@ q.test('simple applicative operations', t => {
 q.test('parser namespaces cache politely', t => {
   const ctx = new Root();
   let exprCount = 0, tplCount = 0;
-  const parseWrapper = function(...args: any[]) {
+  const parseWrapper = function (...args: any[]) {
     exprCount++;
     return parse.apply(null, args);
   };
   (parseWrapper as any).namespace = 'expr';
-  const parseTplWrapper = function(...args: any[]) {
+  const parseTplWrapper = function (...args: any[]) {
     tplCount++;
     return parseTemplate.apply(null, args);
   };

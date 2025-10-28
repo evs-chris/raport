@@ -31,12 +31,12 @@ const sqlEqual = (v1: any, v2: any) => {
   else return v1 == v2;
 };
 
-type Identifier = true|string|((v: any) => any);
+type Identifier = true | string | ((v: any) => any);
 export interface IdentityMap {
   [path: string]: Identifier;
 }
 
-type EqualizerValue = 'strict'|'loose'|'sql'|((v1: any, v2: any) => boolean);
+type EqualizerValue = 'strict' | 'loose' | 'sql' | ((v1: any, v2: any) => boolean);
 interface EqualizerOptions {
   type?: EqualizerValue;
   /** A map of identity methods to use when comparing elements within an array, making arrays act as a set */
@@ -52,7 +52,7 @@ function checkIdentity(map: IdentityMap, path: string) {
 
 export interface DiffOpts {
   equal?: Equalizer;
-  keys?: 'all'|'common';
+  keys?: 'all' | 'common';
 }
 
 export function diff(v1: any, v2: any, opts?: DiffOpts): Diff {
@@ -61,7 +61,7 @@ export function diff(v1: any, v2: any, opts?: DiffOpts): Diff {
   return _diff(v1, v2, '', {}, eq, typeof opts?.equal === 'object' ? opts?.equal.identity : undefined, opts?.keys || 'all');
 }
 
-function _diff(v1: any, v2: any, path: string, diff: Diff, equal: (v1: any, v2: any) => boolean, ident?: IdentityMap, keyMode?: 'all'|'common'): Diff {
+function _diff(v1: any, v2: any, path: string, diff: Diff, equal: (v1: any, v2: any) => boolean, ident?: IdentityMap, keyMode?: 'all' | 'common'): Diff {
   if (typeof v1 !== 'object' || typeof v2 !== 'object') {
     if (v1 === v2) return diff;
     diff[path] = [v1, v2];

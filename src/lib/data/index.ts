@@ -17,7 +17,7 @@ export interface Schema {
   /** Types of tuple or union */
   types?: Schema[];
   /** Literal value of field */
-  literal?: string|number|boolean|undefined|null;
+  literal?: string | number | boolean | undefined | null;
   /** Addition validators on the value */
   checks?: ValueOrExpr[];
   /** An optional map of named types */
@@ -61,9 +61,9 @@ export class CachedDataSource<R = any> implements DataSource<any, R> {
 
 export interface SourceMap { [key: string]: DataSet }
 
-export type ValueType = 'string'|'number'|'boolean'|'date'|'object'|'literal';
-export type ArrayType = 'string[]'|'number[]'|'boolean[]'|'date[]'|'object[]'|'tuple[]'|'union[]'|'value[]';
-export type Type = ValueType|ArrayType|'value'|'array'|'union'|'tuple'|'any';
+export type ValueType = 'string' | 'number' | 'boolean' | 'date' | 'object' | 'literal';
+export type ArrayType = 'string[]' | 'number[]' | 'boolean[]' | 'date[]' | 'object[]' | 'tuple[]' | 'union[]' | 'value[]';
+export type Type = ValueType | ArrayType | 'value' | 'array' | 'union' | 'tuple' | 'any';
 
 export interface Field extends Schema {
   /** The property name for the field */
@@ -84,16 +84,16 @@ export interface Operation {
   meta?: any;
 }
 
-export type Sort = ValueOrExpr|SortBy;
-export type SortBy = SortBySQL|SortByDir;
+export type Sort = ValueOrExpr | SortBy;
+export type SortBy = SortBySQL | SortByDir;
 export interface SortByBase {
   by: ValueOrExpr;
 }
 export interface SortBySQL extends SortByBase {
-  desc?: ValueOrExpr|boolean;
+  desc?: ValueOrExpr | boolean;
 }
 export interface SortByDir extends SortByBase {
-  dir?: ValueOrExpr|'asc'|'desc';
+  dir?: ValueOrExpr | 'asc' | 'desc';
 }
 
 export type Operator = AggregateOperator | ValueOperator | CheckedOperator;
@@ -126,7 +126,7 @@ export interface AggregateOperator extends BaseOperator {
   value?: true;
 }
 
-export type CheckResult = 'continue'|{ result: any }|{ skip: number, value?: any };
+export type CheckResult = 'continue' | { result: any } | { skip: number, value?: any };
 
 export interface Group<R = any> {
   grouped: number;
@@ -144,7 +144,7 @@ export function getKeypath(ref: Reference): Keypath {
   else return { k: [] };
 }
 
-export function safeGet(root: Context, path: string|Keypath): any {
+export function safeGet(root: Context, path: string | Keypath): any {
   if (!path) return root.value;
   const p = typeof path === 'string' ? parsePath(path) : path;
 
@@ -236,7 +236,7 @@ export function safeGet(root: Context, path: string|Keypath): any {
   }
 }
 
-export function safeSet(root: Context, path: string|Keypath, value: any, islet?: boolean): any {
+export function safeSet(root: Context, path: string | Keypath, value: any, islet?: boolean): any {
   if (!path) return;
   const p = typeof path === 'string' ? (islet ? parseLetPath(path) : parsePath(path)) : path;
 
@@ -278,11 +278,11 @@ export function safeSet(root: Context, path: string|Keypath, value: any, islet?:
       if (!(key in o) || o[key] == null) o[key] = typeof next === 'number' ? [] : {};
       o = o[key];
     }
-    
+
     if (o) {
       const part = parts[last];
       let k = keys[last];
-      if (o != null && typeof k === 'number' && typeof part === 'object' && 'anchor' in part && part.anchor === 'end' && typeof o.length === 'number') k = o.length- 1 - k;
+      if (o != null && typeof k === 'number' && typeof part === 'object' && 'anchor' in part && part.anchor === 'end' && typeof o.length === 'number') k = o.length - 1 - k;
       const cur = o[k];
       o[k] = value;
       return cur;
@@ -291,8 +291,8 @@ export function safeSet(root: Context, path: string|Keypath, value: any, islet?:
 }
 
 export function evaluate(value: ValueOrExpr): any;
-export function evaluate(root: Context|{ context: Context }|any, value: ValueOrExpr): any;
-export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, value?: ValueOrExpr): any {
+export function evaluate(root: Context | { context: Context } | any, value: ValueOrExpr): any;
+export function evaluate(root: ValueOrExpr | Context | { context: Context } | any, value?: ValueOrExpr): any {
   let r: Context;
   let e: ValueOrExpr;
   if (!value && isValueOrExpr(root)) {
@@ -315,8 +315,8 @@ export function evaluate(root: ValueOrExpr|Context|{ context: Context }|any, val
 }
 
 export function template(template: string): string;
-export function template(root: Context|{ context: Context }|any, template: string): string;
-export function template(root: string|Context|{ context: Context }|any, template?: string): string {
+export function template(root: Context | { context: Context } | any, template: string): string;
+export function template(root: string | Context | { context: Context } | any, template?: string): string {
   let r: Context;
   let t: string;
   if (typeof root === 'string') {
@@ -625,11 +625,11 @@ export function applyOperator(root: Context, operation: Operation): any {
 
 export interface Keypath {
   u?: number;
-  p?: '!'|'~'|'*'|'@';
-  k: Array<string|number|Value|ValueWithAnchor>;
+  p?: '!' | '~' | '*' | '@';
+  k: Array<string | number | Value | ValueWithAnchor>;
 }
 
-export function isKeypath(v: any): v is string|Keypath {
+export function isKeypath(v: any): v is string | Keypath {
   return typeof v === 'string' || (typeof v === 'object' && Array.isArray(v.k));
 }
 
@@ -645,7 +645,7 @@ export function isOperation(v: any): v is Operation {
   return typeof v === 'object' && typeof v.op === 'string';
 }
 
-export interface Reference { r: string|Keypath; c?: string[] };
+export interface Reference { r: string | Keypath; c?: string[] };
 export interface Application { a: Value; n?: string[]; c?: string[] };
 export interface Literal { v: any; s?: 1; c?: string[]; q?: string };
 
@@ -680,9 +680,9 @@ export type DateRelSpan = DateRelSpanMS | DateRelSpanFull;
 /** A date span covering last|this|next day|week|month|year */
 export interface DateRelRange {
   /** Starting point (d: day, w: week, m: month, y: year) */
-  f: 'd'|'w'|'m'|'y';
+  f: 'd' | 'w' | 'm' | 'y';
   /** Offset in units (-1: last, 0: this, 1: next) */
-  o: -1|0|1;
+  o: -1 | 0 | 1;
   /** Anchor to the end for non-range usage */
   e?: 1;
   /** Timezone offset */
@@ -693,7 +693,7 @@ export interface DateRelTimeRange {
   /** Starting point (day) */
   f: 'd';
   /** Offset in units (-1: yesterday, 0: today, 1: tomorrow) */
-  o: -1|0|1;
+  o: -1 | 0 | 1;
   /** Time array [hour, minute, second, millisecond, timezone offset] */
   t: [number, number?, number?, number?, number?];
   /** Anchor to the end for non-range usage */
@@ -702,7 +702,7 @@ export interface DateRelTimeRange {
 /** A date span covering this year, month, or week to the current date */
 export interface DateRelToDate {
   /** Starting point */
-  f: 'w'|'m'|'y';
+  f: 'w' | 'm' | 'y';
   /** Offset */
   o: 0;
   /** Relative to current date */
@@ -722,7 +722,7 @@ export interface DateExactRange {
 }
 export type DateRel = Date | DateRelSpan | DateRelRange | DateRelTimeRange | DateRelToDate | DateExactRange;
 
-export type TimeSpan = number|TimeSpanMS|FullTimeSpan;
+export type TimeSpan = number | TimeSpanMS | FullTimeSpan;
 export interface TimeSpanMS {
   ms: number;
 }
@@ -731,9 +731,9 @@ export interface FullTimeSpan {
   d: [number?, number?, number?, number?, number?, number?, number?];
 }
 
-export type ValueOrExpr = string|Value;
+export type ValueOrExpr = string | Value;
 export type Value = Reference | Literal | Operation | Application | ParseError;
-export type ValueWithAnchor = Value & { anchor?: 'start'|'end'; slice?: ValueWithAnchor };
+export type ValueWithAnchor = Value & { anchor?: 'start' | 'end'; slice?: ValueWithAnchor };
 
 export function isValueOrExpr(o: any): o is ValueOrExpr {
   return typeof o === 'string' || isValue(o);
@@ -756,7 +756,7 @@ export interface ParameterBase {
   required?: boolean;
   refine?: string;
   init?: ValueOrExpr;
-  options?: Array<string|{ label: string; value: any }>;
+  options?: Array<string | { label: string; value: any }>;
 }
 
 export interface ParameterMap {
@@ -841,7 +841,7 @@ export function extend(context: Context, opts: ExtendOptions): Context {
 
 export const formats: { [name: string]: { apply: (value: any, args?: any[], opts?: OperatorOptions) => string, defaults: { [key: string]: any } } } = {};
 export const virtualFormats: { [name: string]: { defaults: { [key: string]: any } } } = {};
-export function registerFormat<T = any>(name: string|string[], format: (value: T, args?: any[], opts?: OperatorOptions) => string, defaults: { [key: string]: any } = {}) {
+export function registerFormat<T = any>(name: string | string[], format: (value: T, args?: any[], opts?: OperatorOptions) => string, defaults: { [key: string]: any } = {}) {
   if (Array.isArray(name)) name.forEach(n => formats[n] = { apply: format, defaults });
   else formats[name] = { apply: format, defaults };
 }
@@ -1088,7 +1088,7 @@ export function datesDiff(l: Date, r: Date): FullTimeSpan {
   return res;
 }
 
-export function dateAndTimespan(l: Date, r: TimeSpan, m: 1|-1): Date {
+export function dateAndTimespan(l: Date, r: TimeSpan, m: 1 | -1): Date {
   if (typeof r === 'number') return new Date(+l + r * m);
   else if (isTimespanMS(r)) return new Date(+l + r.ms * m);
   else {

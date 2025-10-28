@@ -5,10 +5,12 @@ q.module('data/ops/value');
 
 q.test('simple op', t => {
   t.expect(2);
-  const op: Operator = { type: 'value', names: ['tmp'], apply(name) {
-    t.equal(name, 'tmp');
-    return 'yep';
-  } };
+  const op: Operator = {
+    type: 'value', names: ['tmp'], apply(name) {
+      t.equal(name, 'tmp');
+      return 'yep';
+    }
+  };
 
   registerOperator(op);
 
@@ -21,11 +23,13 @@ q.test('op with args', t => {
   t.expect(6);
 
   let len = 1;
-  const op: Operator = { type: 'value', names: ['tmp'], apply(name, values) {
-    t.equal(values.length, len);
-    t.equal(name, 'tmp');
-    return values[0];
-  } };
+  const op: Operator = {
+    type: 'value', names: ['tmp'], apply(name, values) {
+      t.equal(values.length, len);
+      t.equal(name, 'tmp');
+      return values[0];
+    }
+  };
 
   registerOperator(op);
 
@@ -39,9 +43,11 @@ q.test('op with args', t => {
 q.test('multi-named ops', t => {
   t.expect(2);
   let name = 'foo'
-  const op: Operator = { type: 'value', names: ['foo', 'bar'], apply(n) {
-    t.equal(name, n);
-  } };
+  const op: Operator = {
+    type: 'value', names: ['foo', 'bar'], apply(n) {
+      t.equal(name, n);
+    }
+  };
 
   registerOperator(op);
 
@@ -54,9 +60,11 @@ q.test('multi-named ops', t => {
 
 q.test('ops with op args', t => {
   t.expect(1);
-  const op: Operator = { type: 'value', names: ['tmp'], apply(_name, args) {
-    t.equal(args[0], 10);
-  } };
+  const op: Operator = {
+    type: 'value', names: ['tmp'], apply(_name, args) {
+      t.equal(args[0], 10);
+    }
+  };
 
   registerOperator(op);
 

@@ -6,7 +6,7 @@ interface BoolStyle {
 }
 interface ValueStyle<T> {
   tag: string;
-  value: T|null;
+  value: T | null;
 }
 
 // zero width space
@@ -24,26 +24,26 @@ const places = str('left', 'right', 'top', 'bottom', 'center');
 const align = map(seq(str('align'), opt(seq(str('='), alt(
   seq(str('top', 'middle', 'bottom', 'base'), opt(seq(sp, str('left', 'right', 'center')))),
   seq(str('left', 'right', 'center'), opt(seq(sp, str('top', 'middle', 'bottom', 'base'))))
-)))), ([,v]) => ({ tag: 'align', value: v ? [v[1][0], v[1][1]?.[1]].filter(v => v) : null }));
+)))), ([, v]) => ({ tag: 'align', value: v ? [v[1][0], v[1][1]?.[1]].filter(v => v) : null }));
 const valign = map(seq(str('valign'), opt(seq(str('='), str('top', 'middle', 'bottom', 'base')))), ([, v]) => ({ tag: 'valign', value: v ? v[1] : null }));
 
 const pad = map(seq(str('pad'), opt(seq(str('='), rep1sep(number, sp)))), ([, v]) => ({ tag: 'pad', value: v ? v[1] : null }));
 const margin = map(seq(str('margin'), opt(seq(str('='), rep1sep(number, sp)))), ([, v]) => ({ tag: 'margin', value: v ? v[1] : null }));
-const width = map(seq(str('width', 'w'), opt(seq(str('='), remOrPercent))), ([,v]) => ({ tag: 'width', value: v ? v[1] : null }));
-const height = map(seq(str('height', 'h'), opt(seq(str('='), remOrPercent))), ([,v]) => ({ tag: 'height', value: v ? v[1] : null }));
-const line = map(seq(str('line'), opt(seq(str('='), number))), ([,v]) => ({ tag: 'line', value: v ? v[1] : null }));
-const fg = map(seq(str('fg', 'color', 'fore'), opt(seq(str('='), color))), ([,v]) => ({ tag: 'fg', value: v ? v[1] : null }));
-const bg = map(seq(str('bg', 'background', 'back'), opt(seq(str('='), color))), ([,v]) => ({ tag: 'bg', value: v ? v[1] : null }));
-const size = map(seq(str('size'), opt(seq(str('='), number))), ([,v]) => ({ tag: 'size', value: v ? v[1] : null }));
-const font = map(seq(str('font'), opt(seq(str('='), read1To(',|')))), ([,v]) => ({ tag: 'font', value: v ? v[1] : null }));
-const rotate = map(seq(str('rotate'), opt(seq(str('='), number, ws, opt(str('left', 'right')), opt(seq(sp, alt(remOrPercent, places), sp, alt(remOrPercent, places)))))), ([,v]) => ({ tag: 'rotate', value: v ? { turn: v[1] * (v[3] === 'left' ? -1 : 1), origin: v[4] ? [v[4][1], v[4][3]] : undefined } : null }));
-const move = map(seq(str('move'), opt(seq(str('='), remOrPercent, sp, remOrPercent))), ([,v]) => ({ tag: 'move', value: v ? { x: v[1], y: v[3] } : null }));
+const width = map(seq(str('width', 'w'), opt(seq(str('='), remOrPercent))), ([, v]) => ({ tag: 'width', value: v ? v[1] : null }));
+const height = map(seq(str('height', 'h'), opt(seq(str('='), remOrPercent))), ([, v]) => ({ tag: 'height', value: v ? v[1] : null }));
+const line = map(seq(str('line'), opt(seq(str('='), number))), ([, v]) => ({ tag: 'line', value: v ? v[1] : null }));
+const fg = map(seq(str('fg', 'color', 'fore'), opt(seq(str('='), color))), ([, v]) => ({ tag: 'fg', value: v ? v[1] : null }));
+const bg = map(seq(str('bg', 'background', 'back'), opt(seq(str('='), color))), ([, v]) => ({ tag: 'bg', value: v ? v[1] : null }));
+const size = map(seq(str('size'), opt(seq(str('='), number))), ([, v]) => ({ tag: 'size', value: v ? v[1] : null }));
+const font = map(seq(str('font'), opt(seq(str('='), read1To(',|')))), ([, v]) => ({ tag: 'font', value: v ? v[1] : null }));
+const rotate = map(seq(str('rotate'), opt(seq(str('='), number, ws, opt(str('left', 'right')), opt(seq(sp, alt(remOrPercent, places), sp, alt(remOrPercent, places)))))), ([, v]) => ({ tag: 'rotate', value: v ? { turn: v[1] * (v[3] === 'left' ? -1 : 1), origin: v[4] ? [v[4][1], v[4][3]] : undefined } : null }));
+const move = map(seq(str('move'), opt(seq(str('='), remOrPercent, sp, remOrPercent))), ([, v]) => ({ tag: 'move', value: v ? { x: v[1], y: v[3] } : null }));
 
 const trash = map(readTo(',|'), v => ({ tag: 'trash', value: v }));
 
 const border = map(seq(
-  str('border'), opt(seq(str('='),opt(str('solid', 'dot', 'dash', 'double')), ws,
-  rep1sep(integer, sp), ws, opt(seq(str('/'), ws, rep1sep(number, sp))), ws, opt(color),
+  str('border'), opt(seq(str('='), opt(str('solid', 'dot', 'dash', 'double')), ws,
+    rep1sep(integer, sp), ws, opt(seq(str('/'), ws, rep1sep(number, sp))), ws, opt(color),
   ))), ([, v]) => ({ tag: 'border', value: v ? { style: v[1] || 'solid', width: v[3], radius: v[5]?.[2], color: v[7] } : null }));
 
 const bools = map(alt(str('sub', 'sup', 'bold', 'italic', 'underline', 'strike', 'overline', 'overflow', 'nowrap', 'pre', 'br', 'b', 'i', 'u')), tag => ({ tag }));
@@ -51,7 +51,7 @@ const bools = map(alt(str('sub', 'sup', 'bold', 'italic', 'underline', 'strike',
 const tag: Parser<Style[]> = map(seq(str('|'), ws, rep1sep(alt(border, align, fg, bg, valign, size, line, font, pad, margin, width, height, bools, rotate, move, trash), seq(ws, str(','), ws), 'allow'), readTo('|'), str('|')), ([, , tags]) => tags.filter(t => t.tag !== 'trash'));
 const text = map(rep1(alt(read1To('\\|', true), map(str('\\|'), () => '|'))), txts => txts.join(''));
 
-const all = rep(alt<Style[]|string>(text, tag))
+const all = rep(alt<Style[] | string>(text, tag))
 
 const parser = makeParser(all, { consumeAll: true, undefinedOnError: true });
 
@@ -68,7 +68,7 @@ const aliases = {
   u: 'underline',
 }
 
-function process(stuff: Array<Style[]|string>): string {
+function process(stuff: Array<Style[] | string>): string {
   let res = '';
   let open = false;
   const state: State = { bool: {}, value: {} };
@@ -127,7 +127,7 @@ export function style(str: string): string {
 
 const flexAlign = { top: 'start', middle: 'center', bottom: 'end', base: 'baseline' };
 const borderStyle = { dot: 'dotted', dash: 'dashed' };
-function getStyle(state: State, which: 'inline'|string[]) {
+function getStyle(state: State, which: 'inline' | string[]) {
   let res = '';
 
   if (which === 'inline') {

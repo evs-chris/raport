@@ -59,7 +59,7 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   } else if (w.font && w.font.right) {
     s += `padding-right:${w.font.right}rem;`;
   }
-  
+
   if ((opts && opts.font) || w.font) s += styleFont((opts && opts.font) || w.font, context);
   if (w.border) s += styleBorder(w, context, placement);
 
@@ -68,7 +68,7 @@ export function style(w: Widget, placement: Placement, context: RenderContext, o
   return [s, i];
 }
 
-export function styleExtra(w: { bg?: ValueOrExpr|Computed; radius?: ValueOrExpr|Computed }, context: RenderContext): string {
+export function styleExtra(w: { bg?: ValueOrExpr | Computed; radius?: ValueOrExpr | Computed }, context: RenderContext): string {
   let s = '';
 
   const bg = maybeComputed(w.bg, context);
@@ -105,7 +105,7 @@ export function styleFont(f: Font, context: RenderContext): string {
   return s;
 }
 
-export function styleBorder(w: { border?: number|Borders|number[]|string }, context: RenderContext, placement: Placement): string {
+export function styleBorder(w: { border?: number | Borders | number[] | string }, context: RenderContext, placement: Placement): string {
   const b = expandBorder(w, context, placement);
   if (b[0] + b[1] + b[2] + b[3]) return `border-style:solid;border-width:${b[0]}rem ${b[1]}rem ${b[2]}rem ${b[3]}rem;`;
   return '';
@@ -113,6 +113,6 @@ export function styleBorder(w: { border?: number|Borders|number[]|string }, cont
 
 export function styleImage(fit?: string): [string, string] {
   const s = `background-size:${!fit || fit === 'contain' ? 'contain;background-position:center' : fit === 'stretch' ? '100% 100%' : 'cover'};`;
-  
+
   return [s, ''];
 }

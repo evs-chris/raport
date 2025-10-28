@@ -5,13 +5,13 @@ import { Schema } from '../index';
 const checkIdent = new RegExp(`[${endRef.split('').map(v => `\\${v}`).join('')}]`);
 
 export interface ListOverride {
-  base: boolean|number;
-  array?: boolean|number;
-  union?: boolean|number;
-  args?: boolean|number;
-  keys?: boolean|number;
-  ops?: boolean|number;
-  opchain?: boolean|number;
+  base: boolean | number;
+  array?: boolean | number;
+  union?: boolean | number;
+  args?: boolean | number;
+  keys?: boolean | number;
+  ops?: boolean | number;
+  opchain?: boolean | number;
 }
 
 interface _ListOverride {
@@ -32,7 +32,7 @@ export interface BaseStringifyOpts {
   /** Enable comma separators in lists of values. */
   listCommas?: boolean;
   /** Whether to wrap lists of items. `true` wraps every item. A number targets that many characters in the output to cause a wrap. The default is 60 chars. */
-  listWrap?: boolean|number|ListOverride;
+  listWrap?: boolean | number | ListOverride;
   /** Output template formatted expressions. */
   template?: boolean;
   /** Output unindented single line expressions. */
@@ -46,7 +46,7 @@ export interface SimpleStringifyOpts extends BaseStringifyOpts {
   /** Render all operations as s-expressions rather than sugary raport expressions. */
   SExprOps?: false;
   /** How to render pipes: op as a binary operator, call as a function call, or default/undefined as originally specified */
-  pipes?: 'op'|'call';
+  pipes?: 'op' | 'call';
 }
 export interface SExprStringifyOpts extends BaseStringifyOpts {
   /** Render all operations as s-expressions rather than sugary raport expressions. */
@@ -69,7 +69,7 @@ let _noindent: boolean = false;
 let _listwrap: _ListOverride = { array: 60, union: 60, args: 60, keys: 60, ops: 30, opchain: 60 };
 let _html: boolean = false;
 let _nochecks: boolean = false;
-let _pipes: 'op'|'call'|undefined;
+let _pipes: 'op' | 'call' | undefined;
 
 let _level = 0;
 let _first = false;
@@ -190,7 +190,7 @@ function _stringify(value: ValueOrExpr): string {
   return stringed;
 }
 
-function stringifyBinopArg(op: string, arg: ValueOrExpr, pos: 1|2): string {
+function stringifyBinopArg(op: string, arg: ValueOrExpr, pos: 1 | 2): string {
   let res: string;
   if (op === '**' && pos === 1 && typeof arg !== 'string' && 'op' in arg && arg.op === '**') res = `(${_stringify(arg)})`;
   if (typeof arg !== 'string' && 'op' in arg) {
@@ -344,7 +344,7 @@ function stringifyLiteral(value: Literal): string {
   }
 }
 
-function offsetToTimezone(dir: 1|-1, offset?: number): string {
+function offsetToTimezone(dir: 1 | -1, offset?: number): string {
   if (offset == null) return '';
   offset = offset * dir;
   const o = Math.abs(offset);
@@ -479,7 +479,7 @@ function wrapArgs(open: string, args: ValueOrExpr[], opts: ValueOrExpr, close: s
         _level++;
         _first = i === 1;
         const res = _stringify(args[i]);
-        if (res[0] === '\n')  parts[parts.length - 1] += ' ' + res.replace(leadingSpace, '');
+        if (res[0] === '\n') parts[parts.length - 1] += ' ' + res.replace(leadingSpace, '');
         else parts[parts.length - 1] += res;
         _level--;
       }
@@ -501,7 +501,7 @@ function wrapArgs(open: string, args: ValueOrExpr[], opts: ValueOrExpr, close: s
         _level++;
         _first = i === 1;
         const res = _stringify(args[i]);
-        if (res[0] === '\n')  parts[parts.length - 1] += ' ' + res.replace(leadingSpace, '');
+        if (res[0] === '\n') parts[parts.length - 1] += ' ' + res.replace(leadingSpace, '');
         else parts[parts.length - 1] += res;
         _level--;
       }
@@ -771,7 +771,7 @@ export function stringifySchema(schema: Schema, noChecks?: boolean): string {
     else if (wrap === 1) fin = `${lopen}${strs.join(`${join}${nl}${l2}`)}${lclose}`;
     else {
       let line = '';
-      
+
       const last = strs.length - 1;
       for (let i = 0; i < strs.length; i++) {
         if (~strs[i].indexOf('\n')) {

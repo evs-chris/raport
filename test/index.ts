@@ -10,7 +10,7 @@ import './data/ops/date';
 const q = QUnit;
 
 q.extend(q.assert, {
-  matches(this: Assert, value: any, target: string|RegExp, message?: string) {
+  matches(this: Assert, value: any, target: string | RegExp, message?: string) {
     if (typeof target === 'string') {
       if (!(new RegExp(target)).test(value)) {
         this.pushResult({
@@ -43,6 +43,6 @@ q.extend(q.assert, {
 
 declare global {
   interface Assert {
-    matches(value: any, target: string|RegExp, message?: string): void;
+    matches(value: any, target: string | RegExp, message?: string): void;
   }
 }

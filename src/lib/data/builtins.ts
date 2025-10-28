@@ -34,13 +34,13 @@ function stringTimes(str: string, times: number): string {
   return res;
 }
 
-type RoundingMethod = 'half-up'|'half-down'|'half-even'|'half-odd'|'half-to-0'|'half-from-0'|'to-0'|'from-0'|'up'|'down';
+type RoundingMethod = 'half-up' | 'half-down' | 'half-even' | 'half-odd' | 'half-to-0' | 'half-from-0' | 'to-0' | 'from-0' | 'up' | 'down';
 const roundDefaults = {
   places: 2,
   'all-numeric': false,
   method: 'half-even' as RoundingMethod,
 };
-export function round(amt: string|number, settings?: { places: number; method: RoundingMethod }): string {
+export function round(amt: string | number, settings?: { places: number; method: RoundingMethod }): string {
   const place = settings?.places ?? roundDefaults.places;
   const type = settings?.method ?? roundDefaults.method;
   if (place > 0) {
@@ -281,7 +281,7 @@ export function similar(a: string, b: string, threshhold: number = 0.5, fudges: 
   }
 }
 
-export function inRange(v: number, range: Array<number|[number, number]|{ not: number|[number, number] }>): boolean {
+export function inRange(v: number, range: Array<number | [number, number] | { not: number | [number, number] }>): boolean {
   let found = false;
   let excluded = false;
   for (const r of range) {
@@ -406,7 +406,7 @@ registerOperator(
     }
     const res = !!~r.indexOf(l);
     return name === 'in' ? res : !res;
-  }), 
+  }),
   simple(['contains', 'does-not-contain'], (name: string, values: any[], _opts, ctx: Context): boolean => {
     const [l, r] = values;
     if (isDateRel(l)) {
@@ -439,7 +439,7 @@ registerOperator(
     else return evaluate(c, r);
   }),
   simple(['generate'], (_name: string, [apply], opts, ctx) => {
-    let r: ParseError|Array<number|[number, number]|{ not: number|[number, number] }>;
+    let r: ParseError | Array<number | [number, number] | { not: number | [number, number] }>;
     if (apply && isApplication(apply)) {
       const res = [];
       let state = opts;
@@ -829,7 +829,7 @@ registerOperator(
       return parseFloat(values[0]);
     }
     if (Array.isArray(values[0])) return values[0].concat.apply(values[0], values.slice(1));
-    else if (isDateRel(values[0]) && values.length > 1 && values.slice(1).reduce((a, c) => a && isTimespan(c), true)) return values.slice(1).reduce((a, c) => dateAndTimespan(a, c, 1), dateRelToDate(values[0])); 
+    else if (isDateRel(values[0]) && values.length > 1 && values.slice(1).reduce((a, c) => a && isTimespan(c), true)) return values.slice(1).reduce((a, c) => dateAndTimespan(a, c, 1), dateRelToDate(values[0]));
     else if (typeof values[0] !== 'number' && values.length > 1 && isTimespan(values[0])) return values.slice(1).reduce((a, c) => addTimespan(a, c), values[0]);
     else if (values.reduce((a, c) => a && typeof c === 'object' && !isDateRel(c), true)) return Object.assign.apply(Object, [{}].concat(values));
     const num = values.reduce((a, c) => a && isNum(c), true);
@@ -858,7 +858,7 @@ registerOperator(
     if (ctx.special?.round) return values.reduce((a, c) => +round(a - (!isNum(c) ? 0 : +c), ctx.special.round), !isNum(first) ? 0 : +first);
     else return values.reduce((a, c) => a - (!isNum(c) ? 0 : +c), !isNum(first) ? 0 : +first);
   }),
-  simple(['*', 'multiply'], (_name, values: any[], _opts, ctx): number|string|any[] => {
+  simple(['*', 'multiply'], (_name, values: any[], _opts, ctx): number | string | any[] => {
     const first = values.shift();
     if (!isNum(first)) {
       if (values.length === 1 && isNum(values[0]) && +values[0] > 0) {
@@ -900,7 +900,7 @@ registerOperator(
     if (typeof values[0] !== 'number') return values[0];
     return Math.abs(values[0]);
   }),
-  simple(['round'], (_name: string, [num, precision, method]: [number, number, string], opts): number|string => {
+  simple(['round'], (_name: string, [num, precision, method]: [number, number, string], opts): number | string => {
     precision = precision ?? opts?.places;
     if (precision !== undefined || roundDefaults['all-numeric']) {
       const res = round(num, { places: precision, method: (method || opts?.method) as any });
@@ -932,12 +932,12 @@ registerOperator(
       const [str, count] = args;
       for (let i = 0; i < count; i++) res += str[Math.floor(Math.random() * str.length)];
       return res;
-    } 
+    }
   }),
 );
 
 // string
-function pad(where: 'l'|'c'|'r', str: string, count: number, pad: string): string {
+function pad(where: 'l' | 'c' | 'r', str: string, count: number, pad: string): string {
   if (typeof str !== 'string') str = '' + str;
   if (!isNum(count)) return str;
   if (typeof pad !== 'string') pad = '' + pad;
@@ -995,7 +995,7 @@ registerOperator(
       return str.replace(find, rep);
     }
   }),
-  simple(['reverse'], (_name: string, [src]): string|any[] => {
+  simple(['reverse'], (_name: string, [src]): string | any[] => {
     if (typeof src === 'string') {
       let r = '';
       for (let i = 0; i < src.length; i++) r = src[i] + r;
@@ -1012,7 +1012,7 @@ registerOperator(
       if (ww) {
         if (ww === 'grow') w = avail;
         else if (typeof ww === 'number') w = ww;
-        else if (typeof ww === 'object' && typeof ww.percent === 'number') w = (ww.percent / 100) * avail; 
+        else if (typeof ww === 'object' && typeof ww.percent === 'number') w = (ww.percent / 100) * avail;
         else if (typeof ww === 'object' && typeof ww.x === 'string') w = evaluate(ctx, ww.x);
       }
     }
@@ -1038,11 +1038,11 @@ registerOperator(
     if (!src) return [];
     return Object.values(src);
   }),
-  simple(['date'], (_name: string, args: any[], opts, ctx: Context): Date|DateRel => {
+  simple(['date'], (_name: string, args: any[], opts, ctx: Context): Date | DateRel => {
     let [v, t] = args;
     if (typeof opts !== 'object' || !opts) opts = {} as any;
 
-    let res: Date|DateRel;
+    let res: Date | DateRel;
     if (v !== undefined) {
       if (isDateRel(v)) res = dateRelToDate(v);
       else if (typeof v === 'string') {
@@ -1231,7 +1231,7 @@ registerOperator({
     }
     else return { result: value }; // odd branch that wasn't skipped means previous condition matched
   },
-  apply() {}
+  apply() { }
 }, {
   type: 'checked',
   names: ['case', 'switch'],
@@ -1251,7 +1251,7 @@ registerOperator({
       return { skip: 1 };
     } else return { result: value }; // odd branch
   },
-  apply() {},
+  apply() { },
   extend: true,
 }, {
   type: 'checked',
@@ -1267,7 +1267,7 @@ registerOperator({
       else return { skip: 1 };
     } else return { result: value };
   },
-  apply(_name: string, [value, body]: [any[]|object, ValueOrExpr], opts, ctx: Context) {
+  apply(_name: string, [value, body]: [any[] | object, ValueOrExpr], opts, ctx: Context) {
     if (Array.isArray(value)) {
       const count = value.length;
       const last = count - 1;
@@ -1305,7 +1305,7 @@ registerOperator({
     else if (value) return { result: value };
     else return 'continue';
   },
-  apply() {}
+  apply() { }
 });
 
 // aggregates
@@ -1553,27 +1553,27 @@ function _indexPair(res: any, value: any, current: any, many: boolean): any {
 }
 
 // basic formats
-registerFormat('dollar', function(n, [dec, group, sign, neg], opts) {
+registerFormat('dollar', function (n, [dec, group, sign, neg], opts) {
   return dollar(n, undefined, dec ?? opts?.dec ?? this.defaults.dec, group ?? opts?.group ?? this.defaults.group, sign ?? opts?.sign ?? this.defaults.sign, neg ?? opts?.neg ?? this.defaults.neg);
 }, { dec: 2, group: ',', sign: '$', neg: 'sign' });
 
-registerFormat('date', function(n, [fmt], opts) {
+registerFormat('date', function (n, [fmt], opts) {
   return fmtDate(n, fmt ?? opts?.format ?? this.defaults.format);
 }, { format: 'yyyy-MM-dd' });
 
-registerFormat('time', function(n, [fmt], opts) {
+registerFormat('time', function (n, [fmt], opts) {
   return fmtDate(n, fmt ?? opts?.format ?? this.defaults.format);
 }, { format: 'HH:mm:ss' });
 
-registerFormat('timespan', function(n, _, opts) {
+registerFormat('timespan', function (n, _, opts) {
   return timespanToString(n, opts);
 });
 
-registerFormat('timestamp', function(n, [fmt], opts) {
+registerFormat('timestamp', function (n, [fmt], opts) {
   return fmtDate(n, fmt ?? opts?.format ?? this.defaults.format);
 }, { format: 'yyyy-MM-dd HH:mm:ss' });
 
-registerFormat('timestamptz', function(n, [fmt], opts) {
+registerFormat('timestamptz', function (n, [fmt], opts) {
   return fmtDate(n, fmt ?? opts?.format ?? this.defaults.format);
 }, { format: 'yyyy-MM-dd HH:mm:sszzz' });
 
@@ -1581,15 +1581,15 @@ registerFormat('iso8601', n => {
   return fmtDate(n, 'yyyy-MM-ddTHH:mm:sszzz');
 });
 
-registerFormat(['integer', 'int'], function(n, [group, neg], opts) {
+registerFormat(['integer', 'int'], function (n, [group, neg], opts) {
   return number(n, 0, group ?? opts?.group ?? this.defaults.group, neg ?? opts?.neg ?? this.defaults.neg);
 }, { group: ',', neg: 'sign' });
 
-registerFormat(['number', 'num'], function(n, [dec, group, neg], opts) {
+registerFormat(['number', 'num'], function (n, [dec, group, neg], opts) {
   return number(n, dec ?? opts?.dec ?? this.defaults.dev, group ?? opts?.group ?? this.defaults.group, neg ?? opts?.neg ?? this.defaults.neg);
 }, { dec: 2, group: ',', neg: 'sign' });
 
-registerFormat('ordinal', function(n, [group], opts) {
+registerFormat('ordinal', function (n, [group], opts) {
   return ordinal(n, group ?? opts?.group ?? this.defaults.group);
 }, { group: ',' });
 
@@ -1658,7 +1658,7 @@ registerFormat('xml', (val, [n]) => {
   else return val;
 });
 
-function objectToXML(object: object, indent: number|undefined = undefined) {
+function objectToXML(object: object, indent: number | undefined = undefined) {
   if (Array.isArray(object)) return _objectToXML({ values: { value: object } }, 0, indent);
   const keys = Object.keys(object);
   if (keys.length > 1) return _objectToXML({ root: object }, 0, indent);
@@ -1667,7 +1667,7 @@ function objectToXML(object: object, indent: number|undefined = undefined) {
   return _objectToXML(object, 0, indent);
 }
 
-function _objectToXML(val: any, depth: number, indent: number|undefined, propname: string|undefined = undefined) {
+function _objectToXML(val: any, depth: number, indent: number | undefined, propname: string | undefined = undefined) {
   if (Array.isArray(val)) {
     return val.reduce((xml, entry) => {
       const val = _objectToXML(entry, depth + 1, indent, propname);
@@ -1710,7 +1710,7 @@ function timespanToString(value: any, opts: any) {
       const part = `${parts[i] || 0}`;
       if (fmt === 'long' && parts[i]) res.push(`${part} ${IntervalNames[i]}${parts[i] !== 1 ? 's' : ''}`);
       else if (fmt === 'short' && parts[i]) res.push(`${part}${p}`);
-      else if (fmt.includes('timer') && (parts[i] || i > 2)) res.push(i < 3 ? `${res.length >  0 ? `${fmt.includes('long') ? ',' : ''} ` : ''}${part}${fmt.includes('long') ? ` ${IntervalNames[i]}${parts[i] !== 1 ? 's' : ''}` : p}` : i === 3 ? ` ${part || '0'}` : `${i === 6 ? '.' : ':'}${pad('l', part, i === 6 ? 3 : 2, '0')}`);
+      else if (fmt.includes('timer') && (parts[i] || i > 2)) res.push(i < 3 ? `${res.length > 0 ? `${fmt.includes('long') ? ',' : ''} ` : ''}${part}${fmt.includes('long') ? ` ${IntervalNames[i]}${parts[i] !== 1 ? 's' : ''}` : p}` : i === 3 ? ` ${part || '0'}` : `${i === 6 ? '.' : ':'}${pad('l', part, i === 6 ? 3 : 2, '0')}`);
     }
     return res.join(fmt === 'long' ? ', ' : fmt === 'short' ? ' ' : '');
   } else return value;

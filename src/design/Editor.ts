@@ -62,7 +62,7 @@ export class Editor extends Ractive {
 
   keydown(ev: KeyboardEvent) {
     const key = ev.key;
-    
+
     if (key === 'Enter') {
       if (ev.ctrlKey || ev.metaKey) {
         this.fire('run');
@@ -130,7 +130,7 @@ Ractive.extendWith(Editor, {
   template, css, cssId: 'raport-editor',
   on: {
     init() {
-      this.observe('src template', debounce(function() {
+      this.observe('src template', debounce(function () {
         this.highlightSyntax();
       }, 150));
     },
@@ -181,7 +181,7 @@ Ractive.extendWith(Viewer, {
   },
   on: {
     init() {
-      this.observe('src template', debounce(function() {
+      this.observe('src template', debounce(function () {
         this.highlightSyntax();
       }, 350));
     },

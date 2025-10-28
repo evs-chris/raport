@@ -234,7 +234,7 @@ q.test('count', t => {
   t.deepEqual(e(`count([{type::foo} {type::bar} {type::foo} {type::baz}] partition:=>type)`), { foo: 2, bar: 1, baz: 1 });
   t.deepEqual(e(`count([{type::foo} {type::bar} {type::foo} {type::baz} {type::loooooooong}] sub:{ small:=>type.length < 4 large:=>type.length > 4 })`), { small: 4, large: 1 });
   t.deepEqual(e(`count([{type::foo} {type::bar} {type::foo} {type::baz} {type::loooooooong}] sub:{ key:=>type large:=>type.length > 4 })`), { foo: 2, bar: 1, baz: 1, large: 1, loooooooong: 1 });
-  t.deepEqual(e(`count([{type::foo size:10} {type::foo size:2} {type::bar size:5} {type::baz size:10}] sub:{ key:=>[type if size > 4 then :large else :small] })`), { foo: 2, bar: 1, baz: 1, large: 3, small: 1})
+  t.deepEqual(e(`count([{type::foo size:10} {type::foo size:2} {type::bar size:5} {type::baz size:10}] sub:{ key:=>[type if size > 4 then :large else :small] })`), { foo: 2, bar: 1, baz: 1, large: 3, small: 1 })
 });
 
 q.test('date', t => {

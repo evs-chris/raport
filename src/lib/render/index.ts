@@ -53,7 +53,7 @@ export function measureEstimate(text: string, width: number, context: RenderCont
     family === 'narrow' || /narrow|condensed/i.test(family) ? avgs.narrow :
       family === 'sans' || /sans|arial|helvetica/i.test(family) ? avgs.sans :
         avgs.serif))) * size) / 16;
-  
+
   const lines = text.split(/\r?\n/g);
   return lines.reduce((a, c) => {
     const [word, lines] = c.split(/\s|-/g).reduce((a, c) => {
@@ -91,7 +91,7 @@ export interface RenderContinuation<T = any> {
   cancel?: boolean;
 }
 
-export type RenderResult<T = any> = string|RenderContinuation<T>;
+export type RenderResult<T = any> = string | RenderContinuation<T>;
 
 export interface Renderer<T extends Widget = Widget, S = any> extends RendererOptions {
   render(widget: T, context: RenderContext, placement: Placement, state?: RenderState<S>): RenderResult;
@@ -114,7 +114,7 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   const renderer = renderers[w.type];
   if (!renderer || (w.hide && evaluate(extendContext(context.context, { special: { widget: w, placement } }), w.hide))) return { output: '', height: 0 };
 
-  if (!('height' in w) && renderer.container) w.height = 'auto'; 
+  if (!('height' in w) && renderer.container) w.height = 'auto';
   const h = getHeightWithMargin(w, placement, context);
 
   if (placement.maxY && !isNaN(h) && h > placement.maxY) return error(context, placement);
@@ -141,7 +141,7 @@ export function renderWidget(w: Widget, context: RenderContext, placement: Place
   if (typeof r.height === 'number') r.height = +r.height.toFixed(6);
   if (typeof r.width === 'number') r.width = +r.width.toFixed(6);
   if (placement.availableY != null) placement.availableY = +placement.availableY.toFixed(6);
-  
+
   if (placement.maxY && r.height > placement.maxY) return error(context, placement);
 
   if (isNaN(h) && placement.availableY != null && r.height > placement.availableY) return { output: '', continue: { offset: 0 }, height: r.height || 0, cancel: true };
@@ -306,7 +306,7 @@ export function renderWidgets(widget: Widget, context: RenderContext, placement:
 }
 
 export function getWidth(w: Widget, placement: Placement, context: RenderContext): number {
-  let width = isComputed(w.width) ? evaluate(extendContext(context.context, { special: { widget: w, placement} }), w.width.x) : w.width;
+  let width = isComputed(w.width) ? evaluate(extendContext(context.context, { special: { widget: w, placement } }), w.width.x) : w.width;
   const m = w.margin && expandMargin(w, context, placement);
   let pct = false;
   if (width === 'grow') width = placement.availableX || placement.maxX;
@@ -389,9 +389,9 @@ function maxXOffset(points: Array<[number, number, number, number]>): number {
   return points.reduce((a, c) => a > c[0] + c[2] ? a : c[0] + c[2], 0);
 }
 
-export function expandMargin(w: { margin?: Margin|Computed }, context: RenderContext, placement: Placement): [number, number, number, number] {
+export function expandMargin(w: { margin?: Margin | Computed }, context: RenderContext, placement: Placement): [number, number, number, number] {
   if (w.margin) {
-    const m = isComputed(w.margin) ? evaluate(extendContext(context.context, { special: { widget: w, placement} }), w.margin.x) : w.margin;
+    const m = isComputed(w.margin) ? evaluate(extendContext(context.context, { special: { widget: w, placement } }), w.margin.x) : w.margin;
     if (Array.isArray(m)) {
       if (m.length === 4) return m.map(e => +e) as [number, number, number, number];
       else if (m.length === 2) return [+m[0], +m[1], +m[0], +m[1]];
@@ -401,7 +401,7 @@ export function expandMargin(w: { margin?: Margin|Computed }, context: RenderCon
   return [0, 0, 0, 0];
 }
 
-export function expandBorder(w: { border?: number|number[]|Borders|string }, context: RenderContext, placement: Placement): [number, number, number, number] {
+export function expandBorder(w: { border?: number | number[] | Borders | string }, context: RenderContext, placement: Placement): [number, number, number, number] {
   let b = w.border;
   let res: [number, number, number, number] = [0, 0, 0, 0];
   if (typeof b === 'string' || (b && !Array.isArray(b) && typeof b === 'object' && ('v' in b || 'r' in b || 'op' in b))) b = evaluate(extendContext(context.context, { special: { widget: w, placement } }), b as string);

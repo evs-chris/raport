@@ -4,18 +4,18 @@ const ws = read(' \r\n\t');
 const endTxt = '&<';
 
 const entities = { amp: '&', gt: '>', lt: '<' };
-const entity = map(seq(str('&'), str('amp', 'gt', 'lt'), str(';')), ([,which]) => entities[which] || '', 'entity');
+const entity = map(seq(str('&'), str('amp', 'gt', 'lt'), str(';')), ([, which]) => entities[which] || '', 'entity');
 
 const name = read1('abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-_:$', 'name');
-const attr = map(seq(name, opt(seq(ws, str('='), ws, alt(name, quoted('"'), quoted("'"))))), ([name, rest]) => ({ name, value: rest ? rest[3] : true}), 'attr');
+const attr = map(seq(name, opt(seq(ws, str('='), ws, alt(name, quoted('"'), quoted("'"))))), ([name, rest]) => ({ name, value: rest ? rest[3] : true }), 'attr');
 
 function quoted(quote: string) {
-  return map(seq(str(quote), readTo(quote), str(quote)), ([,str]) => str);
+  return map(seq(str(quote), readTo(quote), str(quote)), ([, str]) => str);
 }
 
 interface Attr {
   name: string;
-  value: string|boolean;
+  value: string | boolean;
 }
 
 interface Open {
@@ -30,12 +30,12 @@ interface Close {
   name: string;
 }
 
-const open = map(seq(str('<'), ws, name, ws, repsep(attr, ws, 'allow'), opt(str('/')), str('>')), ([,,name,,attrs,close]) => ({ open: true, name, attrs, empty: !!close } as Open), 'open');
-const close = map(seq(str('</'), ws, name, ws, str('>')), ([,,name]) => ({ close: true, name } as Close), 'close');
+const open = map(seq(str('<'), ws, name, ws, repsep(attr, ws, 'allow'), opt(str('/')), str('>')), ([, , name, , attrs, close]) => ({ open: true, name, attrs, empty: !!close } as Open), 'open');
+const close = map(seq(str('</'), ws, name, ws, str('>')), ([, , name]) => ({ close: true, name } as Close), 'close');
 
 const content = map(rep1(alt(read1To(endTxt, true), entity), 'content'), txts => txts.join('').trim());
 
-const stream = rep(alt<string|Open|Close>(open, content, close));
+const stream = rep(alt<string | Open | Close>(open, content, close));
 
 const _parse = makeParser(stream, { trim: true, consumeAll: true, undefinedOnError: true });
 
@@ -53,7 +53,7 @@ export function parse(str: string, strict?: boolean): any {
   const names: string[] = [];
   const res: any[] = [];
   let content = '';
-  const stream = _parse(str) as Array<string|Open|Close>;
+  const stream = _parse(str) as Array<string | Open | Close>;
   if (!stream || 'error' in stream) return undefined;
 
   function close(end: string) {

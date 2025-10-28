@@ -89,7 +89,7 @@ registerRenderer<Container>('container', (w, ctx, placement, state) => {
   return r;
 }, { container: true });
 
-type RepeatState = { part: 'group'|'header'|'body'|'footer'; group?: 'header'|'body'; src: Group|any[]; current: number; context?: RenderContext; newPage?: boolean };
+type RepeatState = { part: 'group' | 'header' | 'body' | 'footer'; group?: 'header' | 'body'; src: Group | any[]; current: number; context?: RenderContext; newPage?: boolean };
 registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) => {
   addStyle(ctx, 'container', `.container {position:absolute;box-sizing:border-box;}`);
   if (!w.height) w.height = 'auto';
@@ -106,10 +106,10 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
     availableY = +availableY.toFixed(6)
   }
   let group: Group;
-  let groupNo: number|boolean = false;
+  let groupNo: number | boolean = false;
   const newPage = state && state.state && state.state.newPage;
 
-  let src: Group|any[] = state && state.state && state.state.src;
+  let src: Group | any[] = state && state.state && state.state.src;
   if (!src) {
     if (!w.source) return '';
     src = isValueOrExpr(w.source) ?
@@ -117,7 +117,7 @@ registerRenderer<Repeater, RepeatState>('repeater', (w, ctx, placement, state) =
       filter(ctx.context.root.sources[w.source.source] || { value: [] }, w.source.filter, w.source.sort, w.source.group, ctx.context).value;
     (ctx.context.special || (ctx.context.special = {})).values || (ctx.context.special.values = {});
   }
-    
+
   let arr: any[];
 
   if (!Array.isArray(src)) {
@@ -321,7 +321,7 @@ registerRenderer<MeasuredLabel>('measured', (w, ctx, placement, state) => {
   addStyle(ctx, 'measured', `.measured {position:absolute;box-sizing:border-box;white-space:pre-wrap;font-family:serif;font-size:0.83rem;word-break:break-word;}`);
   const text = evaluate(ctx, w.text);
   const height = measure(text, getWidth(w, placement, ctx) || placement.availableX, ctx, w.font);
-  
+
   if (!state && height > placement.availableY) {
     return { output: '', height: 0, continue: { state: {}, offset: 0 } };
   } else {
