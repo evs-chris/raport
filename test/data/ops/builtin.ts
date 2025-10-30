@@ -535,6 +535,12 @@ q.test('len, length', t => {
   t.equal(e('len({ a:1 b:2 c:3 })'), 3);
   t.equal(e('length(source([1 2 3 4]))'), 4);
   t.equal(e('len(69)'), 0);
+  t.equal(e('len(=>_)'), 0);
+  t.equal(e('len(|a b c|=>_)'), 3);
+  t.equal(e({ ap: { a: { r: { p: '_' } } } }, 'len(ap)'), 0);
+  t.equal(e({ ap: { a: { r: { k: '_' } }, n: ['a', 'b', 'c'] } }, 'len(ap)'), 3);
+  t.equal(e({ ap: { a: { r: { k: '_' } }, c: 'a comment' } }, 'len(ap)'), 0);
+  t.equal(e({ ap: { a: { r: { k: '_' } }, c: 'a comment', n: ['a', 'b'] } }, 'len(ap)'), 2);
 });
 
 q.test(`like`, t => {

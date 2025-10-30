@@ -982,6 +982,7 @@ registerOperator(
   }),
   simple(['len', 'length'], (_name: string, [src]: any[]) => {
     if (typeof src === 'string' || Array.isArray(src)) return src.length;
+    else if (isApplication(src)) return src.n?.length || 0;
     else if (typeof src === 'object' && Object.keys(src).length === 1 && Array.isArray(src.value)) return src.value.length;
     else if (typeof src === 'object') return Object.keys(src).length;
     return 0;

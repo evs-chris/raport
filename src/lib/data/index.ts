@@ -652,7 +652,7 @@ export interface Literal { v: any; s?: 1; c?: string[]; q?: string };
 export function isApplication(v: any): v is Application {
   if (typeof v !== 'object' || !('a' in v) || typeof v.a !== 'object') return false;
   const len = Object.keys(v).length;
-  return len === 1 || len === 2 && 'n' in v;
+  return len === 1 || len === 2 && ('n' in v || 'c' in v) || len === 3 && 'n' in v && 'c' in v;
 }
 
 /** A timespan specified in milliseconds */
