@@ -367,7 +367,7 @@ function runDelimited(report: Delimited, context: Context, options?: { table?: b
   let headers = report.headers;
 
   if ((!fields || !fields.length) && values.length && typeof values[0] === 'object' && values[0]) {
-    if (Array.isArray(values[0])) fields = fields.map(i => `_.${i}`);
+    if (Array.isArray(values[0])) fields = Object.keys(values[0]).map(i => `_.${i}`);
     else {
       fields = Object.keys(values[0]).map(k => `_[${JSON.stringify(k)}]`);
       if (!headers || !headers.length) headers = Object.keys(values[0]);
