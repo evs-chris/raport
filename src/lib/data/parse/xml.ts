@@ -1,4 +1,4 @@
-import { Parser, parser as makeParser, opt, repsep, seq, alt, map, readTo, read1To, rep1, rep, str, read, read1, chars } from 'sprunge';
+import { Parser, parser as makeParser, opt, repsep, seq, alt, map, readTo, readToParser, read1To, rep1, rep, str, read, read1, chars } from 'sprunge';
 
 const ws = read(' \r\n\t');
 const endTxt = '&<';
@@ -30,12 +30,25 @@ interface Close {
   name: string;
 }
 
+interface DECL {
+  name: string;
+  attrs?: Attr[];
+}
+
+interface Comment {
+  text: string;
+}
+
+const decl = map(seq(str('<?'), name, ws, repsep(attr, ws, 'allow'), ws, str('?>')), ([, name,, attrs]) => ({ name, attrs }));
+const comment = map(seq(str('<!--'), readToParser('-', str('-->')), str('-->')), ([, text]) => ({ text }));
+const cdata = map(seq(str('<![CDATA['), readToParser(']', str(']]>')), str(']]>')), ([, chars]) => chars);
+
 const open = map(seq(str('<'), ws, name, ws, repsep(attr, ws, 'allow'), opt(str('/')), str('>')), ([, , name, , attrs, close]) => ({ open: true, name, attrs, empty: !!close } as Open), 'open');
 const close = map(seq(str('</'), ws, name, ws, str('>')), ([, , name]) => ({ close: true, name } as Close), 'close');
 
 const content = map(rep1(alt(read1To(endTxt, true), entity), 'content'), txts => txts.join('').trim());
 
-const stream = rep(alt<string | Open | Close>(open, content, close));
+const stream = rep(alt<string|Open|Close|DECL|Comment>(comment, decl, cdata, open, content, close));
 
 const _parse = makeParser(stream, { trim: true, consumeAll: true, undefinedOnError: true });
 
@@ -53,8 +66,8 @@ export function parse(str: string, strict?: boolean): any {
   const names: string[] = [];
   const res: any[] = [];
   let content = '';
-  const stream = _parse(str) as Array<string | Open | Close>;
-  if (!stream || 'error' in stream) return undefined;
+  const stream = _parse(str) as Array<string | Open | Close | DECL | Comment>;
+  if (!stream) return;
 
   function close(end: string) {
     const val = stack.pop();
