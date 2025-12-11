@@ -1187,7 +1187,7 @@ registerOperator(
     else if (opts.json) return JSON.parse(v);
     else if (opts.schema) return parseSchema(v);
     else if (opts.range) return parseRange(v, opts);
-    else if (opts.xml) return parseXML(v, opts.strict);
+    else if (opts.xml) return parseXML(v, opts);
     else if (opts.csv || opts.delimited) {
       if (opts.detect || !opts.field || !opts.record) opts = Object.assign(csvDetect(v, opts.context), opts);
       return csvParse(v, opts);

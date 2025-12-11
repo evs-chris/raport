@@ -419,8 +419,9 @@ The label map is a nested object with the keys being single key paths in the dif
     { name:'schema' type:'boolean' desc:'Use the schema parser rather than the expression parser.' }
     { name:'json' type:'boolean' desc:'Use a JSON parser rather than the expression parser.' }
     { name:'base64' type:'boolean' desc:'Use a base64 parser to decode a base64 encoded string.' }
-    { name:'xml' type:'boolean' desc:'Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.' }
+    { name:'xml' type:'boolean' desc:'Use the XML parser to read data. In JSON mode, properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning. In document mode, a document with a single element root is producted. Each element can have attributes, a namespace, a name, and children, which can be elements, string content, or comments.' }
     { name:'strict' type:'boolean' desc:'For the XML parser, be less forgiving about malformed content. Defaults to false.' }
+    { name:'type' type:"'doc'|'json'" desc:'For the XML parser, set the parsing mode.' }
     { name:'csv' type:'boolean' desc:'Use the delimited text parser rather than the expression parser.' }
     { name:'delimited' type:'boolean' desc:'Use the delimited text parser rather than the expression parser.' }
     { name:'detect' type:'boolean' desc:'If using the delimited parser, detect the delimiters and use them to parse.' }
