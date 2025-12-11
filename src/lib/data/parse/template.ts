@@ -53,7 +53,7 @@ const case_op = map(seq(case_value(['case']), min_one(rep(alt<Content>(branch(['
   return op;
 }, { primary: true, name: 'case-block' });
 
-const interpolator = map(seq(str('{{'), ws, value, ws, str('}}')), ([, , value]) => ({ op: 'string', args: [value] }), { primary: true, name: 'interpolator' });
+const interpolator = map(seq(str('{{'), ws, value, ws, str('}}')), ([, , value]) => ({ op: 'string', args: [value], opts: { v: { interp: 1 } } }), { primary: true, name: 'interpolator' });
 
 content.parser = alt<Value>({ primary: true, name: 'content' }, text, each_op, if_op, with_op, case_op, unless_op, interpolator);
 

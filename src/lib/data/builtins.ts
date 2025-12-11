@@ -694,10 +694,11 @@ registerOperator(
       } else return span;
     }
   }),
-  simple(['string', 'unparse'], (name: string, args: any[], opts: any): string => {
+  simple(['string', 'unparse'], (name: string, args: any[], opts: any, ctx: Context): string => {
     const [value] = args;
     opts = opts || args[1] || {};
     if (!opts || typeof opts !== 'object') opts = {};
+    if (opts.interp && ctx.stringifier) return ctx.stringifier(args[0]);
     if (name === 'unparse') opts = Object.assign({}, opts, { raport: 1 });
     if (opts.raport && opts.tpl) opts.template = 1;
     if (!opts && (value === null || value === undefined)) return '';
@@ -1173,6 +1174,9 @@ registerOperator(
       } else Object.assign(roundDefaults, opts);
     } else if (type === 'generate') {
       Object.assign(generateDefaults, opts);
+    } else if (type === 'stringifier') {
+      if (opts?.unset) ctx.stringifier = undefined;
+      else if (isApplication(name)) ctx.stringifier = (v) => evalApply(ctx, name, [v]);
     }
   }),
   simple(['parse'], (_name: string, args: any[], opts: any): any => {

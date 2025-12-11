@@ -341,9 +341,6 @@ export function template(root: string | Context | { context: Context } | any, te
 
 /**
  * Evaluate an applicative with the given locals, naming them if the applicative declares named arguments.
- * If swap is not true, then a new context extension will be used. Otherwise, the context locals will be
- * swapped for the evaluation and replaced afterwards. Swap should only be used for applications that are
- * passing the context value as the first local.
  */
 export function evalApply(ctx: Context, value: ValueOrExpr, locals: any[], special?: object): any {
   if (isApplication(value)) {
@@ -774,6 +771,7 @@ export interface Context {
   locals?: ParameterMap;
   value: any;
   parser?: ((txt: string) => Value) & { namespace: string };
+  stringifier?: (v: any) => string;
 }
 
 export interface RootContext extends Context {
@@ -823,20 +821,23 @@ export interface ExtendOptions {
   special?: any;
   locals?: ParameterMap,
   parser?: ((txt: string) => Value) & { namespace: string };
+  stringifier?: (v: any) => string;
   path?: string;
   fork?: boolean;
 }
 
 export function extend(context: Context, opts: ExtendOptions): Context {
-  return {
+  const res: Context = {
     parent: opts.fork && (!opts.value || opts.value === context.value) ? (context.parent || context.root) : context,
     root: context.root,
     path: opts.path || '',
     value: 'value' in opts ? opts.value : context.value,
     special: opts.fork ? Object.assign({}, context.special, { pipe: undefined }, opts.special) : (opts.special || {}),
-    parser: opts.parser,
-    locals: opts.locals,
   };
+  if (opts.parser) res.parser = opts.parser;
+  if (opts.stringifier || context.stringifier) res.stringifier = opts.stringifier || context.stringifier;
+  if (opts.locals) res.locals = opts.locals;
+  return res;
 }
 
 export const formats: { [name: string]: { apply: (value: any, args?: any[], opts?: OperatorOptions) => string, defaults: { [key: string]: any } } } = {};
