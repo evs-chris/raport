@@ -1,4 +1,4 @@
-## 0.30.0
+## 0.30.1
 
 2025-12-12
 
@@ -30,6 +30,11 @@
 ### Project
 
 * The types for `bg` and `radius` will now accept an expression object to match how they are handled.
+
+
+## 0.30.0
+
+Apparently published prematurely. Oops.
 
 
 ## 0.29.0
