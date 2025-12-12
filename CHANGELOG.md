@@ -1,15 +1,35 @@
-## 0.29.1
+## 0.30.0
 
-Unreleased
+2025-12-12
 
 ### Parser
 
+* The csv parser will now accept a header option with an object that has numeric keys to produce objects with the field numbers corresponding to the keys with key names corresponding to the values.
 * `min` is now accepted as a minute unit when parsing intervals.
+* The XML parser now supports declarations, comments, and CDATA.
+* The XML parser will now optionally generate a document structure rather than a direct JSON tree.
+
+### Render
+
+* __BUG:__ Delimited reports with automatically generated fields for an object array will now safely handle more exotic object keys by using a bracketed accessor for each field.
+* __BUG:__ Non-bridging containers that meet a page boundary will now fully reset their state to avoid committing completed child rendering that needs to be redone on the next page.
+* __BUG:__ Manually positioned elements with negative offsets that exceed their container's height will now render an error rather than breaking the layout. There are specific errors for the container not having a height set and the container not having sufficient height.
+* __BUG:__ Delimited reports with automatically generated fields for an array of arrays will no longer throw an exception.
+* Aggregated report data from IDed labels in the row are now exposed directly in the footer as their ID e.g. the label with an ID of `name` will expose an array of values named `name` in the footer context.
 
 ### Data
 
 * The `string` operator will now stringify intervals.
 * There is now a `timespan` formatter to format intervals.
+* The sort and filter operators now accept additional options that allow inverting one or more or all of the individual sorting criteria.
+* The length operator can now return the length of arguments to an application.
+* Operators can now be called with a special option that allows for passing arguments, options, or both that are not known at parse time. The `_` option can be an array to specify arguments. It can be an object with an `options` object and/or and `arguments` array. It can also be an object with no `options` or `arguments` keys to be used directly as an options object.
+* Applied applications now have access to `@arguments` and `@options` special references that resolve to the array or passed arguments and object of passed options, respectively.
+* Templates can now have custom interpolator stringication using a context option, `stringifier`. Any calls to the `string` operator with an `interp` option set, as templates now do, will use the `stringifier` application set on the context, defaulting to the existing stringifier. This makes it possible to do things like template JSON documents without having to do as much additional escaping.
+
+### Project
+
+* The types for `bg` and `radius` will now accept an expression object to match how they are handled.
 
 
 ## 0.29.0
@@ -28,7 +48,7 @@ Unreleased
 * __BUG:__ Schema validations against the `object` type will now verify that the target is not an array. This also includes `object[]` checks.
 * __BREAKING:__ Literal and platform dates are now stringifed as timestamps when passed to the `string` operator. This is technically breaking, but probably more in line with expectations, especially for literal dates.
 * There is now a `value[]` schema type to match the `value` type that will only match arrays of `value`s.
-* An application can now be multipled to build an array e.g. `(=>rand(1 100)) * 10` will result in an array of 10 random numbers between 1 and 100. The index of the member being generated is passed into the application.
+* An application can now be multiplied to build an array e.g. `(=>rand(1 100)) * 10` will result in an array of 10 random numbers between 1 and 100. The index of the member being generated is passed into the application.
 
 
 ## 0.28.0
@@ -46,7 +66,7 @@ Unreleased
 ### Render
 
 * Render delimited report to HTML will now use more semantic tables.
-* Array of array data soures can now be run as delimited reports with automatically generated fields.
+* Array of array data sources can now be run as delimited reports with automatically generated fields.
 
 ### Designer
 
@@ -54,7 +74,7 @@ Unreleased
 
 ### Data
 
-* Accessing an object with an a array key will now return a new object containing only the keys that are in the array and the source object.
+* Accessing an object with an array key will now return a new object containing only the keys that are in the array and the source object.
 * The `count` operator can now be used for more complex cases using additional named arguments. `partition` allows returning a key for each value in the counted array. `sub` allows returning one or more keys and multiple applications for each value in the counted array. The result of either of the new modes is an object with the resulting keys and counts for each key.
 
 
@@ -64,7 +84,7 @@ Unreleased
 
 ### Parser
 
-* __BREAKING:__ Bracketed paths now support indicating that an index should be applied from the end rather than the start by ducking the index (following it with a <). This removes support for accessing array indexs from the right by passing a negative number, which was undocumented but still makes this a breaking change.
+* __BREAKING:__ Bracketed paths now support indicating that an index should be applied from the end rather than the start by ducking the index (following it with a <). This removes support for accessing array indexes from the right by passing a negative number, which was undocumented but still makes this a breaking change.
 * Bracketed paths can now accept an additional index, which may also be ducked, that turns the access into a slice for array and string values. The order of the slice is maintained based on the given indices, so giving a larger index first will result in a reversed slice.
 * Triple quoted strings and inline templates can now be stringified.
 
@@ -109,7 +129,7 @@ Unreleased
 * The `pad`, `padl`, and `padr` functions will now accept any value that converts to a single character string as padding.
 * The `generate` function can now operator on a range.
 * There is now a `cat` operator that replaces `+` for joining template portions, as `cat` will not consider actual addition under any circumstances.
-* Date formats now support escpaing format characters so they can be included in the formatted date.
+* Date formats now support escaping format characters so they can be included in the formatted date.
 * Delimited reports now have access to the `@index` special reference corresponding to the index of the current row in the source dataset.
 * Paged reports now have access to the `@page` special reference in any expression, where it was previously limited to page headers and footers.
 * `diff` now has an option to compare only keys common to both objects.
@@ -164,7 +184,7 @@ Unreleased
 ### Data
 
 * __BUG:__ Date diffs that span years on the last day of the month will no longer swallow years.
-* The similarity operator can now be asked for whole string similaroty in addition to the existing matching substring similarity.
+* The similarity operator can now be asked for whole string similarity in addition to the existing matching substring similarity.
 
 ### Render
 
@@ -273,7 +293,7 @@ Unreleased
 * __BUG:__ The `base` formatter will now actually return the converted value.
 * __BUG:__ The `reverse` operator for arrays will now return a reversed copy rather than reversing the source array and returning it.
 * `-` can now be used as a unary operator.
-* Ranges can now have exclusions in the form of any of the existing range parts immeddiately preceded by a `!` e.g. `1-20 !12 !15-16`.
+* Ranges can now have exclusions in the form of any of the existing range parts immediately preceded by a `!` e.g. `1-20 !12 !15-16`.
 * Contexts can now have local rounding set, which will cause any math operators that execute in the context or any of its children to automatically apply the set local rounding to their results. Context-local rounding can be specified with `set-defaults`.
 
 ### Render
@@ -391,7 +411,7 @@ Unreleased
 ### Designer
 
 * Labels will no longer offer to split their text into parts, though they can still be modified if they are already split. Styled labels are the preferred and superior replacement.
-* The widget tree scroll-to-active function now targets center to better accomodate sticky nodes.
+* The widget tree scroll-to-active function now targets center to better accommodate sticky nodes.
 * Labeled fields in the UI with buttons next to the label will now align more pleasantly.
 * Selecting a macro container or expression repeater will link the relevant property to the evaluation pane like label text.
 * There are now tooltips for pasting and moving elements and more consistent behavior when pasting.
@@ -572,12 +592,12 @@ Unreleased
 
 * __BREAKING:__ Grouped repeaters can now have headers enabled per group and at the top level.
 * __BUG:__ Grouped repeater headers that happen to use the remaining space on a page will no longer be lost.
-* Reports now have configurable margins. The page header and footer can potionally be included in the margin.
+* Reports now have configurable margins. The page header and footer can optionally be included in the margin.
 
 ### Data
 
 * __BUG:__ Formatters will now receive their default ops when called in postfix sugar mode.
-* Operators can now be called as formatters, and `set-defaults` can set options for operators called as formatters. This allows operators like `round`, `join`, `uppoer`, and `lower` to be used directtly as formatters.
+* Operators can now be called as formatters, and `set-defaults` can set options for operators called as formatters. This allows operators like `round`, `join`, `uppoer`, and `lower` to be used directly as formatters.
 * The `eval` operator now has an option to evaluate the string as a template, and a context can be given for evaluation.
 * The `length` operator now properly supports strings.
 * The `get` operator now supports numeric indices.
@@ -614,7 +634,7 @@ Unreleased
 ### Data
 
 * The `round` operator now supports alternate rounding methods half even, half odd, half up, half down, to 0, and from 0.
-* The `round` operator can now round to the nearest whole number place by specifing a negative number of digits where -1 is to the nearest 10, -2 is the nearest 100, etc.
+* The `round` operator can now round to the nearest whole number place by specifying a negative number of digits where -1 is to the nearest 10, -2 is the nearest 100, etc.
 * The `set-defaults` operator can now set defaults for the `round` operator.
 
 ### Designer
@@ -760,7 +780,7 @@ Unreleased
 ### Data
 
 * __BUG:__ Applications as custom operators can now be called without arguments.
-* __BREAKING:__ Applications that need to be parsed will now be evaulated in the same way they would have been had they been pre-parsed.
+* __BREAKING:__ Applications that need to be parsed will now be evaluated in the same way they would have been had they been pre-parsed.
 * __BREAKING:__ The context used in applications and blocks will now fork the current context if there are no locals defined in the current context to eliminate the need to use context parent prefixes where unnecessary.
 * Internal sort functionality has been refactored to be more useful for the `sort` operator, which allows the `sort` operator to work on objects in addition to arrays. Objects can now have their keys sorted by arbitrary application.
 * The `sort` operator can now accept a single sort specifier without a wrapping array, and it now defaults to an identity sort if no specifiers are provided.
@@ -931,7 +951,7 @@ __BUG:__ Automatic layouts now take the current y-axis offset into account when 
 * __BUG:__ Moving a widget in a manual layout container down the list of widgets in the container will no longer break the container layout.
 * Labels and containers in the widget tree will now show a little info about their content, so they're a little easier to tell apart.
 * Holding shift while moving a widget up or down the tree will move the widget to the top or bottom, respectively.
-* Holding control while moving a widget in a manual layout container up or down the tree will stop its layout corrdinate from moving with it, effectively swapping the coordinates of the swapped widgets.
+* Holding control while moving a widget in a manual layout container up or down the tree will stop its layout coordinate from moving with it, effectively swapping the coordinates of the swapped widgets.
 * There is now a copy action button in the widget tree to allow easily duplicating a widget and its children.
 * Containers in the widget tree now support collapsing their nodes, making it easier to deal with adjacent widgets that have many children.
 
@@ -984,7 +1004,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 
 * __BUG:__ An object will now only be considered to be an application if it has a single `a` key.
 * The `in` and `not-in` operators can now check for:
-  * nultiple keys in an object
+  * multiple keys in an object
   * entries in an array that match an application
   * entries in an object that match an application
 * The `contains` and `does-not-contain` operators can now check for:
@@ -1027,7 +1047,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 
 ### Data
 
-* The `in` operator can now check for numbers in print-style ranges. Print style number ranges are strings of numbers and ranges seperated by at least a space, `,`, or `;`. Numbers may be negative. Ranges consist of two numbers separated by a `-` with no intervening whitespace e.g. `10-49`. Greater than and less than a number e.g. `<10` and `>20` create implicit ranges that go to +/- inifinity on the relevant side. A full example of a print-style range would be `1, 3, 17, 19-25, >999`.
+* The `in` operator can now check for numbers in print-style ranges. Print style number ranges are strings of numbers and ranges separated by at least a space, `,`, or `;`. Numbers may be negative. Ranges consist of two numbers separated by a `-` with no intervening whitespace e.g. `10-49`. Greater than and less than a number e.g. `<10` and `>20` create implicit ranges that go to +/- infinity on the relevant side. A full example of a print-style range would be `1, 3, 17, 19-25, >999`.
 
 
 ## 0.11.6
@@ -1037,7 +1057,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 ### Render
 
 * __BUG__: Manual layouts that use negative coordinates will now properly account for margins that would previously cause the coordinates to render as positive.
-* __BUG__: Widgets with height set to grow will now include their margin in their final height, like a contain widget. Those with a manual layout will also offset their bottom and right poisitioned children's coordinates by their top and left margin.
+* __BUG__: Widgets with height set to grow will now include their margin in their final height, like a contain widget. Those with a manual layout will also offset their bottom and right positioned children's coordinates by their top and left margin.
 
 ### Designer
 
@@ -1059,7 +1079,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 
 ### Render
 
-* Widgets and label parts can be assigned background color and border radius. The designer supports expressions for both for widgets, but label parts can only be assigned literals from the the designer. The renderer _does_ support expressions for label parts.
+* Widgets and label parts can be assigned background color and border radius. The designer supports expressions for both for widgets, but label parts can only be assigned literals from the designer. The renderer _does_ support expressions for label parts.
 
 ### Lib
 
@@ -1142,7 +1162,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 
 ### Data
 
-* There is a new built-in `pipe` operator that can automatically pipeline operaions. The first argument is evaluated, the result is passed to the second argument and evaluated, the result is passed to the next argument and evaluated, and so forth until the last argument, the result of which is the value returned from the pipe operation. Application arguments are automatically passed the piped value. Operations that don't reference the new special `@pipe` reference or its shorthand `_` will have their argument list prepended with a reference to `@pipe`, which allows things like `pipe(some-list filter(=>age > 18) map(=>'"{name}\n{address}\n{city}, {state} {zip}"') join(','))`.
+* There is a new built-in `pipe` operator that can automatically pipeline operations. The first argument is evaluated, the result is passed to the second argument and evaluated, the result is passed to the next argument and evaluated, and so forth until the last argument, the result of which is the value returned from the pipe operation. Application arguments are automatically passed the piped value. Operations that don't reference the new special `@pipe` reference or its shorthand `_` will have their argument list prepended with a reference to `@pipe`, which allows things like `pipe(some-list filter(=>age > 18) map(=>'"{name}\n{address}\n{city}, {state} {zip}"') join(','))`.
 
 ### Designer
 
@@ -1206,7 +1226,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 
 ### Data
 
-* __BUG:__ `diff` will no longer try to read properies of an `undefined` object in some scenarios.
+* __BUG:__ `diff` will no longer try to read properties of an `undefined` object in some scenarios.
 
 
 ## 0.10.9
@@ -1222,7 +1242,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 
 2022-03-18
 
-`0.10.7` was also no fully built when published, so... yeah.
+`0.10.7` was also not fully built when published, so... yeah.
 
 ### Data
 
@@ -1335,7 +1355,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 
 ### Data
 
-* __BUG__: `date` properly supports time plus timezone time strings as the second argument. For instance, `date(#now# :midnight-10)` in `-5` will result in <F8>
+* __BUG__: `date` properly supports time plus timezone time strings as the second argument. For instance, `date(#now# :midnight-10)` in `-5` will result in `05:00` in `-5` on the same day.
 * __BUG__: Date literals with a timezone will no longer shift when formatting as a timestamp.
 
 ### Designer
@@ -1450,7 +1470,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 ### Designer
 
 * __BUG__: `classifyStyles` set to `false` is now exported correctly in compact mode.
-* Changes to the defition can be undone/redone using `ctrl-z`/`ctrl-shift-z`.
+* Changes to the definition can be undone/redone using `ctrl-z`/`ctrl-shift-z`.
 * Widgets can be moved from one container to another using the widget tree. Click the move button to put that widget into move mode and then click a container to move the widget. You can cancel the move by clicking the widget again or using the button at the top of the left pane.
 
 
@@ -1474,7 +1494,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 
 * __BUG__: Measured labels now output classy styles correctly.
 * __BUG__: Containers with a manual layout will now default the coordinates for any given child to 0, 0.
-* __BUG__: Containers will now use their inner width (width widthout margins) as available inner space to avoid child overflow.
+* __BUG__: Containers will now use their inner width (width without margins) as available inner space to avoid child overflow.
 * __BUG__: Widgets with percentage widths will now render with an exact computed width rather than a percentage, so margins are fully respected.
 
 
@@ -1552,7 +1572,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 
 ### Data
 
-* The `date` operator now supports a second arguemt that allows you to set the time on the resulting date. It can be either a string, to be parsed with the parser used by date literals, or an array with `[hours, minutes, second, milliseconds, timezone offset in minutes]`, where only the first element is required and the timezone is only used if present.
+* The `date` operator now supports a second argument that allows you to set the time on the resulting date. It can be either a string, to be parsed with the parser used by date literals, or an array with `[hours, minutes, second, milliseconds, timezone offset in minutes]`, where only the first element is required and the timezone is only used if present.
 
 ### Parser
 
@@ -1580,7 +1600,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 * __BUG__: `is-not` now parses with higher priority than `is` so that it can actually be parsed.
 * __BUG__: The stringifier now properly outputs `#now#`.
 * Interval timespans (those that are represented by a number of milliseconds) now parse to a wrapper type so that they can be properly stringified.
-* Stringifying long binary operands will now wrap and indent the sebsequent operands.
+* Stringifying long binary operands will now wrap and indent the subsequent operands.
 
 ### Designer
 
@@ -1595,9 +1615,9 @@ __BUG__: The code editors in the designer now handle long lines and long express
 ### Data
 
 * There are three new string operators, which are also exported from the library:
-  * `similar` - the main operator that finds similar substrings within two strings based on a minimum threshhold and a fudge factor
+  * `similar` - the main operator that finds similar substrings within two strings based on a minimum threshold and a fudge factor
   * `similarity` - get the similarity factor from the `similar` operator
-  * `overlap` - get a substring that is common to both strings that meets a minimum threshhold of size (and no fudge factor) using the `similar` operator
+  * `overlap` - get a substring that is common to both strings that meets a minimum threshold of size (and no fudge factor) using the `similar` operator
 
 
 ## 0.8.0
@@ -1610,7 +1630,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 
 ### Data
 
-* There is now an `interval` operator that will parse a raport interval from a string, with the `#`s being optional e.g. `interval('{count} days')` where `count` is `5` is equavalent to `#5 days#`.
+* There is now an `interval` operator that will parse a raport interval from a string, with the `#`s being optional e.g. `interval('{count} days')` where `count` is `5` is equivalent to `#5 days#`.
 * The `date` operator will now try the raport date parser on strings that produce an `Invalid Date`.
 
 ### Designer
@@ -1640,7 +1660,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 ### Data
 
 * __BREAKING__: `time-span` has been rewritten to be more useful. The old behavior is still achievable with slightly different arguments.
-* Full timespans now include a date anchor by default to make them convertable to an exact number of milliseconds.
+* Full timespans now include a date anchor by default to make them convertible to an exact number of milliseconds.
 
 ### Library
 
@@ -1723,7 +1743,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 * __BREAKING__: Application is now handled more explicitly within operators (again... ish). Application will no longer automatically evaluate in the current context.
 * Locals are now handled in the context rather than in the evaluation call.
 * Applications can now have named arguments specified, and are handled as locals during evaluation e.g. `|a c| => a + c` can be used with `reduce` to sum values.
-* There is now a `reduce` operator that folds a value throuh an array using an application e.g. `reduce([1 2 3] |a c|=>a+c 0)`.
+* There is now a `reduce` operator that folds a value through an array using an application e.g. `reduce([1 2 3] |a c|=>a+c 0)`.
 * There is now a `block` operator that evaluates all of its arguments in a new context with an empty set of locals.
 * There is now a `let` operator that allows defining a local variable in the current context. The variable can be any path expression except prefixes other than `^`. Any missing intermediate levels will be filled in based on the type of the key.
 * There is now a `set` operator that allows setting values in an local scope up the context hierarchy if any match or in the current context data otherwise. Like `let` the variable can be any path expression.
@@ -1777,7 +1797,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
   * It supports templates.
 * There is now a `case` operator sugar e.g. `case some + expr when :foo then another(expression) when 22 then :sure else :none`.
   * It also has a template form as `{{case some + expr when :foo}}{{another(expression)}}{{when 22}}sure{{else}}none{{/}}`.
-  * The expression form will automatically stringify on multiple lines when approriate.
+  * The expression form will automatically stringify on multiple lines when appropriate.
   * `when` conditions that are expressions (not application) will substitute `_` refs with `@case`.
 * The `$` in string interpolation is now optional e.g. `'foo {bar} baz'` is equivalent to `'foo ${bar} baz'` and the former is the default for stringification.
 
@@ -1799,7 +1819,7 @@ __BUG__: The code editors in the designer now handle long lines and long express
 * __BUG__: Data sources are now passed to the report runner correctly.
 * __BUG__: Containers can now be manually positioned.
 * Changing the selected widget will now scroll it into view in the widget tree.
-* Loading a definition tries `JSON.parse` first and then the raport parser for more realxed definitions.
+* Loading a definition tries `JSON.parse` first and then the raport parser for more relaxed definitions.
 * Report definition output now does basic minification i.e. removes keys that have no effect on the definition.
 * The designer now exposes `parse` and `unparse` operators for seeing how an expression breaks down.
 * The designer now supports `fetch` data sources that can be built with templates. The definitions can also be loaded from the import tab.
@@ -1825,9 +1845,9 @@ Most of the changes in 0.5.0 were unintentionally published as 0.4.1, but I'm go
 ### Data
 
 * There is now a `case` formatter that works with upper, lower, snake, kebab, pascal, camel, and proper cases.
-* The `in`, `not-in`, `contains`, and `does-not-contain` operators now support arrays on both sides, where the checked side must have all values appear in the source array in order for the affirmitive versions to return true.
+* The `in`, `not-in`, `contains`, and `does-not-contain` operators now support arrays on both sides, where the checked side must have all values appear in the source array in order for the affirmative versions to return true.
 * There is now an `intersect` operator that provides a unique intersection of two arrays.
-* The `like`, `ilike`, `not-like`, and `not-ilike` operators now support arrays on both sides, where each element in the source will be checked against each pattern. If any pattern matches any source element, the affirmitive versions of this operator will return true.
+* The `like`, `ilike`, `not-like`, and `not-ilike` operators now support arrays on both sides, where each element in the source will be checked against each pattern. If any pattern matches any source element, the affirmative versions of this operator will return true.
 
 ### Designer
 
@@ -1896,7 +1916,7 @@ Most of the changes in 0.5.0 were unintentionally published as 0.4.1, but I'm go
 * There is now an `html` widget that will not escape its content.
 * Widgets can now break on page boundaries or stop breaking on a page boundary if necessary.
 * Flowed layout will now track available width in addition to height as it goes so that grid-like layouts can be achieved.
-* Labels may have a format applied to their value spearately.
+* Labels may have a format applied to their value separately.
 * Labels may have an `id` if they appear within a repeater. This `id` is used to collect values to be used in footers for aggregation without having to repeat complex expressions.
 * The report runner now supports passing additional html strings for the header and body end of the generated report.
 
@@ -1908,7 +1928,7 @@ The parser has been switched from hand-coded to be based on [sprunge](https://gi
 * __BREAKING__: The source reference sigil has been changed from `+` to `*`.
 * __BREAKING__: Aggregate operators no longer have local arguments or a special source sigil. The source is the first argument, if it's an array or source, or the implicit `@source` otherwise. Application is handled by application literals, as are local arguments.
 * __BREAKING__: Expression literals are now handled by application e.g. `=>_ + 5`.
-* There is now a bit of sugar for array and object literals similar to JS, except allowing just space as a spearator in addition to commas. Array and object literals containing only literals will become literals, and those containing expressions will become operations. Quotes on object keys are optional if they don't have spaces.
+* There is now a bit of sugar for array and object literals similar to JS, except allowing just space as a separator in addition to commas. Array and object literals containing only literals will become literals, and those containing expressions will become operations. Quotes on object keys are optional if they don't have spaces.
 * Single- and backtick-quoted strings now support interpolation with `${...}`.
 * There is now support for date literals between `#`s e.g. `#2012-2-22#`, `#today#`, `#last week#`, `#2020#`, `#2020-4#`, `#2032-5-30 -8`, `#1999-12-3 12:45#`. Relative dates result in a time range, as do exact dates that are specified to at most the hour, as specifying a minute results in zeroed out seconds and milliseconds. Timespans can be specified in weeks, days, hours, minutes, seconds, and milliseconds as anumbers followed by the unit e.g. `# 3 weeks 2 days#` and evaluate to a number literal in milliseconds.
 * The parser now supports unary, binary, call, if, bracketed access, postfix access, and postfix format expressions to make the language a little more familiar non-lispers.

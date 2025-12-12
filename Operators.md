@@ -601,7 +601,7 @@ The basis value is available as @case or the shorthand _ in each matcher.</dd>
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>partition</code></dt><dd>Build a count object where the keys are determined by the application and the count associated with each keys is how many times the application produces the key when applying it to each value in the array.</dd><dt><code>sub</code></dt><dd>Build a count object where the keys are determined by the sub object. Each key of the sub object must be an application. If the application returns a string, it will be used as the key. If it returns an array, each member will be used as a key. If it returns an otherise trutch value, the key associated with the application will be used as the key. The counts in the resulting object represent how many times each key appeared when each application was applied to each value in the array.</dd>
+<dt><code>partition</code></dt><dd>Build a count object where the keys are determined by the application and the count associated with each key is how many times the application produces the key when applying it to each value in the array.</dd><dt><code>sub</code></dt><dd>Build a count object where the keys are determined by the sub object. Each key of the sub object must be an application. If the application returns a string, it will be used as the key. If it returns an array, each member will be used as a key. If it returns an otherise truthy value, the key associated with the application will be used as the key. The counts in the resulting object represent how many times each key appeared when each application was applied to each value in the array.</dd>
 </dl>
 </dl>
 <br/>
@@ -842,6 +842,11 @@ If there is context-local rounding set, it will be applied to the result (see se
 <dd>Filters the given array using the given application to remove entries that return a false-y result. The result is then sorted using the given sort array. The result is finally grouped by the final application or array of applications.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>invert</code></dt><dd>Inverts the result of the sort, if any. If true, all sort segments will be inverted. If an array, each segment index in the array will be inverted. :first is a slightly more clear shorthand for [0]. The special reference, invert, is available to the sort expression during evaluation as true if there is an inversion passed in.</dd>
+</dl>
 </dl>
 <br/>
 
@@ -1362,8 +1367,8 @@ The label map is a nested object with the keys being single key paths in the dif
 <dd>
 
 <dl>
-<dt><code>string|array|dataset|object => number</code></dt>
-<dd>Returns the length of a given string or array, the length of a given array dataset, the number of keys in a given object, or 0.</dd>
+<dt><code>string|array|dataset|application|object => number</code></dt>
+<dd>Returns the length of a given string or array, the length of a given array dataset, the number of keys in a given object, the number of named arguments of an application, or 0.</dd>
 </dl>
 
 </dl>
@@ -1378,8 +1383,8 @@ The label map is a nested object with the keys being single key paths in the dif
 <dd>
 
 <dl>
-<dt><code>string|array|dataset|object => number</code></dt>
-<dd>Returns the length of a given string or array, the length of a given array dataset, the number of keys in a given object, or 0.</dd>
+<dt><code>string|array|dataset|application|object => number</code></dt>
+<dd>Returns the length of a given string or array, the length of a given array dataset, the number of keys in a given object, the number of named arguments of an application, or 0.</dd>
 </dl>
 
 </dl>
@@ -1845,7 +1850,7 @@ If there is context-local rounding set, it will be applied to the result (see se
 #### <ins>Options</ins>
 
 <dl>
-<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>json</code></dt><dd>Use a JSON parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. Properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning.</dd><dt><code>strict</code></dt><dd>For the XML parser, be less forgiving about malformed content. Defaults to false.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>delimited</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>Only applies when using the delimited parser. If an array, each array element will be used as the header for the corresponding field in the rows. This will not consume the first row of non-tabular data to be used as the header. If an object with non-numeric keys, each header will be replaced with its corresponding value in the map if it is a non-empty string, removed if it is a non-nullish falsey value, or left alone if it is a nullish value. This will consume the first row of non-tabular data to use as a header. If an object with numeric keys, the results will be objects with the header map values as keys and the corresponding field index as values. This will not consume any data, so if there is a header row, it will need to be removed from the resulting data. If a truthy value, the first row of non-tabular data will be consumed to be used as a header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd><dt><code>order</code></dt><dd>If set to false or 0, the fields in resulting objects generated from input with headers will not be keyed in alphabetical order.</dd><dt><code>fixedSize</code></dt><dd>Discard any delimited rows that are not at least as long as the header/first row.</dd>
+<dt><code>date</code></dt><dd>Use the date parser rather than the expression parser.</dd><dt><code>template</code></dt><dd>Use the template parser rather than the expression parser.</dd><dt><code>time</code></dt><dd>Use the time parser rather than the expression parser.</dd><dt><code>schema</code></dt><dd>Use the schema parser rather than the expression parser.</dd><dt><code>json</code></dt><dd>Use a JSON parser rather than the expression parser.</dd><dt><code>base64</code></dt><dd>Use a base64 parser to decode a base64 encoded string.</dd><dt><code>xml</code></dt><dd>Use the XML parser to read data. In JSON mode, properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning. In document mode, a document with a single element root is producted. Each element can have attributes, a namespace, a name, and children, which can be elements, string content, or comments.</dd><dt><code>strict</code></dt><dd>For the XML parser, be less forgiving about malformed content. Defaults to false.</dd><dt><code>type</code></dt><dd>For the XML parser, set the parsing mode.</dd><dt><code>csv</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>delimited</code></dt><dd>Use the delimited text parser rather than the expression parser.</dd><dt><code>detect</code></dt><dd>If using the delimited parser, detect the delimiters and use them to parse.</dd><dt><code>header</code></dt><dd>Only applies when using the delimited parser. If an array, each array element will be used as the header for the corresponding field in the rows. This will not consume the first row of non-tabular data to be used as the header. If an object with non-numeric keys, each header will be replaced with its corresponding value in the map if it is a non-empty string, removed if it is a non-nullish falsey value, or left alone if it is a nullish value. This will consume the first row of non-tabular data to use as a header. If an object with numeric keys, the results will be objects with the header map values as keys and the corresponding field index as values. This will not consume any data, so if there is a header row, it will need to be removed from the resulting data. If a truthy value, the first row of non-tabular data will be consumed to be used as a header.</dd><dt><code>field</code></dt><dd>If using the delimited parser, use the given string as the field delimiter.</dd><dt><code>record</code></dt><dd>If using the delimited parser, use the given string as the record delimiter.</dd><dt><code>quote</code></dt><dd>If using the delimited parser, use the given string as the field quote.</dd><dt><code>order</code></dt><dd>If set to false or 0, the fields in resulting objects generated from input with headers will not be keyed in alphabetical order.</dd><dt><code>fixedSize</code></dt><dd>Discard any delimited rows that are not at least as long as the header/first row.</dd>
 </dl>
 </dl>
 <br/>
@@ -2180,6 +2185,11 @@ Any arguments that are objects may include a by key with an application value al
 If no sorts are provided, an identity sort will be applied to the keys.</dd>
 </dl>
 
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>invert</code></dt><dd>Inverts the result of the sort. If true, all sort segments will be inverted. If an array, each segment index in the array will be inverted. :first is a slightly more clear shorthand for [0]. The special reference, invert, is available to the sort expression during evaluation as true if there is an inversion passed in.</dd>
+</dl>
 </dl>
 <br/>
 
