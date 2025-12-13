@@ -19,7 +19,7 @@ export {
   Type, ArrayType, ValueType, Value, Literal, Reference, ValueOrExpr,
   template,
 } from './data/index';
-export { inspect, validate, checkType } from './data/schema';
+export { inspect, validate, checkType, ValidationResult, ValidationError } from './data/schema';
 export { diff, Diff, deepEqual, labelDiff, LabelOptions } from './data/diff';
 export { parse, parsePath, parseTime, parseDate } from './data/parse';
 export { stringify, StringifyOpts } from './data/parse/stringify';
