@@ -1,3 +1,17 @@
+## 0.30.2
+
+2025-12-19
+
+### Project
+
+* The types ValidationResult and ValidationSchema are now publicly exported.
+* The `log` operator is now in the operator docs.
+
+### Data
+
+* __BUG:__ The `diff` operator will now more gracefully handle `Date`s and hopefully other special weird objects that don't have any properties, if such beasts exist.
+
+
 ## 0.30.1
 
 2025-12-12
