@@ -11,6 +11,7 @@ import { debounce } from './util';
 
 import { operators as operator_docs, formats as format_docs, languageReference as langref } from './docs';
 
+import { highlight } from './Editor';
 export { highlight } from './Editor';
 
 export interface InputOperatorDoc {
@@ -2379,6 +2380,18 @@ registerOperator({
 registerOperatorDoc({
   op: 'debugger',
   sig: [{ proto: '() => void', desc: 'Triggers a manual breakpoint if your environment has developer tools available and open.' }],
+});
+
+registerOperator({
+  type: 'value',
+  names: ['highlight'],
+  apply(_name, args) {
+   return highlight(args[0]);
+  },
+});
+registerOperatorDoc({
+  op: 'highlight',
+  sig: [{ proto: 'str => str', desc: 'Parses the given string as an expression and returns an HTML string with AST-node classes suitable for displaying as highlighted code.' }],
 });
 
 let clipEl: HTMLTextAreaElement;

@@ -5,6 +5,7 @@
 ### Designer
 
 * __BREAKING:__ The `docs` export is now the `docs` object from the designer rather than directly from the docs builder. The docs builder is now exported as `docText`. This allows sharing a common source for operator docs and enables the new `registerOperatorDoc` and `registerFormatDoc` functions.
+* Expose the syntax highlighting function as the `highlight` operator in the designer to make future language reference changes a little easier.
 
 
 ## 0.30.2
