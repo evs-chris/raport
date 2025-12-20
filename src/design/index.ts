@@ -1,3 +1,4 @@
-export { Designer as ReportDesigner, AvailableSource, ExprOptions, highlight } from './Report';
+export { Designer as ReportDesigner, AvailableSource, ExprOptions, highlight, docs, registerOperatorDoc, registerFormatDoc, OperatorDoc, FormatDoc } from './Report';
 export { debounce } from './util';
-export * as docs from './docs';
+
+export * as docText from './docs';

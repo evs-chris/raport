@@ -1,3 +1,12 @@
+## 0.31.0
+
+**Unreleased**
+
+### Designer
+
+* __BREAKING:__ The `docs` export is now the `docs` object from the designer rather than directly from the docs builder. The docs builder is now exported as `docText`. This allows sharing a common source for operator docs and enables the new `registerOperatorDoc` and `registerFormatDoc` functions.
+
+
 ## 0.30.2
 
 2025-12-19

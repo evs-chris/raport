@@ -13,7 +13,7 @@ import { operators as operator_docs, formats as format_docs, languageReference a
 
 export { highlight } from './Editor';
 
-export interface OperatorDoc {
+export interface InputOperatorDoc {
   op: string | string[];
   alias?: string;
   note?: string;
@@ -29,8 +29,11 @@ export interface OperatorDoc {
     desc: string;
   }>
 }
+export interface OperatorDoc extends InputOperatorDoc {
+  builtin: boolean;
+}
 
-export interface FormatDoc {
+export interface InputFormatDoc {
   name: string | string[];
   alias?: boolean;
   desc: string;
@@ -41,17 +44,14 @@ export interface FormatDoc {
     desc: string;
   }>;
 }
+export interface FormatDoc extends InputFormatDoc {
+  builtin: boolean;
+}
 
-export const docs = {
-  operators: [] as Array<OperatorDoc>,
-  operatorText: {} as { [op: string]: string },
-  languageReference: langref,
-};
-{
-  const ops = evaluate(operator_docs) as Array<OperatorDoc>;
-  for (const doc of ops) {
-    const op = Array.isArray(doc.op) ? doc.op[0] : doc.op;
-    const txt = `${op}${Array.isArray(doc.op) ? ` (alias ${doc.op.filter(n => n !== op).join(', ')})` : ''}
+let builtinDoc = true;
+export function registerOperatorDoc(doc: InputOperatorDoc) {
+  const op = Array.isArray(doc.op) ? doc.op[0] : doc.op;
+  const txt = `${op}${Array.isArray(doc.op) ? ` (alias ${doc.op.filter(n => n !== op).join(', ')})` : ''}
 ---${doc.note ? `
 NOTE: ${doc.note}
 ` : ''}
@@ -59,32 +59,44 @@ ${doc.sig.map(s => `${s.proto}${s.bin ? '        (can be binary)' : ''}${s.un ? 
 
 Options
 ---
-${doc.opts.map(o => `${Array.isArray(o.name) ? `${o.name[0]} (alias ${o.name.slice(1).join(', ')})` : o.name} - ${o.type}\n  ${o.desc}\n`).join('\n')}` : ''}`;
-    const all = Array.isArray(doc.op) ? doc.op : [doc.op];
-    all.forEach((n, i) => {
-      docs.operatorText[n] = txt;
-      docs.operators.push(Object.assign({}, doc, i === 0 ? { op: n } : { op: n, alias: all[0] }));
-    });
-  }
+${doc.opts.map(o => `${Array.isArray(o.name) ? `${o.name[0]} (alias ${o.name.slice(1).join(', ')})` : o.name} - ${o.type} - ${builtinDoc ? 'built-in' : 'custom'}\n  ${o.desc}\n`).join('\n')}` : ''}`;
+  const all = Array.isArray(doc.op) ? doc.op : [doc.op];
+  all.forEach((n, i) => {
+    docs.operatorText[n] = txt;
+    docs.operators.push(Object.assign({}, doc, i === 0 ? { op: n } : { op: n, alias: all[0] }, { builtin: builtinDoc }));
+  });
+}
 
-  const fmts = evaluate(format_docs) as Array<FormatDoc>;
-  for (const f of fmts) {
-    const all = Array.isArray(f.name) ? f.name : [f.name];
-    all.forEach((n, i) => {
-      const op = `#${n}`;
-      const val: any = { op, sig: [{ fmt: 1, proto: op, desc: f.desc }], opts: f.opts };
-      if (i > 0) val.alias = true;
-      docs.operators.push(val);
-      const txt = `${n}${all.length > 1 ? ` (alias: ${all.filter(nn => n !== nn).join(', ')})` : ''}${f.opts ? ` - #${n},${f.opts.map(o => `${o.name}${o.req ? '' : '?'}`).join(',')}` : ''}
+export function registerFormatDoc(f: InputFormatDoc) {
+  const all = Array.isArray(f.name) ? f.name : [f.name];
+  all.forEach((n, i) => {
+    const op = `#${n}`;
+    const val: any = { op, sig: [{ fmt: 1, proto: op, desc: f.desc }], opts: f.opts };
+    if (i > 0) val.alias = true;
+    docs.operators.push(Object.assign({}, val, { builtin: builtinDoc }));
+    const txt = `${n}${all.length > 1 ? ` (alias: ${all.filter(nn => n !== nn).join(', ')})` : ''}${f.opts ? ` - #${n},${f.opts.map(o => `${o.name}${o.req ? '' : '?'}`).join(',')}` : ''} - ${builtinDoc ? 'built-in' : 'custom'}
 ${f.desc ? `${f.desc}
 ` : ''}
 ${f.opts ? `
 Arguments
 ---
 ${f.opts.map(o => `${o.name} - ${o.type}\n  ${o.desc}\n`).join('\n')}` : ''}`;
-      docs.operatorText[op] = txt;
-    });
-  }
+    docs.operatorText[op] = txt;
+  });
+}
+
+export const docs = {
+  operators: [] as Array<OperatorDoc>,
+  operatorText: {} as { [op: string]: string },
+  languageReference: langref,
+};
+{
+  const ops = evaluate(operator_docs) as Array<InputOperatorDoc>;
+  for (const doc of ops) registerOperatorDoc(doc);
+
+  const fmts = evaluate(format_docs) as Array<InputFormatDoc>;
+  for (const f of fmts) registerFormatDoc(f);
+  builtinDoc = false;
 }
 
 let sourceTm: any;
@@ -2363,6 +2375,10 @@ registerOperator({
   apply(..._args) {
     debugger;
   },
+});
+registerOperatorDoc({
+  op: 'debugger',
+  sig: [{ proto: '() => void', desc: 'Triggers a manual breakpoint if your environment has developer tools available and open.' }],
 });
 
 let clipEl: HTMLTextAreaElement;

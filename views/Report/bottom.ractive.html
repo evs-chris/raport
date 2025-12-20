@@ -30,7 +30,7 @@
           <h2 style="text-align: center;">Raport Operators</h2>
           <dl>
             {{#each ~/operators as op}}{{#if (!~/opDoc || op.0.includes(~/opDoc)) && (!~/opDocSearch || JSON.stringify(op.1).toLowerCase().includes(~/opDocSearch.toLowerCase()))}}
-            <dt style="border-bottom: 1px dotted; margin-bottom: 0.25rem; margin-top: 2rem;"><h3>{{op.0.0 === '#' ? 'Format ' + op.0.slice(1) : op.0}}{{#if op.1.alias}} <em style="font-size: 0.8em;"> - (alias for <strong>{{op.1.alias}}</strong>)</em>{{/if}}</h3></dt>
+            <dt style="border-bottom: 1px dotted; margin-bottom: 0.25rem; margin-top: 2rem;"><h3 style="display: flex; justify-content: space-between;"><span>{{op.0.0 === '#' ? 'Format ' + op.0.slice(1) : op.0}}{{#if op.1.alias}} <em style="font-size: 0.8em;"> - (alias for <strong>{{op.1.alias}}</strong>)</em>{{/if}}</span> <em style="font-size: 0.8em;">({{op.1.builtin ? 'built-in' : 'custom'}})</em></h3></dt>
               <dd>
                 <dl>
                   {{#each op.1.sig}}

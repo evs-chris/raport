@@ -178,10 +178,10 @@ The basis value is available as @case or the shorthand _ in each matcher.' eg:['
     { bin:1 proto:'(daterange, date) => boolean' desc:'Returns false if the second argument is a falls within the first argument range.' }
   ]}
   { op:'each' sig:[
-    { proto:'(any[], application) => string' desc:'Iterates over the given array, executes the application for each value, and returns ther results joined with an empty string.' }
-    { proto:'(any[], application, ...(boolean, result)) => string' desc:'Iterates over the given array, executes the application for each value, and returns ther results joined with an empty string. If the array is empty, then the final array of condition/result pairs are lazily evaluated to return one that matches.' }
-    { proto:'(object, application) => string' desc:'Iterates over the given object entries, executes the application for each value, and returns ther results joined with an empty string.' }
-    { proto:'(object, application, ...(boolean, result)) => string' desc:'Iterates over the given object entries, executes the application for each value, and returns ther results joined with an empty string. If the object is empty, then the final array of condition/result pairs are lazily evaluated to return one that matches.' }
+    { proto:'(any[], application) => string' desc:'Iterates over the given array, executes the application for each value, and returns the results joined with an empty string.' }
+    { proto:'(any[], application, ...(boolean, result)) => string' desc:'Iterates over the given array, executes the application for each value, and returns the results joined with an empty string. If the array is empty, then the final array of condition/result pairs are lazily evaluated to return one that matches.' }
+    { proto:'(object, application) => string' desc:'Iterates over the given object entries, executes the application for each value, and returns the results joined with an empty string.' }
+    { proto:'(object, application, ...(boolean, result)) => string' desc:'Iterates over the given object entries, executes the application for each value, and returns the results joined with an empty string. If the object is empty, then the final array of condition/result pairs are lazily evaluated to return one that matches.' }
   ] opts:[
     { name:'join' type:'string' desc:'An alternate string to use to join the results.' }
   ]}

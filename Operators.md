@@ -783,13 +783,13 @@ If there is context-local rounding set, it will be applied to the result (see se
 
 <dl>
 <dt><code>(any[], application) => string</code></dt>
-<dd>Iterates over the given array, executes the application for each value, and returns ther results joined with an empty string.</dd>
+<dd>Iterates over the given array, executes the application for each value, and returns the results joined with an empty string.</dd>
 <dt><code>(any[], application, ...(boolean, result)) => string</code></dt>
-<dd>Iterates over the given array, executes the application for each value, and returns ther results joined with an empty string. If the array is empty, then the final array of condition/result pairs are lazily evaluated to return one that matches.</dd>
+<dd>Iterates over the given array, executes the application for each value, and returns the results joined with an empty string. If the array is empty, then the final array of condition/result pairs are lazily evaluated to return one that matches.</dd>
 <dt><code>(object, application) => string</code></dt>
-<dd>Iterates over the given object entries, executes the application for each value, and returns ther results joined with an empty string.</dd>
+<dd>Iterates over the given object entries, executes the application for each value, and returns the results joined with an empty string.</dd>
 <dt><code>(object, application, ...(boolean, result)) => string</code></dt>
-<dd>Iterates over the given object entries, executes the application for each value, and returns ther results joined with an empty string. If the object is empty, then the final array of condition/result pairs are lazily evaluated to return one that matches.</dd>
+<dd>Iterates over the given object entries, executes the application for each value, and returns the results joined with an empty string. If the object is empty, then the final array of condition/result pairs are lazily evaluated to return one that matches.</dd>
 </dl>
 
 #### <ins>Options</ins>
