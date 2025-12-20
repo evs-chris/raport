@@ -271,6 +271,10 @@ q.test('diff', t => {
   t.equal(JSON.stringify(e('diff({ a:1 b::2 c:3 } { a:2 b:2 })')), JSON.stringify({ a: [1, 2], c: [3, null] }));
   t.equal(JSON.stringify(e('diff({ a:1 b::2 c:3 } { a:2 b:2 } equal::strict)')), JSON.stringify({ a: [1, 2], b: ['2', 2], c: [3, null] }));
   t.equal(JSON.stringify(e('diff({ a:1 b:2 c:3 } { a:2 b:2 } keys::common)')), JSON.stringify({ a: [1, 2] }));
+  t.equal(JSON.stringify(e(`diff({ date:date('2022-12-22Z') } { date:date('2022-12-22Z') }))`)), JSON.stringify({}));
+  t.equal(JSON.stringify(e(`diff({ date:date('2022-12-22Z') } { date:date('2022-12-23Z') }))`)), JSON.stringify({ date: ['2022-12-22T00:00:00.000Z', '2022-12-23T00:00:00.000Z'] }));
+  t.equal(JSON.stringify(e(`diff({ date:null } { date:date('2022-12-23Z') }))`)), JSON.stringify({ date: [null, '2022-12-23T00:00:00.000Z'] }));
+  t.equal(JSON.stringify(e(`diff({ date:date('2022-12-22Z') } {}))`)), JSON.stringify({ date: ['2022-12-22T00:00:00.000Z', undefined] }));
 });
 
 q.test('does-not-contain', t => {

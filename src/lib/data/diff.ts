@@ -90,6 +90,11 @@ function _diff(v1: any, v2: any, path: string, diff: Diff, equal: (v1: any, v2: 
       diff[join(path, `${i + found.length}`)] = [undefined, v2[i]];
     }
   } else {
+    if (v1 && !v2 || !v1 && v2) {
+      diff[path] = [v1, v2];
+      return diff;
+    }
+
     const _v1 = v1 || {};
     const _v2 = v2 || {};
     const ks: string[] = [];
@@ -98,6 +103,13 @@ function _diff(v1: any, v2: any, path: string, diff: Diff, equal: (v1: any, v2: 
     } else {
       ks.push.apply(ks, Object.keys(_v1));
       for (const k of Object.keys(_v2)) if (!~ks.indexOf(k)) ks.push(k);
+    }
+
+    if (!ks.length) {
+      let _v1 = v1.toString();
+      let _v2 = v2.toString();
+      if (_v1 !== _v2 && ((_v1[0] && _v1[0] !== '[') || (_v2[0] && _v2[0] !== '['))) diff[path] = [v1, v2];
+      return diff;
     }
 
     for (const k of ks) {
