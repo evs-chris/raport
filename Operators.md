@@ -1435,6 +1435,22 @@ The label map is a nested object with the keys being single key paths in the dif
 
 <dl><dt>
 
+### `log`
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>...any => void</code></dt>
+<dd>Sends the given arguments to the context logging facility, which defaults to console.log if none is provided.</dd>
+</dl>
+
+</dl>
+<br/>
+
+<dl><dt>
+
 ### `lower`
 ---
 

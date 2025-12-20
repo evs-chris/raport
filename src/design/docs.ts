@@ -329,6 +329,9 @@ The label map is a nested object with the keys being single key paths in the dif
   ] opts: [
     { name:'free' type:'boolean' desc:'Causes the patterns not to be anchored to the start and end of the target string.' }
   ]}
+  { op:'log' sig:[
+    { proto:'...any => void' desc:'Sends the given arguments to the context logging facility, which defaults to console.log if none is provided.' }
+  ]}
   { op:'lower' sig:[
     { proto:'string => string' desc:'Returns the given string in lower case.' }
   ]}
