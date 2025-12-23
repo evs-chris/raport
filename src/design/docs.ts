@@ -8,7 +8,7 @@ export const operators = `[
 If there is context-local rounding set, it will be applied to the result (see set-defaults).' }
     { bin:1 proto:'(string, number) => string' desc:'Returns the given string copied number times if the number is positive.'}
     { bin:1 proto:'(any[], number) => any[]' desc:'Returns the given array concatenated number times if the array has fewer than 1,000 elements and the number is positive and less than 10,000.'}
-    { bin:1 proto:'(application, number) => any[]' desc:'Returns an array of the results of the application called once with each index the given y concatenated number times if the array has fewer than 1,000 elements and the number is positive and less than 10,000.'}
+    { bin:1 proto:'(application, number) => any[]' desc:'Returns an array of the results of the application called once with each the special reference index set to the current iteration. If the named operator is called with additional arguments, they are passed to the application as arguments.'}
   ]}
   { op:['**' 'pow'] sig:[
     { bin:1 proto:'...number => number' desc:'Applies exponentiation to the given arguments with right associativity.

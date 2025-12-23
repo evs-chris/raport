@@ -859,15 +859,15 @@ registerOperator(
     if (ctx.special?.round) return values.reduce((a, c) => +round(a - (!isNum(c) ? 0 : +c), ctx.special.round), !isNum(first) ? 0 : +first);
     else return values.reduce((a, c) => a - (!isNum(c) ? 0 : +c), !isNum(first) ? 0 : +first);
   }),
-  simple(['*', 'multiply'], (_name, values: any[], _opts, ctx): number | string | any[] => {
+  simple(['*', 'multiply'], (name, values: any[], _opts, ctx): number | string | any[] => {
     const first = values.shift();
     if (!isNum(first)) {
-      if (values.length === 1 && isNum(values[0]) && +values[0] > 0) {
+      if ((values.length === 1 || name !== '*') && isNum(values[0]) && +values[0] > 0) {
         if (typeof first === 'string') {
           return stringTimes(first, +values[0]);
         } else if (isApplication(first) && +values[0] < 10000) {
           const res = [];
-          for (let i = 0; i < +values[0]; i++) res.push(evalApply(ctx, first, [i]));
+          for (let i = 0; i < +values[0]; i++) res.push(evalApply(ctx, first, values.slice(1), { index: i }));
           return res;
         } else if (Array.isArray(first) && +values[0] < 10000 && first.length < 1000) {
           const res = [];
