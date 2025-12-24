@@ -1797,7 +1797,7 @@ const designerOpts: ExtendOpts<Designer> = {
         else this.set('projectChanged', false);
       }, 1000),
     },
-    'report.parameters report.sources report.context sources'() {
+    'report.parameters report.sources report.context sources params'() {
       this._builtroot = undefined;
     },
     'report.context'(v: any) {
