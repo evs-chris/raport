@@ -997,13 +997,17 @@ registerOperator(
       return str.replace(find, rep);
     }
   }),
-  simple(['reverse'], (_name: string, [src]): string | any[] => {
+  simple(['reverse'], (_name: string, [src]): string | any[] | any => {
     if (typeof src === 'string') {
       let r = '';
       for (let i = 0; i < src.length; i++) r = src[i] + r;
       return r;
     } else if (Array.isArray(src)) {
       return src.slice().reverse();
+    } else if (typeof src === 'object') {
+      const r = {};
+      for (const k in src) r[src[k]] = k;
+      return r;
     }
   }),
   simple(['wrap-count'], (_name: string, [str, width, font], opts, ctx): number => {
