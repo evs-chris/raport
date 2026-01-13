@@ -714,7 +714,13 @@ registerOperator(
         if (v === undefined) v = stringify({ v: value }, opts);
         return v;
       } else if (typeof value === 'string' && opts.styled) return style(value);
-      else if (value == null) return '';
+      else if ((opts.int || opts.integer) && !isNaN(value)) {
+        const r = Math.min(36, Math.max(2, opts.radix || opts.base || 10));
+        let v = Math.floor(+value);
+        const n = v < 0;
+        if (n) v = v * -1;
+        return `${n ? '-' : ''}${r === 16 ? '0x' : r === 2 ? '0b' : r === 8 ? '0o' :''}${v.toString(r)}`;
+      } else if (value == null) return '';
     }
 
     if (isDateRel(value)) return fmtDate(value, 'yyyy-MM-dd HH:mm:ssz');
@@ -1196,7 +1202,16 @@ registerOperator(
     else if (opts.schema) return parseSchema(v);
     else if (opts.range) return parseRange(v, opts);
     else if (opts.xml) return parseXML(v, opts);
-    else if (opts.csv || opts.delimited) {
+    else if (opts.int || opts.integer) {
+      let r = opts.radix || opts.base;
+      let n = `${v}`;
+      const p = v.slice(0, 2);
+      if (p === '0x' || p === '0X') r = 16;
+      else if (p === '0b' || p === '0B') r = 2;
+      else if (p === '0o') r = 8;
+      r = Math.min(36, Math.max(2, r));
+      return parseInt(`${v}`.replace(/0[xob]/i, ''), r);
+    } else if (opts.csv || opts.delimited) {
       if (opts.detect || !opts.field || !opts.record) opts = Object.assign(csvDetect(v, opts.context), opts);
       return csvParse(v, opts);
     } else if (opts.base64) return atob(v);

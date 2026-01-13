@@ -422,6 +422,10 @@ The label map is a nested object with the keys being single key paths in the dif
     { name:'schema' type:'boolean' desc:'Use the schema parser rather than the expression parser.' }
     { name:'json' type:'boolean' desc:'Use a JSON parser rather than the expression parser.' }
     { name:'base64' type:'boolean' desc:'Use a base64 parser to decode a base64 encoded string.' }
+    { name:'int' type:'boolean' desc:'Convert a string to an integeger.' }
+    { name:'integer' type:'boolean' desc:'Convert a string to an integeger.' }
+    { name:'radix' type:'number' desc:'Set the base to be used when parsing an integer if it is not given by the string e.g. hex' }
+    { name:'base' type:'number' desc:'Set the base to be used when parsing an integer if it is not given by the string e.g. hex' }
     { name:'xml' type:'boolean' desc:'Use the XML parser to read data. In JSON mode, properties and children are equivalent. Duplicate names result in all of the duplicate values being aggregated into an array rather than last in winning. In document mode, a document with a single element root is producted. Each element can have attributes, a namespace, a name, and children, which can be elements, string content, or comments.' }
     { name:'strict' type:'boolean' desc:'For the XML parser, be less forgiving about malformed content. Defaults to false.' }
     { name:'type' type:"'doc'|'json'" desc:'For the XML parser, set the parsing mode.' }
@@ -546,6 +550,10 @@ If no sorts are provided, an identity sort will be applied to the keys.' }
     { name:'interval' type:'boolean' desc:'Process the value as a timespan, turning it into a human readable time interval.' }
     { name:'format' type:"'long'|'short'|'timer'|'longtimer'" desc:'When paired with interval, allows changing the format of the human readable timespan.' }
     { name:'precision' type:"'y'|'m'|'d'|'h'|'mm'|'s'|'ms'" desc:'When paired with interval, limit the output to the given unit and every larger unit.' }
+    { name:'integer' type:'boolean' desc:'Convert the given value to an integer string if it is a number.' }
+    { name:'int' type:'boolean' desc:'Convert the given value to an integer string if it is a number.' }
+    { name:'radix' type:'number' desc:'When paired with int or integer, sets the radix/base for the output integer string.' }
+    { name:'base' type:'number' desc:'When paired with int or integer, sets the radix/base for the output integer string.' }
   ]}
   { op:'wrap-count' sig:[
     { proto:'string,number?,font?' desc:'Calculates the number of lines that the given string will occupy in the given width in rem using the given font. If the width is not specified, the @widget.width or @placement.availableX will be used. If the font is not specified, the @widget.font will be used. Inherited fonts are not considered.' }
