@@ -343,6 +343,7 @@ The label map is a nested object with the keys being single key paths in the dif
     { name:'array' type:'boolean' desc:'When truthy for an object map call, this will cause the result to be the array of application results rather than an object. The application in this case should only return result values.'}
     { name:'entries' type:'boolean' desc:'When truthy for an object map call, this will cause the result to be the array of resulting application entries rather than an object. The same handling for object entries still applies to this option as the operation without it.'}
     { name:'flat' type:'number' desc:'When applied to an array or an object call that results in an array, this will cause the array to be flattened up to the level specified by the value of the option. If the value is not a number but still truthy, the number defaults to 1.' }
+    { name:'object' type:'boolean' desc:'When the result of the mapping application is an array of tuples of key/value pairs or objects with a key and value property, returns an object built from the key/value pairs resulting from the mapping operation rather than an array.' }
   ]}
   { op:'max' sig:[
     { agg:1 proto: '() => number' desc:'Returns the largest entry in the current source.' }

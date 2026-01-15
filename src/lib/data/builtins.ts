@@ -1414,6 +1414,11 @@ registerOperator({
     if ((Array.isArray(v) || v && '0' in v) && isApplication(app)) {
       const res = Array.prototype.map.call(v, (e: any, i: number) => evalApply(ctx, app, [e, i], { index: i, key: i }));
       if (opts && opts.flat) return flatten(res, opts.flat);
+      if (opts && opts.object) return res.reduce((a, c) => {
+        if (Array.isArray(c)) a[c[0]] = c[1];
+        else if (typeof c === 'object' && 'key' in c) a[c.key] = c.value;
+        return a;
+      }, {} as any);
       return res;
     }
     else if (v && typeof v === 'object' && isApplication(app)) {
