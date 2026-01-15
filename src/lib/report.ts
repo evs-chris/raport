@@ -323,6 +323,8 @@ export function run(report: Report, sources: SourceMap, parameters?: ParameterMa
 
   if (report.sources) applySources(ctx, report.sources, sources);
   ctx.parameters = Object.assign({}, initParameters(report, sources), ctx.parameters);
+  if (!ctx.special) ctx.special = {};
+  ctx.special.definition = report;
 
   if (report.extraContext) {
     const res = evaluate(ctx, report.extraContext);

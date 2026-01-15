@@ -735,7 +735,7 @@ export class Designer extends Ractive {
       });;
     }
     const report: Report = this.get('report');
-    const res = new Root(cloneDeep(report.context), { parameters: this.get('params') });
+    const res = new Root(cloneDeep(report.context), { parameters: this.get('params'), special: { definition: report } });
     res.log = this.log;
     if (report.extraContext) evaluate(res, report.extraContext);
     const srcs = await this.buildSources(sample);
