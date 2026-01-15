@@ -569,7 +569,19 @@ export function applyOperator(root: Context, operation: Operation): any {
         if (isOperation(a) && (!a.args || !a.args.find(a => isReference(a) && hasPipeRef(a)))) a = Object.assign({}, a, { args: [{ r: { k: ['pipe'], p: '@' } } as ValueOrExpr].concat(a.args || []) });
 
         if (isApplication(a)) v = evalApply(root, a, [v]);
-        else v = evalParse(extend(root, { special: { pipe: v } }), a);
+        else {
+          if (isReference(a)) {
+            const ref = safeGet(root, a.r);
+            if (isApplication(ref)) {
+              a = ref;
+            } else {
+              const r: string = typeof a.r === 'string' ? a.r : typeof a.r === 'object' && 'k' in a.r && Array.isArray(a.r.k) && a.r.k.length === 1 && typeof a.r.k[0] === 'string' ? a.r.k[0] : '';
+              if (opMap[r]) a = { op: r, args: [{ r: { k: ['pipe'], p: '@' } }] };
+            }
+          }
+          if (isApplication(a)) v = evalApply(root, a, [v]);
+          else v = evalParse(extend(root, { special: { pipe: v } }), a);
+        }
       }
       return v;
     }
