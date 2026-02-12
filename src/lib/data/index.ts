@@ -179,6 +179,8 @@ export function safeGet(root: Context, path: string | Keypath): any {
           o = ctx[key] || (ctx[key] = {});
         } else if (which === 'parameters' || which === 'sources') {
           o = root.root[which];
+        } else if (which === 'VERSION') {
+          o = 'RAPORT_VERSION';
         } else if (which !== 'value') {
           while (ctx && (!ctx.special || !(which in ctx.special))) ctx = ctx.parent;
           o = ctx && ctx.special[which];

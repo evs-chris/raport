@@ -1161,6 +1161,11 @@ export function languageReference(zoom = 100, theme = 'dark') {
     <td>page header, footer, watermark, and overlay</td>
     <td>An object with <code>x</code> and <code>y</code> properties corresponding to the usable width and height of the page.</td>
   </tr>
+  <tr>
+    <td>@VERSION</td>
+    <td>any</td>
+    <td>The built version string of raport.</td>
+  </tr>
   </tbody>
   </table>
 </details>

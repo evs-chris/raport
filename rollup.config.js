@@ -33,6 +33,7 @@ if (process.env.ENV === 'dev') {
       }),
       sourcemaps(),
       node(),
+      replace(replaceOpts),
     ],
   });
 
@@ -176,6 +177,7 @@ if (process.env.ENV === 'dev') {
       }),
       sourcemaps(),
       node(),
+      replace(replaceOpts),
     ],
   });
 
