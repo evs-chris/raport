@@ -124,7 +124,7 @@
         <div class-parameter class-head>
           <div class-param-name>Name</div>
           <div class-param-type>Type</div>
-          <div class-param-require style-width=30%>Require</div>
+          <div class-param-require style-width=7em></div>
         </div>
       {{/if}}
       <div>
@@ -134,8 +134,12 @@
             <div class-param-type><select value="{{.type}}">
               {{>types}}
             </select></div>
-            <div class-param-require><input type=checkbox checked="{{.required}}" /></div>
-            <div class-param-btn><button class-ico on-click="@.checkLink('param', @keypath), @context.splice('../', @index, 1)">{{>times}}</button></div>
+            <div class=param-buttons>
+              <div class-param-require title="Mark this parameter as required to correctly run the report?"><input type=checkbox checked="{{.required}}" /></div>
+              <div class=param-btn><button class="ico up-arrow" title="Move up (hold the shift key to move to first)" disabled="{{@index === 0}}" on-click="@.moveUp(@context, ['../'], @index, @event.shiftKey), false">{{>arrow}}</button></div>
+              <div class=param-btn><button class="ico down-arrow" title="Move down (hold the shift key to move to last)" disabled="{{@index === @last}}" on-click="@.moveDown(@context, ['../'], @index, @event.shiftKey), false">{{>arrow}}</button></div>
+              <div class-param-btn><button class-ico title="Remove this parameter" on-click="@.checkLink('param', @keypath), @context.splice('../', @index, 1)">{{>times}}</button></div>
+            </div>
           </div>
         {{/each}}
       </div>
@@ -421,17 +425,27 @@
     color: {{@style.fg}};
   }
   .param-name {
-    width: 40%;
+    flex-grow: 1.5;
+    flex-shrink: 1;
   }
   .param-type {
-    width: 30%;
+    width: 7em;
+    flex-shrink: 0;
+  }
+  .param-buttons {
+    display: flex;
+    flex-shrink: 0;
+    padding: 0;
+    width: 7em;
+  }
+  .param-buttons .param-btn, .param-buttons .param-require {
+    border-right: 1px solid {{@style.border}};
+    padding-top: 0.4em;
   }
   .param-require {
-    width: 19%;
     text-align: center;
   }
   .param-btn {
-    width: 10%;
   }
 
   .src-name {
