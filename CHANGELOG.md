@@ -1,11 +1,36 @@
 ## 0.31.0
 
-**Unreleased**
+2026-03-14
+
+### Data
+
+* Additional arguments can now be passed to multiply with an application. The index of the call to the application is now available as the index special reference. Any arguments after the application are passed to the application in calls to the non-binary `multiply` operator.
+* The `reverse` operator will now invert an object e.g. swap the keys and values.
+* The `parse`/`string` operators now have an `:int`/`:integer` mode that accept a `radix`/`base` to parse or stringify numbers in non-decimal bases.
+* The `map` operator will now has a named argument `object` that will cause it to build an object with key/value pairs.
+* Pipe targets may now be references. If the reference happens to resolve to an application, the pipe will be connected to the application. If not and it has the same name as an operator, the pipe will be connected to the operator as if it were a call with empty arguments, subbing in the piped value for a first argument.
+* There is now a `VERSION` special reference that resolves with the build version of the running raport library.
+* There are now `flike`, `cflike`, `not-flike`, and `not-cflike` binary operators that do case-insensitive and case-sensitive fuzzy matching and negated versions of those, respectively. A fuzzy match checks to see that the search characters appear in order in the target string.
+* There is now a `fuzzy-likeness` operator that will return a score for a search string within a target string. The more like the target string the search string is, the higher the resulting score will be. If the search does not match the target, the score will be less than 0.
+
+### Render
+
+* __BUG:__ Processing styled text will no longer break a render if the text to be styled is not a string.
+
+### Parser
+
+* __BUG:__ The CSV parser will now correctly handle doubled quotes as escaped quotes e.g. `""` is now correctly processed as `"` and not the end of the quoted field.
+
+### Report
+
+* The report definition is now exposed to the running report as the `definition` special reference, allowing access parameters metadata.
 
 ### Designer
 
 * __BREAKING:__ The `docs` export is now the `docs` object from the designer rather than directly from the docs builder. The docs builder is now exported as `docText`. This allows sharing a common source for operator docs and enables the new `registerOperatorDoc` and `registerFormatDoc` functions.
+* __BUG:__ Parameter values should always be available in the eval context.
 * Expose the syntax highlighting function as the `highlight` operator in the designer to make future language reference changes a little easier.
+* You can now double click the changes warning icon to save changes.
 
 
 ## 0.30.2
