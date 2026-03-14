@@ -120,7 +120,7 @@ function process(stuff: Array<Style[] | string>): string {
 }
 
 export function style(str: string): string {
-  const parsed = parser(str);
+  const parsed = parser(typeof str === 'string' ? str : str != null ? `${str}` : '');
   if (Array.isArray(parsed)) return process(parsed);
   return str;
 }
