@@ -11,8 +11,9 @@ export function csv(options?: CSVOptions) {
   const opts: typeof DEFAULTS = Object.assign({}, DEFAULTS, options);
 
   const ws = skip(' \t\r\n'.replace(opts.field, '').replace(opts.record, '').replace(opts.quote, ''));
-  const quote = str(opts.quote || '"');
-  const quotedField = bracket(seq(ws, quote), map(rep(alt(readTo(opts.quote || '"'), map(seq(quote, quote), () => ''))), r => concat(r)), seq(quote, ws));
+  const q = opts.quote || '"';
+  const quote = str(q);
+  const quotedField = bracket(seq(ws, quote), map(rep(alt(map(str(`${q}${q}`), () => q), readTo(q))), r => concat(r)), seq(quote, ws));
   const unquotedField = readTo(opts.record + opts.field, true);
   const field: IParser<string> = opts.quote ? alt(quotedField, unquotedField) : unquotedField;
   const record = verify(rep1sep(field, seq(ws, str(opts.field), ws)), s => s.length > 1 || s[0].length > 0 || 'empty record');
