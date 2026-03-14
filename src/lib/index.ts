@@ -7,7 +7,7 @@ export {
 } from './report';
 
 import './render/builtins';
-export { overlap, similar, similarity } from './data/builtins';
+export { overlap, similar, similarity, fuzzyMatch } from './data/builtins';
 
 export {
   evaluate, evalParse, evalValue, evalApply, extend, toDataSet,

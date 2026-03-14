@@ -95,7 +95,7 @@ export const localpath = map(seq(read('^'), pathident, rep(alt<string | Value>('
 export const parsePath = makeParser(keypath);
 export const parseLetPath = makeParser(localpath);
 
-const illegalRefs = ['if', 'else', 'elif', 'elseif', 'elsif', 'fi', 'esac', 'unless', 'then', 'case', 'when', 'not', 'gte', 'gt', 'lte', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain', 'is-not', 'is', 'strict-is-not', 'strict-is', 'deep-is-not', 'deep-is', 'and', 'or', 'end', 'with', 'each'];
+const illegalRefs = ['if', 'else', 'elif', 'elseif', 'elsif', 'fi', 'esac', 'unless', 'then', 'case', 'when', 'not', 'gte', 'gt', 'lte', 'lt', 'in', 'ilike', 'like', 'flike', 'cflike', 'not-in', 'not-like', 'not-ilike', 'not-flike', 'not-cflike', 'contains', 'does-not-contain', 'is-not', 'is', 'strict-is-not', 'strict-is', 'deep-is-not', 'deep-is', 'and', 'or', 'end', 'with', 'each'];
 export const ref = map(keypath, (r, err) => {
   if (r.k.length === 1 && !r.p && !r.u && illegalRefs.includes(r.k[0] as string)) err(`invalid reference name '${r.k[0] as string}'`);
   return { r };
@@ -407,7 +407,7 @@ export const binop_as = map(seq(binop_md, rep(alt(
 ))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'addsub-op');
 export const binop_cmp = map(seq(binop_as, rep(alt(
   seq(nop, name(str('>=', '>', '<=', '<'), 'cmp-op'), nop, binop_as),
-  seq(rws, name(str('>=', '>', '<=', '<', 'gte', 'gt', 'lte', 'lt', 'in', 'like', 'ilike', 'not-in', 'not-like', 'not-ilike', 'contains', 'does-not-contain'), 'cmp-op'), rws, binop_as),
+  seq(rws, name(str('>=', '>', '<=', '<', 'gte', 'gt', 'lte', 'lt', 'in', 'like', 'ilike', 'flike', 'cflike', 'not-in', 'not-like', 'not-ilike', 'not-flike', 'not-cflike', 'contains', 'does-not-contain'), 'cmp-op'), rws, binop_as),
 ))), ([arg1, more]) => more.length ? more.reduce(leftassoc, arg1) : arg1, 'cmp-op');
 export const binop_eq = map(seq(binop_cmp, rep(alt(
   seq(nop, name(str('===', '==', '!==', '!='), 'eq-op'), nop, binop_cmp),

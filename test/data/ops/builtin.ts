@@ -178,6 +178,13 @@ q.test('call', t => {
 // q.todo('case', t => { t.expect(0); });
 // q.todo('ceil', t => { t.expect(0); });
 
+q.test('cflike', t => {
+  t.equal(e(`'The quick brown Fox' cflike :tfx`), false);
+  t.equal(e(`'The quick brown Fox' cflike :TFx`), true);
+  t.equal(e(`'The quick brown Fox' cflike :quick`), true);
+  t.equal(e(`'The quick brown Fox' cflike :quib`), true);
+});
+
 q.test('clamp', t => {
   t.equal(e('(clamp 10 20 30)'), 20);
   t.equal(e('(clamp 10 0 30)'), 10);
@@ -330,12 +337,26 @@ q.test('flatten', t => {
   t.deepEqual(e('flatten([:a :b [:c [:d] :e] :f :g] 2)'), 'abcdefg'.split(''));
 });
 
+q.test('flike', t => {
+  t.equal(e(`'The quick brown Fox' flike :tfx`), true);
+  t.equal(e(`'The quick brown Fox' flike :TFx`), true);
+  t.equal(e(`'The quick brown Fox' flike :quick`), true);
+  t.equal(e(`'The quick brown Fox' flike :quib`), true);
+  t.equal(e(`'The quick brown Fox' flike :quzb`), false);
+});
+
 // q.todo('floor', t => { t.expect(0); });
 
 q.test('format', t => {
   // TODO: test all of the builtins
   t.equal(e('(format #2019-4-20# :date :yyyy-MM-dd)'), `2019-04-20`);
   t.equal(e(`@date#date,'${'yMdEHmsSkaz'.split('').map(c => '\\\\' + c).join('')}'`), 'yMdEHmsSkaz');
+});
+
+q.test('fuzzy-likeness', t => {
+  t.equal(e(`fuzzy-likeness('The quick brown Fox', 'quick')`), 54);
+  t.equal(e(`fuzzy-likeness('The quick brown Fox', 'quicky')`), -15);
+  t.equal(e(`fuzzy-likeness('The quick brown Fox', 'y')`), -20);
 });
 
 q.test('generate', t => {
@@ -600,6 +621,21 @@ q.test('min', t => {
 });
 
 // q.todo('not', t => { t.expect(0); });
+
+q.test('not-cflike', t => {
+  t.equal(e(`'The quick brown Fox' not-cflike :tfx`), true);
+  t.equal(e(`'The quick brown Fox' not-cflike :TFx`), false);
+  t.equal(e(`'The quick brown Fox' not-cflike :quick`), false);
+  t.equal(e(`'The quick brown Fox' not-cflike :quib`), false);
+});
+
+q.test('not-flike', t => {
+  t.equal(e(`'The quick brown Fox' not-flike :tfx`), false);
+  t.equal(e(`'The quick brown Fox' not-flike :TFx`), false);
+  t.equal(e(`'The quick brown Fox' not-flike :quick`), false);
+  t.equal(e(`'The quick brown Fox' not-flike :quib`), false);
+  t.equal(e(`'The quick brown Fox' not-flike :quzb`), true);
+});
 
 q.test(`not-ilike`, t => {
   t.equal(e('(not-ilike :SomeThing :*et*)'), false);

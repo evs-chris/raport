@@ -511,6 +511,28 @@ The basis value is available as @case or the shorthand _ in each matcher.</dd>
 
 <dl><dt>
 
+### `cflike`
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>(string, string) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in the first string appear in the second string in order, allowing interim characters to be skipped. Case sensitive fuzzy like.</dd>
+<dt><code>(string[], string) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in any of the strings in the first argument appear in the second string in order, allowing interim characters to be skipped. Case sensitive fuzzy like.</dd>
+<dt><code>(string, string[]) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in the first string appear in any of the strings in the second argument in order, allowing interim characters to be skipped. Case sensitive fuzzy like.</dd>
+<dt><code>(string[], string[]) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in any of the strings in the first argument appear in any of the strings in the second argument in order, allowing interim characters to be skipped. Case sensitive fuzzy like.</dd>
+</dl>
+
+</dl>
+<br/>
+
+<dl><dt>
+
 ### `clamp`
 ---
 
@@ -913,6 +935,28 @@ If there is context-local rounding set, it will be applied to the result (see se
 
 <dl><dt>
 
+### `flike`
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>(string, string) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in the first string appear in the second string in order, allowing interim characters to be skipped and ignoring case. Fuzzy like.</dd>
+<dt><code>(string[], string) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in any of the strings in the first argument appear in the second string in order, allowing interim characters to be skipped and ignoring case. Fuzzy like.</dd>
+<dt><code>(string, string[]) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in the first string appear in any of the strings in the second argument in order, allowing interim characters to be skipped and ignoring case. Fuzzy like.</dd>
+<dt><code>(string[], string[]) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in any of the strings in the first argument appear in any of the strings in the second argument in order, allowing interim characters to be skipped and ignoring case. Fuzzy like.</dd>
+</dl>
+
+</dl>
+<br/>
+
+<dl><dt>
+
 ### `floor`
 ---
 
@@ -956,6 +1000,27 @@ If there is context-local rounding set, it will be applied to the result (see se
 <dd>Applies the named formatted indicated by the second argument string to the given value, passing along any additional arguments to the formatter.</dd>
 </dl>
 
+</dl>
+<br/>
+
+<dl><dt>
+
+### `fuzzy-likeness`
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>(string|string[], string|string[]) => number</code></dt>
+<dd>Does a fuzzy match of any of the first argument against any of the second argument. Any number less than 0 as a result indicates that no second argument is a fuzzy match for the first. The larger the result is, the closer the first matching or last non-matching second argument is to a first argument. Defaults to case insensitivity.</dd>
+</dl>
+
+#### <ins>Options</ins>
+
+<dl>
+<dt><code>case</code></dt><dd>Makes matching take case into account. Alias c.</dd><dt><code>c</code></dt><dd>Makes matching take case into account. Alias case.</dd>
+</dl>
 </dl>
 <br/>
 
@@ -1621,6 +1686,50 @@ If there is context-local rounding set, it will be applied to the result (see se
 <dl>
 <dt><code>any => boolean</code> (unary)</dt>
 <dd>Negates the truthiness of the given value.</dd>
+</dl>
+
+</dl>
+<br/>
+
+<dl><dt>
+
+### `not-cflike`
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>(string, string) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in the first string do not appear in the second string in order, allowing interim characters to be skipped. Negated case sensitive fuzzy like.</dd>
+<dt><code>(string[], string) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in any of the strings in the first argument do not appear in the second string in order, allowing interim characters to be skipped. Negated case sensitive fuzzy like.</dd>
+<dt><code>(string, string[]) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in the first string do not appear in any of the strings in the second argument in order, allowing interim characters to be skipped. Negated case sensitive fuzzy like.</dd>
+<dt><code>(string[], string[]) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in any of the strings in the first argument do not appear in any of the strings in the second argument in order, allowing interim characters to be skipped. Negated case sensitive fuzzy like.</dd>
+</dl>
+
+</dl>
+<br/>
+
+<dl><dt>
+
+### `not-flike`
+---
+
+</dt>
+<dd>
+
+<dl>
+<dt><code>(string, string) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in the first string do not appear in the second string in order, allowing interim characters to be skipped and ignoring case. Negated fuzzy like.</dd>
+<dt><code>(string[], string) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in any of the strings in the first argument do not appear in the second string in order, allowing interim characters to be skipped and ignoring case. Negated fuzzy like.</dd>
+<dt><code>(string, string[]) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in the first string do not appear in any of the strings in the second argument in order, allowing interim characters to be skipped and ignoring case. Negated fuzzy like.</dd>
+<dt><code>(string[], string[]) => any</code> (binary)</dt>
+<dd>Checks to see if all of the characters in any of the strings in the first argument do not appear in any of the strings in the second argument in order, allowing interim characters to be skipped and ignoring case. Negated fuzzy like.</dd>
 </dl>
 
 </dl>

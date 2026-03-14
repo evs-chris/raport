@@ -119,6 +119,12 @@ The basis value is available as @case or the shorthand _ in each matcher.' eg:['
   { op:'ceil' sig:[
     { proto:'number => number' desc:'Returns the given number rounded up to the nearest integer.' }
   ]}
+  { op:'cflike' sig:[
+    { bin:1 proto:'(string, string) => any' desc:'Checks to see if all of the characters in the first string appear in the second string in order, allowing interim characters to be skipped. Case sensitive fuzzy like.' }
+    { bin:1 proto:'(string[], string) => any' desc:'Checks to see if all of the characters in any of the strings in the first argument appear in the second string in order, allowing interim characters to be skipped. Case sensitive fuzzy like.' }
+    { bin:1 proto:'(string, string[]) => any' desc:'Checks to see if all of the characters in the first string appear in any of the strings in the second argument in order, allowing interim characters to be skipped. Case sensitive fuzzy like.' }
+    { bin:1 proto:'(string[], string[]) => any' desc:'Checks to see if all of the characters in any of the strings in the first argument appear in any of the strings in the second argument in order, allowing interim characters to be skipped. Case sensitive fuzzy like.' }
+  ]}
   { op:'clamp' sig:[
     { proto:'(number, number, number) => number' desc:'Takes a minimum, a value, and a maximum, and returns the minimum if the value is less than the minimum, the maximum if the value is more than the maximum, or the value otherwise.' }
   ]}
@@ -215,11 +221,23 @@ The basis value is available as @case or the shorthand _ in each matcher.' eg:['
   ], opts: [
     { name:'flat' type:'number' desc:'The number of levels of nested arrays to flatten. If this is not supplied or not a number, it defaults to 1.' }
   ]}
+  { op:'flike' sig:[
+    { bin:1 proto:'(string, string) => any' desc:'Checks to see if all of the characters in the first string appear in the second string in order, allowing interim characters to be skipped and ignoring case. Fuzzy like.' }
+    { bin:1 proto:'(string[], string) => any' desc:'Checks to see if all of the characters in any of the strings in the first argument appear in the second string in order, allowing interim characters to be skipped and ignoring case. Fuzzy like.' }
+    { bin:1 proto:'(string, string[]) => any' desc:'Checks to see if all of the characters in the first string appear in any of the strings in the second argument in order, allowing interim characters to be skipped and ignoring case. Fuzzy like.' }
+    { bin:1 proto:'(string[], string[]) => any' desc:'Checks to see if all of the characters in any of the strings in the first argument appear in any of the strings in the second argument in order, allowing interim characters to be skipped and ignoring case. Fuzzy like.' }
+  ]}
   { op:'floor' sig:[
     { proto:'number => number' desc:'Returns the given number rounded down to the nearest integer.' }
   ]}
   { op:['format' 'fmt'] sig:[
     { proto:'(any, string, ...args) => string' desc:'Applies the named formatted indicated by the second argument string to the given value, passing along any additional arguments to the formatter.' }
+  ]}
+  { op: 'fuzzy-likeness' sig:[
+    { proto:'(string|string[], string|string[]) => number' desc:'Does a fuzzy match of any of the first argument against any of the second argument. Any number less than 0 as a result indicates that no second argument is a fuzzy match for the first. The larger the result is, the closer the first matching or last non-matching second argument is to a first argument. Defaults to case insensitivity.' }
+  ] opts:[
+    { name:'case' type:'boolean' desc:'Makes matching take case into account. Alias c.' }
+    { name:'c' type:'boolean' desc:'Makes matching take case into account. Alias case.' }
   ]}
   { op:'generate' sig:[
     { proto:'(application) => any[]' desc:'Calls the given application, aggregating values until the application returns undefined.
@@ -361,6 +379,18 @@ The label map is a nested object with the keys being single key paths in the dif
   ]}
   { op:'not' sig:[
     { un:1 proto:'any => boolean' desc:'Negates the truthiness of the given value.' }
+  ]}
+  { op:'not-cflike' sig:[
+    { bin:1 proto:'(string, string) => any' desc:'Checks to see if all of the characters in the first string do not appear in the second string in order, allowing interim characters to be skipped. Negated case sensitive fuzzy like.' }
+    { bin:1 proto:'(string[], string) => any' desc:'Checks to see if all of the characters in any of the strings in the first argument do not appear in the second string in order, allowing interim characters to be skipped. Negated case sensitive fuzzy like.' }
+    { bin:1 proto:'(string, string[]) => any' desc:'Checks to see if all of the characters in the first string do not appear in any of the strings in the second argument in order, allowing interim characters to be skipped. Negated case sensitive fuzzy like.' }
+    { bin:1 proto:'(string[], string[]) => any' desc:'Checks to see if all of the characters in any of the strings in the first argument do not appear in any of the strings in the second argument in order, allowing interim characters to be skipped. Negated case sensitive fuzzy like.' }
+  ]}
+  { op:'not-flike' sig:[
+    { bin:1 proto:'(string, string) => any' desc:'Checks to see if all of the characters in the first string do not appear in the second string in order, allowing interim characters to be skipped and ignoring case. Negated fuzzy like.' }
+    { bin:1 proto:'(string[], string) => any' desc:'Checks to see if all of the characters in any of the strings in the first argument do not appear in the second string in order, allowing interim characters to be skipped and ignoring case. Negated fuzzy like.' }
+    { bin:1 proto:'(string, string[]) => any' desc:'Checks to see if all of the characters in the first string do not appear in any of the strings in the second argument in order, allowing interim characters to be skipped and ignoring case. Negated fuzzy like.' }
+    { bin:1 proto:'(string[], string[]) => any' desc:'Checks to see if all of the characters in any of the strings in the first argument do not appear in any of the strings in the second argument in order, allowing interim characters to be skipped and ignoring case. Negated fuzzy like.' }
   ]}
   { op:'not-ilike' sig:[
     { bin:1 proto:'(string, string) => any' desc:'Checks to see if the first string does not match the second string used as a pattern case insensitively.' }

@@ -281,6 +281,29 @@ export function similar(a: string, b: string, threshhold: number = 0.5, fudges: 
   }
 }
 
+export function fuzzyMatch(search: string, str: string): number {
+  if (!search) return 0;
+  if (typeof str !== 'string') str = `${str}`;
+  if (typeof search !== 'string') search = `${search}`;
+  let c = -1;
+  let distance = 0;
+  let match = 0;
+  let front = 0;
+  fuzz: for (let i = 0; i < search.length; i++) {
+    for (let cc = c + 1; cc < str.length; cc++) {
+      if (search[i] === str[cc]) {
+        c = cc;
+        match++;
+        if (i === 0) front = cc;
+        continue fuzz;
+      }
+      distance++;
+    }
+    return 0 - str.length - search.length + 2 * match;
+  }
+  return (2 * (str.length + search.length)) - (2 * distance - (front + (str.length - 1 - c)));
+}
+
 export function inRange(v: number, range: Array<number | [number, number] | { not: number | [number, number] }>): boolean {
   let found = false;
   let excluded = false;
@@ -374,7 +397,39 @@ registerOperator(
       if (Array.isArray(target)) res = !!target.find(v => re.test(v));
       else res = re.test(target);
     }
-    return name === 'like' || name === 'ilike' ? res : !res;
+    return name[0] !== 'n' ? res : !res;
+  }),
+  simple(['flike', 'not-flike', 'cflike', 'not-cflike'], (name: string, values: any[]): boolean => {
+    const [target, pattern] = values;
+    let res = false;
+    const patterns = typeof pattern === 'string' ? [pattern] : pattern;
+    const targets = typeof target === 'string' ? [target] : target;
+    if (!Array.isArray(patterns) || !Array.isArray(targets)) return false;
+    if (name === 'flike' || name === 'not-flike') {
+      for (let i = 0; i < targets.length; i++) targets[i] = `${targets[i]}`.toLowerCase();
+      for (let i = 0; i < patterns.length; i++) patterns[i] = `${patterns[i]}`.toLowerCase();
+    }
+    for (let i = 0; i < patterns.length && !res; i++) {
+      for (let j = 0; j < targets.length && !res; j++) res = fuzzyMatch(patterns[i], targets[j]) >= 0;
+    }
+    return name[0] !== 'n' ? res : !res;
+  }),
+  simple(['fuzzy-likeness'], (_, values: any[], opts): number => {
+    let [target, pattern, arg] = values;
+    if (!opts && typeof arg === 'object') opts = arg;
+    if (!Array.isArray(target)) target = [target];
+    if (!Array.isArray(pattern)) pattern = [pattern];
+    if (!target.length || !pattern.length) return 0;
+    let res: number = null;
+    for (let i = 0; i < target.length && (res === null || res < 0); i++) {
+      for (let j = 0; j < pattern.length && (res === null || res < 0); j++) {
+        let n: number;
+        if (!opts?.case && !opts?.c) n = fuzzyMatch(`${pattern[j]}`.toLowerCase(), `${target[i]}`.toLowerCase());
+        else n = fuzzyMatch(pattern[j], target[i]);
+        if (res === null || res < n) res = n;
+      }
+    }
+    return res;
   }),
   simple(['in', 'not-in'], (name: string, values: any[], _opts, ctx: Context): boolean => {
     const [l, r] = values;
